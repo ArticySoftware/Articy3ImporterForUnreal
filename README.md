@@ -45,7 +45,9 @@ For unreal to correctly build the plugin we need to add it as an dependency, to 
 
 And open it in your favorite text or code editor.
 
-Now we need to adjust the existing code and make sure that the Importer is an dependency for the project. Locate the `PublicDependencyModuleNames` array and add `"ArticyRuntime"` as an additional dependancy. You should also add a new line adding the header include paths to the public include paths by adding the line `PublicIncludePaths.AddRange(new string[] {"ArticyRuntime/Public"});` below the dependencies.
+Now we need to adjust the existing code and make sure that the Importer is an dependency for the project. 
+Locate the `PublicDependencyModuleNames` array and add `"ArticyRuntime"` as an additional dependancy. 
+You should also add the plugin header files to the public include path by adding `PublicIncludePaths.AddRange(new string[] {"ArticyRuntime/Public"});` below the dependencies.
 Your file should now look something like this:
 
 ```
@@ -106,7 +108,7 @@ or if you are using steam, you can change add that in the launch options of your
 > Please note that the experimental unreal export needs at least articy:draft version **3.1.6.31945**
 
 Now open your articy:draft project and open the export window. Here you will now find the unreal engine export. Please note that the unreal export uses [Rulesets](https://www.nevigo.com/help/Exports_Rulesets.html) to choose what and how to export.
-When exporting, chose your unrea projects **Content** folder as the target for the `.articyue4` export file.
+When exporting, chose your unreal projects **Content** folder as the target for the `.articyue4` export file.
 
 After every export, going back to unreal will trigger the ArticyImporter plugin to automatically parse the new file and import the changes.
 
