@@ -1,0 +1,29 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.0.1",
+	"FriendlyName": "ArticyImporter",
+	"Description": "Importer and interface for articy:draft.",
+	"Category": "Articy",
+	"CreatedBy": "articy Software GmbH & Co. KG",
+	"CreatedByURL": "http://www.nevigo.com",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "ArticyRuntime",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "ArticyImporter",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	]
+}
