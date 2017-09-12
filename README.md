@@ -6,18 +6,37 @@
 
 This unreal engine 4 plugin allows you to import your articy:draft content into your unreal project and gives you a simple C++ and blueprint interface to work with your data.
 
+# Table of contents
+
+* [Goals & Features](https://github.com/ArticySoftware/ArticyImporterForUnreal#goals)
+* [Setup](https://github.com/ArticySoftware/ArticyImporterForUnreal#setup)
+* [Export from articy:draft](https://github.com/ArticySoftware/ArticyImporterForUnreal#export-project-from-articydraft)
+* [Using the plugin](https://github.com/ArticySoftware/ArticyImporterForUnreal#using-the-plugin)
+
+
 # Goals
 
 We release our current progress for the plugin as a github open source project in the hopes that this will give you a substantial headstart into incorporating your articy:draft data into your unreal project while still give you enough flexibility to adjust the plugin to your needs. 
-We also would love to hear about suggestions or even better for you to directly contribute to the development of the plugin.
+We also would love to hear about suggestions or even better for you to directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the plugin.
+
+# Features
+
+While this is not meant as a full product release, it is still considered a working foundation for integrating your articy:draft content into your unreal engine project.
+So you can expect the following features including but not limited to:
+
+ * Everything accessible via **C++** and **Blueprint**
+ * **Flow player** for automatic configurable flow traversal as an actor component
+ * Automatic import
+ * Database with all project data
+ * Uses of unreal engines localization
 
 # Setup
 
-There are a couple of steps need to get the plugin to work with your unreal project.
+There are a couple of steps need to get the plugin to work.
 
 ## Create a new project
 
-You need to create a C++ unreal project or make sure that your existing project is capable of compiling c++ projects.
+You need to create a C++ unreal project or make sure that your existing project is capable of compiling C++ projects.
 
 
 <p align="center">
@@ -37,7 +56,7 @@ Copy the plugin folder **ArticyImporter** into this **Plugins** folder. Your pro
 
 ## Adjust build configuration
 
-For unreal to correctly build the plugin we need to add it as an dependency, to do that open the file **Source/\<ProjectName>/\<ProjectName\>Cpp.Build.cs**
+For unreal to correctly build the plugin we need to add it as an dependency, to do that locate the file **Source/\<ProjectName>/\<ProjectName\>Cpp.Build.cs**
 
 <p align="center">
   <img src="https://www.nevigo.com/articy-importer/unreal/buildconfigfile.png">
@@ -45,9 +64,7 @@ For unreal to correctly build the plugin we need to add it as an dependency, to 
 
 And open it in your favorite text or code editor.
 
-Now we need to adjust the existing code and make sure that the Importer is an dependency for the project. 
-Locate the `PublicDependencyModuleNames` array and add `"ArticyRuntime"` as an additional dependancy. 
-You should also add the plugin header files to the public include path by adding `PublicIncludePaths.AddRange(new string[] {"ArticyRuntime/Public"});` below the dependencies.
+Now we need to adjust the existing code and make sure that the Importer is an dependency for the project. Locate the `PublicDependencyModuleNames` array and add `"ArticyRuntime"` as an additional dependency. You should also add the plugin header files to the public include path by adding `PublicIncludePaths.AddRange(new string[] {"ArticyRuntime/Public"});` below the dependencies.
 Your file should now look something like this:
 
 ```
@@ -81,7 +98,7 @@ Make sure to save the file and close the editor.
 ## Enable plugin in unreal
 
 Now you can open your unreal project and open the Plugins window by selecting Edit->Plugins in the main window menu bar.
-Inside this window scroll in the list of plugins down until you find the Group **Project** and the sub group **Articy**, click on Articy and enable the ArticyImporter plugin on the right.
+Inside this window scroll in the list of groups down until you find the Group **Project** and the sub group **Articy**, click on Articy and enable the ArticyImporter plugin on the right.
 
 <p align="center">
   <img src="https://www.nevigo.com/articy-importer/unreal/enable_plugin.png">
@@ -91,7 +108,7 @@ After enabling the plugin the window will prompt you to restart the editor which
 
 ## Export project from articy:draft
 
-Now that the plugin is running, you are ready to export your data from articy:draft. You first need to enable the experimental unreal export to do that you need to start articy:draft with the `-experimental.unreal` command line switch.
+Now that the plugin is running, you are ready to export your data from articy:draft. You first need to enable the experimental unreal export. To do that you need to start articy:draft with the `-experimental.unreal` command line switch.
 
 In the explorer you can do that by modifying the shortcut for articy:draft.
 
@@ -99,7 +116,7 @@ In the explorer you can do that by modifying the shortcut for articy:draft.
   <img src="https://www.nevigo.com/articy-importer/unreal/enable_explorer_export.png">
 </p>
 
-or if you are using steam, you can change add that in the launch options of your articy:draft version.
+If you are using steam, you can add it in the launch options of your articy:draft version.
 
 <p align="center">
   <img src="https://www.nevigo.com/articy-importer/unreal/enable_steam_export.png">
@@ -107,13 +124,81 @@ or if you are using steam, you can change add that in the launch options of your
 
 > Please note that the experimental unreal export needs at least articy:draft version **3.1.6.31945**
 
-Now open your articy:draft project and open the export window. Here you will now find the unreal engine export. Please note that the unreal export uses [Rulesets](https://www.nevigo.com/help/Exports_Rulesets.html) to choose what and how to export.
+Now open your articy:draft project and open the export window. Here you will find the unreal engine export. Please note that the unreal export uses [Rulesets](https://www.nevigo.com/help/Exports_Rulesets.html) to choose what and how to export.
 When exporting, chose your unreal projects **Content** folder as the target for the `.articyue4` export file.
+
+<p align="center">
+  <img src="https://www.nevigo.com/articy-importer/unreal/export_options.png">
+</p>
 
 After every export, going back to unreal will trigger the ArticyImporter plugin to automatically parse the new file and import the changes.
 
 Make sure to confirm the prompt after the import to save all assets generated by the plugin.
 
+# Using the plugin
+
+Now that the plugin is installed and your project data is imported you can start working on your project. 
+Here are some quick tips at what to look for so you won't go in completely blind:
+
+## Get object
+
+There are many ways to access your objects, check this screenshot for a blueprint code showing you how to access an object by id/technical or directly clone it.
+Also make sure to cast the object to the desired type to get access to its properties and its template.
+
+<p align="center">
+  <img src="https://www.nevigo.com/articy-importer/unreal/get_object.png">
+</p>
+
+## Articy Flow Player
+
+The flow player is used as an automatic traversal engine. 
+To set it up you add the Flow player actor component to one of your actors:
+
+<p align="center">
+  <img src="https://www.nevigo.com/articy-importer/unreal/flow_player_component.png">
+</p>
+
+Now you can customize the flow player by setting the necessary options in the Setup section of the details panel. Most interestingly are **Pause On** an **Start On**
+
+<p align="center">
+  <img src="https://www.nevigo.com/articy-importer/unreal/component_settings.png">
+</p>
+
+If you scroll down you will find the components event section. Here you probably want to add events for **On Player Paused** and **On Branches Updated**
+
+<p align="center">
+  <img src="https://www.nevigo.com/articy-importer/unreal/component_events.png">
+</p>
+
+Adding those will create new event nodes in the graph of your current actor and allow you to implement your custom logic. 
+
+To quickly reiterate how to use those: **On Player Paused** is called with the current paused object of the flow traversal, the current spoken dialogue fragment for example; and **On Branches Updated** to create the user choices for the current pause.
+
+Here is an example blueprint implementation for both methods
+
+<p align="center">
+  <img src="https://www.nevigo.com/articy-importer/unreal/component_basic_event_implementation.png">
+</p>
+
+The `ShowPausedObject` method is to display the current pause on the ui. Here is the implementation of that method.
+
+
+<p align="center">
+  <img src="https://www.nevigo.com/articy-importer/unreal/show_paused_text.png">
+</p>
+
+`spokenText` is bound to a UI text block.
+
+
+And the **On Branches Updated** is used to create a vertical list of buttons. How to create those buttons, creating the layout etc. is out of scope of this quick guide but it is important that you
+store the branch in every button. When you instantiate the button you should pass in the reference used in the forloop and when the button is clicked you use that branch as the index for the flow player so it knows where to continue.
+
+<p align="center">
+  <img src="https://www.nevigo.com/articy-importer/unreal/clicked_branch.png">
+</p>
+
+If you want to learn more about the flow player and its events you can read the [unity documentation](https://www.nevigo.com/articy-importer/unity/html/howto_flowplayer.htm) as both implementations are based on the same principles.
+
 # Contributing
 
-We are very grateful for any kind of contribution that you bring to the ArticyImporter plugin, no matter if it is reporting any issues or by actively adding new features of fixing existing issues. If you want to know more about how to contribute please check our [Contribution](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) article.
+We are very grateful for any kind of contribution that you bring to the ArticyImporter plugin, no matter if it is reporting any issues, or by actively adding new features, or fixing existing issues. If you want to know more about how to contribute please check our [Contribution](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) article.
