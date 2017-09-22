@@ -42,7 +42,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="ObjectWithSpeaker")
 	virtual UArticyObject* SetSpeaker(UArticyObject* const Speaker)
 	{
-		SetSpeakerId(Speaker ? Speaker->GetId() : 0);
+		SetSpeakerId(Speaker ? Speaker->GetId() : (FArticyId) 0);
 		return Speaker;
 	}
 

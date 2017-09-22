@@ -141,7 +141,7 @@ struct ARTICYRUNTIME_API ExpressoType
 	const Definition& GetDefinition(const FName& CppType) const;
 
 	template<typename T>
-	static void ExpressoType::AddDefinition(const FName& CppType)
+	static void AddDefinition(const FName& CppType)
 	{
 		Definition def;
 

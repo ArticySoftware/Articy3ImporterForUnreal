@@ -22,7 +22,7 @@ void FArticyRef::SetId(FArticyId NewId)
 void FArticyRef::SetReference(UArticyPrimitive* Object)
 {
 	Reference = Object;
-	SetId(Object ? Object->GetId() : 0);
+	SetId(Object ? Object->GetId() : (FArticyId) 0);
 }
 
 const FArticyId& FArticyRef::GetId() const
