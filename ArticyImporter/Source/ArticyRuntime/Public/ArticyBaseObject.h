@@ -25,7 +25,7 @@ public:
 	/** For ArticyImporter internal use only: initializes the bWasDeserialized variable. */
 	void Initialize() { bWasDeserialized = true; }
 
-	UWorld* GetWorld() const override { return GEngine->GetWorldFromContextObject(GetOuter()); }
+	UWorld* GetWorld() const override { return GEngine->GetWorldFromContextObjectChecked(GetOuter()); }
 
 	UArticyPrimitive* GetSubobject(FArticyId Id) const;
 
