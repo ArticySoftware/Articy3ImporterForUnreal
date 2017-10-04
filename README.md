@@ -27,12 +27,12 @@ So you can expect the following features including but not limited to:
  * Everything accessible via **C++** and **Blueprint**
  * **Flow player** for automatic configurable flow traversal as an actor component
  * Automatic import
- * Database with all project data
+ * Database with your project data. *Excluding Journeys, Settings, Template constraints* 
  * Uses of unreal engines localization
 
 # Setup
 
-There are a couple of steps need to get the plugin to work.
+There are a couple of steps needed to get the plugin up and running:
 
 ## Create a new project
 
@@ -148,6 +148,54 @@ Also make sure to cast the object to the desired type to get access to its prope
 <p align="center">
   <img src="https://www.nevigo.com/articy-importer/unreal/get_object.png">
 </p>
+
+## Accessing properties
+
+Most of the time if you want to access the properties of an objects you queried from the database or got passed by the flow player callbacks (see below) you need to
+cast the object to the correct type first. 
+
+If you have an object without a template the type to cast into is easy.
+Every built-in class is named as the object in articy:draft with your project name as a prefix. Lets say your project is named `ManiacManfred` so you will find `ManiacManfredFlowFragment`, `ManiacManfredDialogueFragment`, `ManiacManfredLocation`, `ManiacManfredEntity` and alot more. 
+All those respective objects have their expected properties, so you will find the `Speaker` property inside the `ManiacManfredDialogueFragment` object etc.
+
+<p align="center">
+  <img src="https://www.nevigo.com/articy-importer/unreal/base_object_property.png">
+</p>
+
+> You will also find classes with the `Articy` prefix. Those are the base classes for the generated classes and casting into them works almost the same. This would allow you to create code that is reusable
+> independant of any imported project.  
+
+Dealing with templates is a bit more complicated. First thing to understand is that **all your articy:draft templates are new types** inside unreal. 
+
+The name of your template types also follows a similar structure as the one mentioned before, but utilizing the Templates technical name: `<ProjectName><TemplateTechnicalName>`. So if your project is called *ManiacManfred* and your templates technical name is *Conditional_Zone* your correct type would be called `ManiacManfredConditional_Zone`.
+Its also worth mentioning that even if it is a new type, it is still derived from the base type with all its properties.
+
+Accessing is easy once you have cast the object into the correct type, just drag a connection out of the cast node and search for the type to see all its properties.
+
+<p align="center">
+  <img src="https://www.nevigo.com/articy-importer/unreal/base_object_propertylist.png">
+</p>
+
+For templates it works the same way, but you will also find fields for every feature inside your template, so in the case of the `Conditional_Zone` template, there is a `ZoneCondition` field for the feature with the same name.
+> Please note: It is possible that the **context sensitive** search does not properly work at this point in blueprint. When you disable it, you should be able to see all the fields inside your object.
+
+Some properties are a bit more complex like reference strips and scripts etc:
+
+* Scripts contain methods to `Evaluate` the underlying script. You can also access the `Expression` which is the original script in text form.
+* ReferenceStrips and QueryStrips are just arrays.
+* ReferenceSlots, `Speaker`, `Asset` inside the `PreviewImage` etc. are of type `ArticyId`, which can be plugged into `GetObject`.
+
+So to reiterate:
+
+1. Cast object to appropriate type.
+2. Access the property/feature.
+3. If it is a feature you access now the property inside the feature. <br/>
+3a. If it is a script method, you can execute it via the `Evaluate` method.
+
+<p align="center">
+  <img src="https://www.nevigo.com/articy-importer/unreal/object_with_script.png">
+</p>
+
 
 ## Articy Flow Player
 
