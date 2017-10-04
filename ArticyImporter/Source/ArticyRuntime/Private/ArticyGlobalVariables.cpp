@@ -44,7 +44,7 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetDefault(const UObject* WorldC
 
 		UE_LOG(LogTemp, Warning, TEXT("Cloning GVs."));
 
-		auto world = GEngine->GetWorldFromContextObject(WorldContext);
+		auto world = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 		ensureMsgf(world, TEXT("Getting world for GV cloning failed!"));
 
 		Clone = DuplicateObject(asset, world); //TODO need to add to root object?

@@ -71,7 +71,7 @@ T* FArticyRef::GetObject(const UObject* WorldContext) const
 }
 
 template<>
-struct TStructOpsTypeTraits<FArticyRef> : public TStructOpsTypeTraitsBase
+struct TStructOpsTypeTraits<FArticyRef> : public TStructOpsTypeTraitsBase2<FArticyRef>
 {
 	enum
 	{

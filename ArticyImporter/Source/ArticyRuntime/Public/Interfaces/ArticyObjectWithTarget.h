@@ -43,7 +43,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="ArticyObjectWithTarget")
 	virtual UArticyPrimitive* SetTarget(UArticyPrimitive* const Target)
 	{
-		SetTargetId(Target ? Target->GetId() : 0);
+		SetTargetId(Target ? Target->GetId() : (FArticyId) 0);
 		return Target;
 	}
 

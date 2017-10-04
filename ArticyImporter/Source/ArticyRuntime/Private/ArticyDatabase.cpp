@@ -115,7 +115,7 @@ UArticyDatabase* UArticyDatabase::Get(const UObject* WorldContext)
 	Clones.Remove(nullptr);
 	
 	//find the clone that belongs to the world of the passed in context object
-	auto world = GEngine->GetWorldFromContextObject(WorldContext);
+	auto world = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	if(!ensureMsgf(world, TEXT("Could not get world from WorldContext %s"), WorldContext ? *WorldContext->GetName() : TEXT("NULL")))
 		return nullptr;
 
