@@ -67,7 +67,7 @@ namespace ArticyHelpers
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
 
-static const FString ArticyFolder = FString(TEXT("/Game/Articy"));
+static const FString ArticyFolder = FString(TEXT("/Game/ArticyContent/Resources"));
 static const FString ArticyAssetsFolder = ArticyFolder; //TODO add this back once fixed in the exporter: / TEXT("Assets");
 static const FString ArticyGeneratedFolder = ArticyFolder / TEXT("Generated");
 
