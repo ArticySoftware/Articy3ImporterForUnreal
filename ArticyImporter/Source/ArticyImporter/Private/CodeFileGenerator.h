@@ -191,7 +191,7 @@ template <typename Type>
 void CodeFileGenerator::Enum(const FString& Enumname, const FString& Comment, const bool bUEnum, TArray<Type> Values)
 {
 	if(bUEnum)
-		Line("UENUM()");
+		Line("UENUM(BlueprintType)");
 
 	Line("enum");
 	StartClass(Enumname + (bUEnum ? " : uint8" : ""), Comment, false);
