@@ -67,8 +67,8 @@ namespace ArticyHelpers
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
 
-static const FString ArticyFolder = FString(TEXT("/Game/ArticyContent/Resources"));
-static const FString ArticyAssetsFolder = ArticyFolder; //TODO add this back once fixed in the exporter: / TEXT("Assets");
+static const FString ArticyFolder = FString(TEXT("/Game/ArticyContent/"));
+static const FString ArticyAssetsFolder = ArticyFolder / TEXT("Resources");
 static const FString ArticyGeneratedFolder = ArticyFolder / TEXT("Generated");
 
 inline uint64 HexToUint64(FString str) { return FCString::Strtoui64(*str, nullptr, 16); }
