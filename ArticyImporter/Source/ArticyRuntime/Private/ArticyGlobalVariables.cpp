@@ -66,80 +66,32 @@ UArticyBaseVariableSet* UArticyGlobalVariables::GetNamespace(const FName Namespa
 	return set;
 }
 
-const bool& UArticyGlobalVariables::GetBoolVariable(FName Namespace, const FName Variable, bool& bSucceeded)
+const bool& UArticyGlobalVariables::GetBoolVariable(const FName Namespace, const FName Variable, bool& bSucceeded)
 {
-	auto set = GetNamespace(Namespace);
-	if(set)
-	{
-		auto ptr = set->GetPropPtr<bool>(Variable);
-		if(ptr)
-		{
-			bSucceeded = true;
-			return *ptr;
-		}
-	}
-
-	bSucceeded = false;
-	UE_LOG(LogArticyRuntime, Warning, TEXT("Could not find GV %s.%s!"), *Namespace.ToString(), *Variable.ToString());
-	static bool Empty = false;
-	return Empty;
+	return GetVariableValue<UArticyBool, bool>(Namespace, Variable, bSucceeded);
 }
 
-const int32& UArticyGlobalVariables::GetIntVariable(FName Namespace, const FName Variable, bool& bSucceeded)
+const int32& UArticyGlobalVariables::GetIntVariable(const FName Namespace, const FName Variable, bool& bSucceeded)
 {
-	auto set = GetNamespace(Namespace);
-	if(set)
-	{
-		auto ptr = set->GetPropPtr<int32>(Variable);
-		if(ptr)
-		{
-			bSucceeded = true;
-			return *ptr;
-		}
-	}
-
-	bSucceeded = false;
-	UE_LOG(LogArticyRuntime, Warning, TEXT("Could not find GV %s.%s!"), *Namespace.ToString(), *Variable.ToString());
-	static int32 Empty = -1;
-	return Empty;
+	return GetVariableValue<UArticyInt, int32>(Namespace, Variable, bSucceeded);
 }
 
 const FString& UArticyGlobalVariables::GetStringVariable(const FName Namespace, const FName Variable, bool& bSucceeded)
 {
-	auto set = GetNamespace(Namespace);
-	if(set)
-	{
-		auto ptr = set->GetPropPtr<FString>(Variable);
-		if(ptr)
-		{
-			bSucceeded = true;
-			return *ptr;
-		}
-	}
-
-	bSucceeded = false;
-	UE_LOG(LogArticyRuntime, Warning, TEXT("Could not find GV %s.%s!"), *Namespace.ToString(), *Variable.ToString());
-	static FString Empty = "";
-	return Empty;
+	return GetVariableValue<UArticyString, FString>(Namespace, Variable, bSucceeded);
 }
 
 void UArticyGlobalVariables::SetBoolVariable(const FName Namespace, const FName Variable, const bool Value)
 {
-	auto set = GetNamespace(Namespace);
-	if(set)
-		set->SetProp<bool>(Variable, Value);
+	SetVariableValue<UArticyBool>(Namespace, Variable, Value);
 }
 
 void UArticyGlobalVariables::SetIntVariable(const FName Namespace, const FName Variable, const int32 Value)
 {
-	auto set = GetNamespace(Namespace);
-	if(set)
-		set->SetProp<int32>(Variable, Value);
+	SetVariableValue<UArticyInt>(Namespace, Variable, Value);
 }
 
 void UArticyGlobalVariables::SetStringVariable(const FName Namespace, const FName Variable, const FString Value)
 {
-	auto set = GetNamespace(Namespace);
-	if(set)
-		set->SetProp<FString>(Variable, Value);
+	SetVariableValue<UArticyString>(Namespace, Variable, Value);
 }

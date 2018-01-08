@@ -294,11 +294,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Getter")
 	UArticyBaseVariableSet* GetNamespace(const FName Namespace);
 	
-	UFUNCTION(BlueprintCallable, Category="Setter")
+	UFUNCTION(BlueprintCallable, Category="Getter")
 	const bool& GetBoolVariable(const FName Namespace, const FName Variable, bool& bSucceeded);
-	UFUNCTION(BlueprintCallable, Category="Setter")
+	UFUNCTION(BlueprintCallable, Category="Getter")
 	const int32& GetIntVariable(const FName Namespace, const FName Variable, bool& bSucceeded);
-	UFUNCTION(BlueprintCallable, Category="Setter")
+	UFUNCTION(BlueprintCallable, Category="Getter")
 	const FString& GetStringVariable(const FName Namespace, const FName Variable, bool& bSucceeded);
 
 	UFUNCTION(BlueprintCallable, Category="Setter")
@@ -307,6 +307,14 @@ public:
 	void SetIntVariable(const FName Namespace, const FName Variable, const int32 Value);
 	UFUNCTION(BlueprintCallable, Category="Setter")
 	void SetStringVariable(const FName Namespace, const FName Variable, const FString Value);
+
+private:
+
+	template <typename ArticyVariableType, typename VariablePayloadType>
+	void SetVariableValue(const FName Namespace, const FName Variable, const VariablePayloadType Value);
+
+	template<typename ArticyVariableType, typename VariablePayloadType>
+	const VariablePayloadType& GetVariableValue(const FName Namespace, const FName Variable, bool& bSucceeded);
 };
 
 //---------------------------------------------------------------------------//
@@ -339,4 +347,39 @@ template <typename Type>
 void UArticyVariable::RegisterOnStorePop(Type* Instance)
 {
 	Store->RegisterOnPopState([=] { this->PopState(Instance); });
+}
+
+template <typename ArticyVariableType, typename VariablePayloadType>
+void UArticyGlobalVariables::SetVariableValue(const FName Namespace, const FName Variable, const VariablePayloadType Value)
+{
+	auto set = GetNamespace(Namespace);
+	if (set)
+	{
+		auto ptr = set->GetPropPtr<ArticyVariableType *>(Variable);
+		if (ptr)
+		{
+			auto& propValue = (**ptr);
+			propValue = Value;
+		}
+	}
+}
+
+template<typename ArticyVariableType, typename VariablePayloadType>
+const VariablePayloadType& UArticyGlobalVariables::GetVariableValue(const FName Namespace, const FName Variable, bool& bSucceeded)
+{
+	auto set = GetNamespace(Namespace);
+	if (set)
+	{
+		auto ptr = set->GetPropPtr<ArticyVariableType *>(Variable);
+		if (ptr)
+		{
+			auto& propValue = (**ptr);
+			bSucceeded = true;
+			return propValue.Get();
+		}
+	}
+
+	bSucceeded = false;
+	static VariablePayloadType empty = VariablePayloadType();
+	return empty;
 }
