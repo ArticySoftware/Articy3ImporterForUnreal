@@ -223,6 +223,7 @@ void UArticyDatabase::LoadPackage(FString PackageName)
 
 		auto shared = MakeShared<FArticyClonableObject>(primitiveClone);
 		LoadedObjectsById.Add(id, shared);
+		ArticyObjects.Add(primitiveClone);
 
 		auto objectClone = Cast<UArticyObject>(primitiveClone);
 		if(objectClone)
@@ -238,6 +239,7 @@ void UArticyDatabase::UnloadAllPackages()
 	LoadedPackages.Reset();
 	LoadedObjectsById.Reset();
 	LoadedObjectsByName.Reset();
+	ArticyObjects.Reset();
 }
 
 void UArticyDatabase::SetExpressoScriptsClass(TSubclassOf<UArticyExpressoScripts> NewClass)

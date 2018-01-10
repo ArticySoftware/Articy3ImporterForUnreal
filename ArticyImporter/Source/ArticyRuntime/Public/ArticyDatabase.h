@@ -256,6 +256,9 @@ protected:
 
 	TMap<FArticyId, TSharedPtr<FArticyClonableObject>> LoadedObjectsById;
 	TMap<FName, FArticyDatabaseObjectArray> LoadedObjectsByName;
+	/** Holds the references to all cloned articy objects to prevent them from being garbage collected. */
+	UPROPERTY()
+	TArray<UArticyPrimitive *> ArticyObjects;
 
 	void UnloadAllPackages();
 
