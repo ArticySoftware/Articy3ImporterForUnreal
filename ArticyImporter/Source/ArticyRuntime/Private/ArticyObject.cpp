@@ -41,9 +41,3 @@ TArray<UArticyObject*> UArticyObject::GetChildren() const
 {
 	return TArray<UArticyObject*>();
 }
-
-UArticyBaseFeature* UArticyObject::GetFeature(FName propertyName)
-{
-	auto propPtr = GetPropPtr<UArticyBaseFeature *>(propertyName);
-	return propPtr ? *propPtr : nullptr;
-}

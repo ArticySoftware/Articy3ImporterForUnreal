@@ -6,8 +6,8 @@ using UnrealBuildTool;
 
 public class ArticyRuntime : ModuleRules
 {
-	public ArticyRuntime(TargetInfo Target)
-	{
+	public ArticyRuntime(ReadOnlyTargetRules Target) : base(Target)
+    {
 		
 		PublicIncludePaths.AddRange(
 			new string[] {

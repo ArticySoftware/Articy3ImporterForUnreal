@@ -6,7 +6,7 @@ using UnrealBuildTool;
 
 public class ArticyImporter : ModuleRules
 {
-	public ArticyImporter(TargetInfo Target)
+	public ArticyImporter(ReadOnlyTargetRules Target) : base(Target)
 	{
 		
 		PublicIncludePaths.AddRange(

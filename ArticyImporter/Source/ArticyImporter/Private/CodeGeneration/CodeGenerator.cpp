@@ -121,7 +121,7 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 	});
 
 	if(!bWaitingForOtherCompile)
-		HotReloadSupport.DoHotReloadFromEditor(false /*async*/);
+		HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None /*async*/);
 }
 
 void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImportData* Data, const bool bWaitingForOtherCompile)
