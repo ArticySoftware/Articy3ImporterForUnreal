@@ -24,6 +24,9 @@ public:
 	UArticyObject* GetParent() const;
 	TArray<UArticyObject*> GetChildren() const;
 
+	UFUNCTION(BlueprintCallable)
+	UArticyBaseFeature* GetFeature(FName propertyName);
+
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
