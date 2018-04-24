@@ -47,6 +47,8 @@ After you have created a new project, close the unreal editor for now.
 
 ## Clone/Copy the plugin into the unreal project
 
+*Unreal Engine 4.18 and below use [the UE-4.18 tagged version](https://github.com/ArticySoftware/ArticyImporterForUnreal/releases) of the plugin*
+
 Get a copy of the plugin and copy it into your projects **Plugins** folder. It is possible that you don't have one if it is a new project, so you can just create it.
 Copy the plugin folder **ArticyImporter** into this **Plugins** folder. Your project structure should now look something like this.
 
