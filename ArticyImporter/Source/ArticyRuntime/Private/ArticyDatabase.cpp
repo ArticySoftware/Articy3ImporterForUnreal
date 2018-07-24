@@ -8,6 +8,7 @@
 #include "ArticyBaseTypes.h"
 #include "ArticyHelpers.h"
 #include "ArticyGlobalVariables.h"
+#include "ArticyPluginSettings.h"
 #include "ArticyExpressoScripts.h"
 
 FArticyShadowableObject::FArticyShadowableObject(UArticyPrimitive* Object)
@@ -15,8 +16,11 @@ FArticyShadowableObject::FArticyShadowableObject(UArticyPrimitive* Object)
 	ShadowCopies.Add(FArticyObjectShadow(0, Object));
 }
 
-UArticyPrimitive* FArticyShadowableObject::Get(const IShadowStateManager* ShadowManager) const
+UArticyPrimitive* FArticyShadowableObject::Get(const IShadowStateManager* ShadowManager, bool bForceUnshadowed) const
 {
+	if (bForceUnshadowed)
+		return ShadowCopies[0].Object;
+
 	const auto ShadowLvl = ShadowManager->GetShadowLevel();
 	FArticyObjectShadow* info = ShadowCopies.FindByPredicate([&](const FArticyObjectShadow& item)
 	{
@@ -50,10 +54,10 @@ FArticyClonableObject::FArticyClonableObject(UArticyPrimitive* BaseObject)
 	AddClone(BaseObject, 0);
 }
 
-UArticyPrimitive* FArticyClonableObject::Get(const IShadowStateManager* ShadowManager, int32 CloneId) const
+UArticyPrimitive* FArticyClonableObject::Get(const IShadowStateManager* ShadowManager, int32 CloneId, bool bForceUnshadowed) const
 {
 	auto info = Clones.Find(CloneId);
-	return info ? info->Get(ShadowManager) : nullptr;
+	return info ? info->Get(ShadowManager, bForceUnshadowed) : nullptr;
 }
 
 UArticyPrimitive* FArticyClonableObject::Clone(const IShadowStateManager* ShadowManager, int32 CloneId, bool bFailIfExists)
@@ -109,17 +113,20 @@ void UArticyDatabase::Init()
 
 UArticyDatabase* UArticyDatabase::Get(const UObject* WorldContext)
 {
-	static TMap<TWeakObjectPtr<UWorld>, TWeakObjectPtr<UArticyDatabase>> Clones;
+	bool bKeepBetweenWorlds = UArticyPluginSettings::Get()->bKeepDatabaseBetweenWorlds;
+
+	if(bKeepBetweenWorlds && PersistentClone.IsValid())
+		return PersistentClone.Get();
 
 	//remove all clones who's world died (world == nullptr)
 	Clones.Remove(nullptr);
-	
-	//find the clone that belongs to the world of the passed in context object
+
 	auto world = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	if(!ensureMsgf(world, TEXT("Could not get world from WorldContext %s"), WorldContext ? *WorldContext->GetName() : TEXT("NULL")))
 		return nullptr;
 
-	auto& clone = Clones.FindOrAdd(world);
+	//find either the persistent clone or the clone that belongs to the world of the passed in context object
+	auto& clone = bKeepBetweenWorlds ? PersistentClone : Clones.FindOrAdd(world);
 
 	if(!clone.IsValid())
 	{
@@ -132,7 +139,17 @@ UArticyDatabase* UArticyDatabase::Get(const UObject* WorldContext)
 			return nullptr;
 
 		//duplicate the original asset
-		clone = DuplicateObject(asset, world);
+		if(bKeepBetweenWorlds)
+		{
+			clone = DuplicateObject(asset, world->GetGameInstance());
+#if !WITH_EDITOR
+			clone->AddToRoot();
+#endif
+		}
+		else
+		{
+			clone = DuplicateObject(asset, world);
+		}
 
 		//make the clone load its default packages
 		if(clone.IsValid())
@@ -140,6 +157,24 @@ UArticyDatabase* UArticyDatabase::Get(const UObject* WorldContext)
 	}
 
 	return clone.Get();
+}
+
+void UArticyDatabase::UnloadDatabase()
+{
+	bool bKeepBetweenWorlds = UArticyPluginSettings::Get()->bKeepDatabaseBetweenWorlds;
+
+	TWeakObjectPtr<UArticyDatabase>* dbPtr = nullptr;
+	if (bKeepBetweenWorlds)
+		dbPtr = &PersistentClone;
+	else
+		dbPtr = &Clones.FindOrAdd(GetWorld());
+
+	if (dbPtr && dbPtr->IsValid())
+	{
+		(*dbPtr)->RemoveFromRoot();
+		(*dbPtr)->ConditionalBeginDestroy();
+		*dbPtr = NULL;
+	}
 }
 
 UArticyGlobalVariables* UArticyDatabase::GetGVs() const
@@ -277,8 +312,18 @@ const UArticyDatabase* UArticyDatabase::GetOriginal(bool bLoadAllPackages)
 
 UArticyPrimitive* UArticyDatabase::GetObject(FArticyId Id, int32 CloneId) const
 {
+	return GetObjectInternal(Id, CloneId);
+}
+
+UArticyPrimitive* UArticyDatabase::GetObjectUnshadowed(FArticyId Id, int32 CloneId) const
+{
+	return GetObjectInternal(Id, CloneId, true);
+}
+
+UArticyPrimitive* UArticyDatabase::GetObjectInternal(FArticyId Id, int32 CloneId, bool bForceUnshadowed) const
+{
 	const TSharedPtr<FArticyClonableObject>* info = LoadedObjectsById.Find(Id);
-	return info && info->IsValid() ? info->Get()->Get(this, CloneId) : nullptr;
+	return info && info->IsValid() ? info->Get()->Get(this, CloneId, bForceUnshadowed) : nullptr;
 }
 
 UArticyObject* UArticyDatabase::GetObjectByName(FName TechnicalName, int32 CloneId) const
@@ -294,6 +339,21 @@ UArticyObject* UArticyDatabase::GetObjectByName(FName TechnicalName, int32 Clone
 TArray<UArticyObject*> UArticyDatabase::GetObjects(FName TechnicalName, int32 CloneId) const
 {
 	return GetObjects<UArticyObject>(TechnicalName, CloneId);
+}
+
+TArray<UArticyObject*> UArticyDatabase::GetObjectsByType(TSubclassOf<class UArticyObject> Type, int32 CloneId) const
+{
+	TArray<UArticyObject*> arr;
+	for (auto obj : ArticyObjects)
+		if (obj->GetCloneId() == CloneId && obj->IsA(Type))
+			arr.Add(Cast<UArticyObject>(obj));
+
+	return arr;
+}
+
+TArray<UArticyPrimitive*> UArticyDatabase::GetAllObjects() const
+{
+	return ArticyObjects;
 }
 
 //---------------------------------------------------------------------------//
@@ -345,3 +405,6 @@ UArticyExpressoScripts* UArticyDatabase::GetExpressoInstance() const
 
 	return CachedExpressoScripts;
 }
+
+TMap<TWeakObjectPtr<UWorld>, TWeakObjectPtr<UArticyDatabase>> UArticyDatabase::Clones;
+TWeakObjectPtr<UArticyDatabase> UArticyDatabase::PersistentClone;

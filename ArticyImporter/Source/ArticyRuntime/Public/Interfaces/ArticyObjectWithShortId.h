@@ -7,7 +7,7 @@
 #include "ArticyObjectWith_Base.h"
 #include "ArticyObjectWithShortId.generated.h"
 
-UINTERFACE(BlueprintType, meta=(CannotImplementInterfaceInBlueprint))
+UINTERFACE(MinimalAPI, BlueprintType, meta=(CannotImplementInterfaceInBlueprint))
 class UArticyObjectWithShortId : public UArticyObjectWith_Base { GENERATED_BODY() };
 
 /**

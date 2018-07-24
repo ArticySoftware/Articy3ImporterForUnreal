@@ -18,7 +18,7 @@ class UArticyImportData;
 //same as PREDEFINED_TYPE, but with a custom DefaultValue and Deserializer.
 #define PREDEFINE_TYPE_EXT(Type, DefaultValue, Deserializer) new ArticyPredefinedTypeInfo<Type>(#Type, #Type, DefaultValue, Deserializer)
 //same as PREDEFINED_TYPE_EX, but creates a ArticyObjectTypeInfo, which has a default deserializer
-#define PREDEFINE_ARTICYOBJECT_TYPE(Type) new ArticyObjectTypeInfo<Type, Type##*>(#Type, #Type"*")
+#define PREDEFINE_ARTICYOBJECT_TYPE(Type) new ArticyObjectTypeInfo<Type, Type*>(#Type, #Type"*")
 
 #define PROP_SETTER_PARAMS UArticyBaseObject* Model, const FString& Path, const TSharedPtr<FJsonValue> Json
 #define ARRAY_SETTER_PARAMS UArticyBaseObject* Model, const FString& Path, const TArray<TSharedPtr<FJsonValue>> JsonArray

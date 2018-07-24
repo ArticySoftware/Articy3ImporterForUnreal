@@ -29,5 +29,6 @@
 #include "ArticyObjectWithSpeaker.h"
 #include "ArticyObjectWithTarget.h"
 #include "ArticyObjectWithText.h"
+#include "ArticyObjectWithTransform.h"
 #include "ArticyObjectWithVertices.h"
 #include "ArticyObjectWithZIndex.h"

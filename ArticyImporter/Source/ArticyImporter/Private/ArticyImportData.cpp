@@ -9,6 +9,7 @@
 #include "CodeGeneration/CodeGenerator.h"
 #include "ArticyJSONFactory.h"
 #include "SharedPointerInternals.h"
+#include "ArticyPluginSettings.h"
 #include "Regex.h"
 
 void FADISettings::ImportFromJson(TSharedPtr<FJsonObject> Json)
@@ -69,7 +70,7 @@ FString FArticyGVar::GetCPPValueString() const
 		break;
 
 	case EArticyType::ADT_String:
-		value = FString::Printf(TEXT("%s"), *StringValue);
+		value = FString::Printf(TEXT("\"%s\""), *StringValue);
 		break;
 
 	default:
@@ -168,6 +169,11 @@ const FString& FAIDScriptMethod::GetCPPReturnType() const
 		const static auto String = FString{ "FString" };
 		return String;
 	}
+	if(ReturnType == "ArticyObject")
+	{
+		const static auto ArticyObject = FString{ "UArticyObject*" };
+		return ArticyObject;
+	}
 	
 	return ReturnType;
 }
@@ -190,18 +196,26 @@ const FString& FAIDScriptMethod::GetCPPDefaultReturn() const
 		const static auto EmptyString = FString{ "\"\"" };
 		return EmptyString;
 	}
+	if (ReturnType == "ArticyObject")
+	{
+		const static auto ArticyObject = FString{ "nullptr" };
+		return ArticyObject;
+	}
 	
 	const static auto Nothing = FString{ "" };
 	return Nothing;
 }
 
-void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json)
+void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString> &OverloadedMethods)
 {
 	JSON_TRY_STRING(Json, Name);
 	JSON_TRY_STRING(Json, ReturnType);
 
+	BlueprintName = Name + "_";
 	ParameterList = "";
+	OrigininalParameterTypes = "";
 	const TArray<TSharedPtr<FJsonValue>>* items;
+
 	if(Json->TryGetArrayField(L"Parameters", items))
 	{
 		for(const auto item : *items)
@@ -214,9 +228,18 @@ void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json)
 			JSON_TRY_STRING((*obj), Param);
 			JSON_TRY_STRING((*obj), Type);
 			
+			// append param types to blueprint names
+			FString formattedType = Type;
+			formattedType[0] = FText::FromString(Type).ToUpper().ToString()[0];
+			BlueprintName += formattedType;
+
+			OrigininalParameterTypes += ", " + Type;
+
 			//string -> const FString& (because UE4 wants a const reference for strings..)
 			if(Type == "string")
 				Type = "const FString&";
+			else if(Type == "ArticyObject")
+				Type = "UArticyObject*";
 
 			//append to parameter list
 			ParameterList += ", " + Type + " " + Param;
@@ -226,7 +249,27 @@ void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json)
 		//remove the leading ", "
 		if(ParameterList.Len() >= 2)
 			ParameterList.RemoveAt(0, 2);
+		if(ParameterList.Len() >= 2)
+			ArgumentList.RemoveAt(0, 2);
+		if(OrigininalParameterTypes.Len() >= 2)
+			OrigininalParameterTypes.RemoveAt(0, 2);
 	}
+
+	if(BlueprintName.EndsWith("_"))
+		BlueprintName.RemoveAt(BlueprintName.Len() - 1);
+
+	// deterimine if this is an overloaded blueprint function
+	static TMap<FString, FString> UsedBlueprintMethodsNames;
+	if (UsedBlueprintMethodsNames.Contains(Name))
+	{
+		if (UsedBlueprintMethodsNames[Name] != BlueprintName)
+			OverloadedMethods.Add(Name);
+	}
+	else
+	{
+		UsedBlueprintMethodsNames.Add(Name, BlueprintName);
+	}
+
 }
 
 void FAIDUserMethods::ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json)
@@ -236,6 +279,8 @@ void FAIDUserMethods::ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json)
 	if(!Json)
 		return;
 
+	TSet<FString> OverloadedMethods;
+
 	for(const auto smJson : *Json)
 	{
 		const auto obj = smJson->AsObject();
@@ -243,8 +288,14 @@ void FAIDUserMethods::ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json)
 			continue;
 
 		FAIDScriptMethod sm;
-		sm.ImportFromJson(obj);
+		sm.ImportFromJson(obj, OverloadedMethods);
 		ScriptMethods.Add(sm);
+	}
+
+	// mark overloaded methods
+	for (auto scriptMethod : ScriptMethods)
+	{
+		scriptMethod.bIsOverloadedFunction = OverloadedMethods.Contains(scriptMethod.Name);
 	}
 }
 
@@ -380,11 +431,13 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 	//match any group of two words separated by a dot, that does not start with a double quote
 	// (?<!["a-zA-Z])(\w+\.\w+)
 	//NOTE: static is no good here! crashes on application quit...
-	const FRegexPattern unquotedWordDotWord(TEXT("(?<![\"a-zA-Z])(\\w+\\.\\w+)"));
+	const FRegexPattern unquotedWordDotWord(TEXT("(?<![\"a-zA-Z])([a-zA-Z]+\\.[a-zA-Z]+)"));
 	//match an assignment operator (an = sign that does not have any of [ = < > ] before it, and no = after it)
 	const FRegexPattern assignmentOperator(TEXT("(?<![=<>])=(?!=)"));
 
-	auto string = Fragment.Replace(TEXT("\n"), TEXT(""));
+	bool bCreateBlueprintableUserMethods = UArticyPluginSettings::Get()->bCreateBlueprintTypeForScriptMethods;
+
+	auto string = Fragment; //Fragment.Replace(TEXT("\n"), TEXT(""));
 	if(string.Len() > 0)
 	{
 		static TArray<FString> lines; lines.Reset();
@@ -409,7 +462,7 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 		}
 
 		//now, split at semicolons, i.e. into statements
-		string.TrimTrailing();
+		string.TrimEndInline();
 		string.ParseIntoArray(lines, TEXT(";"));
 
 		//a script condition must not have more than one statement (semicolon)!
@@ -448,9 +501,22 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 					offset += strlen(">") + strlen("->Get()");
 				}
 				else
-				{
+				{			
+					// if the value the variable should get assigned is a string, we cast it to FString
+					auto valueStr = line.Mid(end);
+					for (int i = 0; i < valueStr.Len(); i++)
+					{
+						auto currentChar = valueStr[i];
+						if (currentChar == ' ' || currentChar == '<' || currentChar == '>' || currentChar == '=')
+							continue;
+						else if (currentChar == '\"' && i > 0)
+							valueStr.InsertAt(i, "(FString)");
+
+						break;
+					}
+					
 					//get the dereferenced variable
-					line = line.Left(start) + "*" + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + line.Mid(end);
+					line = line.Left(start) + "*" + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + valueStr;
 					offset += strlen(".") + strlen(">");
 				}
 			}
@@ -466,6 +532,7 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 			if(l < lines.Num() - 1)
 				string += TEXT("\n");
 		}
+
 	}
 
 	FArticyExpressoFragment frag;
@@ -475,3 +542,15 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 	ScriptFragments.Add(frag);
 }
 
+void UArticyImportData::AddChildToParentCache(const FArticyId Parent, const FArticyId Child)
+{
+	FArticyIdArray* childrenPtr = ParentChildrenCache.Find(Parent);
+	if (!childrenPtr)
+	{
+		FArticyIdArray children;
+		ParentChildrenCache.Add(Parent, children);
+		childrenPtr = &children;
+	}
+
+	childrenPtr->Values.AddUnique(Child);
+}

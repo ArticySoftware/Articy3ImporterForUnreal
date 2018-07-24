@@ -10,6 +10,7 @@
 #include "ArticyObjectWithSpeaker.h"
 #include "ArticyExpressoScripts.h"
 #include "ArticyInputPinsProvider.h"
+#include "ArticyOutputPinsProvider.h"
 
 TScriptInterface<IArticyFlowObject> FArticyBranch::GetTarget() const
 {
@@ -18,6 +19,8 @@ TScriptInterface<IArticyFlowObject> FArticyBranch::GetTarget() const
 
 void UArticyFlowPlayer::BeginPlay()
 {
+	Super::BeginPlay();
+
 	//update Cursor to object referenced by StartOn
 	SetCursorToStartNode();
 }
@@ -30,6 +33,13 @@ void UArticyFlowPlayer::SetStartNode(FArticyRef StartNodeId)
 	SetCursorToStartNode();
 }
 
+void UArticyFlowPlayer::SetStartNodeWithFlowObject(TScriptInterface<IArticyFlowObject> Node)
+{
+	FArticyRef ArticyRef;
+	ArticyRef.SetReference(Cast<UArticyPrimitive>(Node.GetObject()));
+	SetStartNode(ArticyRef);
+}
+
 void UArticyFlowPlayer::SetCursorTo(TScriptInterface<IArticyFlowObject> Node)
 {
 	Cursor = Node;
@@ -38,14 +48,45 @@ void UArticyFlowPlayer::SetCursorTo(TScriptInterface<IArticyFlowObject> Node)
 
 void UArticyFlowPlayer::Play(int BranchIndex)
 {
+	TArray<FArticyBranch> branches;
+	if (IgnoresInvalidBranches())
+	{
+		for (auto branch : AvailableBranches)
+			if (branch.bIsValid)
+				branches.Add(branch);
+	}
+	else
+	{
+		branches = AvailableBranches;
+	}
+
 	//check if the specified branch exists
-	if(!AvailableBranches.IsValidIndex(BranchIndex))
+	if(!branches.IsValidIndex(BranchIndex))
 	{
 		UE_LOG(LogArticyRuntime, Error, TEXT("Branch with index %d does not exist!"), BranchIndex)
 		return;
 	}
 
-	PlayBranch(AvailableBranches[BranchIndex]);
+	PlayBranch(branches[BranchIndex]);
+}
+
+void UArticyFlowPlayer::FinishCurrentPausedObject(int PinIndex)
+{
+	IArticyOutputPinsProvider* outputPinOwner = Cast<IArticyOutputPinsProvider>(Cursor.GetObject());
+	if (outputPinOwner)
+	{
+		auto outputPins = outputPinOwner->GetOutputPins();
+
+		if (outputPins->Num() > 0)
+		{
+			if (PinIndex < outputPins->Num())
+			{
+				(*outputPins)[PinIndex]->Execute(GetGVs(), GetMethodsProvider());
+			}
+			else
+				UE_LOG(LogArticyRuntime, Warning, TEXT("FinishCurrentPausedObject: The index was out of bounds: Index: %d, PinCount: %d"), PinIndex, outputPins->Num());
+		}
+	}
 }
 
 bool UArticyFlowPlayer::ShouldPauseOn(IArticyFlowObject* Node) const
@@ -106,14 +147,55 @@ UObject* UArticyFlowPlayer::GetMethodsProvider() const
 	return UserMethodsProvider;
 }
 
+IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
+{
+	auto db = UArticyDatabase::Get(this);
+	auto unshadowedObject = db->GetObjectUnshadowed(Cast<UArticyPrimitive>(Node)->GetId());
+
+	// handle pins, because we can not request them directly from the db 
+	if (!unshadowedObject)
+	{
+		auto pinOwner = db->GetObjectUnshadowed(Cast<UArticyFlowPin>(Node)->GetOwner()->GetId());
+
+		TArray<UArticyFlowPin*> pins;
+		auto inputPinsOwner = Cast<IArticyInputPinsProvider>(pinOwner);
+		pins.Append(*inputPinsOwner->GetInputPins());
+		auto outputPinsOwner = Cast<IArticyOutputPinsProvider>(pinOwner);
+		pins.Append(*outputPinsOwner->GetOutputPins());
+
+		auto targetId = Cast<UArticyPrimitive>(Node)->GetId();
+		for (auto pin : pins)
+		{
+			if (pin->GetId() == targetId)
+			{
+				unshadowedObject = pin;
+				break;
+			}
+		}
+	}
+
+	return Cast<IArticyFlowObject>(unshadowedObject);
+}
+
 //---------------------------------------------------------------------------//
 
 TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, uint32 Depth)
 {
 	TArray<FArticyBranch> OutBranches;
 
+	// get if owner of input pin is a stop node
+	bool bInputPinOwnerIsStopNode = false;
+	IArticyInputPinsProvider* inputPinOwner = nullptr;
+	auto inputPin = Cast<UArticyInputPin>(Node);
+	if(Depth > 2 && inputPin)
+	{
+		inputPinOwner = Cast<IArticyInputPinsProvider>(inputPin->GetOwner());
+		bInputPinOwnerIsStopNode = ShouldPauseOn(inputPinOwner);
+	}
+
+
 	//check stop condition
-	if(Depth > uint32(ExploreDepthLimit) || !Node || Node != Cursor.GetInterface() && ShouldPauseOn(Node))
+	if((Depth > uint32(ExploreDepthLimit) || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))) || bInputPinOwnerIsStopNode)
 	{
 		if(Depth > uint32(ExploreDepthLimit))
 			UE_LOG(LogArticyRuntime, Warning, TEXT("ExploreDepthLimit (%d) reached, stopping exploration!"), ExploreDepthLimit);
@@ -132,14 +214,31 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 		if(Node)
 		{
 			/* NOTE: This check must not be done, as the last node in a branch never affects
-			 * validity of the branch. A branch is only invalidated if it runs THROUGH a node
-			 * with invalid condition, instead of just UP TO that node.
+			* validity of the branch. A branch is only invalidated if it runs THROUGH a node
+			* with invalid condition, instead of just UP TO that node.
 			branch.bIsValid = Node->Execute(this); */
 
+			auto unshadowedNode = GetUnshadowedNode(Node);
+
 			TScriptInterface<IArticyFlowObject> ptr;
-			ptr.SetObject(Node->_getUObject());
-			ptr.SetInterface(Node);
+			ptr.SetObject(unshadowedNode->_getUObject());
+			ptr.SetInterface(unshadowedNode);
 			branch.Path.Add(ptr);
+
+			if (bInputPinOwnerIsStopNode)
+			{
+				bool bIsValid;
+				ShadowedOperation([&] { bIsValid = inputPin->Evaluate(GetGVs(), GetMethodsProvider()); });
+				branch.bIsValid = bIsValid;
+
+				auto ownerNode = Cast<IArticyFlowObject>(Cast<UArticyFlowPin>(Node)->GetOwner());
+				auto unshadowedInputPinOwner = GetUnshadowedNode(ownerNode);
+				
+				TScriptInterface<IArticyFlowObject> ownerPtr;
+				ownerPtr.SetObject(unshadowedInputPinOwner->_getUObject());
+				ownerPtr.SetInterface(unshadowedInputPinOwner);
+				branch.Path.Add(ownerPtr);
+			}
 		}
 
 		OutBranches.Add(branch);
@@ -176,7 +275,7 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 			if(bShadowed)
 			{
 				//explore the node inside a shadowed operation
-				ShadowedOperation([&] {	Node->Explore(this, OutBranches, Depth + 1); });
+				ShadowedOperation([&] { Node->Explore(this, OutBranches, Depth + 1); });
 			}
 			else
 			{
@@ -188,9 +287,10 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 		//add this node to the head of all the branches
 		for(auto& branch : OutBranches)
 		{
+			auto unshadowedNode = GetUnshadowedNode(Node);
 			TScriptInterface<IArticyFlowObject> ptr;
-			ptr.SetObject(Node->_getUObject());
-			ptr.SetInterface(Node);
+			ptr.SetObject(unshadowedNode->_getUObject());
+			ptr.SetInterface(unshadowedNode);
 
 			branch.Path.Insert(ptr, 0); //TODO inserting at front is not ideal performance wise
 		}
@@ -224,11 +324,11 @@ void UArticyFlowPlayer::UpdateAvailableBranches()
 			//fast-forwarding will call UpdateAvailableBranches again, can abort here
 			return;
 		}
-	}
 
-	//broadcast and return result
-	OnPlayerPaused.Broadcast(Cursor);
-	OnBranchesUpdated.Broadcast(AvailableBranches);
+		//broadcast and return result
+		OnPlayerPaused.Broadcast(Cursor);
+		OnBranchesUpdated.Broadcast(AvailableBranches);
+	}
 }
 
 void UArticyFlowPlayer::SetCursorToStartNode()

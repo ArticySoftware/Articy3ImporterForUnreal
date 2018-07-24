@@ -7,12 +7,12 @@
 #include "ArticyScriptFragment.h"
 #include "ArticyExpressoScripts.h"
 
-FName UArticyScriptFragment::GetExpression() const
+int UArticyScriptFragment::GetExpressionHash() const
 {
-	if(CachedExpression.IsNone() && !Expression.IsEmpty())
-		CachedExpression = *Expression;
+	if(!CachedExpressionHash)
+		CachedExpressionHash = GetTypeHash(Expression);
 
-	return CachedExpression;
+	return CachedExpressionHash;
 }
 
 void UArticyScriptFragment::InitFromJson(TSharedPtr<FJsonValue> Json)
@@ -33,7 +33,7 @@ void UArticyScriptFragment::InitFromJson(TSharedPtr<FJsonValue> Json)
 bool UArticyScriptCondition::Evaluate(class UArticyGlobalVariables* GV, class UObject* MethodProvider)
 {
 	auto db = UArticyDatabase::Get(this);
-	return db->GetExpressoInstance()->Evaluate(GetExpression(), GV ? GV : db->GetGVs(), MethodProvider);
+	return db->GetExpressoInstance()->Evaluate(GetExpressionHash(), GV ? GV : db->GetGVs(), MethodProvider);
 }
 
 bool UArticyCondition::Evaluate(UArticyGlobalVariables* GV, UObject* MethodProvider)
@@ -63,7 +63,7 @@ void UArticyCondition::Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>&
 void UArticyScriptInstruction::Execute(class UArticyGlobalVariables* GV, class UObject* MethodProvider)
 {
 	auto db = UArticyDatabase::Get(this);
-	db->GetExpressoInstance()->Execute(GetExpression(), GV ? GV : db->GetGVs(), MethodProvider);
+	db->GetExpressoInstance()->Execute(GetExpressionHash(), GV ? GV : db->GetGVs(), MethodProvider);
 }
 
 UArticyScriptCondition* UArticyCondition::GetCondition() const

@@ -7,7 +7,6 @@
 #include "Public/ArticyHelpers.h"
 #include "ObjectDefinitionsImport.h"
 #include "PackagesImport.h"
-
 #include "ArticyImportData.generated.h"
 
 class UArticyImportData;
@@ -146,6 +145,10 @@ struct FAIDScriptMethod
 public:
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
 	FString Name;
+	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
+	FString BlueprintName;
+	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
+	bool bIsOverloadedFunction;
 
 	/** A list of parameters (type + parameter name), to be used in a method declaration. */
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
@@ -153,11 +156,17 @@ public:
 	/** A list of arguments (values), including a leading comma, to be used when calling a method. */
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
 	FString ArgumentList;
+	/** A list of parameters (original types), used for generating the blueprint function display name. */
+	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
+	FString OrigininalParameterTypes;
+
+
+
 
 	const FString& GetCPPReturnType() const;
 	const FString& GetCPPDefaultReturn() const;
 
-	void ImportFromJson(TSharedPtr<FJsonObject> Json);
+	void ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString> &OverloadedMethods);
 
 private:
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
@@ -174,6 +183,18 @@ public:
 	TArray<FAIDScriptMethod> ScriptMethods;
 
 	void ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json);
+};
+
+
+/*Used as a workaround to store an array in a map*/
+USTRUCT()
+struct FArticyIdArray
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	TArray<FArticyId> Values;
 };
 
 //---------------------------------------------------------------------------//
@@ -215,7 +236,7 @@ struct FArticyExpressoFragment
 	GENERATED_BODY()
 
 public:
-	FName OriginalFragment = "";
+	FString OriginalFragment = "";
 	FString ParsedFragment = "";
 	bool bIsInstruction = false;
 
@@ -268,6 +289,9 @@ public:
 	void AddScriptFragment(const FString& Fragment, const bool bIsInstruction);
 	const TSet<FArticyExpressoFragment>& GetScriptFragments() const { return ScriptFragments; }
 
+	void AddChildToParentCache(FArticyId Parent, FArticyId Child);
+	const TMap<FArticyId, FArticyIdArray> GetParentChildrenCache() const { return ParentChildrenCache; }
+
 protected:
 
 	/** Performs a complete reimport and asset regeneration. */
@@ -283,6 +307,8 @@ protected:
 	bool bRegenerateAssets = false;
 
 private:
+
+	friend class FArticyImporterFunctionLibrary;
 
 	UPROPERTY(VisibleAnywhere, Category="ImportData")
 	FADISettings Settings;
@@ -304,5 +330,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category="Imported")
 	TArray<FArticyPackage> ImportedPackages;
+
+	UPROPERTY(VisibleAnywhere, Category="Imported")
+	TMap<FArticyId, FArticyIdArray> ParentChildrenCache;
 };
 

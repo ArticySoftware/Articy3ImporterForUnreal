@@ -21,7 +21,7 @@
 
 FString CodeGenerator::GetSourceFolder()
 {
-	return FPaths::GameSourceDir() / FApp::GetGameName() / TEXT("ArticyGenerated");
+	return FPaths::GameSourceDir() / FApp::GetProjectName() / TEXT("ArticyGenerated");
 }
 
 FString CodeGenerator::GetGeneratedTypesFilename(const UArticyImportData* Data)
@@ -150,7 +150,7 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 	//compiling is done!
 	//check if UArticyBaseGlobalVariables can be found, otherwise something went wrong!
 	auto className = GetGlobalVarsClassname(Data, true);
-	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetGameName(), *className);
+	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *className);
 	if(!ensure(ConstructorHelpersInternal::FindOrLoadClass(fullClassName, UArticyGlobalVariables::StaticClass())))
 		UE_LOG(LogArticyImporter, Error, TEXT("Could not find generated global variables class after compile!"));
 

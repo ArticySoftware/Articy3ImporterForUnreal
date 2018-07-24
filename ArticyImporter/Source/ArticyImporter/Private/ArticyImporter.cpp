@@ -4,111 +4,55 @@
 //
 #include "ArticyImporterPrivatePCH.h"
 
-#include "SlateBasics.h"
-#include "SlateExtras.h"
+#include "ArticyPluginSettings.h"
+#include "ArticyPluginSettingsCustomization.h"
 
-#include "ArticyImporterStyle.h"
-#include "ArticyImporterCommands.h"
-
-#include "LevelEditor.h"
-
-#include "ArticyGlobalVariables.h"
-#include "ArticyBaseTypes.h"
-#include "ArticyHelpers.h"
-#include "ArticyRef.h"
+#include "Developer/Settings/Public/ISettingsModule.h"
+#include "Developer/Settings/Public/ISettingsSection.h"
+#include "Developer/Settings/Public/ISettingsContainer.h"
+#include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
 
 DEFINE_LOG_CATEGORY(LogArticyImporter)
-
-static const FName ArticyImporterTabName("ArticyImporter");
 
 #define LOCTEXT_NAMESPACE "FArticyImporterModule"
 
 void FArticyImporterModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
-	/*
-	FArticyImporterStyle::Initialize();
-	FArticyImporterStyle::ReloadTextures();
-
-	FArticyImporterCommands::Register();
-	
-	PluginCommands = MakeShareable(new FUICommandList);
-
-	PluginCommands->MapAction(
-		FArticyImporterCommands::Get().OpenPluginWindow,
-		FExecuteAction::CreateRaw(this, &FArticyImporterModule::PluginButtonClicked),
-		FCanExecuteAction());
-		
-	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-	
-	{
-		TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender());
-		MenuExtender->AddMenuExtension("WindowLayout", EExtensionHook::After, PluginCommands, FMenuExtensionDelegate::CreateRaw(this, &FArticyImporterModule::AddMenuExtension));
-
-		LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
-	}
-	
-	{
-		TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender);
-		ToolbarExtender->AddToolBarExtension("Settings", EExtensionHook::After, PluginCommands, FToolBarExtensionDelegate::CreateRaw(this, &FArticyImporterModule::AddToolbarExtension));
-		
-		LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
-	}
-	
-	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(ArticyImporterTabName, FOnSpawnTab::CreateRaw(this, &FArticyImporterModule::OnSpawnPluginTab))
-		.SetDisplayName(LOCTEXT("FArticyImporterTabTitle", "ArticyImporter"))
-		.SetMenuType(ETabSpawnerMenuType::Hidden);
-	*/
+	RegisterPluginSettings();
 }
 
 void FArticyImporterModule::ShutdownModule()
 {
-	/*
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
-	FArticyImporterStyle::Shutdown();
-
-	FArticyImporterCommands::Unregister();
-
-	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(ArticyImporterTabName);*/
+	if (UObjectInitialized())
+	{
+		UnregisterPluginSettings();
+	}
 }
-/*
-TSharedRef<SDockTab> FArticyImporterModule::OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs)
+
+void FArticyImporterModule::RegisterPluginSettings()
 {
-	FText WidgetText = FText::Format(
-		LOCTEXT("WindowWidgetText", "Add code to {0} in {1} to override this window's contents"),
-		FText::FromString(TEXT("FArticyImporterModule::OnSpawnPluginTab")),
-		FText::FromString(TEXT("ArticyImporter.cpp"))
+	ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
+
+	if (SettingsModule != nullptr)
+	{
+		ISettingsSectionPtr SettingsSectionPtr = SettingsModule->RegisterSettings("Project", "Plugins", "ArticyImporter",
+			LOCTEXT("Name", "Articy Importer"),
+			LOCTEXT("Description", "Articy Importer Configuration."),
+			GetMutableDefault<UArticyPluginSettings>()
 		);
+	}
 
-	return SNew(SDockTab)
-		.TabRole(ETabRole::NomadTab)
-		[
-			// Put your tab content here!
-			SNew(SBox)
-			.HAlign(HAlign_Center)
-			.VAlign(VAlign_Center)
-			[
-				SNew(STextBlock)
-				.Text(WidgetText)
-			]
-		];
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	PropertyModule.RegisterCustomClassLayout("ArticyPluginSettings", FOnGetDetailCustomizationInstance::CreateStatic(&FArticyPluginSettingsCustomization::MakeInstance));
 }
 
-void FArticyImporterModule::PluginButtonClicked()
+void FArticyImporterModule::UnregisterPluginSettings()
 {
-	FGlobalTabmanager::Get()->InvokeTab(ArticyImporterTabName);
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->UnregisterSettings("Project", "Plugins", "ArticyImporter");
+	}
 }
-
-void FArticyImporterModule::AddMenuExtension(FMenuBuilder& Builder)
-{
-	Builder.AddMenuEntry(FArticyImporterCommands::Get().OpenPluginWindow);
-}
-
-void FArticyImporterModule::AddToolbarExtension(FToolBarBuilder& Builder)
-{
-	Builder.AddToolBarButton(FArticyImporterCommands::Get().OpenPluginWindow);
-}*/
 
 #undef LOCTEXT_NAMESPACE
 	

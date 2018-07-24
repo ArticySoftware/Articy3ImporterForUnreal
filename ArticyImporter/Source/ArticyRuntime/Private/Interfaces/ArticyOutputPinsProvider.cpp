@@ -29,5 +29,5 @@ void IArticyOutputPinsProvider::Explore(UArticyFlowPlayer* Player, TArray<FArtic
 const TArray<UArticyOutputPin*>* IArticyOutputPinsProvider::GetOutputPins() const
 {
 	const static auto name = FName("OutputPins");
-	return GetPropPtr<TArray<UArticyOutputPin*>>(name);
+	return Cast<IArticyReflectable>(this)->GetPropPtr<TArray<UArticyOutputPin*>>(name);
 }

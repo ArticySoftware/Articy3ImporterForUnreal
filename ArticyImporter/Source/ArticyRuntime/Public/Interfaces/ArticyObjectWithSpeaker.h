@@ -5,9 +5,13 @@
 #pragma once
 
 #include "ArticyObjectWith_Base.h"
+#include "ArticyBaseTypes.h"
+#include "ArticyObject.h"
 #include "ArticyObjectWithSpeaker.generated.h"
 
-UINTERFACE(BlueprintType, meta=(CannotImplementInterfaceInBlueprint))
+struct FArticyId;
+
+UINTERFACE(MinimalAPI, BlueprintType, meta=(CannotImplementInterfaceInBlueprint))
 class UArticyObjectWithSpeaker : public UArticyObjectWith_Base { GENERATED_BODY() };
 
 /**

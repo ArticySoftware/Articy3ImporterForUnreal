@@ -42,9 +42,11 @@ public:
 	UTexture* LoadAsTexture() const;
 
 	UFUNCTION(BlueprintCallable, Category="Load Asset")
+	UTexture2D* LoadAsTexture2D() const;
+
+	UFUNCTION(BlueprintCallable, Category="Load Asset")
 	class UFileMediaSource* LoadAsAudio() const;
 
-protected:
 	/** The relative path of the referenced asset. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Meta Data")
 	FString AssetRef;

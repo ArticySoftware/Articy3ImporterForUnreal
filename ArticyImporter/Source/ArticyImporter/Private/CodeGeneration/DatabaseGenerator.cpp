@@ -60,5 +60,5 @@ void DatabaseGenerator::GenerateCode(const UArticyImportData* Data)
 UArticyDatabase* DatabaseGenerator::GenerateAsset(const UArticyImportData* Data)
 {
 	const auto className = CodeGenerator::GetDatabaseClassname(Data, true);
-	return ArticyHelpers::GenerateAsset<UArticyDatabase>(*className, FApp::GetGameName());
+	return ArticyHelpers::GenerateAsset<UArticyDatabase>(*className, FApp::GetProjectName());
 }

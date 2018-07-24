@@ -36,8 +36,17 @@ UArticyObject* UArticyObject::GetParent() const
 	return UArticyDatabase::Get(this)->GetObject<UArticyObject>(Parent);
 }
 
-// ReSharper disable once CppMemberFunctionMayBeStatic
-TArray<UArticyObject*> UArticyObject::GetChildren() const
-{
-	return TArray<UArticyObject*>();
+TArray<TWeakObjectPtr<UArticyObject>> UArticyObject::GetChildren() const
+{	
+	if (CachedChildren.Num() != Children.Num())
+	{
+		auto db = UArticyDatabase::Get(this);
+		CachedChildren.Empty(Children.Num());
+
+		for (auto childId : Children)
+			if (auto child = db->GetObject<UArticyObject>(childId))
+				CachedChildren.Add(child);
+	}
+
+	return CachedChildren;
 }

@@ -18,7 +18,10 @@ void FArticyModelDef::ImportFromJson(const TSharedPtr<FJsonObject> JsonModel)
 {
 	JSON_TRY_FNAME(JsonModel, Type);
 	JSON_TRY_STRING(JsonModel, AssetRef);
-	JSON_TRY_ENUM(JsonModel, Category);
+
+	FString Category;
+	JSON_TRY_STRING(JsonModel, Category);
+	this->Category = GetAssetCategoryFromString(Category);
 
 	{
 		PropertiesJsonString = "";
@@ -62,7 +65,7 @@ UArticyObject* FArticyModelDef::GenerateAsset(const UArticyImportData* Data, con
 	className.RemoveAt(0);
 
 	//generate the asset
-	auto obj = ArticyHelpers::GenerateAsset<UArticyObject>(*className, FApp::GetGameName(), GetNameAndId(), Package);
+	auto obj = ArticyHelpers::GenerateAsset<UArticyObject>(*className, FApp::GetProjectName(), GetNameAndId(), Package);
 	if(ensure(obj))
 	{
 		obj->Initialize();
@@ -103,6 +106,17 @@ TSharedPtr<FJsonObject> FArticyModelDef::GetTemplatesJson() const
 	return CachedTemplateJson;
 }
 
+EArticyAssetCategory FArticyModelDef::GetAssetCategoryFromString(const FString AssetCategory)
+{
+	if (AssetCategory == "Image") return EArticyAssetCategory::Image;
+	else if (AssetCategory == "Video") return EArticyAssetCategory::Video;
+	else if (AssetCategory == "Audio") return EArticyAssetCategory::Audio;
+	else if (AssetCategory == "Document") return EArticyAssetCategory::Document;
+	else if (AssetCategory == "Misc") return EArticyAssetCategory::Misc;
+	else if (AssetCategory == "All") return EArticyAssetCategory::All;
+	else return EArticyAssetCategory::None;
+}
+
 //---------------------------------------------------------------------------//
 
 void FArticyPackageDef::ImportFromJson(const TSharedPtr<FJsonObject> JsonPackage)
@@ -134,7 +148,7 @@ void FArticyPackageDef::GatherScripts(UArticyImportData* Data) const
 		Data->GetObjectDefs().GatherScripts(model, Data);
 }
 
-FArticyPackage FArticyPackageDef::GenerateAssets(const UArticyImportData* Data) const
+FArticyPackage FArticyPackageDef::GenerateAssets(UArticyImportData* Data) const
 {
 	FArticyPackage package;
 	package.Name = Name;
@@ -145,7 +159,10 @@ FArticyPackage FArticyPackageDef::GenerateAssets(const UArticyImportData* Data) 
 	{
 		auto asset = model.GenerateAsset(Data, GetFolder());
 		if(asset)
+		{
 			package.Objects.Add(asset);
+			Data->AddChildToParentCache(model.GetParent(), model.GetId());
+		}
 	}
 
 	return package;
@@ -190,4 +207,21 @@ void FArticyPackageDefs::GenerateAssets(UArticyImportData* Data) const
 
 	for(auto pack : Packages)
 		importedPackages.Add(pack.GenerateAssets(Data));
+
+	//store gathered information about who has which children in generated assets
+	auto parentChildrenCache = Data->GetParentChildrenCache();
+	const auto childrenProp = FName{ TEXT("Children") };
+	for (auto pack : importedPackages)
+	{
+		for (auto obj : pack.Objects)
+		{
+			if (auto articyObj = Cast<UArticyObject>(obj))
+			{
+				if (auto children = parentChildrenCache.Find(articyObj->GetId()))
+				{
+					articyObj->SetProp(childrenProp, children->Values);
+				}
+			}
+		}
+	}
 }

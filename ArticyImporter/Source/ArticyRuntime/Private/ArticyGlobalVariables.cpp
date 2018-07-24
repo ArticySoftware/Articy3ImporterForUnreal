@@ -4,8 +4,10 @@
 //
 #include "ArticyRuntimePrivatePCH.h"
 
+#include "Kismet/KismetStringLibrary.h"
 #include "ArticyRuntime.h"
 #include "ArticyGlobalVariables.h"
+#include "ArticyPluginSettings.h"
 #include "ArticyFlowPlayer.h"
 
 uint32 UArticyVariable::GetStoreShadowLevel() const
@@ -22,10 +24,10 @@ void UArticyBaseVariableSet::BroadcastOnVariableChanged(UArticyVariable* Variabl
 
 UArticyGlobalVariables* UArticyGlobalVariables::GetDefault(const UObject* WorldContext)
 {
-	static TWeakObjectPtr<UArticyGlobalVariables> Clone = nullptr;
-
 	if(!Clone.IsValid())
 	{
+		bool keepBetweenWorlds = UArticyPluginSettings::Get()->bKeepGlobalVariablesBetweenWorlds;
+
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 		TArray<FAssetData> AssetData;
 		AssetRegistryModule.Get().GetAssetsByClass(UArticyGlobalVariables::StaticClass()->GetFName(), AssetData, true);
@@ -34,7 +36,7 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetDefault(const UObject* WorldC
 		if(ensureMsgf(AssetData.Num() != 0, TEXT("ArticyGlobalVariables asset not found!")))
 		{
 			if(AssetData.Num() > 1)
-			UE_LOG(LogTemp, Warning, TEXT("More than one ArticyGlobalVariables asset was found, this is not supported! The first one will be selected."));
+				UE_LOG(LogTemp, Warning, TEXT("More than one ArticyGlobalVariables asset was found, this is not supported! The first one will be selected."));
 
 			asset = Cast<UArticyGlobalVariables>(AssetData[0].GetAsset());
 		}
@@ -47,11 +49,32 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetDefault(const UObject* WorldC
 		auto world = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 		ensureMsgf(world, TEXT("Getting world for GV cloning failed!"));
 
-		Clone = DuplicateObject(asset, world); //TODO need to add to root object?
+		if(keepBetweenWorlds)
+		{
+			Clone = DuplicateObject(asset, world->GetGameInstance());
+#if !WITH_EDITOR
+			Clone->AddToRoot();
+#endif
+		}
+		else
+		{
+			Clone = DuplicateObject(asset, world);
+		}
+
 		ensureMsgf(Clone.IsValid(), TEXT("Cloning GV asset failed!"));
 	}
 
 	return Clone.Get();
+}
+
+void UArticyGlobalVariables::UnloadGlobalVariables()
+{
+	if (Clone.IsValid())
+	{
+		Clone->RemoveFromRoot();
+		Clone->ConditionalBeginDestroy();
+		Clone = NULL;
+	}
 }
 
 UArticyBaseVariableSet* UArticyGlobalVariables::GetNamespace(const FName Namespace)
@@ -95,3 +118,5 @@ void UArticyGlobalVariables::SetStringVariable(const FName Namespace, const FNam
 {
 	SetVariableValue<UArticyString>(Namespace, Variable, Value);
 }
+
+TWeakObjectPtr<UArticyGlobalVariables> UArticyGlobalVariables::Clone;

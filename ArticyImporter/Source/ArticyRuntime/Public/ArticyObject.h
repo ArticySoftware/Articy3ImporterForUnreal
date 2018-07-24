@@ -20,17 +20,22 @@ class ARTICYRUNTIME_API UArticyObject : public UArticyPrimitive
 
 public:
 	FName GetTechnicalName() const;
-
 	UArticyObject* GetParent() const;
-	TArray<UArticyObject*> GetChildren() const;
+	TArray<TWeakObjectPtr<UArticyObject>> GetChildren() const;
 
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FArticyId Parent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<FArticyId> Children;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FString TechnicalName;
 
 	/** Used internally by ArticyImporter. */
 	void InitFromJson(TSharedPtr<FJsonValue> Json) override;
+
+private:
+
+	mutable TArray<TWeakObjectPtr<UArticyObject>> CachedChildren;
 };

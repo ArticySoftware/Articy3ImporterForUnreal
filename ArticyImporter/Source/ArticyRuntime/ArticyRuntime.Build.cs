@@ -8,7 +8,9 @@ public class ArticyRuntime : ModuleRules
 {
 	public ArticyRuntime(ReadOnlyTargetRules Target) : base(Target)
     {
-		
+
+		//OptimizeCode = CodeOptimization.Never;
+
 		PublicIncludePaths.AddRange(
 			new string[] {
 				"ArticyRuntime/Public",
@@ -46,7 +48,7 @@ public class ArticyRuntime : ModuleRules
 				"Slate",
 				"SlateCore",
 				// ... add private dependencies that you statically link with here ...	
-				"Json"
+				"Json",
 			}
 			);
 		

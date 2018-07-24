@@ -20,12 +20,11 @@ class ARTICYRUNTIME_API UArticyScriptFragment : public UArticyPrimitive
 
 protected:
 
-	//for some reason, the editor crashes on save if this property is an FName
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FString Expression = "";
 
-	//returns a cached FName version of the expression
-	FName GetExpression() const;
+	//returns a cached hash of the expression
+	int GetExpressionHash() const;
 
 	template<typename Type, typename PropType>
 		friend struct ArticyObjectTypeInfo;
@@ -34,7 +33,7 @@ protected:
 
 private:
 
-	mutable FName CachedExpression = "";
+	mutable int CachedExpressionHash;
 };
 
 /** -------------------------------------------------------------------------------- */
