@@ -7,7 +7,7 @@
 #include "ArticyReflectable.h"
 #include "ArticyObjectWith_Base.generated.h"
 
-UINTERFACE(meta=(CannotImplementInterfaceInBlueprint))
+UINTERFACE(MinimalAPI, meta=(CannotImplementInterfaceInBlueprint))
 class UArticyObjectWith_Base : public UArticyReflectable { GENERATED_BODY() };
 
 /**

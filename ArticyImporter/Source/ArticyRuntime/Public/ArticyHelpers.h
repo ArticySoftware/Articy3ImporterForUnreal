@@ -79,6 +79,13 @@ inline FString Uint64ToHex(uint64 id)
 	return UTF8_TO_TCHAR(stream.str().c_str());
 }
 
+inline FString Uint64ToObjectString(uint64 id)
+{
+	std::ostringstream stream;
+	stream << id << "_0";
+	return UTF8_TO_TCHAR(stream.str().c_str());
+}
+
 inline FVector2D ParseFVector2DFromJson(const TSharedPtr<FJsonValue> Json)
 {
 	if(!Json.IsValid() || !ensure(Json->Type == EJson::Object))

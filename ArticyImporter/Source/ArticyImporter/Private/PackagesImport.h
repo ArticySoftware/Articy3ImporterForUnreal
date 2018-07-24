@@ -26,6 +26,8 @@ public:
 	FName GetType() const { return Type; }
 	const FString& GetTechnicalName() const { return TechnicalName; }
 	const FString& GetNameAndId() const { return NameAndId; }
+	const FArticyId& GetId() const { return Id; }
+	const FArticyId& GetParent() const { return Parent; }
 
 	const FString& GetAssetRef() const { return AssetRef; }
 	const EArticyAssetCategory& GetAssetCat() const { return Category; }
@@ -33,6 +35,8 @@ public:
 	TSharedPtr<FJsonObject> GetTemplatesJson() const;
 
 private:
+
+	EArticyAssetCategory GetAssetCategoryFromString(const FString AssetCategory);
 
 	/** The original type of the model as read in from json. */
 	UPROPERTY(VisibleAnywhere, Category = "Model")
@@ -78,7 +82,7 @@ public:
 
 	void ImportFromJson(const TSharedPtr<FJsonObject> JsonPackage);
 	void GatherScripts(UArticyImportData* Data) const;
-	FArticyPackage GenerateAssets(const UArticyImportData* Data) const;
+	FArticyPackage GenerateAssets(UArticyImportData* Data) const;
 
 	FString GetFolder() const;
 

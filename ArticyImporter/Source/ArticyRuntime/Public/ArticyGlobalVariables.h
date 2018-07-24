@@ -8,32 +8,35 @@
 #include "ArticyReflectable.h"
 #include "AssetRegistryModule.h"
 #include "Private/ShadowStateManager.h"
+#include "ArticyExpressoScripts.h"
 
 #include "ArticyGlobalVariables.generated.h"
 
 //implicit convertion operator (= getter)
 //ReSharper disable once CppNonExplicitConversionOperator
-#define ARTICY_VARIABLE_ACCESS(Type)		\
-	Type& operator=(const Type &NewValue)	\
+#define ARTICY_VARIABLE_ACCESS(T)			\
+	T& operator=(const T &NewValue)			\
 	{										\
 		/*set and return the new value*/	\
-		return Setter<std::remove_reference<decltype(*this)>::type>(NewValue);		\
+		return Setter<TRemoveReference<decltype(*this)>::Type>(NewValue);		\
 	}										\
-	const Type& Get() const					\
+	const T& Get() const					\
 	{										\
 		/*just return the value*/			\
 		return Value;						\
 	}										\
-	operator const Type &() const			\
+	operator const T &() const				\
 	{										\
 		/*just return the value*/			\
 		return Get();						\
-	}										
+	}
+	
 
 class UArticyFlowPlayer;
 class UArticyGlobalVariables;
 class UArticyVariable;
 class UArticyBaseVariableSet;
+struct ExpressoType;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGVChanged, UArticyVariable*, Variable);
 
@@ -44,7 +47,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGVChanged, UArticyVariable*, Vari
 template<typename Type>
 struct ArticyShadowState
 {
-	ArticyShadowState(const uint32& Level, const Type& Value) : Level(Level), Value(Value) { }
+	ArticyShadowState(const uint32& level, const Type& value) : Level(level), Value(value) { }
 
 	uint32 Level = 0;
 	Type Value;
@@ -73,7 +76,7 @@ protected:
 	virtual ~UArticyVariable() {}
 
 	//void Init(UArticyBaseGlobalVariables* const NewStore) { this->Store = NewStore; }
-	
+
 	template<typename Type, typename ValueType>
 	ValueType& Setter(const ValueType &NewValue)
 	{
@@ -150,6 +153,14 @@ public:
 	int& operator-=(const int &Val) { return *this = Value - Val; }
 	int& operator*=(const int &Val) { return *this = Value * Val; }
 	int& operator/=(const int &Val) { return *this = Value / Val; }
+	const int& operator>=(const int &Val) { return *this = Value >= Val; }
+	const int& operator<=(const int &Val) { return *this = Value <= Val; }
+	const int& operator==(const int &Val) { return *this = Value == Val; }
+
+	int& operator=(const ExpressoType &NewValue)
+	{
+		return Value = NewValue.GetInt();
+	}
 
 	int operator++(int)
 	{
@@ -200,6 +211,11 @@ public:
 	//getter and setter
 	ARTICY_VARIABLE_ACCESS(bool)
 
+	bool& operator=(const ExpressoType &NewValue)
+	{
+		return Value = NewValue.GetBool();
+	}
+
 protected:
 	/** The current value of this variable (i.e. the value of a shadow state, if any is active). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -236,6 +252,14 @@ public:
 	//other operators
 	FString& operator+=(const FString &Val) { return Setter<UArticyString>(Value + Val); }
 
+	FString& operator=(const ExpressoType &NewValue)
+	{
+		if (NewValue.Type == ExpressoType::Int) // used to store a string representation of an articy object
+			return Value = ArticyHelpers::Uint64ToObjectString(NewValue.GetInt());
+		else
+			return Value = NewValue.GetString();
+	}
+
 protected:
 	/** The current value of this variable (i.e. the value of a shadow state, if any is active). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -267,7 +291,16 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Callback")
 	FOnGVChanged OnVariableChanged;
 
+	UFUNCTION(BlueprintCallable, Category = "Variables")
+	const TArray<UArticyVariable*> GetVariables() const { return Variables; }
+
+protected:
+
+	UPROPERTY()
+	TArray<UArticyVariable*> Variables;
+
 private:
+
 	UFUNCTION()
 	void BroadcastOnVariableChanged(UArticyVariable* Variable);
 
@@ -291,8 +324,15 @@ public:
 	 */
 	static UArticyGlobalVariables* GetDefault(const UObject* WorldContext);
 
+	/* Unloads the global variables, which causes that all changes get removed. */
+	UFUNCTION(BlueprintCallable, Category = "Packages")
+	void UnloadGlobalVariables();
+
 	UFUNCTION(BlueprintCallable, Category="Getter")
 	UArticyBaseVariableSet* GetNamespace(const FName Namespace);
+
+	UFUNCTION(BlueprintCallable, Category = "Getter")
+	const TArray<UArticyBaseVariableSet*> GetVariableSets() const { return VariableSets; }
 	
 	UFUNCTION(BlueprintCallable, Category="Getter")
 	const bool& GetBoolVariable(const FName Namespace, const FName Variable, bool& bSucceeded);
@@ -308,7 +348,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Setter")
 	void SetStringVariable(const FName Namespace, const FName Variable, const FString Value);
 
+protected:
+
+	UPROPERTY()
+	TArray<UArticyBaseVariableSet*> VariableSets;
+
 private:
+
+	static TWeakObjectPtr<UArticyGlobalVariables> Clone;
 
 	template <typename ArticyVariableType, typename VariablePayloadType>
 	void SetVariableValue(const FName Namespace, const FName Variable, const VariablePayloadType Value);

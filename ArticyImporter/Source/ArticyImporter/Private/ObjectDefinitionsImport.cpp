@@ -507,7 +507,7 @@ UClass* FArticyTemplateFeatureDef::GetUClass(const UArticyImportData* Data) cons
 	//remove the 'U' at the beginning of the class name, since FindOrLoadClass doesn't like that one....
 	className.RemoveAt(0);
 
-	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetGameName(), *className);
+	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *className);
 	return ConstructorHelpersInternal::FindOrLoadClass(fullClassName, UObject::StaticClass());
 }
 
@@ -619,6 +619,7 @@ const FName& FArticyObjectDefinitions::GetProviderInterface(const FArticyPropert
 		ProviderInterfaces.Add(OBJECT_WITH_X("StageDirections"));
 		ProviderInterfaces.Add(OBJECT_WITH_X("Target"));
 		ProviderInterfaces.Add(OBJECT_WITH_X("Text"));
+		ProviderInterfaces.Add(OBJECT_WITH_X("Transform"));
 		ProviderInterfaces.Add(OBJECT_WITH_X("Vertices"));
 		ProviderInterfaces.Add(OBJECT_WITH_X("ZIndex"));
 	}

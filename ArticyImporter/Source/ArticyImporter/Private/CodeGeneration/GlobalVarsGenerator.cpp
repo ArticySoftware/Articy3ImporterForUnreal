@@ -43,7 +43,6 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 					//create subobject
 					for(const auto var : ns.Variables)
 						header->Line(FString::Printf(TEXT("%s = CreateDefaultSubobject<%s>(\"%s\");"), *var.Variable, *var.GetCPPTypeString(), *var.Variable));
-
 				});
 
 				header->Line();
@@ -54,7 +53,10 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 					header->Comment("initialize the variables");
 
 					for(const auto var : ns.Variables)
+					{
 						header->Line(FString::Printf(TEXT("%s->Init<%s>(this, Store, TEXT(\"%s.%s\"), %s);"), *var.Variable, *var.GetCPPTypeString(), *ns.Namespace, *var.Variable, *var.GetCPPValueString()));
+						header->Line(FString::Printf(TEXT("this->Variables.Add(%s);"), *var.Variable));
+					}					
 				});
 			});
 		}
@@ -81,9 +83,7 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 			{
 				header->Comment("create the namespaces");
 				for(const auto ns : Data->GetGlobalVars().Namespaces)
-				{
 					header->Line(FString::Printf(TEXT("%s = CreateDefaultSubobject<%s>(\"%s\");"), *ns.Namespace, *ns.CppTypename, *ns.Namespace));
-				}
 
 				header->Line();
 				header->Line("Init();");
@@ -98,6 +98,7 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 				for(const auto ns : Data->GetGlobalVars().Namespaces)
 				{
 					header->Line(FString::Printf(TEXT("%s->Init(this);"), *ns.Namespace));
+					header->Line(FString::Printf(TEXT("this->VariableSets.Add(%s);"), *ns.Namespace));
 				}
 			});
 
@@ -116,5 +117,5 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 void GlobalVarsGenerator::GenerateAsset(const UArticyImportData* Data)
 {
 	const auto className = CodeGenerator::GetGlobalVarsClassname(Data, true);
-	ArticyHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetGameName());
+	ArticyHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName());
 }

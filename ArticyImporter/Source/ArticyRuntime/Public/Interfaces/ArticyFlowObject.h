@@ -8,14 +8,14 @@
 #include "ArticyReflectable.h"
 #include "ArticyFlowObject.generated.h"
 
-UINTERFACE()
+UINTERFACE(MinimalAPI, BlueprintType)
 class UArticyFlowObject : public UArticyReflectable { GENERATED_BODY() };
 
 /**
  * All objects that are part of a flow (i.e. can be traversed by the Flow Player) need
  * to implement this interface.
  */
-class IArticyFlowObject : public IArticyReflectable
+class IArticyFlowObject
 {
 	GENERATED_BODY()
 

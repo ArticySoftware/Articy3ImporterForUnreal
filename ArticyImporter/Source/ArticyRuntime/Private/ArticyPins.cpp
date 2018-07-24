@@ -27,7 +27,7 @@ void UArticyFlowPin::InitFromJson(TSharedPtr<FJsonValue> Json)
 		for (int i = 0; i < items->Num(); ++i)
 		{
 			auto item = (*items)[i];
-			auto conn = NewObject<UArticyOutgoingConnection>(this, "Connection_" + i);
+			auto conn = NewObject<UArticyOutgoingConnection>(this, *FString::Printf(TEXT("Connection_%d'"), i));
 			conn->InitFromJson(item);
 			Connections.Add(conn);
 		}
@@ -45,7 +45,7 @@ UArticyObject* UArticyFlowPin::GetOwner()
 bool UArticyInputPin::Evaluate(class UArticyGlobalVariables* GV, class UObject* MethodProvider)
 {
 	auto db = UArticyDatabase::Get(this);
-	return db->GetExpressoInstance()->Evaluate(Text, GV ? GV : db->GetGVs(), MethodProvider);
+	return db->GetExpressoInstance()->Evaluate(GetTypeHash(Text), GV ? GV : db->GetGVs(), MethodProvider);
 }
 
 void UArticyInputPin::Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>& OutBranches, const uint32& Depth)
@@ -92,7 +92,7 @@ void UArticyInputPin::Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>& 
 void UArticyOutputPin::Execute(class UArticyGlobalVariables* GV, class UObject* MethodProvider)
 {
 	auto db = UArticyDatabase::Get(this);
-	db->GetExpressoInstance()->Execute(Text, GV ? GV : db->GetGVs(), MethodProvider);
+	db->GetExpressoInstance()->Execute(GetTypeHash(Text), GV ? GV : db->GetGVs(), MethodProvider);
 }
 
 void UArticyOutputPin::Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>& OutBranches, const uint32& Depth)

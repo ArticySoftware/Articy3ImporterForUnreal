@@ -23,7 +23,5 @@ public:
 
 	void Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>& OutBranches, const uint32& Depth) override;
 
-protected:
-
 	const TArray<UArticyOutputPin*>* GetOutputPins() const;
 };

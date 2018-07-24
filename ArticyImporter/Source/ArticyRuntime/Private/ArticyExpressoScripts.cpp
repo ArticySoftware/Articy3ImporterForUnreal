@@ -68,6 +68,24 @@ ExpressoType::ExpressoType(const UArticyPrimitive* Object)
 	StringValue = FString::Printf(TEXT("%d_%d"), Object->GetId(), Object->GetCloneId());
 }
 
+ExpressoType::ExpressoType(const UArticyString& Value)
+{
+	Type = String;
+	StringValue = Value.Get();
+}
+
+ExpressoType::ExpressoType(const UArticyInt & Value)
+{
+	Type = Int;
+	IntValue = Value.Get();
+}
+
+ExpressoType::ExpressoType(const UArticyBool & Value)
+{
+	Type = Bool;
+	BoolValue = Value.Get();
+}
+
 ExpressoType::operator bool() const
 {
 	ensure(Type == Bool);
@@ -473,21 +491,21 @@ UArticyBaseObject* ExpressoType::TryFeatureReroute(UArticyBaseObject* Object, FS
 
 //---------------------------------------------------------------------------//
 
-bool UArticyExpressoScripts::Evaluate(const FName& ConditionFragment, UArticyGlobalVariables* GV, UObject* MethodProvider) const
+bool UArticyExpressoScripts::Evaluate(const int& ConditionFragmentHash, UArticyGlobalVariables* GV, UObject* MethodProvider) const
 {
 	SetGV(GV);
 	UserMethodsProvider = MethodProvider;
 
-	auto condition = Conditions.Find(ConditionFragment);
+	auto condition = Conditions.Find(ConditionFragmentHash);
 	return ensure(condition) && (*condition)();
 }
 
-bool UArticyExpressoScripts::Execute(const FName& InstructionFragment, UArticyGlobalVariables* GV, UObject* MethodProvider) const
+bool UArticyExpressoScripts::Execute(const int& InstructionFragmentHash, UArticyGlobalVariables* GV, UObject* MethodProvider) const
 {
 	SetGV(GV);
 	UserMethodsProvider = MethodProvider;
 
-	auto instruction = Instructions.Find(InstructionFragment);
+	auto instruction = Instructions.Find(InstructionFragmentHash);
 	if(ensure(instruction))
 	{
 		(*instruction)();
@@ -501,6 +519,8 @@ UArticyObject* UArticyExpressoScripts::getObj(const FString& NameOrId, const uin
 {
 	if(NameOrId.StartsWith(TEXT("0x")))
 		return OwningDatabase->GetObject<UArticyObject>(FArticyId{ ArticyHelpers::HexToUint64(NameOrId) }, CloneId);
+	if(NameOrId.IsNumeric())
+		return OwningDatabase->GetObject<UArticyObject>(FArticyId{ FCString::Strtoui64(*NameOrId, NULL, 10) }, CloneId);
 
 	return OwningDatabase->GetObjectByName(*NameOrId, CloneId);
 }
@@ -543,4 +563,24 @@ ExpressoType UArticyExpressoScripts::getProp(UArticyBaseObject* Object, const FN
 ExpressoType UArticyExpressoScripts::getProp(const ExpressoType& Id_CloneId, const FName& Property) const
 {
 	return getProp(getObjInternal(Id_CloneId), Property);
+}
+
+int UArticyExpressoScripts::random(int Min, int Max)
+{
+	return FMath::RandRange(Min, Max);
+}
+
+int UArticyExpressoScripts::random(int Max)
+{
+	return FMath::RandRange(0, Max);
+}
+
+float UArticyExpressoScripts::random(float Min, float Max)
+{
+	return FMath::FRandRange(Min, Max);
+}
+
+float UArticyExpressoScripts::random(float Max)
+{
+	return FMath::FRandRange(0, Max);
 }

@@ -9,6 +9,7 @@
 #include "Private/ShadowStateManager.h"
 #include "AssetRegistryModule.h"
 #include "ArticyObject.h"
+#include "Serialization/Archive.h"
 
 #include "ArticyDatabase.generated.h"
 
@@ -23,7 +24,7 @@ struct FArticyObjectShadow
 	GENERATED_BODY()
 	
 	FArticyObjectShadow() {}
-	FArticyObjectShadow(uint32 ShadowLevel, UArticyPrimitive* Object) : ShadowLevel(ShadowLevel), Object(Object) {}
+	FArticyObjectShadow(uint32 shadowLevel, UArticyPrimitive* object) : ShadowLevel(shadowLevel), Object(object) {}
 
 public:
 	UPROPERTY()
@@ -47,7 +48,7 @@ public:
 	/**
 	 * Returns the requested shadow.
 	 */
-	UArticyPrimitive* Get(const IShadowStateManager* ShadowManager) const;
+	UArticyPrimitive* Get(const IShadowStateManager* ShadowManager, bool ForceUnshadowed = false) const;
 
 private:
 
@@ -78,7 +79,7 @@ public:
 	 * Get the clone of this object with a certain CloneId.
 	 * Returns nullptr if the clone does not exist.
 	 */
-	UArticyPrimitive* Get(const IShadowStateManager* ShadowManager, int32 CloneId = 0) const;
+	UArticyPrimitive* Get(const IShadowStateManager* ShadowManager, int32 CloneId = 0, bool bForceUnshadowed = false) const;
 	/**
 	 * Clone the original object and assign it the id CloneId.
 	 * If bFailIfExists is true, nullptr is returned if the clone already exists.
@@ -129,6 +130,18 @@ public:
 	/** Get the current GVs instance. */
 	virtual UArticyGlobalVariables* GetGVs() const;
 
+	/** Unloads the database, which causes that all changes get removed.*/
+	UFUNCTION(BlueprintCallable)
+	void UnloadDatabase();
+
+	/** 
+	 * Returns true if the database is in shadow state.
+	 * Can be used in script methods to determine if the function is called during
+	 * a flow player branch calculation.
+	 */
+	UFUNCTION(BlueprintPure, meta=(DisplayName="Is in shadow state?"), Category = "Script Methods")
+	bool IsInShadowState() const { return GetShadowLevel()  > 0; }
+
 	UWorld* GetWorld() const override;
 
 	//---------------------------------------------------------------------------//
@@ -163,6 +176,8 @@ public:
 	template<typename T>
 	T* GetObject(FArticyId Id, int32 CloneId = 0) const { return Cast<T>(GetObject(Id, CloneId)); }
 
+	UArticyPrimitive* GetObjectUnshadowed(FArticyId Id, int32 CloneId = 0) const;
+
 	/**
 	 * Get an object by its TechnicalName.
 	 * If a CloneId other than 0 is provided, a copy of the object with this index must exist,
@@ -190,6 +205,28 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Objects")
 	TArray<UArticyObject*> GetObjects(FName TechnicalName, int32 CloneId = 0) const;
+
+	/**
+	* Get all objects with a given Type.
+	* If a CloneId other than 0 is provided, copies of the objects with this index must exist,
+	* otherwise they will be not added to the result.
+	*/
+	template<typename T>
+	TArray<T*> GetObjectsByType(int32 CloneId = 0) const;
+
+	/**
+	* Get all objects with a given Type.
+	* If a CloneId other than 0 is provided, copies of the objects with this index must exist,
+	* otherwise they will be not added to the result.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Objects")
+	TArray<UArticyObject*> GetObjectsByType(TSubclassOf<class UArticyObject> Type, int32 CloneId = 0) const;
+
+	/**
+	* Get all objects.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Objects")
+	TArray<UArticyPrimitive*> GetAllObjects() const;
 
 	/**
 	 * Get all objects with a given TechnicalName.
@@ -267,12 +304,17 @@ protected:
 
 private:
 
+	static TMap<TWeakObjectPtr<UWorld>, TWeakObjectPtr<UArticyDatabase>> Clones;
+	static TWeakObjectPtr<UArticyDatabase> PersistentClone;
+
 	UPROPERTY()
 	mutable UArticyExpressoScripts* CachedExpressoScripts;
 
 	/** An instance of this class will be used to execute script fragments. */
 	UPROPERTY(Config, VisibleAnywhere)
 	TSubclassOf<UArticyExpressoScripts> ExpressoScriptsClass;
+
+	UArticyPrimitive* GetObjectInternal(FArticyId Id, int32 CloneId = 0, bool bForceUnshadowed = false) const;
 
 	/** Get the original asset (on disk) of the database. */
 	static const UArticyDatabase* GetOriginal(bool bLoadDefaultPackages = false);
@@ -287,6 +329,17 @@ TArray<T*> UArticyDatabase::GetObjects(FName TechnicalName, int32 CloneId) const
 	GetObjects(Array, TechnicalName, CloneId);
 
 	return Array;
+}
+
+template<typename T>
+TArray<T*> UArticyDatabase::GetObjectsByType(int32 CloneId) const
+{
+	TArray<T*> arr;
+	for (auto obj : ArticyObjects)
+		if (obj->GetCloneId() == CloneId && Cast<T>(obj))
+			arr.Add(obj);
+
+	return arr;
 }
 
 template<typename T>

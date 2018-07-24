@@ -27,7 +27,7 @@ enum class EArticyPausableType : uint8
 ENUM_CLASS_FLAGS(EArticyPausableType);
 
 USTRUCT(BlueprintType)
-struct FArticyBranch
+struct ARTICYRUNTIME_API FArticyBranch
 {
 	GENERATED_BODY()
 
@@ -83,16 +83,27 @@ public:
 	//---------------------------------------------------------------------------//
 
 	/** Set the StartOn node to a certain node. */
-	UFUNCTION(BlueprintCallable, Category = "Setup")
+	UFUNCTION(BlueprintCallable, meta=(DisplayName="Set Start Node (ArticyRef)"), Category = "Setup")
 	void SetStartNode(FArticyRef NewId);
+
+	/** Set the StartOn node to a certain node. */
+	UFUNCTION(BlueprintCallable, meta=(DisplayName="Set Start Node (FlowObject)"), Category = "Setup")
+	void SetStartNodeWithFlowObject(TScriptInterface<IArticyFlowObject> Node);
 
 	/** Set the Cursor (current node) to this Node and updates the available branches. */
 	UFUNCTION(BlueprintCallable, Category = "Flow")
 	void SetCursorTo(TScriptInterface<IArticyFlowObject> Node);
 
+	/** Get the Cursor (current node). */
+	UFUNCTION(BlueprintCallable, Category = "Flow")
+	const TScriptInterface<IArticyFlowObject> GetCursor() const { return Cursor; }
+
 	/** Play a branch, identified by its index in the AvailableBranches array. */
 	UFUNCTION(BlueprintCallable, Category="Flow")
 	void Play(int Index = 0);
+
+	UFUNCTION(BlueprintCallable, Category = "Flow")
+	void FinishCurrentPausedObject(int PinIndex = 0);
 
 	/**
 	 * Traverse this branch to the end, executing all scripts and updating the Cursor
@@ -138,12 +149,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Setup")
 	bool IgnoresInvalidBranches() const { return bIgnoreInvalidBranches; }
 
-protected:
-
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPushState);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPopState);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerPaused, TScriptInterface<IArticyFlowObject>, PausedOn);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBranchesUpdated, const TArray<FArticyBranch>&, AvailableBranches);
+
 
 	/** This event is broadcast whenever a new ShadowedOperation starts. */
 	UPROPERTY(BlueprintAssignable, Category = "Flow")
@@ -165,6 +175,8 @@ protected:
 	 */
 	UPROPERTY(BlueprintAssignable, Category = "Flow")
 	FOnBranchesUpdated OnBranchesUpdated;
+
+protected:
 
 	//========================================//
 
@@ -242,6 +254,9 @@ private:
 
 	/** Returns true if Node is one of the PauseOn types. */
 	bool ShouldPauseOn(IArticyFlowObject* Node) const;
+
+	/** Returns a ptr to the unshadowed object of this node */
+	IArticyFlowObject* GetUnshadowedNode(IArticyFlowObject* Node);
 
 	UArticyDatabase* GetDB() const;
 	UArticyExpressoScripts* GetExpresso() const;

@@ -25,7 +25,7 @@ class ARTICYRUNTIME_API UArticyFlowPin : public UArticyPrimitive, public IArticy
 public:
 	/** The script fragment. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FName Text = "";
+	FString Text = "";
 
 	/** The Id of the object owning this pin. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

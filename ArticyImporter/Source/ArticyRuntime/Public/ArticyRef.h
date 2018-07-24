@@ -9,8 +9,8 @@
 #include "ArticyRef.generated.h"
 
 /**
- * 
- */
+*
+*/
 USTRUCT(BlueprintType)
 struct ARTICYRUNTIME_API FArticyRef
 {
@@ -24,7 +24,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Setup")
 	bool bReferenceBaseObject = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(EditCondition="!bReferenceBaseObject"), Category="Setup")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition="!bReferenceBaseObject"), Category="Setup")
 	mutable int32 CloneId;
 
 	void SetId(FArticyId NewId);

@@ -6,27 +6,42 @@
 
 #include "ExpressoScriptsGenerator.h"
 #include "CodeFileGenerator.h"
+#include "ArticyPluginSettings.h"
 
-void GenerateMethodInterface(CodeFileGenerator* header, const UArticyImportData* Data)
+void GenerateMethodInterface(CodeFileGenerator* header, const UArticyImportData* Data, bool bCreateBlueprintableUserMethods)
 {
 	header->UInterface(CodeGenerator::GetMethodsProviderClassname(Data, true), "", [&]
 	{
-		header->Line("protected:", false, true, -1);
+		header->Line("public:", false, true, -1);
 		for(const auto method : Data->GetUserMethods())
 		{
-			header->Line();
-			header->Method(method.GetCPPReturnType(), method.Name, method.ParameterList, nullptr, "", true, "BlueprintNativeEvent");
-
 			auto returnOrEmpty = method.GetCPPDefaultReturn();
 			if(!returnOrEmpty.IsEmpty())
 				returnOrEmpty = "return " + returnOrEmpty + ";";
-			header->Method("virtual " + method.GetCPPReturnType(), method.Name + "_Implementation", method.ParameterList, nullptr, "", false, "",
-						   FString::Printf(TEXT("{ %s }"), *returnOrEmpty));
+
+			header->Line();
+
+			if(bCreateBlueprintableUserMethods)
+			{
+				FString displayName = method.Name;
+				if(method.bIsOverloadedFunction && method.OrigininalParameterTypes.Len() > 0)
+					displayName = FString::Printf(TEXT("%s (%s)"), *method.Name, *method.OrigininalParameterTypes);
+
+				header->Method(method.GetCPPReturnType(), method.BlueprintName, method.ParameterList, nullptr, "", true, 
+					FString::Printf(TEXT("BlueprintCallable, BlueprintNativeEvent, meta=(DisplayName=\"%s\")"), *displayName));
+				header->Method("virtual " + method.GetCPPReturnType(), method.BlueprintName + "_Implementation", method.ParameterList, nullptr, "", false, "",
+					FString::Printf(TEXT("{ %s }"), *returnOrEmpty));
+			}
+			else
+			{
+				header->Method("virtual " + method.GetCPPReturnType(), method.Name, method.ParameterList, nullptr, "", false, "",
+					FString::Printf(TEXT("{ %s }"), *returnOrEmpty));
+			}
 		}
 	});
 }
 
-void GenerateUserMethods(CodeFileGenerator* header, const UArticyImportData* Data)
+void GenerateUserMethods(CodeFileGenerator* header, const UArticyImportData* Data, bool bCreateBlueprintableUserMethods)
 {
 	header->Line("private:", false, true, -1);
 	header->Line();
@@ -40,7 +55,19 @@ void GenerateUserMethods(CodeFileGenerator* header, const UArticyImportData* Dat
 			header->Line(FString::Printf(TEXT("if(!UserMethodsProvider) return %s;"), *method.GetCPPDefaultReturn()));
 
 			const FString returnOrEmpty = bIsVoid ? TEXT("") : TEXT("return ");
-			header->Line(FString::Printf(TEXT("%s%s::Execute_%s(UserMethodsProvider%s);"), *returnOrEmpty, *iClass, *method.Name, *method.ArgumentList));
+
+			if(bCreateBlueprintableUserMethods)
+			{
+				FString args = "";
+				if(!method.ArgumentList.IsEmpty())
+				{
+					args = FString::Printf(TEXT(", %s"), *method.ArgumentList);
+				}
+				header->Line(FString::Printf(TEXT("%s%s::Execute_%s(UserMethodsProvider%s);"), *returnOrEmpty, *iClass, *method.BlueprintName, *args));
+			}
+			else
+				header->Line(FString::Printf(TEXT("%sCast<%s>(UserMethodsProvider)->%s(%s);"), *returnOrEmpty, *iClass, *method.Name, *method.ArgumentList));
+
 		}, "", false, "", "const");
 	}
 }
@@ -91,14 +118,15 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 		const auto fragments = Data->GetScriptFragments();
 		for(auto script : fragments)
 		{
-			if(script.OriginalFragment.IsNone())
+			if(script.OriginalFragment.IsEmpty())
 				continue;
 
-			auto cleanScript = script.OriginalFragment.ToString().ReplaceCharWithEscapedChar();
+
+			int cleanScriptHash = GetTypeHash(script.OriginalFragment);
 
 			if(script.bIsInstruction)
 			{
-				header->Line(FString::Printf(TEXT("Instructions.Add(TEXT(\"%s\"), [&]"), *cleanScript));
+				header->Line(FString::Printf(TEXT("Instructions.Add(%d, [&]"), cleanScriptHash));
 				header->Line("{");
 				{
 					header->Line(script.ParsedFragment, false, true, 1);
@@ -107,7 +135,7 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 			}
 			else
 			{
-				header->Line(FString::Printf(TEXT("Conditions.Add(TEXT(\"%s\"), [&]"), *cleanScript));
+				header->Line(FString::Printf(TEXT("Conditions.Add(%d, [&]"), cleanScriptHash));
 				header->Line("{");
 				{
 					//the fragment might be emtpy or contain only a comment, so we need to wrap it in
@@ -127,6 +155,10 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 
 void ExpressoScriptsGenerator::GenerateCode(const UArticyImportData* Data)
 {
+	// Determine if we want to make the user methods blueprintable.
+	// (if true, we use a different naming to allow something like overloaded functions)
+	bool bCreateBlueprintableUserMethods = UArticyPluginSettings::Get()->bCreateBlueprintTypeForScriptMethods;
+
 	CodeFileGenerator(GetFilename(Data), true, [&](CodeFileGenerator* header)
 	{
 		header->Line("#include \"ArticyRuntime/Public/ArticyExpressoScripts.h\"");
@@ -137,7 +169,7 @@ void ExpressoScriptsGenerator::GenerateCode(const UArticyImportData* Data)
 
 		//========================================//
 	
-		GenerateMethodInterface(header, Data);
+		GenerateMethodInterface(header, Data, bCreateBlueprintableUserMethods);
 
 		header->Line();
 
@@ -147,7 +179,7 @@ void ExpressoScriptsGenerator::GenerateCode(const UArticyImportData* Data)
 			//if script support is disabled, the class remains empty
 			if(Data->GetSettings().set_UseScriptSupport)
 			{
-				GenerateUserMethods(header, Data);
+				GenerateUserMethods(header, Data, bCreateBlueprintableUserMethods);
 			
 				header->Line();
 

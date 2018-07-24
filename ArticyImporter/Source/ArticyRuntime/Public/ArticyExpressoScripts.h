@@ -8,7 +8,7 @@
 #include "ArticyRef.h"
 #include "ArticyObject.h"
 #include "ArticyDatabase.h"
-#include "ArticyGlobalVariables.h"
+//#include "ArticyGlobalVariables.h"
 
 #include "ArticyExpressoScripts.generated.h"
 
@@ -71,6 +71,9 @@ struct ARTICYRUNTIME_API ExpressoType
 	ExpressoType(const FText& Value) : ExpressoType(Value.ToString()) {}
 	ExpressoType(const FName& Value) : ExpressoType(Value.ToString()) {}
 	ExpressoType(const UArticyPrimitive* Object);
+	ExpressoType(const UArticyString& Value);
+	ExpressoType(const UArticyInt& Value);
+	ExpressoType(const UArticyBool& Value);
 	
 	//implicit conversion to value type
 	explicit operator bool() const;
@@ -179,6 +182,16 @@ struct ARTICYRUNTIME_API ExpressoType
 	static UArticyBaseObject* TryFeatureReroute(UArticyBaseObject* Object, FString& Property);
 };
 
+FORCEINLINE	int operator+(const int& Lhs, const ExpressoType& Rhs)
+{
+	return Lhs + (int)Rhs;
+}
+
+FORCEINLINE	float operator+(const float& Lhs, const ExpressoType& Rhs)
+{
+	return Lhs + (float)Rhs;
+}
+
 /**
  * The database is used for accessing or cloning any articy object.
  */
@@ -192,8 +205,8 @@ public:
 	UArticyExpressoScripts()
 	{
 		//add empty condition and instruction
-		Conditions.Add(FName{ "" }, [&] { return true; });
-		Instructions.Add(FName{ "" }, [&] { return; });
+		Conditions.Add(GetTypeHash(FString{ "" }), [&] { return true; });
+		Instructions.Add(GetTypeHash(FString{ "" }), [&] { return; });
 	}
 
 	/** Used by the FlowPlayer internally. */
@@ -210,12 +223,12 @@ public:
 	 * Evaluate the condition and return the result.
 	 * Note that the passed in condition is only used as a key to look up a lambda in a map of existing (imported) conditions!
 	 */
-	bool Evaluate(const FName &ConditionFragment, UArticyGlobalVariables* GV, UObject* MethodProvider) const;
+	bool Evaluate(const int &ConditionFragmentHash, UArticyGlobalVariables* GV, UObject* MethodProvider) const;
 	/**
 	 * Execute the instruction, and return true (unless the fragment was not found!)
 	 * Note that the passed in condition is only used as a key to look up a lambda in a map of existing (imported) conditions!
 	 */
-	bool Execute(const FName &InstructionFragment, UArticyGlobalVariables* GV, UObject* MethodProvider) const;
+	bool Execute(const int &InstructionFragmentHash, UArticyGlobalVariables* GV, UObject* MethodProvider) const;
 
 protected:
 
@@ -237,8 +250,8 @@ protected:
 	 */
 	UArticyObject* speaker = nullptr;
 
-	TMap<FName, TFunction<bool()>> Conditions;
-	TMap<FName, TFunction<void()>> Instructions;
+	TMap<uint32, TFunction<bool()>> Conditions;
+	TMap<uint32, TFunction<void()>> Instructions;
 
 	/** Don't change the name, it's called like this in script fragments! */
 	UArticyObject* getObj(const FString& NameOrId, const uint32& CloneId = 0) const;
@@ -252,6 +265,16 @@ protected:
 	static ExpressoType getProp(UArticyBaseObject* Object, const FName& Property);
 	/** Don't change the name, it's called like this in script fragments! */
 	ExpressoType getProp(const ExpressoType& Id_CloneId, const FName& Property) const;
+
+	/** Don't change the name, it's called like this in script fragments! */
+	int random(int Min, int Max);
+	/** Don't change the name, it's called like this in script fragments! */
+	int random(int Max);
+	/** Don't change the name, it's called like this in script fragments! */
+	float random(float Min, float Max);
+	/** Don't change the name, it's called like this in script fragments! */
+	float random(float Max);
+
 
 	/**
 	 * Prints a string to the log. Can contain placeholders:

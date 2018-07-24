@@ -79,8 +79,10 @@ bool FArticyRef::Serialize(FArchive& Ar)
 void FArticyRef::PostSerialize(const FArchive& Ar)
 {
 	//we use this as post-loading hook
+#if WITH_EDITOR
 	if(Ar.IsLoading())
 	{
 		GetReference();
 	}
+#endif
 }

@@ -38,7 +38,7 @@ public:
 			//it must be a shadowed explore
 			const auto bShadowed = bForceShadowed
 									|| inPins->Num() > 1
-									|| (*inPins)[0] && (*inPins)[0]->Connections.Num() > 1;
+									|| ((*inPins)[0] && (*inPins)[0]->Connections.Num() > 1);
 
 			//submerge!
 			for(auto pin : *inPins)
@@ -56,12 +56,10 @@ public:
 
 		return bSubmerged;
 	}
-
-private:
 	
 	const TArray<UArticyInputPin*>* GetInputPins() const
 	{
 		const static auto name = FName("InputPins");
-		return GetPropPtr<TArray<UArticyInputPin*>>(name);
+		return Cast<IArticyReflectable>(this)->GetPropPtr<TArray<UArticyInputPin*>>(name);
 	}
 };

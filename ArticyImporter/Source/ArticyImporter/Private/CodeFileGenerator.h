@@ -133,7 +133,7 @@ CodeFileGenerator::CodeFileGenerator(const FString& Path, const bool bHeader, La
 
 	Line();
 
-	if(ensure(!std::is_null_pointer_v<Lambda>))
+	if(ensure(!std::is_null_pointer<Lambda>::value))
 		ContentGenerator(this);
 
 	WriteToFile();
@@ -229,7 +229,7 @@ void CodeFileGenerator::Method(const FString& ReturnType, const FString& Name, c
 		this->UFunctionMacro(UFunctionSpecifiers);
 
 	//check if nullptr was passed as Definition
-	constexpr auto hasDefinition = !std::is_null_pointer_v<Lambda>;
+	constexpr auto hasDefinition = !std::is_null_pointer<Lambda>::value;
 
 	//ReturnType Name(Parameters..)
 	//only add the semicolon if there is no definition
