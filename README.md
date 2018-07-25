@@ -110,7 +110,7 @@ After enabling the plugin the window will prompt you to restart the editor which
 
 ## Export project from articy:draft
 
-Now that the plugin is running, you are ready to export your data from articy:draft. You first need to enable the experimental unreal export. To do that you need to start articy:draft with the `-experimental.unreal` command line switch.
+Now that the plugin is running, you are ready to export your data from articy:draft. If you still use a articy:draft version below 3.1.14 you first need to enable the experimental unreal export. To do that you need to start articy:draft with the `-experimental.unreal` command line switch.
 
 In the explorer you can do that by modifying the shortcut for articy:draft.
 
