@@ -90,6 +90,10 @@ public:
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Set Start Node (FlowObject)"), Category = "Setup")
 	void SetStartNodeWithFlowObject(TScriptInterface<IArticyFlowObject> Node);
 
+	/** Gets the last set StartOn node */
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Start Node"), Category = "Setup")
+	FArticyRef GetStartNode() { return StartOn; }
+		
 	/** Set the Cursor (current node) to this Node and updates the available branches. */
 	UFUNCTION(BlueprintCallable, Category = "Flow")
 	void SetCursorTo(TScriptInterface<IArticyFlowObject> Node);
@@ -120,6 +124,9 @@ public:
 	 * If the node is submergeable, a submerge is performed.
 	 */
 	TArray<FArticyBranch> Explore(IArticyFlowObject* Node, bool bShadowed, uint32 Depth);
+
+	/** Returns true if Node is one of the PauseOn types. */
+	bool ShouldPauseOn(IArticyFlowObject* Node) const;
 	
 	/**
 	 * Get the GV instance used for expresso script execution.
@@ -251,9 +258,6 @@ private:
 	 * the path branches out.
 	 */
 	bool FastForwardToPause();
-
-	/** Returns true if Node is one of the PauseOn types. */
-	bool ShouldPauseOn(IArticyFlowObject* Node) const;
 
 	/** Returns a ptr to the unshadowed object of this node */
 	IArticyFlowObject* GetUnshadowedNode(IArticyFlowObject* Node);

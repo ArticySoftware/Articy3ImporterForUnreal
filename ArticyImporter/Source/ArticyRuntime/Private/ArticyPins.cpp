@@ -57,7 +57,14 @@ void UArticyInputPin::Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>& 
 	if(!bIsValid && Player->IgnoresInvalidBranches())
 		return;
 
-	if(Connections.Num() > 0)
+	IArticyFlowObject* owner = Cast<IArticyFlowObject>(GetOwner());
+
+	if(Depth > 3 && Player->ShouldPauseOn(owner))
+	{
+		// if the owner of this input pin is a stop node, we directly continue with it instead of submerging
+		OutBranches.Append(Player->Explore(owner, false, Depth + 1));
+	}
+	else if(Connections.Num() > 0)
 	{
 		//shadow needed?
 		const auto bShadowed = Connections.Num() > 1;
@@ -72,7 +79,7 @@ void UArticyInputPin::Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>& 
 	else
 	{
 		//no connections, so continue with the owner itself
-		OutBranches.Append( Player->Explore(Cast<IArticyFlowObject>(GetOwner()), false, Depth+1) );
+		OutBranches.Append( Player->Explore(owner, false, Depth+1) );
 	}
 
 	/**
