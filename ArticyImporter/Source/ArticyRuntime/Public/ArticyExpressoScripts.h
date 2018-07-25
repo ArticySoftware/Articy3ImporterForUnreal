@@ -216,7 +216,7 @@ public:
 	UArticyDatabase* GetDb() const { return OwningDatabase; }
 
 
-	void SetCurrentObject(UArticyObject* Object) { self = Object; }
+	void SetCurrentObject(UArticyPrimitive* Object) { self = Object; }
 	void SetSpeaker(UArticyObject* Speaker) { speaker = Speaker; }
 
 	/**
@@ -243,7 +243,7 @@ protected:
 	 * The current object where the script is evaluated on.
 	 * Don't change the name, it's called like this in script fragments!
 	 */
-	UArticyObject* self = nullptr;
+	UArticyPrimitive* self = nullptr;
 	/**
 	 * Inside a DialogFragment this is a reference to the current speaker.
 	 * Don't change the name, it's called like this in script fragments!

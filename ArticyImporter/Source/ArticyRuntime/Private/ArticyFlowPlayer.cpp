@@ -183,19 +183,8 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 {
 	TArray<FArticyBranch> OutBranches;
 
-	// get if owner of input pin is a stop node
-	bool bInputPinOwnerIsStopNode = false;
-	IArticyInputPinsProvider* inputPinOwner = nullptr;
-	auto inputPin = Cast<UArticyInputPin>(Node);
-	if(Depth > 2 && inputPin)
-	{
-		inputPinOwner = Cast<IArticyInputPinsProvider>(inputPin->GetOwner());
-		bInputPinOwnerIsStopNode = ShouldPauseOn(inputPinOwner);
-	}
-
-
 	//check stop condition
-	if((Depth > uint32(ExploreDepthLimit) || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))) || bInputPinOwnerIsStopNode)
+	if((Depth > uint32(ExploreDepthLimit) || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))))
 	{
 		if(Depth > uint32(ExploreDepthLimit))
 			UE_LOG(LogArticyRuntime, Warning, TEXT("ExploreDepthLimit (%d) reached, stopping exploration!"), ExploreDepthLimit);
@@ -224,21 +213,6 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 			ptr.SetObject(unshadowedNode->_getUObject());
 			ptr.SetInterface(unshadowedNode);
 			branch.Path.Add(ptr);
-
-			if (bInputPinOwnerIsStopNode)
-			{
-				bool bIsValid;
-				ShadowedOperation([&] { bIsValid = inputPin->Evaluate(GetGVs(), GetMethodsProvider()); });
-				branch.bIsValid = bIsValid;
-
-				auto ownerNode = Cast<IArticyFlowObject>(Cast<UArticyFlowPin>(Node)->GetOwner());
-				auto unshadowedInputPinOwner = GetUnshadowedNode(ownerNode);
-				
-				TScriptInterface<IArticyFlowObject> ownerPtr;
-				ownerPtr.SetObject(unshadowedInputPinOwner->_getUObject());
-				ownerPtr.SetInterface(unshadowedInputPinOwner);
-				branch.Path.Add(ownerPtr);
-			}
 		}
 
 		OutBranches.Add(branch);
@@ -249,12 +223,17 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 		auto xp = GetDB()->GetExpressoInstance();
 		if(ensure(xp))
 		{
-			auto obj = Cast<UArticyObject>(Node);
+			auto obj = Cast<UArticyPrimitive>(Node);
 			if(obj)
 			{
 				xp->SetCurrentObject(obj);
 
-				auto speaker = Cast<IArticyObjectWithSpeaker>(obj);
+				IArticyObjectWithSpeaker* speaker;
+				if (auto flowPin = Cast<UArticyFlowPin>(Node))
+					speaker = Cast<IArticyObjectWithSpeaker>(flowPin->GetOwner());
+				else
+					speaker = Cast<IArticyObjectWithSpeaker>(obj);
+
 				if(speaker)
 					xp->SetSpeaker(speaker->GetSpeaker());
 			}

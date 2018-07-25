@@ -153,9 +153,6 @@ public:
 	int& operator-=(const int &Val) { return *this = Value - Val; }
 	int& operator*=(const int &Val) { return *this = Value * Val; }
 	int& operator/=(const int &Val) { return *this = Value / Val; }
-	const int& operator>=(const int &Val) { return *this = Value >= Val; }
-	const int& operator<=(const int &Val) { return *this = Value <= Val; }
-	const int& operator==(const int &Val) { return *this = Value == Val; }
 
 	int& operator=(const ExpressoType &NewValue)
 	{
