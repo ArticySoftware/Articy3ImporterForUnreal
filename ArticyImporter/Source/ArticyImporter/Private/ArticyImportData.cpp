@@ -293,10 +293,8 @@ void FAIDUserMethods::ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json)
 	}
 
 	// mark overloaded methods
-	for (auto scriptMethod : ScriptMethods)
-	{
+	for (auto& scriptMethod : ScriptMethods)
 		scriptMethod.bIsOverloadedFunction = OverloadedMethods.Contains(scriptMethod.Name);
-	}
 }
 
 //---------------------------------------------------------------------------//
