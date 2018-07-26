@@ -71,6 +71,19 @@ T* FArticyRef::GetObject(const UObject* WorldContext) const
 }
 
 template<>
+inline UArticyPrimitive* FArticyRef::GetObject(const UObject* WorldContext) const
+{
+	if (!CachedObject.IsValid() || CachedId != Id || CloneId != CachedCloneId)
+	{
+		CachedId = Id;
+		CachedCloneId = CloneId;
+		CachedObject = GetObjectInternal(WorldContext);
+	}
+
+	return CachedObject.Get();
+}
+
+template<>
 struct TStructOpsTypeTraits<FArticyRef> : public TStructOpsTypeTraitsBase2<FArticyRef>
 {
 	enum

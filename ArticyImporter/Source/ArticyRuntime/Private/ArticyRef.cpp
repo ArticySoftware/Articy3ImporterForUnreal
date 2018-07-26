@@ -43,19 +43,6 @@ UArticyPrimitive* FArticyRef::GetReference()
 	return Reference;
 }
 
-template<>
-UArticyPrimitive* FArticyRef::GetObject(const UObject* WorldContext) const
-{
-	if(!CachedObject.IsValid() || CachedId != Id || CloneId != CachedCloneId)
-	{
-		CachedId = Id;
-		CachedCloneId = CloneId;
-		CachedObject = GetObjectInternal(WorldContext);
-	}
-
-	return CachedObject.Get();
-}
-
 UArticyPrimitive* FArticyRef::GetObjectInternal(const UObject* WorldContext) const
 {
 	if(bReferenceBaseObject)
