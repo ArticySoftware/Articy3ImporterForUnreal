@@ -431,7 +431,7 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 	//match any group of two words separated by a dot, that does not start with a double quote
 	// (?<!["a-zA-Z])(\w+\.\w+)
 	//NOTE: static is no good here! crashes on application quit...
-	const FRegexPattern unquotedWordDotWord(TEXT("(?<![\"a-zA-Z])([a-zA-Z]+\\.[a-zA-Z]+)"));
+	const FRegexPattern unquotedWordDotWord(TEXT("(?<![\"a-zA-Z_])([a-zA-Z_]{1}\\w+\\.\\w+)"));
 	//match an assignment operator (an = sign that does not have any of [ = < > ] before it, and no = after it)
 	const FRegexPattern assignmentOperator(TEXT("(?<![=<>])=(?!=)"));
 
