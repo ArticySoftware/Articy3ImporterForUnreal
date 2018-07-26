@@ -156,7 +156,10 @@ public:
 
 	int& operator=(const ExpressoType &NewValue)
 	{
-		return Value = NewValue.GetInt();
+		if (NewValue.Type == ExpressoType::Float) // getProp return value could contain a float
+			return Value = NewValue.GetFloat();
+		else
+			return Value = NewValue.GetInt();
 	}
 
 	int operator++(int)
