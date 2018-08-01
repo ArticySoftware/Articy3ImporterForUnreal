@@ -514,8 +514,8 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 					}
 					
 					//get the dereferenced variable
-					line = line.Left(start) + "*" + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + valueStr;
-					offset += strlen(".") + strlen(">");
+					line = line.Left(start) + "(*" + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + ")" + valueStr;
+					offset += strlen(".") + strlen(">") + strlen("()");
 				}
 			}
 
