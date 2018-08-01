@@ -505,7 +505,7 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 					for (int i = 0; i < valueStr.Len(); i++)
 					{
 						auto currentChar = valueStr[i];
-						if (currentChar == ' ' || currentChar == '<' || currentChar == '>' || currentChar == '=')
+						if (currentChar == ' ' || currentChar == '<' || currentChar == '>' || currentChar == '=' || currentChar == '+' || currentChar == '-')
 							continue;
 						else if (currentChar == '\"' && i > 0)
 							valueStr.InsertAt(i, "(FString)");

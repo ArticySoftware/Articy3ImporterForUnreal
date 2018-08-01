@@ -154,14 +154,6 @@ public:
 	int& operator*=(const int &Val) { return *this = Value * Val; }
 	int& operator/=(const int &Val) { return *this = Value / Val; }
 
-	int& operator=(const ExpressoType &NewValue)
-	{
-		if (NewValue.Type == ExpressoType::Float) // getProp return value could contain a float
-			return Value = NewValue.GetFloat();
-		else
-			return Value = NewValue.GetInt();
-	}
-
 	int operator++(int)
 	{
 		int copy = *this;
@@ -177,6 +169,46 @@ public:
 		return copy;
 	}
 	int& operator--() { return *this = Value + 1; }
+
+	int& operator=(const ExpressoType &NewVal)
+	{
+		if (NewVal.Type == ExpressoType::Float)
+			return Value = NewVal.GetFloat();
+		else
+			return Value = NewVal.GetInt();
+	}
+
+	int& operator+=(const ExpressoType &Val)
+	{
+		if (Val.Type == ExpressoType::Float)
+			return *this = Value + Val.GetFloat();
+		else
+			return *this = Value + Val.GetInt();
+	}
+
+	int& operator-=(const ExpressoType &Val)
+	{
+		if (Val.Type == ExpressoType::Float)
+			return *this = Value - Val.GetFloat();
+		else
+			return *this = Value - Val.GetInt();
+	}
+
+	int& operator*=(const ExpressoType &Val)
+	{
+		if (Val.Type == ExpressoType::Float)
+			return *this = Value * Val.GetFloat();
+		else
+			return *this = Value * Val.GetInt();
+	}
+
+	int& operator/=(const ExpressoType &Val)
+	{
+		if (Val.Type == ExpressoType::Float)
+			return *this = Value / Val.GetFloat();
+		else
+			return *this = Value / Val.GetInt();
+	}
 
 protected:
 	/** The current value of this variable (i.e. the value of a shadow state, if any is active). */
@@ -250,7 +282,9 @@ public:
 	ARTICY_VARIABLE_ACCESS(FString)
 
 	//other operators
-	FString& operator+=(const FString &Val) { return Setter<UArticyString>(Value + Val); }
+	//FString& operator+=(const FString &Val) { return Setter<UArticyString>(Value + Val); }
+
+	FString& operator+=(const ExpressoType &Val) { return Setter<UArticyString>(Value + Val.GetString()); }
 
 	FString& operator=(const ExpressoType &NewValue)
 	{
