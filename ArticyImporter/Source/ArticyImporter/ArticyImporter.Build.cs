@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
 using UnrealBuildTool;
+using System.IO;
 
 public class ArticyImporter : ModuleRules
 {
@@ -13,22 +14,26 @@ public class ArticyImporter : ModuleRules
 
 		PublicIncludePaths.AddRange(
 			new string[] {
-				"ArticyImporter/Public",
+				Path.Combine(ModuleDirectory, "Public"),
+				Path.Combine(ModuleDirectory, "../ArticyImporter/Public"),
 				// ... add public include paths required here ...
-                "GameProjectGeneration",
-                "ArticyRuntime/Public"
+#if UE_4_20_OR_LATER
+				Path.Combine(EngineDirectory, "Source/Editor/GameProjectGeneration"),
+#else
+				"GameProjectGeneration",
+#endif
+
 			}
 			);
-				
-		
+
+
 		PrivateIncludePaths.AddRange(
 			new string[] {
-				"ArticyImporter/Private",
+				Path.Combine(ModuleDirectory, "Private"),
 				// ... add other private include paths required here ...
 			}
 			);
-			
-		
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{

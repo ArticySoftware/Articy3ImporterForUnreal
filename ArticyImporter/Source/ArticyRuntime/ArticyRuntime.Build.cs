@@ -3,32 +3,35 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
 using UnrealBuildTool;
+using System.IO;
 
 public class ArticyRuntime : ModuleRules
 {
 	public ArticyRuntime(ReadOnlyTargetRules Target) : base(Target)
     {
-
 		OptimizeCode = CodeOptimization.Never;
+
 
 		PublicIncludePaths.AddRange(
 			new string[] {
-				"ArticyRuntime/Public",
+				Path.Combine(ModuleDirectory, "Public"),
 				// ... add public include paths required here ...
+#if UE_4_20_OR_LATER
+				Path.Combine(EngineDirectory, "Source/Runtime/MediaAssets/Public"),
+#else
 				"MediaAssets/Public",
+#endif
 			}
 			);
-				
-		
+
 		PrivateIncludePaths.AddRange(
 			new string[] {
-				"ArticyRuntime/Private",
+				Path.Combine(ModuleDirectory, "Private"),
 				// ... add other private include paths required here ...
 			}
 			);
-			
-		
-		PublicDependencyModuleNames.AddRange(
+
+			PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"Core",
