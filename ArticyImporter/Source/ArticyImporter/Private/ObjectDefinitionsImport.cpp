@@ -284,7 +284,7 @@ void FArticyPropertyDef::ImportFromJson(const TSharedPtr<FJsonObject> JsonProper
 			});
 
 			if(ensure(constraint)) //the constraint should exist
-				bIsLocalized = constraint->IsLocalized && ensure(Type == string);
+				bIsLocalized = constraint->IsLocalized && Type == string;
 		}
 		else if(Type == string)
 		{
