@@ -94,14 +94,22 @@ ExpressoType::operator bool() const
 
 ExpressoType::operator int64() const
 {
-	ensure(Type == Int);
+	ensure(Type == Float || Type == Int);
+
+	if (Type == Float)
+		return GetFloat();
+
 	return GetInt();
 }
 
 ExpressoType::operator double() const
 {
-	ensure(Type == Float);
-	return GetFloat();
+	ensure(Type == Float || Type == Int);
+
+	if(Type == Float)
+		return GetFloat();
+
+	return GetInt();
 }
 
 ExpressoType::operator FString() const

@@ -182,14 +182,49 @@ struct ARTICYRUNTIME_API ExpressoType
 	static UArticyBaseObject* TryFeatureReroute(UArticyBaseObject* Object, FString& Property);
 };
 
-FORCEINLINE	int operator+(const int& Lhs, const ExpressoType& Rhs)
+FORCEINLINE int operator+(const int& Lhs, const ExpressoType& Rhs)
 {
 	return Lhs + (int)Rhs;
 }
 
-FORCEINLINE	float operator+(const float& Lhs, const ExpressoType& Rhs)
+FORCEINLINE int operator-(const int& Lhs, const ExpressoType& Rhs)
+{
+	return Lhs - (int)Rhs;
+}
+
+FORCEINLINE int operator*(const int& Lhs, const ExpressoType& Rhs)
+{
+	return Lhs * (int)Rhs;
+}
+
+FORCEINLINE int operator/(const int& Lhs, const ExpressoType& Rhs)
+{
+	return Lhs / (int)Rhs;
+}
+
+FORCEINLINE int operator%(const int& Lhs, const ExpressoType& Rhs)
+{
+	return Lhs % (int)Rhs;
+}
+
+FORCEINLINE float operator+(const float& Lhs, const ExpressoType& Rhs)
 {
 	return Lhs + (float)Rhs;
+}
+
+FORCEINLINE float operator-(const float& Lhs, const ExpressoType& Rhs)
+{
+	return Lhs - (float)Rhs;
+}
+
+FORCEINLINE float operator*(const float& Lhs, const ExpressoType& Rhs)
+{
+	return Lhs * (float)Rhs;
+}
+
+FORCEINLINE float operator/(const float& Lhs, const ExpressoType& Rhs)
+{
+	return Lhs / (float)Rhs;
 }
 
 /**
@@ -230,7 +265,7 @@ public:
 	 */
 	bool Execute(const int &InstructionFragmentHash, UArticyGlobalVariables* GV, UObject* MethodProvider) const;
 
-protected:
+public:
 
 	mutable UObject* UserMethodsProvider = nullptr;
 
