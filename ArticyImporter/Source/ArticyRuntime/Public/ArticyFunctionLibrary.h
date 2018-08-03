@@ -53,6 +53,12 @@ public:
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Is Valid"), Category = "ArticyId")
 	static bool ArticyId_IsValid(const FArticyId& Id);
 
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Make ArticyGvName from full name"), Category = "ArticyId")
+	static FArticyGvName ArticyGvName_MakeFromFullName(const FName& FullName);
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Make ArticyGvName from namespace & variable"), Category = "ArticyId")
+	static FArticyGvName ArticyGvName_MakeFromVariableAndNamespace(const FName& Variable, const FName& Namespace);
+
+
 	/** Gets the last object in a branch. */
 	UFUNCTION(BlueprintPure, meta=(DisplayName = "Get Target"), Category="ArticyBranch")
 	static TScriptInterface<class IArticyFlowObject> GetBranchTarget(UPARAM(ref) const struct FArticyBranch& Branch);

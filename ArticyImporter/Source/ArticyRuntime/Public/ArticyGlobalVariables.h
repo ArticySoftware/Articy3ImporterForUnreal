@@ -53,6 +53,31 @@ struct ArticyShadowState
 	Type Value;
 };
 
+USTRUCT(BlueprintType)
+struct ARTICYRUNTIME_API FArticyGvName
+{
+	GENERATED_BODY()
+
+public:
+
+	FArticyGvName() = default;
+	FArticyGvName(const FName FullVariableName);
+	FArticyGvName(const FName VariableNamespace, const FName VariableName);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName FullName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Variable;
+
+	void SetByFullName(const FName FullVariableName);
+	void SetByNamespaceAndVariable(const FName VariableNamespace, const FName VariableName);
+	const FName& GetNamespace();
+	const FName& GetVariable();
+	const FName& GetFullName();
+};
+
 UCLASS(Abstract, BlueprintType)
 class ARTICYRUNTIME_API UArticyVariable : public UObject
 {
@@ -368,19 +393,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Getter")
 	const TArray<UArticyBaseVariableSet*> GetVariableSets() const { return VariableSets; }
 	
+	UFUNCTION(BlueprintCallable, Category = "Getter")
+	const bool& GetBoolVariable(FArticyGvName GvName, bool& bSucceeded);
 	UFUNCTION(BlueprintCallable, Category="Getter")
-	const bool& GetBoolVariable(const FName Namespace, const FName Variable, bool& bSucceeded);
+	const int32& GetIntVariable(FArticyGvName GvName, bool& bSucceeded);
 	UFUNCTION(BlueprintCallable, Category="Getter")
-	const int32& GetIntVariable(const FName Namespace, const FName Variable, bool& bSucceeded);
-	UFUNCTION(BlueprintCallable, Category="Getter")
-	const FString& GetStringVariable(const FName Namespace, const FName Variable, bool& bSucceeded);
+	const FString& GetStringVariable(FArticyGvName GvName, bool& bSucceeded);
 
 	UFUNCTION(BlueprintCallable, Category="Setter")
-	void SetBoolVariable(const FName Namespace, const FName Variable, const bool Value);
+	void SetBoolVariable(FArticyGvName GvName, const bool Value);
 	UFUNCTION(BlueprintCallable, Category="Setter")
-	void SetIntVariable(const FName Namespace, const FName Variable, const int32 Value);
+	void SetIntVariable(FArticyGvName GvName, const int32 Value);
 	UFUNCTION(BlueprintCallable, Category="Setter")
-	void SetStringVariable(const FName Namespace, const FName Variable, const FString Value);
+	void SetStringVariable(FArticyGvName GvName, const FString Value);
 
 protected:
 
@@ -393,9 +418,13 @@ private:
 
 	template <typename ArticyVariableType, typename VariablePayloadType>
 	void SetVariableValue(const FName Namespace, const FName Variable, const VariablePayloadType Value);
+	template <typename ArticyVariableType, typename VariablePayloadType>
+	void SetVariableValue(const FName FullVariableName, const VariablePayloadType Value);
 
 	template<typename ArticyVariableType, typename VariablePayloadType>
 	const VariablePayloadType& GetVariableValue(const FName Namespace, const FName Variable, bool& bSucceeded);
+	template<typename ArticyVariableType, typename VariablePayloadType>
+	const VariablePayloadType& GetVariableValue(const FName FullVariableName, bool& bSucceeded);
 };
 
 //---------------------------------------------------------------------------//
@@ -463,4 +492,13 @@ const VariablePayloadType& UArticyGlobalVariables::GetVariableValue(const FName 
 	bSucceeded = false;
 	static VariablePayloadType empty = VariablePayloadType();
 	return empty;
+}
+
+template<typename ArticyVariableType, typename VariablePayloadType>
+const VariablePayloadType& UArticyGlobalVariables::GetVariableValue(const FName FullVariableName, bool& bSucceeded)
+{
+	FString Namespace;
+	FString Variable;
+	FullVariableName.ToString().Split(TEXT("."), &Namespace, &Variable);
+	return GetVariableValue<ArticyVariableType, VariablePayloadType>(FName(*Namespace), FName(*Variable), bSucceeded);
 }

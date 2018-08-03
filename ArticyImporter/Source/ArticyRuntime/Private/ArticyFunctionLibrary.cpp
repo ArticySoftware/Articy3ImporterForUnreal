@@ -8,7 +8,7 @@
 #include "ArticyObject.h"
 #include "ArticyFlowPlayer.h"
 
-UArticyObject* UArticyFunctionLibrary::ArticyRef_GetObject(const FArticyRef& Ref, const UObject* WorldContext)
+UArticyObject* UArticyFunctionLibrary::ArticyRef_GetObject(const FArticyRef& Ref, TSubclassOf<class UArticyObject> CastTo, const UObject* WorldContext)
 {
 	return Ref.GetObject(WorldContext);
 }
@@ -28,7 +28,7 @@ void UArticyFunctionLibrary::ArticyRef_SetObjectId(FArticyRef& Ref, FArticyId Id
 	Ref.SetId(Id);
 }
 
-UArticyObject* UArticyFunctionLibrary::ArticyId_GetObject(const FArticyId& Id, const UObject* WorldContext)
+UArticyObject* UArticyFunctionLibrary::ArticyId_GetObject(const FArticyId& Id, TSubclassOf<class UArticyObject> CastTo, const UObject* WorldContext)
 {
 	return Cast<UArticyObject>(Id.GetObject(WorldContext));
 }
@@ -56,6 +56,16 @@ bool UArticyFunctionLibrary::ArticyId_NotEqual(const FArticyId& A, const FArticy
 bool UArticyFunctionLibrary::ArticyId_IsValid(const FArticyId & Id)
 {
 	return Id && Id.Low != 0 && Id.High != 0;
+}
+
+FArticyGvName UArticyFunctionLibrary::ArticyGvName_MakeFromFullName(const FName& FullName)
+{
+	return FArticyGvName(FullName);
+}
+
+FArticyGvName UArticyFunctionLibrary::ArticyGvName_MakeFromVariableAndNamespace(const FName& Variable, const FName& Namespace)
+{
+	return FArticyGvName(Variable, Namespace);
 }
 
 TScriptInterface<IArticyFlowObject> UArticyFunctionLibrary::GetBranchTarget(const FArticyBranch& Branch)

@@ -10,6 +10,68 @@
 #include "ArticyPluginSettings.h"
 #include "ArticyFlowPlayer.h"
 
+
+FArticyGvName::FArticyGvName(const FName FullVariableName)
+{
+	SetByFullName(FullVariableName);
+}
+
+FArticyGvName::FArticyGvName(const FName VariableNamespace, const FName VariableName)
+{
+	SetByNamespaceAndVariable(VariableNamespace, VariableName);
+}
+
+void FArticyGvName::SetByFullName(const FName FullVariableName)
+{
+	FString variableString;
+	FString namespaceString;
+	if (FullName.ToString().Split(TEXT("."), &variableString, &namespaceString))
+	{
+		FullName = FullVariableName;
+		Variable = FName(*variableString);
+		Namespace = FName(*namespaceString);
+	}
+}
+
+void FArticyGvName::SetByNamespaceAndVariable(const FName VariableNamespace, const FName VariableName)
+{
+	if (!VariableNamespace.IsNone() && !VariableName.IsNone())
+	{
+		Namespace = VariableNamespace;
+		Variable = VariableName;
+		FullName = FName(*FString::Printf(TEXT("%s.%s"), *Variable.ToString(), *Namespace.ToString()));
+	}
+}
+
+const FName& FArticyGvName::GetNamespace()
+{
+	if(!Namespace.IsNone())
+		return Namespace;
+
+	SetByFullName(FullName);
+	return Namespace;
+}
+
+const FName& FArticyGvName::GetVariable()
+{
+	if(!Variable.IsNone())
+		return Variable;
+
+	SetByFullName(FullName);
+	return Variable;
+}
+
+const FName& FArticyGvName::GetFullName()
+{
+	if(!FullName.IsNone())
+		return FullName;
+
+	SetByNamespaceAndVariable(Namespace, Variable);
+	return FullName;
+}
+
+//---------------------------------------------------------------------------//
+
 uint32 UArticyVariable::GetStoreShadowLevel() const
 {
 	return Store->GetShadowLevel();
@@ -89,34 +151,34 @@ UArticyBaseVariableSet* UArticyGlobalVariables::GetNamespace(const FName Namespa
 	return set;
 }
 
-const bool& UArticyGlobalVariables::GetBoolVariable(const FName Namespace, const FName Variable, bool& bSucceeded)
+const bool& UArticyGlobalVariables::GetBoolVariable(FArticyGvName GvName, bool& bSucceeded)
 {
-	return GetVariableValue<UArticyBool, bool>(Namespace, Variable, bSucceeded);
+	return GetVariableValue<UArticyBool, bool>(GvName.GetNamespace(), GvName.GetVariable(), bSucceeded);
 }
 
-const int32& UArticyGlobalVariables::GetIntVariable(const FName Namespace, const FName Variable, bool& bSucceeded)
+const int32& UArticyGlobalVariables::GetIntVariable(FArticyGvName GvName, bool& bSucceeded)
 {
-	return GetVariableValue<UArticyInt, int32>(Namespace, Variable, bSucceeded);
+	return GetVariableValue<UArticyInt, int32>(GvName.GetNamespace(), GvName.GetVariable(), bSucceeded);
 }
 
-const FString& UArticyGlobalVariables::GetStringVariable(const FName Namespace, const FName Variable, bool& bSucceeded)
+const FString& UArticyGlobalVariables::GetStringVariable(FArticyGvName GvName, bool& bSucceeded)
 {
-	return GetVariableValue<UArticyString, FString>(Namespace, Variable, bSucceeded);
+	return GetVariableValue<UArticyString, FString>(GvName.GetNamespace(), GvName.GetVariable(), bSucceeded);
 }
 
-void UArticyGlobalVariables::SetBoolVariable(const FName Namespace, const FName Variable, const bool Value)
+void UArticyGlobalVariables::SetBoolVariable(FArticyGvName GvName, const bool Value)
 {
-	SetVariableValue<UArticyBool>(Namespace, Variable, Value);
+	SetVariableValue<UArticyBool>(GvName.GetNamespace(), GvName.GetVariable(), Value);
 }
 
-void UArticyGlobalVariables::SetIntVariable(const FName Namespace, const FName Variable, const int32 Value)
+void UArticyGlobalVariables::SetIntVariable(FArticyGvName GvName, const int32 Value)
 {
-	SetVariableValue<UArticyInt>(Namespace, Variable, Value);
+	SetVariableValue<UArticyInt>(GvName.GetNamespace(), GvName.GetVariable(), Value);
 }
 
-void UArticyGlobalVariables::SetStringVariable(const FName Namespace, const FName Variable, const FString Value)
+void UArticyGlobalVariables::SetStringVariable(FArticyGvName GvName, const FString Value)
 {
-	SetVariableValue<UArticyString>(Namespace, Variable, Value);
+	SetVariableValue<UArticyString>(GvName.GetNamespace(), GvName.GetVariable(), Value);
 }
 
 TWeakObjectPtr<UArticyGlobalVariables> UArticyGlobalVariables::Clone;
