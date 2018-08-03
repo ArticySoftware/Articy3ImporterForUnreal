@@ -310,7 +310,7 @@ const UArticyDatabase* UArticyDatabase::GetOriginal(bool bLoadAllPackages)
 
 //---------------------------------------------------------------------------//
 
-UArticyPrimitive* UArticyDatabase::GetObject(FArticyId Id, int32 CloneId) const
+UArticyPrimitive* UArticyDatabase::GetObject(FArticyId Id, int32 CloneId, TSubclassOf<class UArticyObject> CastTo) const
 {
 	return GetObjectInternal(Id, CloneId);
 }
@@ -326,7 +326,7 @@ UArticyPrimitive* UArticyDatabase::GetObjectInternal(FArticyId Id, int32 CloneId
 	return info && info->IsValid() ? info->Get()->Get(this, CloneId, bForceUnshadowed) : nullptr;
 }
 
-UArticyObject* UArticyDatabase::GetObjectByName(FName TechnicalName, int32 CloneId) const
+UArticyObject* UArticyDatabase::GetObjectByName(FName TechnicalName, int32 CloneId, TSubclassOf<class UArticyObject> CastTo) const
 {
 	auto arr = LoadedObjectsByName.Find(TechnicalName);
 	if(!arr || arr->Objects.Num() <= 0)
@@ -336,12 +336,12 @@ UArticyObject* UArticyDatabase::GetObjectByName(FName TechnicalName, int32 Clone
 	return info.IsValid() ? Cast<UArticyObject>(info.Pin()->Get(this, CloneId)) : nullptr;
 }
 
-TArray<UArticyObject*> UArticyDatabase::GetObjects(FName TechnicalName, int32 CloneId) const
+TArray<UArticyObject*> UArticyDatabase::GetObjects(FName TechnicalName, int32 CloneId, TSubclassOf<class UArticyObject> CastTo) const
 {
 	return GetObjects<UArticyObject>(TechnicalName, CloneId);
 }
 
-TArray<UArticyObject*> UArticyDatabase::GetObjectsByType(TSubclassOf<class UArticyObject> Type, int32 CloneId) const
+TArray<UArticyObject*> UArticyDatabase::GetObjectsOfClass(TSubclassOf<class UArticyObject> Type, int32 CloneId) const
 {
 	TArray<UArticyObject*> arr;
 	for (auto obj : ArticyObjects)
@@ -358,13 +358,13 @@ TArray<UArticyPrimitive*> UArticyDatabase::GetAllObjects() const
 
 //---------------------------------------------------------------------------//
 
-UArticyPrimitive* UArticyDatabase::CloneFrom(FArticyId Id, int32 NewCloneId)
+UArticyPrimitive* UArticyDatabase::CloneFrom(FArticyId Id, int32 NewCloneId, TSubclassOf<class UArticyObject> CastTo)
 {
 	auto info = LoadedObjectsById.Find(Id);
 	return info && info->IsValid() ? info->Get()->Clone(this, NewCloneId, true) : nullptr;
 }
 
-UArticyObject* UArticyDatabase::CloneFromByName(FName TechnicalName, int32 NewCloneId)
+UArticyObject* UArticyDatabase::CloneFromByName(FName TechnicalName, int32 NewCloneId, TSubclassOf<class UArticyObject> CastTo)
 {
 	auto arr = LoadedObjectsByName.Find(TechnicalName);
 	if(!arr || arr->Objects.Num() <= 0)

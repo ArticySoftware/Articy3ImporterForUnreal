@@ -171,10 +171,11 @@ public:
 	 * If a CloneId other than 0 is provided, a copy of the object with this index must exist.
 	 * Otherwise a null-pointer is returned.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects")
-	UArticyPrimitive* GetObject(FArticyId Id, int32 CloneId = 0) const;
+	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType="CastTo", AdvancedDisplay="CloneId"))
+	UArticyPrimitive* GetObject(FArticyId Id, int32 CloneId = 0, TSubclassOf<class UArticyObject> CastTo = NULL) const;
 	template<typename T>
 	T* GetObject(FArticyId Id, int32 CloneId = 0) const { return Cast<T>(GetObject(Id, CloneId)); }
+
 
 	UArticyPrimitive* GetObjectUnshadowed(FArticyId Id, int32 CloneId = 0) const;
 
@@ -184,8 +185,8 @@ public:
 	 * otherwise a null-pointer is returned.
 	 * Note that the TechnicalName is not unique! This will take the first matching object.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects")
-	UArticyObject* GetObjectByName(FName TechnicalName, int32 CloneId = 0) const;
+	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType="CastTo", AdvancedDisplay="CloneId"))
+	UArticyObject* GetObjectByName(FName TechnicalName, int32 CloneId = 0, TSubclassOf<class UArticyObject> CastTo = NULL) const;
 	template<typename T>
 	T* GetObjectByName(FName TechnicalName, int32 CloneId = 0) const { return Cast<T>(GetObjectByName(TechnicalName, CloneId)); }
 
@@ -203,8 +204,8 @@ public:
 	 * If a CloneId other than 0 is provided, copies of the objects with this index must exist,
 	 * otherwise null-pointers are returned instead.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects")
-	TArray<UArticyObject*> GetObjects(FName TechnicalName, int32 CloneId = 0) const;
+	UFUNCTION(BlueprintCallable, Category = "Objects", meta = (DeterminesOutputType = "CastTo", AdvancedDisplay = "CloneId"))
+	TArray<UArticyObject*> GetObjects(FName TechnicalName, int32 CloneId = 0, TSubclassOf<class UArticyObject> CastTo = NULL) const;
 
 	/**
 	* Get all objects with a given Type.
@@ -212,15 +213,15 @@ public:
 	* otherwise they will be not added to the result.
 	*/
 	template<typename T>
-	TArray<T*> GetObjectsByType(int32 CloneId = 0) const;
+	TArray<T*> GetObjectsOfClass(int32 CloneId = 0) const;
 
 	/**
 	* Get all objects with a given Type.
 	* If a CloneId other than 0 is provided, copies of the objects with this index must exist,
 	* otherwise they will be not added to the result.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "Objects")
-	TArray<UArticyObject*> GetObjectsByType(TSubclassOf<class UArticyObject> Type, int32 CloneId = 0) const;
+	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType = "Class", AdvancedDisplay="CloneId"))
+	TArray<UArticyObject*> GetObjectsOfClass(TSubclassOf<class UArticyObject> Class, int32 CloneId = 0) const;
 
 	/**
 	* Get all objects.
@@ -243,8 +244,8 @@ public:
 	 * If the clone already exists, nullptr is returned!
 	 * If NewCloneId is -1, the next free clone Id will be used.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects")
-	UArticyPrimitive* CloneFrom(FArticyId Id, int32 NewCloneId = -1);
+	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType = "CastTo"))
+	UArticyPrimitive* CloneFrom(FArticyId Id, int32 NewCloneId = -1, TSubclassOf<class UArticyObject> CastTo = NULL);
 	template<typename T>
 	T* CloneFrom(FArticyId Id, int32 NewCloneId = -1) { return Cast<T>(CloneFrom(Id, NewCloneId)); }
 
@@ -253,15 +254,15 @@ public:
 	 * If the clone already exists, nullptr is returned!
 	 * If NewCloneId is -1, the next free clone Id will be used.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects")
-	UArticyObject* CloneFromByName(FName TechnicalName, int32 NewCloneId = -1);
+	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType = "CastTo"))
+	UArticyObject* CloneFromByName(FName TechnicalName, int32 NewCloneId = -1, TSubclassOf<class UArticyObject> CastTo = NULL);
 	template<typename T>
 	T* CloneFrom(FName TechnicalName, int32 NewCloneId = -1) { return Cast<T>(CloneFromByName(TechnicalName, NewCloneId)); }
 
 	/**
 	 * Clone an existing object, and assign the NewCloneId to it.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects")
+	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType = "CastTo"))
 	UArticyPrimitive* GetOrClone(FArticyId Id, int32 NewCloneId);
 	template<typename T>
 	T* GetOrClone(FArticyId Id, int32 NewCloneId) { return Cast<T>(GetOrClone(Id, NewCloneId)); }
@@ -269,7 +270,7 @@ public:
 	/**
 	 * Clone an existing object, and assign the NewCloneId to it.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects")
+	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType = "CastTo"))
 	UArticyObject* GetOrCloneByName(const FName& TechnicalName, int32 NewCloneId);
 	template<typename T>
 	T* GetOrClone(const FName& TechnicalName, int32 NewCloneId) { return Cast<T>(GetOrCloneByName(TechnicalName, NewCloneId)); }
@@ -332,7 +333,7 @@ TArray<T*> UArticyDatabase::GetObjects(FName TechnicalName, int32 CloneId) const
 }
 
 template<typename T>
-TArray<T*> UArticyDatabase::GetObjectsByType(int32 CloneId) const
+TArray<T*> UArticyDatabase::GetObjectsOfClass(int32 CloneId) const
 {
 	TArray<T*> arr;
 	for (auto obj : ArticyObjects)
