@@ -52,7 +52,8 @@ void GenerateUserMethods(CodeFileGenerator* header, const UArticyImportData* Dat
 		const bool bIsVoid = method.GetCPPReturnType() == "void";
 		header->Method(method.GetCPPReturnType(), method.Name, method.ParameterList, [&]
 		{
-			header->Line(FString::Printf(TEXT("if(!UserMethodsProvider) return %s;"), *method.GetCPPDefaultReturn()));
+			header->Line(FString::Printf(TEXT("auto methodProvider = GetUserMethodsProviderObject();")));
+			header->Line(FString::Printf(TEXT("if(!methodProvider) return %s;"), *method.GetCPPDefaultReturn()));
 
 			const FString returnOrEmpty = bIsVoid ? TEXT("") : TEXT("return ");
 
@@ -63,10 +64,10 @@ void GenerateUserMethods(CodeFileGenerator* header, const UArticyImportData* Dat
 				{
 					args = FString::Printf(TEXT(", %s"), *method.ArgumentList);
 				}
-				header->Line(FString::Printf(TEXT("%s%s::Execute_%s(UserMethodsProvider%s);"), *returnOrEmpty, *iClass, *method.BlueprintName, *args));
+				header->Line(FString::Printf(TEXT("%s%s::Execute_%s(methodProvider%s);"), *returnOrEmpty, *iClass, *method.BlueprintName, *args));
 			}
 			else
-				header->Line(FString::Printf(TEXT("%sCast<%s>(UserMethodsProvider)->%s(%s);"), *returnOrEmpty, *iClass, *method.Name, *method.ArgumentList));
+				header->Line(FString::Printf(TEXT("%sCast<%s>(methodProvider)->%s(%s);"), *returnOrEmpty, *iClass, *method.Name, *method.ArgumentList));
 
 		}, "", false, "", "const");
 	}
@@ -108,6 +109,15 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 		header->Line(FString::Printf(TEXT("return %s::StaticClass();"), *CodeGenerator::GetMethodsProviderClassname(Data)));
 	}, "", false, "", "override");
 
+	header->Line();
+	header->Method("UObject*", "GetUserMethodsProviderObject", "", [&]
+	{
+		header->Line("if(UserMethodsProvider)");
+		header->Line("	return UserMethodsProvider;");
+		header->Line("if(DefaultUserMethodsProvider)");
+		header->Line("	return DefaultUserMethodsProvider;");
+		header->Line("return nullptr;");
+	}, "", false, "", "const");
 
 	header->Line();
 	header->Line("public:", false, true, -1);

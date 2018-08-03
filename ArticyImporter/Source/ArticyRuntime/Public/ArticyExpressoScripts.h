@@ -268,6 +268,7 @@ public:
 public:
 
 	mutable UObject* UserMethodsProvider = nullptr;
+	mutable UObject* DefaultUserMethodsProvider = nullptr;
 
 	/** Sets the GV instance to be used when executing expresso script fragments. */
 	virtual void SetGV(UArticyGlobalVariables* GV) const { }

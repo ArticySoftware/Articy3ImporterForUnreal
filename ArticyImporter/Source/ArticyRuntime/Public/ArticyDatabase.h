@@ -135,6 +135,13 @@ public:
 	void UnloadDatabase();
 
 	/** 
+	 * Sets a default method provider, which will be always used whenever scripts get
+	 * evaluated / executed without a valid method provider.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Script Methods")
+	void SetDefaultUserMethodsProvider(UObject* MethodProvider);
+
+	/** 
 	 * Returns true if the database is in shadow state.
 	 * Can be used in script methods to determine if the function is called during
 	 * a flow player branch calculation.

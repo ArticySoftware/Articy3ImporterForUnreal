@@ -106,7 +106,8 @@ UArticyGlobalVariables* UArticyFlowPlayer::GetGVs() const
 
 UObject* UArticyFlowPlayer::GetMethodsProvider() const
 {
-	auto provider = GetDB()->GetExpressoInstance()->GetUserMethodsProviderInterface();
+	auto expressoInstance = GetDB()->GetExpressoInstance();
+	auto provider = expressoInstance->GetUserMethodsProviderInterface();
 	if(ensure(provider))
 	{
 		//check if the set provider implements the required interface
@@ -138,6 +139,11 @@ UObject* UArticyFlowPlayer::GetMethodsProvider() const
 								break;
 							}
 						}
+
+						//and finally we check for a default methods provider, which we can use as fallback
+						auto defaultUserMethodsProvider = expressoInstance->DefaultUserMethodsProvider;
+						if(defaultUserMethodsProvider && ensure(defaultUserMethodsProvider->GetClass()->ImplementsInterface(provider)))
+							UserMethodsProvider = defaultUserMethodsProvider;
 					}
 				}
 			}
