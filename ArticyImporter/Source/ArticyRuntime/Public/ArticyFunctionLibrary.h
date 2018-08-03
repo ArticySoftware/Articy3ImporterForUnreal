@@ -19,8 +19,8 @@ class ARTICYRUNTIME_API UArticyFunctionLibrary : public UBlueprintFunctionLibrar
 	
 public:
 	/** Converts an ArticyRef to an object. */
-	UFUNCTION(BlueprintPure, meta=(DisplayName = "Get Object", DefaultToSelf = "WorldContext"), Category="ArticyRef")
-	static UArticyObject* ArticyRef_GetObject(UPARAM(Ref) const FArticyRef& Ref, const UObject* WorldContext);
+	UFUNCTION(BlueprintPure, meta=(DisplayName = "Get Object", DefaultToSelf = "WorldContext", DeterminesOutputType = "CastTo"), Category="ArticyRef")
+	static UArticyObject* ArticyRef_GetObject(UPARAM(Ref) const FArticyRef& Ref, TSubclassOf<class UArticyObject> CastTo, const UObject* WorldContext);
 	/** Sets the referenced object of an ArticyRef */
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Object", DefaultToSelf = "WorldContext"), Category = "ArticyRef")
 	static void ArticyRef_SetObject(UPARAM(Ref) FArticyRef& Ref, UPARAM(Ref) UArticyPrimitive* Object);
@@ -32,8 +32,8 @@ public:
 	static void ArticyRef_SetObjectId(UPARAM(Ref) FArticyRef& Ref, UPARAM(Ref) FArticyId Id);
 
 	/** Converts an ArticyId to an object. */
-	UFUNCTION(BlueprintPure, meta=(DisplayName = "Get Object", DefaultToSelf = "WorldContext"), Category="ArticyId")
-	static UArticyObject* ArticyId_GetObject(UPARAM(Ref) const FArticyId& Id, const UObject* WorldContext);
+	UFUNCTION(BlueprintPure, meta=(DisplayName = "Get Object", DefaultToSelf = "WorldContext", DeterminesOutputType = "CastTo"), Category="ArticyId")
+	static UArticyObject* ArticyId_GetObject(UPARAM(Ref) const FArticyId& Id, TSubclassOf<class UArticyObject> CastTo, const UObject* WorldContext);
 
 	/** Creates an ArticyId from a hex string. */
 	UFUNCTION(BlueprintPure, meta=(DisplayName = "To Articy Id"), Category="ArticyId")
