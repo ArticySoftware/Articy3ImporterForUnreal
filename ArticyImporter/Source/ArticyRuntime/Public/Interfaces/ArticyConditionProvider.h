@@ -19,7 +19,7 @@ class IArticyConditionProvider
 
 public:
 
-	UFUNCTION(BlueprintCallable, Category="Condition")
+	UFUNCTION(BlueprintCallable, Category="Condition", meta=(AdvancedDisplay="GV, MethodProvider"))
 	virtual bool Evaluate(class UArticyGlobalVariables* GV = nullptr, class UObject* MethodProvider = nullptr) { return true; }
 
 	/*virtual bool Execute(class UArticyGlobalVariables* GV = nullptr, class UObject* MethodProvider = nullptr)

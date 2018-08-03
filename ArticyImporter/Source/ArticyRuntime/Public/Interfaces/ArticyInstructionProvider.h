@@ -19,6 +19,6 @@ class IArticyInstructionProvider
 
 public:
 
-	UFUNCTION(BlueprintCallable, Category="Instruction")
+	UFUNCTION(BlueprintCallable, Category="Instruction", meta=(AdvancedDisplay="GV, MethodProvider"))
 	virtual void Execute(class UArticyGlobalVariables* GV = nullptr, class UObject* MethodProvider = nullptr) { }
 };
