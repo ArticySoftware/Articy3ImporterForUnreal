@@ -344,8 +344,9 @@ TArray<T*> UArticyDatabase::GetObjectsOfClass(int32 CloneId) const
 {
 	TArray<T*> arr;
 	for (auto obj : ArticyObjects)
-		if (obj->GetCloneId() == CloneId && Cast<T>(obj))
-			arr.Add(obj);
+		if (obj->GetCloneId() == CloneId)
+			if (T* castedObj = Cast<T>(obj))
+				arr.Add(castedObj);
 
 	return arr;
 }
