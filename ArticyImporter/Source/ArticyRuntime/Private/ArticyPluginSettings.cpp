@@ -8,8 +8,8 @@
 UArticyPluginSettings::UArticyPluginSettings()
 {
 	bCreateBlueprintTypeForScriptMethods = true;
-	bKeepDatabaseBetweenWorlds = false;
-	bKeepGlobalVariablesBetweenWorlds = false;
+	bKeepDatabaseBetweenWorlds = true;
+	bKeepGlobalVariablesBetweenWorlds = true;
 }
 
 const UArticyPluginSettings* UArticyPluginSettings::Get()
