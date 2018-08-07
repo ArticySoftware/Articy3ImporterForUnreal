@@ -25,11 +25,11 @@ void FArticyGvName::SetByFullName(const FName FullVariableName)
 {
 	FString variableString;
 	FString namespaceString;
-	if (FullName.ToString().Split(TEXT("."), &variableString, &namespaceString))
+	if (FullVariableName.ToString().Split(TEXT("."), &namespaceString, &variableString))
 	{
 		FullName = FullVariableName;
-		Variable = FName(*variableString);
 		Namespace = FName(*namespaceString);
+		Variable = FName(*variableString);
 	}
 }
 
