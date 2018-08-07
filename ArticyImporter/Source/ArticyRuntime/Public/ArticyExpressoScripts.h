@@ -265,10 +265,10 @@ public:
 	 */
 	bool Execute(const int &InstructionFragmentHash, UArticyGlobalVariables* GV, UObject* MethodProvider) const;
 
-public:
-
 	mutable UObject* UserMethodsProvider = nullptr;
 	mutable UObject* DefaultUserMethodsProvider = nullptr;
+
+protected:
 
 	/** Sets the GV instance to be used when executing expresso script fragments. */
 	virtual void SetGV(UArticyGlobalVariables* GV) const { }

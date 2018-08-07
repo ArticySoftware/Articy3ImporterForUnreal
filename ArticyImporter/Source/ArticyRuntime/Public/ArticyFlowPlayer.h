@@ -106,6 +106,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Flow")
 	void Play(int Index = 0);
 
+	/** Calls the script on an output pin of the current object */
 	UFUNCTION(BlueprintCallable, Category = "Flow")
 	void FinishCurrentPausedObject(int PinIndex = 0);
 

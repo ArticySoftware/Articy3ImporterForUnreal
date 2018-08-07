@@ -10,7 +10,7 @@ public class ArticyImporter : ModuleRules
 	public ArticyImporter(ReadOnlyTargetRules Target) : base(Target)
 	{
 
-		OptimizeCode = CodeOptimization.Never;
+		//OptimizeCode = CodeOptimization.Never;
 
 		PublicIncludePaths.AddRange(
 			new string[] {
@@ -22,7 +22,6 @@ public class ArticyImporter : ModuleRules
 #else
 				"GameProjectGeneration",
 #endif
-
 			}
 			);
 
