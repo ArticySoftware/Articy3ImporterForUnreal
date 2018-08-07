@@ -183,7 +183,11 @@ public:
 	template<typename T>
 	T* GetObject(FArticyId Id, int32 CloneId = 0) const { return Cast<T>(GetObject(Id, CloneId)); }
 
-
+	/** 
+	 * Get an unshadowed copy of an object.
+	 * Internally used by the flow player to replace nodes with unshadowed ones
+	 * before returning them via the flow player callbacks.
+	 */
 	UArticyPrimitive* GetObjectUnshadowed(FArticyId Id, int32 CloneId = 0) const;
 
 	/**

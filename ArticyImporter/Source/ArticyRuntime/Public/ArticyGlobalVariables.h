@@ -493,12 +493,3 @@ const VariablePayloadType& UArticyGlobalVariables::GetVariableValue(const FName 
 	static VariablePayloadType empty = VariablePayloadType();
 	return empty;
 }
-
-template<typename ArticyVariableType, typename VariablePayloadType>
-const VariablePayloadType& UArticyGlobalVariables::GetVariableValue(const FName FullVariableName, bool& bSucceeded)
-{
-	FString Namespace;
-	FString Variable;
-	FullVariableName.ToString().Split(TEXT("."), &Namespace, &Variable);
-	return GetVariableValue<ArticyVariableType, VariablePayloadType>(FName(*Namespace), FName(*Variable), bSucceeded);
-}
