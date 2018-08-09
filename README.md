@@ -73,6 +73,7 @@ Your file should now look something like this:
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
+using System.IO;
 
 public class MyArticyProject : ModuleRules
 {
@@ -89,8 +90,8 @@ public class MyArticyProject : ModuleRules
 								"HeadMountedDisplay",
 								"ArticyRuntime"
 							});
-		
-		PublicIncludePaths.AddRange(new string[] {"ArticyRuntime/Public"});
+
+		PublicIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "../../Plugins/ArticyImporter/Source/ArticyRuntime/Public") });
 	}
 }
 ```
@@ -172,7 +173,7 @@ Dealing with templates is a bit more complicated. First thing to understand is t
 The name of your template types also follows a similar structure as the one mentioned before, but utilizing the Templates technical name: `<ProjectName><TemplateTechnicalName>`. So if your project is called *ManiacManfred* and your templates technical name is *Conditional_Zone* your correct type would be called `ManiacManfredConditional_Zone`.
 Its also worth mentioning that even if it is a new type, it is still derived from the base type with all its properties.
 
-Accessing is easy once you have cast the object into the correct type, just drag a connection out of the cast node and search for the type to see all its properties.
+Accessing is easy once you have cast the object into the correct type, just drag a connection out of the node and search for the type to see all its properties.
 
 <p align="center">
   <img src="https://www.nevigo.com/articy-importer/unreal/base_object_propertylist.png">
@@ -189,7 +190,7 @@ Some properties are a bit more complex like reference strips and scripts etc:
 
 So to reiterate:
 
-1. Cast object to appropriate type.
+1. Get object and cast to appropriate type.
 2. Access the property/feature.
 3. If it is a feature you access now the property inside the feature. <br/>
 3a. If it is a script method, you can execute it via the `Evaluate` method.
