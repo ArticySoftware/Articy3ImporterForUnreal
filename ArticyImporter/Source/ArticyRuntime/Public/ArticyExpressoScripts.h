@@ -96,7 +96,6 @@ struct ARTICYRUNTIME_API ExpressoType
 
 	//---------------------------------------------------------------------------//
 
-	#pragma region operators
 	ExpressoType operator-() const;
 
 	bool operator==(const ExpressoType& Other) const;
@@ -123,7 +122,6 @@ struct ARTICYRUNTIME_API ExpressoType
 	ExpressoType& operator--();
 	ExpressoType operator--(int);*/
 
-	#pragma endregion
 	//---------------------------------------------------------------------------//
 
 	struct Definition

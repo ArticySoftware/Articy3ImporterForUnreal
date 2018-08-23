@@ -9,8 +9,6 @@
 
 class UArticyObject;
 
-#pragma region Numeric Types
-
 /**
  * 64-bit ID used for referencing articy objects, exposable to blueprints.
  */
@@ -149,11 +147,7 @@ public:
 	float h;
 };
 
-#pragma endregion
-
 //---------------------------------------------------------------------------//
-
-#pragma region enums
 
 UENUM(BlueprintType)
 enum class EArticyPreviewImageViewBoxModes : uint8
@@ -169,5 +163,3 @@ enum class EArticyLocationAnchorSize : uint8
 	Medium = 1,
 	Large = 2,
 };
-
-#pragma endregion

@@ -121,8 +121,6 @@ ExpressoType::operator FString() const
 //---------------------------------------------------------------------------//
 //===========================================================================//
 
-#pragma region operators
-
 ExpressoType ExpressoType::operator-() const
 {
 	switch (Type)
@@ -408,8 +406,6 @@ ExpressoType ExpressoType::operator--(int)
 	return tmp;
 }
 */
-
-#pragma endregion
 
 //---------------------------------------------------------------------------//
 

@@ -10,8 +10,6 @@
 
 #include "ArticyBuiltinTypes.generated.h"
 
-#pragma region PreviewImage
-
 UCLASS(BlueprintType)
 class ARTICYRUNTIME_API UArticyPreviewImage : public UArticyBaseObject
 {
@@ -33,11 +31,7 @@ private:
 	void InitFromJson(TSharedPtr<FJsonValue> Json) override;
 };
 
-#pragma endregion
-
 //---------------------------------------------------------------------------//
-
-#pragma region Connections
 
 UCLASS(BlueprintType)
 class ARTICYRUNTIME_API UArticyConnection : public UArticyObject
@@ -111,8 +105,6 @@ private:
 
 	void InitFromJson(TSharedPtr<FJsonValue> Json) override;
 };
-
-#pragma endregion
 
 //---------------------------------------------------------------------------//
 
