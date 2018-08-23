@@ -66,7 +66,9 @@ For unreal to correctly build the plugin we need to add it as an dependency, to 
 
 And open it in your favorite text or code editor.
 
-Now we need to adjust the existing code and make sure that the Importer is an dependency for the project. Locate the `PublicDependencyModuleNames` array and add `"ArticyRuntime"` as an additional dependency. You should also add the plugin header files to the public include path by adding `PublicIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "../../Plugins/ArticyImporter/Source/ArticyRuntime/Public") });` below the dependencies.
+Now we need to adjust the existing code and make sure that the Importer is an dependency for the project. Locate the `PublicDependencyModuleNames` array and add `"ArticyRuntime"` as an additional dependency. Furthermore you should add the plugin header files to the public include path by adding `PublicIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "../../Plugins/ArticyImporter/Source/ArticyRuntime/Public") });` below the dependencies.  
+If you are working on macOS, you should also add `"Json"` to `PrivateDependencyModuleNames`.
+
 Your file should now look something like this:
 
 ```
