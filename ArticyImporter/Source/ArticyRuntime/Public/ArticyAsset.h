@@ -45,7 +45,7 @@ public:
 	UTexture2D* LoadAsTexture2D() const;
 
 	UFUNCTION(BlueprintCallable, Category="Load Asset")
-	USoundWave* LoadAsAudio() const;
+	class UFileMediaSource* LoadAsAudio() const;
 
 	/** The relative path of the referenced asset. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Meta Data")

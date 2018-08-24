@@ -5,6 +5,7 @@
 #include "ArticyRuntimePrivatePCH.h"
 
 #include "ArticyAsset.h"
+#include "FileMediaSource.h"
 
 UTexture* UArticyAsset::LoadAsTexture() const
 {
@@ -16,9 +17,9 @@ UTexture2D* UArticyAsset::LoadAsTexture2D() const
 	return Cast<UTexture2D>(GetAsset());
 }
 
-USoundWave* UArticyAsset::LoadAsAudio() const
+UFileMediaSource* UArticyAsset::LoadAsAudio() const
 {
-	return Cast<USoundWave>(GetAsset());
+	return Cast<UFileMediaSource>(GetAsset());
 }
 
 UObject* UArticyAsset::GetAsset() const
