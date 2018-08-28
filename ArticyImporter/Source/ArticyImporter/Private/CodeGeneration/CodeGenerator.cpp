@@ -8,6 +8,7 @@
 #include "ArticyImportData.h"
 #include "DatabaseGenerator.h"
 #include "GlobalVarsGenerator.h"
+#include "InterfacesGenerator.h"
 #include "Developer/HotReload/Public/IHotReload.h"
 #include "ArticyRuntime/Public/ArticyGlobalVariables.h"
 #include "ObjectDefinitionsGenerator.h"
@@ -22,6 +23,11 @@
 FString CodeGenerator::GetSourceFolder()
 {
 	return FPaths::GameSourceDir() / FApp::GetProjectName() / TEXT("ArticyGenerated");
+}
+
+FString CodeGenerator::GetGeneratedInterfacesFilename(const UArticyImportData* Data)
+{
+	return Data->GetProject().TechnicalName + "Interfaces";
 }
 
 FString CodeGenerator::GetGeneratedTypesFilename(const UArticyImportData* Data)
@@ -54,6 +60,11 @@ FString CodeGenerator::GetExpressoScriptsClassname(const UArticyImportData* Data
 	return (bOmittPrefix ? "" : "U") + Data->GetProject().TechnicalName + "ExpressoScripts";
 }
 
+FString CodeGenerator::GetFeatureInterfaceClassName(const UArticyImportData* Data, const FArticyTemplateFeatureDef& Feature, const bool bOmittPrefix)
+{
+	return (bOmittPrefix ? "" : "I") + Data->GetProject().TechnicalName + "ObjectWith" + Feature.GetTechnicalName() + "Feature";
+}
+
 bool CodeGenerator::DeleteGeneratedCode(const FString &Filename)
 {
 	if(Filename.IsEmpty())
@@ -74,6 +85,7 @@ void CodeGenerator::GenerateCode(UArticyImportData* Data)
 
 		GlobalVarsGenerator::GenerateCode(Data);
 		DatabaseGenerator::GenerateCode(Data);
+		InterfacesGenerator::GenerateCode(Data);
 		ObjectDefinitionsGenerator::GenerateCode(Data);
 	}
 
