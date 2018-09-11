@@ -545,9 +545,7 @@ void UArticyImportData::AddChildToParentCache(const FArticyId Parent, const FArt
 	FArticyIdArray* childrenPtr = ParentChildrenCache.Find(Parent);
 	if (!childrenPtr)
 	{
-		FArticyIdArray children;
-		ParentChildrenCache.Add(Parent, children);
-		childrenPtr = &children;
+		childrenPtr = &ParentChildrenCache.Add(Parent, FArticyIdArray());
 	}
 
 	childrenPtr->Values.AddUnique(Child);
