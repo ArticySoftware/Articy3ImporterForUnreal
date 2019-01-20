@@ -9,11 +9,8 @@ public class ArticyImporter : ModuleRules
 {
 	public ArticyImporter(ReadOnlyTargetRules Target) : base(Target)
 	{
-		//OptimizeCode = CodeOptimization.Never;
-		
-#if UE_4_21_OR_LATER
-		PrivatePCHHeaderFile = "Private/ArticyImporterPrivatePCH.h";
-#endif
+
+		OptimizeCode = CodeOptimization.Never;
 
 		PublicIncludePaths.AddRange(
 			new string[] {
