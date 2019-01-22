@@ -6,13 +6,13 @@
 
 #include "Engine/DataAsset.h"
 #include "ArticyBaseObject.h"
-#include "Private/ShadowStateManager.h"
+#include "ShadowStateManager.h"
 #include "AssetRegistryModule.h"
-#include "ArticyObject.h"
 #include "Serialization/Archive.h"
 
 #include "ArticyDatabase.generated.h"
 
+class UArticyObject;
 class UArticyExpressoScripts;
 struct FArticyId;
 struct FArticyPackage;

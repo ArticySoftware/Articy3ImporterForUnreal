@@ -4,6 +4,7 @@
 //
 #pragma once
 
+#include "ArticyObject.h"
 #include "ArticyFlowObject.h"
 #include "ArticyInputPinsProvider.h"
 #include "ArticyOutputPinsProvider.h"

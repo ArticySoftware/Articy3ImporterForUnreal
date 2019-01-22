@@ -8,6 +8,7 @@
 #include "ArticyRef.h"
 #include "ArticyBaseObject.h"
 #include "ArticyBaseTypes.h"
+#include "ArticyDatabase.h"
 
 #include "ArticyPrimitive.generated.h"
 

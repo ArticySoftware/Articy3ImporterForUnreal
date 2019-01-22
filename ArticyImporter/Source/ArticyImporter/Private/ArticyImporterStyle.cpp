@@ -2,10 +2,10 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyImporterPrivatePCH.h"
+
 #include "ArticyImporterStyle.h"
-#include "SlateGameResources.h"
-#include "IPluginManager.h"
+#include "Slate/SlateGameResources.h"
+#include "Interfaces/IPluginManager.h"
 
 TSharedPtr< FSlateStyleSet > FArticyImporterStyle::StyleInstance = NULL;
 
