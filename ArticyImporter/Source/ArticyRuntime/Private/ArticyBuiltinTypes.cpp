@@ -2,12 +2,12 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
 
+
+#include "ArticyBuiltinTypes.h"
 #include "ArticyAsset.h"
 #include "ArticyHelpers.h"
 #include "ArticyDatabase.h"
-#include "ArticyBuiltinTypes.h"
 
 void UArticyPreviewImage::InitFromJson(TSharedPtr<FJsonValue> Json)
 {

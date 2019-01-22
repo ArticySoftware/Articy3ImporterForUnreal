@@ -4,7 +4,12 @@
 //
 #pragma once
 
+#include "CoreMinimal.h"
 #include "ArticyObject.h"
+#include <Engine/Texture2D.h>
+#include <Engine/Texture.h>
+#include <FileMediaSource.h>
+#include "UObject/NoExportTypes.h"
 
 #include "ArticyAsset.generated.h"
 

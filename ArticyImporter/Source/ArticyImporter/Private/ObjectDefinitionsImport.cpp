@@ -2,15 +2,15 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyImporterPrivatePCH.h"
 
-#include "ArticyImporter.h"
+
 #include "ObjectDefinitionsImport.h"
+#include "ArticyImporter.h"
 #include "ArticyImportData.h"
 #include "CodeFileGenerator.h"
 #include "ArticyBaseTypes.h"
 #include "PredefinedTypes.h"
-#include "SharedPointerInternals.h"
+#include "Templates/SharedPointerInternals.h"
 #include "ArticyFlowClasses.h"
 #include "ArticyScriptFragment.h"
 

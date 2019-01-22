@@ -2,11 +2,11 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
 
+
+#include "ArticyGlobalVariables.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "ArticyRuntime.h"
-#include "ArticyGlobalVariables.h"
 #include "ArticyPluginSettings.h"
 #include "ArticyFlowPlayer.h"
 

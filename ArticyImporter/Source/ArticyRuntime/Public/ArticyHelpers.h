@@ -4,9 +4,12 @@
 //
 #pragma once
 
-#include "Engine.h"
+//#include "Engine.h"
 #include "AssetRegistryModule.h"
 #include <sstream>
+#include "Dom/JsonValue.h"
+#include "UObject/Package.h"
+#include "Dom/JsonObject.h"
 
 namespace ArticyHelpers
 {

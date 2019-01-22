@@ -4,7 +4,7 @@
 //
 #pragma once
 
-#include "ArticyRuntimePrivatePCH.h"
+
 
 #include "ArticyOutputPinsProvider.h"
 

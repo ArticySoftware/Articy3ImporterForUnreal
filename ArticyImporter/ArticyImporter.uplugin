@@ -18,12 +18,20 @@
 		{
 			"Name": "ArticyRuntime",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms" : 
+			[
+				"Win64"
+			]
 		},
 		{
 			"Name": "ArticyImporter",
 			"Type": "Editor",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms" : 
+			[
+				"Win64"
+			]
 		}
 	]
 }

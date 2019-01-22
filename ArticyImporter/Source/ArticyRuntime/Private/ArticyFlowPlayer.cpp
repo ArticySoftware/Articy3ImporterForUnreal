@@ -2,10 +2,10 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
 
-#include "ArticyRuntime.h"
+
 #include "ArticyFlowPlayer.h"
+#include "ArticyRuntime.h"
 #include "ArticyFlowObject.h"
 #include "ArticyObjectWithSpeaker.h"
 #include "ArticyExpressoScripts.h"

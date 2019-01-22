@@ -3,7 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
 #pragma once
+#include "CoreMinimal.h"
 #include "AssetRegistryModule.h"
+#include "ArticyImportData.h"
+#include "Misc/CompilationResult.h"
 
 //#include "CodeGenerator.generated.h"
 
