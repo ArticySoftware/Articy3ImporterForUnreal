@@ -136,6 +136,15 @@ void FArticyObjectDef::GenerateCode(CodeFileGenerator& header, const UArticyImpo
 			header.Line("public:", false, true, -1);
 			header.Line();
 			
+			//implement feature interfaces
+			for(const auto& feature : Template.GetFeatures())
+			{
+				header.Method(feature.GetCppType(Data, true), "GetFeature" + feature.GetTechnicalName(), "", [&]
+				{
+					header.Line("return " + feature.GetTechnicalName(), true);
+				}, CodeGenerator::GetFeatureInterfaceClassName(Data, feature) + " implementation", false, "", "const override");
+			}
+
 			//declare all properties
 			for(const auto prop : Properties)
 			{
@@ -255,8 +264,21 @@ FString FArticyObjectDef::GetCppBaseClasses(const UArticyImportData* Data) const
 			baseClasses += ",\n public " + i.ToString();
 		}
 	}
+	for(const auto& feature : Template.GetFeatures())
+	{
+		baseClasses += ",\n public " + CodeGenerator::GetFeatureInterfaceClassName(Data, feature, false);
+	}
 
 	return baseClasses;
+}
+
+const TArray<FArticyTemplateFeatureDef>& FArticyObjectDef::GetFeatures() const
+{
+	if (DefType == EObjectDefType::Template)
+		return Template.GetFeatures();
+
+	static const TArray<FArticyTemplateFeatureDef> Empty;
+	return Empty;
 }
 
 //---------------------------------------------------------------------------//
@@ -466,6 +488,7 @@ void FArticyTemplateFeatureDef::GenerateDefCode(CodeFileGenerator& header, const
 	if(!Data->GetObjectDefs().IsNewFeatureType(*GetCppType(Data, false)))
 		return;
 
+	//generate feature type
 	header.Class(GetCppType(Data, false) + " : public UArticyBaseFeature", "UCLASS generated from Articy " + DisplayName + " Feature", true, [&]
 	{
 		header.Line("public:", false, true, -1);
@@ -535,6 +558,13 @@ void FArticyObjectDefinitions::ImportFromJson(const TArray<TSharedPtr<FJsonValue
 		FArticyObjectDef def;
 		def.ImportFromJson(obj, Data);
 		Types.Add(def.GetOriginalType(), def);
+
+		for (auto feature : def.GetFeatures())
+		{
+			FName key = FName(*feature.GetTechnicalName());
+			if (!FeatureDefs.Contains(key))
+				FeatureDefs.Add(key, feature);
+		}
 	}
 }
 

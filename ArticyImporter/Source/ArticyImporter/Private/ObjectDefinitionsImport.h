@@ -102,6 +102,7 @@ public:
 	UClass* GetUClass(const UArticyImportData* Data) const;
 
 	FString GetTechnicalName() const { return TechnicalName; }
+	FString GetDisplayName() const { return DisplayName; }
 
 private:
 	UPROPERTY(VisibleAnywhere, Category="TemplateFeature")
@@ -131,6 +132,7 @@ public:
 	void InitializeModel(UArticyPrimitive* Model, const FString& Path, const TSharedPtr<FJsonObject> Values, const UArticyImportData* Data) const;
 
 	FString GetDisplayName() const { return DisplayName; }
+	const TArray<FArticyTemplateFeatureDef>& GetFeatures() const { return Features; }
 
 private:
 
@@ -173,6 +175,7 @@ public:
 	FString GetCppType(const UArticyImportData* Data, const bool bForProperty) const;
 	FString GetCppBaseClasses(const UArticyImportData* Data) const;
 	const FName& GetOriginalType() const { return Type; }
+	const TArray<FArticyTemplateFeatureDef>& GetFeatures() const;
 
 private:
 
@@ -234,6 +237,7 @@ public:
 	bool IsNewFeatureType(const FName& CppType) const;
 	TMap<FName, FArticyObjectDef>& GetTypes() { return Types; }
 	const TMap<FName, FArticyObjectDef>& GetTypes() const { return Types; }
+	const TMap<FName, FArticyTemplateFeatureDef> GetFeatures() const { return FeatureDefs; }
 
 private:
 
@@ -251,4 +255,7 @@ private:
 	 */
 	UPROPERTY(VisibleAnywhere, Category="ObjectDefinitions")
 	mutable TSet<FName> FeatureTypes;
+
+	UPROPERTY(VisibleAnywhere, Category = "ObjectDefinitions")
+	TMap<FName, FArticyTemplateFeatureDef> FeatureDefs;
 };

@@ -10,7 +10,7 @@
 
 void GenerateMethodInterface(CodeFileGenerator* header, const UArticyImportData* Data, bool bCreateBlueprintableUserMethods)
 {
-	header->UInterface(CodeGenerator::GetMethodsProviderClassname(Data, true), "", [&]
+	header->UInterface(CodeGenerator::GetMethodsProviderClassname(Data, true), "Blueprintable", "", [&]
 	{
 		header->Line("public:", false, true, -1);
 		for(const auto method : Data->GetUserMethods())

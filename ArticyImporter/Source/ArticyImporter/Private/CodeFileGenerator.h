@@ -54,7 +54,7 @@ public:
 	void Struct(const FString& Structname, const FString& Comment, const bool bUStruct, Lambda Content, const FString& InlineDeclaration = "");
 	/** Adds a UINTERFACE (UMyInterface and IMyInterface) definition. */
 	template<typename Lambda>
-	void UInterface(const FString& Classname, const FString& Comment, Lambda Content);
+	void UInterface(const FString& Classname, const FString& UInterfaceSpecifiers, const FString& Comment, Lambda Content);
 	
 	/** Adds an enum (or UENUM) definition. */
 	template<typename Type>
@@ -173,11 +173,13 @@ void CodeFileGenerator::Struct(const FString& Structname, const FString& Comment
 }
 
 template <typename Lambda>
-void CodeFileGenerator::UInterface(const FString& Classname, const FString& Comment, Lambda Content)
+void CodeFileGenerator::UInterface(const FString& Classname, const FString& UInterfaceSpecifiers, const FString& Comment, Lambda Content)
 {
-	Line("UINTERFACE(Blueprintable)");
+	if (!Comment.IsEmpty())
+		this->Comment(Comment);
+	Line(FString::Printf(TEXT("UINTERFACE(%s)"), *UInterfaceSpecifiers));
 	Line(FString::Printf(TEXT("class U%s : public UInterface { GENERATED_BODY() };"), *Classname));
-	Class("I" + Classname, Comment, false, [&]
+	Class("I" + Classname, "", false, [&]
 	{
 		Line("GENERATED_BODY()");
 		Line();

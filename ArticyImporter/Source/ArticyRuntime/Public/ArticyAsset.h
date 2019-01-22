@@ -43,14 +43,24 @@ class ARTICYRUNTIME_API UArticyAsset : public UArticyObject
 
 public:
 
+
+	UFUNCTION(BlueprintCallable, Category="Load Asset")
+	UObject* LoadAsset() const;
+
 	UFUNCTION(BlueprintCallable, Category="Load Asset")
 	UTexture* LoadAsTexture() const;
 
 	UFUNCTION(BlueprintCallable, Category="Load Asset")
 	UTexture2D* LoadAsTexture2D() const;
 
+	UFUNCTION(BlueprintCallable, Category="Load Asset", meta=(DeprecatedFunction, DeprecationMessage="Function is now splitted into LoadAsFileMediaSource and LoadAsSoundWave."))
+	class UFileMediaSource* LoadAsAudio() const { return LoadAsFileMediaSource(); }
+
 	UFUNCTION(BlueprintCallable, Category="Load Asset")
-	class UFileMediaSource* LoadAsAudio() const;
+	USoundWave* LoadAsSoundWave() const;
+
+	UFUNCTION(BlueprintCallable, Category="Load Asset")
+	class UFileMediaSource* LoadAsFileMediaSource() const;
 
 	/** The relative path of the referenced asset. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Meta Data")
@@ -62,6 +72,4 @@ public:
 private:
 	UPROPERTY(Transient, VisibleAnywhere)
 	mutable TWeakObjectPtr<UObject> Asset = nullptr;
-
-	UObject* GetAsset() const;
 };

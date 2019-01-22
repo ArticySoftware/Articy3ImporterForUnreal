@@ -15,7 +15,8 @@ void ObjectDefinitionsGenerator::GenerateCode(const UArticyImportData* Data)
 	{
 		header->Line("#include \"CoreUObject.h\"");
 		header->Line("#include \"ArticyRuntime/Public/ArticyBaseInclude.h\"");
-		header->Line("#include \""+ CodeGenerator::GetGeneratedTypesFilename(Data) +".generated.h\"");
+		header->Line("#include \"" + CodeGenerator::GetGeneratedInterfacesFilename(Data) + ".h\"");
+		header->Line("#include \"" + CodeGenerator::GetGeneratedTypesFilename(Data) + ".generated.h\"");
 		header->Line();
 
 		for(const auto type : Data->GetObjectDefs().GetTypes())
