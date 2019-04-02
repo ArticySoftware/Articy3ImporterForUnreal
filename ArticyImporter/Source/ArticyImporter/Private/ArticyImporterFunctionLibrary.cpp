@@ -57,5 +57,5 @@ bool FArticyImporterFunctionLibrary::EnsureImportFile(UArticyImportData** Import
 		}
 	}
 
-	return *ImportData;
+	return *ImportData != nullptr; // update for VS2019: Fixed Error C4800. Was just *ImportData before
 }

@@ -134,7 +134,7 @@ ExpressoType ExpressoType::operator-() const
 	case Float:
 		return ExpressoType(-GetFloat());
 	case String:
-		return ExpressoType("");
+		return ExpressoType(FString("")); // update for VS2019: Fixed Error C4800. Was just "" before
 
 	default:
 		ensureMsgf(false, TEXT("Unknown ArticyExpressoType!"));
