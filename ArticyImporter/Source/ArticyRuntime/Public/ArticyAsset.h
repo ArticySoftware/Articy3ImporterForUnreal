@@ -8,6 +8,7 @@
 #include "ArticyObject.h"
 #include <Engine/Texture2D.h>
 #include <Engine/Texture.h>
+#include <Sound/SoundWave.h>
 #include <FileMediaSource.h>
 #include "UObject/NoExportTypes.h"
 
@@ -43,7 +44,6 @@ class ARTICYRUNTIME_API UArticyAsset : public UArticyObject
 
 public:
 
-
 	UFUNCTION(BlueprintCallable, Category="Load Asset")
 	UObject* LoadAsset() const;
 
@@ -57,7 +57,7 @@ public:
 	class UFileMediaSource* LoadAsAudio() const { return LoadAsFileMediaSource(); }
 
 	UFUNCTION(BlueprintCallable, Category="Load Asset")
-	USoundWave* LoadAsSoundWave() const;
+	class USoundWave* LoadAsSoundWave() const;
 
 	UFUNCTION(BlueprintCallable, Category="Load Asset")
 	class UFileMediaSource* LoadAsFileMediaSource() const;
