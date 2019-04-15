@@ -99,7 +99,7 @@ public:
 
 	/** All the objects that belong to this model. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TArray<UArticyPrimitive*> Objects;
+	TArray<TSoftObjectPtr<UArticyPrimitive>> Objects;
 };
 
 //---------------------------------------------------------------------------//

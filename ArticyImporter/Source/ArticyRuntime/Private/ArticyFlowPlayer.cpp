@@ -22,7 +22,8 @@ void UArticyFlowPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	//update Cursor to object referenced by StartOn
-	SetCursorToStartNode();
+	// TODO k2 - the following has been commented out - need a better solution for this - more generic - maybe a property setting.
+	//SetCursorToStartNode(); // removed due to error when BeginPlay of PersonController and level blueprint changes its orders of execution
 }
 
 //---------------------------------------------------------------------------//
@@ -38,6 +39,12 @@ void UArticyFlowPlayer::SetStartNodeWithFlowObject(TScriptInterface<IArticyFlowO
 	FArticyRef ArticyRef;
 	ArticyRef.SetReference(Cast<UArticyPrimitive>(Node.GetObject()));
 	SetStartNode(ArticyRef);
+}
+
+void UArticyFlowPlayer::SetStartNodeById(FArticyId NewId)
+{
+	StartOn.SetId(NewId);
+	SetCursorToStartNode();
 }
 
 void UArticyFlowPlayer::SetCursorTo(TScriptInterface<IArticyFlowObject> Node)
@@ -153,6 +160,17 @@ UObject* UArticyFlowPlayer::GetMethodsProvider() const
 	return UserMethodsProvider;
 }
 
+TArray<FArticyBranch> UArticyFlowPlayer::ExploreTree(UObject* Node, bool bShadowed, int32 Depth)
+{
+	auto iArticyFlowObject = Cast<IArticyFlowObject>(Node);
+	if (iArticyFlowObject)
+	{
+		return Explore(iArticyFlowObject, bShadowed, Depth);
+	}
+
+	return TArray<FArticyBranch>();
+}
+
 IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 {
 	auto db = UArticyDatabase::Get(this);
@@ -185,14 +203,14 @@ IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 
 //---------------------------------------------------------------------------//
 
-TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, uint32 Depth)
+TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth)
 {
 	TArray<FArticyBranch> OutBranches;
 
 	//check stop condition
-	if((Depth > uint32(ExploreDepthLimit) || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))))
+	if((Depth > ExploreDepthLimit || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))))
 	{
-		if(Depth > uint32(ExploreDepthLimit))
+		if(Depth > ExploreDepthLimit)
 			UE_LOG(LogArticyRuntime, Warning, TEXT("ExploreDepthLimit (%d) reached, stopping exploration!"), ExploreDepthLimit);
 		if(!Node)
 			UE_LOG(LogArticyRuntime, Warning, TEXT("Found a nullptr Node when exploring a branch!"));

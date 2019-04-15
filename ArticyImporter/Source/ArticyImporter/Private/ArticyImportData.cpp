@@ -393,6 +393,18 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	CodeGenerator::GenerateCode(this);
 }
 
+// TODO k2 - changes added by DSobczak
+void UArticyImportData::ReimportArticyAssets()
+{
+	const auto factory = NewObject<UArticyJSONFactory>();
+	if (factory)
+	{
+		factory->Reimport(this);
+		//GC will destroy factory
+	}
+}
+// TODO k2 - end DSobczak
+
 void UArticyImportData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostInitProperties();
@@ -542,13 +554,8 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 
 void UArticyImportData::AddChildToParentCache(const FArticyId Parent, const FArticyId Child)
 {
-	FArticyIdArray* childrenPtr = ParentChildrenCache.Find(Parent);
-	if (!childrenPtr)
-	{
-		FArticyIdArray children;
-		ParentChildrenCache.Add(Parent, children);
-		childrenPtr = &children;
-	}
-
-	childrenPtr->Values.AddUnique(Child);
+	// Changed because of the way Map.Find works. In original version there were cases, 
+	// when first element wasn't added because children was declared out of the scope.
+	auto& childrenRef = ParentChildrenCache.FindOrAdd(Parent);
+	childrenRef.Values.AddUnique(Child);
 }

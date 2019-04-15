@@ -31,3 +31,12 @@ const TArray<UArticyOutputPin*>* IArticyOutputPinsProvider::GetOutputPins() cons
 	const static auto name = FName("OutputPins");
 	return Cast<IArticyReflectable>(this)->GetPropPtr<TArray<UArticyOutputPin*>>(name);
 }
+
+TArray<UArticyOutputPin*> IArticyOutputPinsProvider::AcquireOutputPins_Implementation() const
+{
+	auto Pins = GetOutputPins();
+	if (Pins)
+		return *Pins;
+	else
+		return TArray<UArticyOutputPin*>();
+}

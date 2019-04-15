@@ -9,10 +9,10 @@ public class ArticyImporter : ModuleRules
 {
 	public ArticyImporter(ReadOnlyTargetRules Target) : base(Target)
 	{
-
 		OptimizeCode = CodeOptimization.Never;
+        PrivatePCHHeaderFile = "Private/ArticyImporterPrivatePCH.h";
 
-		PublicIncludePaths.AddRange(
+        PublicIncludePaths.AddRange(
 			new string[] {
 				Path.Combine(ModuleDirectory, "Public"),
 				Path.Combine(ModuleDirectory, "../ArticyImporter/Public"),
@@ -58,6 +58,7 @@ public class ArticyImporter : ModuleRules
                 "ArticyRuntime",
 				"Json",
                 "GameProjectGeneration",
+                "ArticyImporter"
 			}
 			);
 		

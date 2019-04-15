@@ -167,6 +167,18 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 	if(ensureMsgf(db, TEXT("Could not create ArticyDatabase asset!")))
 		db->SetLoadedPackages(Data->GetPackages());
 
-	//promt the user to save newly generated packages
-	FEditorFileUtils::SaveDirtyPackages(true, false, /*bSaveContentPackages*/ true, false, false, true);
+	// TODO k2 DSobczak changed to handle command line project reimport
+	if (FParse::Param(FCommandLine::Get(), TEXT("reimport")))
+	{
+		//do not promt the user to save newly generated packages
+		UE_LOG(LogArticyImporter, Error, TEXT("Saving Articy packages without prompting!"));
+		FEditorFileUtils::SaveDirtyPackages(false, false, /*bSaveContentPackages*/ true, false, false, true);
+		FPlatformMisc::RequestExit(0);
+	}
+	else
+	{
+		//promt the user to save newly generated packages
+		FEditorFileUtils::SaveDirtyPackages(true, false, /*bSaveContentPackages*/ true, false, false, true);
+	}
+	// TODO end DSobczak change
 }

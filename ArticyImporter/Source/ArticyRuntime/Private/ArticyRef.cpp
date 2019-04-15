@@ -65,6 +65,7 @@ bool FArticyRef::Serialize(FArchive& Ar)
 
 void FArticyRef::PostSerialize(const FArchive& Ar)
 {
+	// TODO k2 - this code causes the level to load reaaally slow so maybe put it to some option or just fix :)?
 	//we use this as post-loading hook
 #if WITH_EDITOR
 	if(Ar.IsLoading())

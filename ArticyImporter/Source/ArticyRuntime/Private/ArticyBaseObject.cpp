@@ -17,3 +17,9 @@ void UArticyBaseObject::AddSubobject(UArticyPrimitive* Obj)
 {
 	Subobjects.Add(Obj->GetId(), Obj);
 }
+
+void UArticyBaseObject::SetOuter(UObject * Outer)
+{
+	const auto Name = GetFName();
+	LowLevelRename(Name, Outer);
+}

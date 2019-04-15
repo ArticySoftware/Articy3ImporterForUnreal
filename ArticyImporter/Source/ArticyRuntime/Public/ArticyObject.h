@@ -20,6 +20,8 @@ class ARTICYRUNTIME_API UArticyObject : public UArticyPrimitive
 
 public:
 	FName GetTechnicalName() const;
+
+	UFUNCTION(BlueprintCallable)
 	UArticyObject* GetParent() const;
 	TArray<TWeakObjectPtr<UArticyObject>> GetChildren() const;
 

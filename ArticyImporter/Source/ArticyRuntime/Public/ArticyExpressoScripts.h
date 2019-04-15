@@ -182,50 +182,52 @@ struct ARTICYRUNTIME_API ExpressoType
 	static UArticyBaseObject* TryFeatureReroute(UArticyBaseObject* Object, FString& Property);
 };
 
-FORCEINLINE int operator+(const int& Lhs, const ExpressoType& Rhs)
-{
-	return Lhs + (int)Rhs;
-}
 
-FORCEINLINE int operator-(const int& Lhs, const ExpressoType& Rhs)
-{
-	return Lhs - (int)Rhs;
-}
-
-FORCEINLINE int operator*(const int& Lhs, const ExpressoType& Rhs)
-{
-	return Lhs * (int)Rhs;
-}
-
-FORCEINLINE int operator/(const int& Lhs, const ExpressoType& Rhs)
-{
-	return Lhs / (int)Rhs;
-}
-
-FORCEINLINE int operator%(const int& Lhs, const ExpressoType& Rhs)
-{
-	return Lhs % (int)Rhs;
-}
-
-FORCEINLINE float operator+(const float& Lhs, const ExpressoType& Rhs)
-{
-	return Lhs + (float)Rhs;
-}
-
-FORCEINLINE float operator-(const float& Lhs, const ExpressoType& Rhs)
-{
-	return Lhs - (float)Rhs;
-}
-
-FORCEINLINE float operator*(const float& Lhs, const ExpressoType& Rhs)
-{
-	return Lhs * (float)Rhs;
-}
-
-FORCEINLINE float operator/(const float& Lhs, const ExpressoType& Rhs)
-{
-	return Lhs / (float)Rhs;
-}
+// TODO k2 - these operators produce the ambiguity errors when incrementation operators are used in the script.
+//FORCEINLINE int operator+(const int& Lhs, const ExpressoType& Rhs)
+//{
+//	return Lhs + (int)Rhs;
+//}
+//
+//FORCEINLINE int operator-(const int& Lhs, const ExpressoType& Rhs)
+//{
+//	return Lhs - (int)Rhs;
+//}
+//
+//FORCEINLINE int operator*(const int& Lhs, const ExpressoType& Rhs)
+//{
+//	return Lhs * (int)Rhs;
+//}
+//
+//FORCEINLINE int operator/(const int& Lhs, const ExpressoType& Rhs)
+//{
+//	return Lhs / (int)Rhs;
+//}
+//
+//FORCEINLINE int operator%(const int& Lhs, const ExpressoType& Rhs)
+//{
+//	return Lhs % (int)Rhs;
+//}
+//
+//FORCEINLINE float operator+(const float& Lhs, const ExpressoType& Rhs)
+//{
+//	return Lhs + (float)Rhs;
+//}
+//
+//FORCEINLINE float operator-(const float& Lhs, const ExpressoType& Rhs)
+//{
+//	return Lhs - (float)Rhs;
+//}
+//
+//FORCEINLINE float operator*(const float& Lhs, const ExpressoType& Rhs)
+//{
+//	return Lhs * (float)Rhs;
+//}
+//
+//FORCEINLINE float operator/(const float& Lhs, const ExpressoType& Rhs)
+//{
+//	return Lhs / (float)Rhs;
+//}
 
 /**
  * The database is used for accessing or cloning any articy object.

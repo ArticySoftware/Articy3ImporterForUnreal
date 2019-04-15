@@ -29,6 +29,8 @@ public:
 
 	UArticyPrimitive* GetSubobject(FArticyId Id) const;
 
+	void SetOuter(UObject* Outer);
+
 protected:
 	virtual void InitFromJson(TSharedPtr<FJsonValue> Json) { }
 

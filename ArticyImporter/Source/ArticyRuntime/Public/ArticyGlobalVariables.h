@@ -124,9 +124,12 @@ protected:
 			ensure(storeLevel == shadowLevel);
 		}
 		
-		Instance->Value = NewValue;															
-		if(storeLevel == 0)
-			OnVariableChanged.Broadcast(this);
+		if (Instance->Value != NewValue)
+		{
+			Instance->Value = NewValue;
+			if (storeLevel == 0)
+				OnVariableChanged.Broadcast(this);
+		}
 
 		return Instance->Value;
 	}																							
@@ -318,6 +321,8 @@ public:
 		else
 			return Value = NewValue.GetString();
 	}
+	bool operator ==(const char* const text) const { return Value.Equals(text); }
+	bool operator !=(const char* const text) const { return !this->operator==(text); }
 
 protected:
 	/** The current value of this variable (i.e. the value of a shadow state, if any is active). */
@@ -350,13 +355,31 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Callback")
 	FOnGVChanged OnVariableChanged;
 
-	UFUNCTION(BlueprintCallable, Category = "Variables")
+	// TODO k2 - DSobczak added - can GetVariables be used instead of this? 
+	UFUNCTION(BlueprintCallable, Category = "ArticyGlobalVariables", meta = (keywords = "global variables"))
+	TArray<UArticyBool*> GetBooleanVariables()
+	{
+		TArray<UObject*> subobjects;
+		GetDefaultSubobjects(subobjects);
+		TArray<UArticyBool*> articyBools;
+		for (int i = 0; i < subobjects.Num(); i++)
+		{
+			UArticyBool* isBool = Cast<UArticyBool>(subobjects[i]);
+			if (isBool != nullptr)
+			{
+				articyBools.Add(isBool);
+			}
+		}
+		return articyBools;
+	}
+	// end DSobczak added	UFUNCTION(BlueprintCallable, Category = "Variables")
 	const TArray<UArticyVariable*> GetVariables() const { return Variables; }
 
 protected:
 
 	UPROPERTY()
 	TArray<UArticyVariable*> Variables;
+
 
 private:
 
@@ -370,12 +393,14 @@ private:
 /**
  * The base class for the (generated) ArticyGlobalVariables class.
  */
-UCLASS()
+UCLASS(BlueprintType)
 class ARTICYRUNTIME_API UArticyGlobalVariables : public UDataAsset, public IShadowStateManager, public IArticyReflectable
 {
 	GENERATED_BODY()	
 
 public:
+
+	static UArticyGlobalVariables* Create(UObject* WorldContext);
 
 	/**
 	 * Get a reference to the ArticyGlobalVariables asset.
@@ -393,6 +418,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Getter")
 	const TArray<UArticyBaseVariableSet*> GetVariableSets() const { return VariableSets; }
 	
+	UFUNCTION(Exec)
+	void PrintBoolVariable(const FName Namespace, const FName Variable);
+	UFUNCTION(Exec)
+	void PrintIntVariable(const FName Namespace, const FName Variable);
+	UFUNCTION(Exec)
+	void PrintStringVariable(const FName Namespace, const FName Variable);
+
 	UFUNCTION(BlueprintCallable, Category = "Getter")
 	const bool& GetBoolVariable(FArticyGvName GvName, bool& bSucceeded);
 	UFUNCTION(BlueprintCallable, Category="Getter")
@@ -471,6 +503,10 @@ void UArticyGlobalVariables::SetVariableValue(const FName Namespace, const FName
 			auto& propValue = (**ptr);
 			propValue = Value;
 		}
+		else
+		{
+			UE_LOG(LogArticyRuntime, Error, TEXT("Unable to find variable: %s::%s"), *Namespace.ToString(), *Variable.ToString());
+		}
 	}
 }
 
@@ -486,6 +522,10 @@ const VariablePayloadType& UArticyGlobalVariables::GetVariableValue(const FName 
 			auto& propValue = (**ptr);
 			bSucceeded = true;
 			return propValue.Get();
+		}
+		else
+		{
+			UE_LOG(LogArticyRuntime, Error, TEXT("Unable to find variable: %s::%s"), *Namespace.ToString(), *Variable.ToString());
 		}
 	}
 

@@ -86,6 +86,9 @@ public:
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Set Start Node (ArticyRef)"), Category = "Setup")
 	void SetStartNode(FArticyRef NewId);
 
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	void SetStartNodeById(FArticyId NewId);
+	
 	/** Set the StartOn node to a certain node. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Set Start Node (FlowObject)"), Category = "Setup")
 	void SetStartNodeWithFlowObject(TScriptInterface<IArticyFlowObject> Node);
@@ -123,8 +126,11 @@ public:
 	 * The explore can be performed as shadowed operation.
 	 * If the node is submergeable, a submerge is performed.
 	 */
-	TArray<FArticyBranch> Explore(IArticyFlowObject* Node, bool bShadowed, uint32 Depth);
+	TArray<FArticyBranch> Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth);
 
+	UFUNCTION(BlueprintCallable, Category = "Flow", meta=(ClampMin = 0))
+	TArray<FArticyBranch> ExploreTree(UObject* Node, bool bShadowed, int32 Depth);
+	
 	/** Returns true if Node is one of the PauseOn types. */
 	bool ShouldPauseOn(IArticyFlowObject* Node) const;
 	
@@ -183,6 +189,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Flow")
 	FOnBranchesUpdated OnBranchesUpdated;
 
+	UFUNCTION(BlueprintGetter)
+	FArticyRef GetStartOn() { return StartOn; }
 protected:
 
 	//========================================//
@@ -209,10 +217,10 @@ protected:
 	/**
 	 * Invalid branches will not be part of the AvailableBranches.
 	 */
-	UPROPERTY(EditAnywhere, Category = "Setup")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
 	bool bIgnoreInvalidBranches = true;
 
-	UPROPERTY(EditAnywhere, Category = "Setup")
+	UPROPERTY(EditAnywhere, BlueprintGetter=GetStartOn, Category = "Setup")
 	FArticyRef StartOn;
 
 	/** All the branches available at the current flow position. */

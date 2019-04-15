@@ -27,10 +27,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FArticyId Id;
 
-	friend struct FArticyClonableObject;
+	friend struct FArticyObjectShadow;
 	/** The ID of this instance (0 is the original object). */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 CloneId = 0;
+
+
 
 protected:
 	/** Used internally by ArticyImporter. */

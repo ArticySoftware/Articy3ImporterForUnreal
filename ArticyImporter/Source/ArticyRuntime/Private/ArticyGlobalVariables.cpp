@@ -84,6 +84,40 @@ void UArticyBaseVariableSet::BroadcastOnVariableChanged(UArticyVariable* Variabl
 
 //---------------------------------------------------------------------------//
 
+UArticyGlobalVariables* UArticyGlobalVariables::Create(UObject* WorldContext)
+{
+	if (!Clone.IsValid())
+	{
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+		TArray<FAssetData> AssetData;
+		AssetRegistryModule.Get().GetAssetsByClass(UArticyGlobalVariables::StaticClass()->GetFName(), AssetData, true);
+
+		UArticyGlobalVariables* asset = nullptr;
+		if (ensureMsgf(AssetData.Num() != 0, TEXT("ArticyGlobalVariables asset not found!")))
+		{
+			if (AssetData.Num() > 1)
+				UE_LOG(LogTemp, Warning, TEXT("More than one ArticyGlobalVariables asset was found, this is not supported! The first one will be selected."));
+
+			asset = Cast<UArticyGlobalVariables>(AssetData[0].GetAsset());
+		}
+
+		if (!asset)
+			return nullptr;
+
+		UE_LOG(LogTemp, Warning, TEXT("Cloning GVs."));
+
+		Clone = DuplicateObject(asset, WorldContext);
+		ensureMsgf(Clone.IsValid(), TEXT("Cloning GV asset failed!"));
+	}
+
+	return Clone.Get();
+}
+
+//UArticyGlobalVariables* UArticyGlobalVariables::GetDefault(const UObject*)
+//{
+//	return Clone.Get();
+//}
+
 UArticyGlobalVariables* UArticyGlobalVariables::GetDefault(const UObject* WorldContext)
 {
 	if(!Clone.IsValid())
@@ -149,6 +183,39 @@ UArticyBaseVariableSet* UArticyGlobalVariables::GetNamespace(const FName Namespa
 	}
 
 	return set;
+}
+
+// TODO k2 - Print functions need to be refactored.
+void UArticyGlobalVariables::PrintBoolVariable(const FName Namespace, const FName Variable)
+{
+	bool succeeded = false;
+
+	auto value = GetBoolVariable(FArticyGvName(Namespace, Variable), succeeded)? TEXT("True") : TEXT("False");
+	if (succeeded)
+	{
+		UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *Namespace.ToString(), *Variable.ToString(), value );
+	}
+}
+
+
+void UArticyGlobalVariables::PrintIntVariable(const FName Namespace, const FName Variable)
+{
+	bool succeeded = false;
+	auto value = GetIntVariable(FArticyGvName(Namespace, Variable), succeeded);
+	if (succeeded)
+	{
+		UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %d"), *Namespace.ToString(), *Variable.ToString(), value);
+	}
+}
+
+void UArticyGlobalVariables::PrintStringVariable(const FName Namespace, const FName Variable)
+{
+	bool succeeded = false;
+	auto value = GetStringVariable(FArticyGvName(Namespace, Variable), succeeded);
+	if (succeeded)
+	{
+		UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *Namespace.ToString(), *Variable.ToString(), *value);
+	}
 }
 
 const bool& UArticyGlobalVariables::GetBoolVariable(FArticyGvName GvName, bool& bSucceeded)

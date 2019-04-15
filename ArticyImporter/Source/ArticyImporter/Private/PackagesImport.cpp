@@ -158,7 +158,7 @@ FArticyPackage FArticyPackageDef::GenerateAssets(UArticyImportData* Data) const
 	for(const auto model : Models)
 	{
 		auto asset = model.GenerateAsset(Data, GetFolder());
-		if(asset)
+		if (asset)
 		{
 			package.Objects.Add(asset);
 			Data->AddChildToParentCache(model.GetParent(), model.GetId());
@@ -215,7 +215,7 @@ void FArticyPackageDefs::GenerateAssets(UArticyImportData* Data) const
 	{
 		for (auto obj : pack.Objects)
 		{
-			if (auto articyObj = Cast<UArticyObject>(obj))
+			if (auto articyObj = Cast<UArticyObject>(obj.Get()))
 			{
 				if (auto children = parentChildrenCache.Find(articyObj->GetId()))
 				{

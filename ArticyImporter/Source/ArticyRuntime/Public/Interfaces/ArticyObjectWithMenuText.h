@@ -7,7 +7,7 @@
 #include "ArticyObjectWith_Base.h"
 #include "ArticyObjectWithMenuText.generated.h"
 
-UINTERFACE(MinimalAPI, BlueprintType, meta=(CannotImplementInterfaceInBlueprint))
+UINTERFACE(BlueprintType, meta=(CannotImplementInterfaceInBlueprint))
 class UArticyObjectWithMenuText : public UArticyObjectWith_Base { GENERATED_BODY() };
 
 /**

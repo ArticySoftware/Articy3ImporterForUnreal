@@ -37,6 +37,7 @@ public:
 
 	void InitFromJson(TSharedPtr<FJsonValue> Json) override;
 
+	UFUNCTION(BlueprintCallable)
 	UArticyObject* GetOwner();
 
 	//---------------------------------------------------------------------------//

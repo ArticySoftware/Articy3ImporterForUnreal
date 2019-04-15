@@ -255,12 +255,16 @@ inline uint32 GetTypeHash(const FArticyExpressoFragment& A)
  * 
  */
 UCLASS()
-class UArticyImportData : public UDataAsset
+class ARTICYIMPORTER_API UArticyImportData : public UDataAsset
 {
 	GENERATED_BODY()
 	
 public:
 	void PostInitProperties() override;
+
+	// TODO k2 DSobczak
+	void ReimportArticyAssets();
+	// end DSobczak
 
 	UPROPERTY(VisibleAnywhere, Instanced, Category=ImportSettings)
 	class UAssetImportData* ImportData;
@@ -331,7 +335,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category="Imported")
 	TArray<FArticyPackage> ImportedPackages;
 
-	UPROPERTY(VisibleAnywhere, Category="Imported")
+	UPROPERTY(VisibleAnywhere, Category = "Imported")
 	TMap<FArticyId, FArticyIdArray> ParentChildrenCache;
 };
 
