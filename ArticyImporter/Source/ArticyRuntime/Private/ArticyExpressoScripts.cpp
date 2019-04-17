@@ -2,7 +2,7 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
+
 
 #include "ArticyExpressoScripts.h"
 #include "ArticyRuntime.h"
@@ -134,7 +134,7 @@ ExpressoType ExpressoType::operator-() const
 	case Float:
 		return ExpressoType(-GetFloat());
 	case String:
-		return ExpressoType("");
+		return ExpressoType(FString("")); // update for VS2019: Fixed Error C4800. Was just "" before
 
 	default:
 		ensureMsgf(false, TEXT("Unknown ArticyExpressoType!"));

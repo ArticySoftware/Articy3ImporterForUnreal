@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ArticyImporterPrivatePCH.h"
+
 #include "IDetailCustomization.h"
 
 class FArticyPluginSettingsCustomization : public IDetailCustomization

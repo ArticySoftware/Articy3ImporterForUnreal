@@ -2,10 +2,10 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
 
-#include "ArticyPrimitive.h"
+
 #include "ArticyBaseObject.h"
+#include "ArticyPrimitive.h"
 
 UArticyPrimitive* UArticyBaseObject::GetSubobject(FArticyId Id) const
 {

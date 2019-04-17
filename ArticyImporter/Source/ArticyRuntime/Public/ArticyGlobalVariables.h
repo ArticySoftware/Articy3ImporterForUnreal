@@ -7,7 +7,7 @@
 #include "ArticyRuntime.h"
 #include "ArticyReflectable.h"
 #include "AssetRegistryModule.h"
-#include "Private/ShadowStateManager.h"
+#include "ShadowStateManager.h"
 #include "ArticyExpressoScripts.h"
 
 #include "ArticyGlobalVariables.generated.h"

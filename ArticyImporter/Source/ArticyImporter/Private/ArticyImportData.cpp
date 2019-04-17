@@ -2,15 +2,16 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyImporterPrivatePCH.h"
+
 
 #include "ArticyImportData.h"
 #include "EditorFramework/AssetImportData.h"
 #include "CodeGeneration/CodeGenerator.h"
 #include "ArticyJSONFactory.h"
-#include "SharedPointerInternals.h"
+#include "Templates/SharedPointerInternals.h"
 #include "ArticyPluginSettings.h"
-#include "Regex.h"
+#include "Internationalization/Regex.h"
+#include "ArticyImporter.h"
 
 void FADISettings::ImportFromJson(TSharedPtr<FJsonObject> Json)
 {

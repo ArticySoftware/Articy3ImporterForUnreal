@@ -9,11 +9,11 @@ public class ArticyImporter : ModuleRules
 {
 	public ArticyImporter(ReadOnlyTargetRules Target) : base(Target)
 	{
+
+    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
 		//OptimizeCode = CodeOptimization.Never;
-		
-#if UE_4_21_OR_LATER
-		PrivatePCHHeaderFile = "Private/ArticyImporterPrivatePCH.h";
-#endif
+
 
 		PublicIncludePaths.AddRange(
 			new string[] {

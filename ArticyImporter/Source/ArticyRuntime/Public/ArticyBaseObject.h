@@ -4,12 +4,17 @@
 //
 #pragma once
 
-#include "Engine.h"
+//#include "Engine.h"
+#include "CoreMinimal.h"
+#include "Engine/DataAsset.h"
 #include "ArticyBaseTypes.h"
 #include "ArticyReflectable.h"
+#include "Engine/Engine.h"
+#include <Engine/World.h>
 
 #include "ArticyBaseObject.generated.h"
 
+class UArticyPrimitive;
 /**
  * Base class for all articy objects.
  */
