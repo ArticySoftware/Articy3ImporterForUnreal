@@ -4,7 +4,7 @@
 
 # ArticyImporter for Unreal Engine 4
 
-This unreal engine 4 plugin allows you to import your articy:draft content into your unreal project and gives you a simple C++ and blueprint interface to work with your data.
+This unreal engine 4 plugin allows importing articy:draft content into unreal projects and provides a simple C++ and blueprint interface to work with the data.
 
 # Table of contents
 
@@ -16,13 +16,12 @@ This unreal engine 4 plugin allows you to import your articy:draft content into 
 
 # Goals
 
-We release our current progress for the plugin as a github open source project in the hopes that this will give you a substantial headstart into incorporating your articy:draft data into your unreal project while still give you enough flexibility to adjust the plugin to your needs. 
-We also would love to hear about suggestions or even better for you to directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the plugin.
+We release this plugin as a github open source project which will provide a substantial headstart into incorporating articy:draft data into unreal projects while still allowing enough flexibility to adjust the plugin to personal needs. 
+We also would love to hear your suggestions or even better directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the plugin.
 
 # Features
 
-While this is not meant as a full product release, it is still considered a working foundation for integrating your articy:draft content into your unreal engine project.
-So you can expect the following features including but not limited to:
+This plugin provides a working foundation for integrating articy:draft content into unreal engine projects. You can expect the following features including but not limited to:
 
  * Everything accessible via **C++** and **Blueprint**
  * **Flow player** for automatic configurable flow traversal as an actor component
