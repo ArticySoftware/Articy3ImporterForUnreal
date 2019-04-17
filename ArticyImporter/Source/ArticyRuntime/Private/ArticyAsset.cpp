@@ -9,20 +9,25 @@
 
 UTexture* UArticyAsset::LoadAsTexture() const
 {
-	return Cast<UTexture>(GetAsset());
+	return Cast<UTexture>(LoadAsset());
 }
 
 UTexture2D* UArticyAsset::LoadAsTexture2D() const
 {
-	return Cast<UTexture2D>(GetAsset());
+	return Cast<UTexture2D>(LoadAsset());
 }
 
-UFileMediaSource* UArticyAsset::LoadAsAudio() const
+USoundWave* UArticyAsset::LoadAsSoundWave() const
 {
-	return Cast<UFileMediaSource>(GetAsset());
+	return Cast<USoundWave>(LoadAsset());
 }
 
-UObject* UArticyAsset::GetAsset() const
+UFileMediaSource* UArticyAsset::LoadAsFileMediaSource() const
+{
+	return Cast<UFileMediaSource>(LoadAsset());
+}
+
+UObject* UArticyAsset::LoadAsset() const
 {
 	//if(!Asset.IsValid())
 	{

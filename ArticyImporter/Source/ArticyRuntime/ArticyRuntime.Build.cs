@@ -10,6 +10,10 @@ public class ArticyRuntime : ModuleRules
 	public ArticyRuntime(ReadOnlyTargetRules Target) : base(Target)
     {
 		//OptimizeCode = CodeOptimization.Never;
+		
+#if UE_4_21_OR_LATER
+		PrivatePCHHeaderFile = "Private/ArticyRuntimePrivatePCH.h";
+#endif
 
 		PublicIncludePaths.AddRange(
 			new string[] {
