@@ -19,18 +19,26 @@
 			"Name": "ArticyRuntime",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms" : 
-			[
-				"Win64"
+			"WhitelistPlatforms": [
+				"Win32",
+				"Win64",
+				"Linux",
+				"Mac",
+				"IOS",
+				"Android"
 			]
 		},
 		{
 			"Name": "ArticyImporter",
 			"Type": "Editor",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms" : 
-			[
-				"Win64"
+			"WhitelistPlatforms": [
+				"Win32",
+				"Win64",
+				"Linux",
+				"Mac",
+				"IOS",
+				"Android"
 			]
 		}
 	]
