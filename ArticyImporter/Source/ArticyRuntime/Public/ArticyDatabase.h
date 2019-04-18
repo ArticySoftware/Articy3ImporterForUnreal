@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Engine/DataAsset.h"
+#include "ArticyObject.h"
 #include "ArticyBaseObject.h"
 #include "ShadowStateManager.h"
 #include "AssetRegistryModule.h"
@@ -12,7 +13,6 @@
 
 #include "ArticyDatabase.generated.h"
 
-class UArticyObject;
 class UArticyExpressoScripts;
 struct FArticyId;
 struct FArticyPackage;
