@@ -12,6 +12,11 @@ public class ArticyImporter : ModuleRules
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		OptimizeCode = CodeOptimization.Never;
 
+    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
+		OptimizeCode = CodeOptimization.Never;
+
+
 		PublicIncludePaths.AddRange(
 			new string[] {
 				Path.Combine(ModuleDirectory, "Public"),
