@@ -210,7 +210,7 @@ void UArticyDatabase::SetLoadedPackages(const TArray<FArticyPackage> Packages)
 
 void UArticyDatabase::LoadDefaultPackages()
 {
-	LoadAllPackages(true);
+	LoadAllPackages(false);
 }
 
 void UArticyDatabase::LoadAllPackages(bool bDefaultOnly)
