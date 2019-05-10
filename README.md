@@ -112,23 +112,8 @@ After enabling the plugin the window will prompt you to restart the editor which
 
 ## Export project from articy:draft
 
-Now that the plugin is running, you are ready to export your data from articy:draft. If you still use a articy:draft version below 3.1.14 you first need to enable the experimental unreal export. To do that you need to start articy:draft with the `-experimental.unreal` command line switch.
-
-In the explorer you can do that by modifying the shortcut for articy:draft.
-
-<p align="center">
-  <img src="https://www.nevigo.com/articy-importer/unreal/enable_explorer_export.png">
-</p>
-
-If you are using steam, you can add it in the launch options of your articy:draft version.
-
-<p align="center">
-  <img src="https://www.nevigo.com/articy-importer/unreal/enable_steam_export.png">
-</p>
-
-> Please note that the experimental unreal export needs at least articy:draft version **3.1.6.31945**
-
-Now open your articy:draft project and open the export window. Here you will find the unreal engine export. Please note that the unreal export uses [Rulesets](https://www.nevigo.com/help/Exports_Rulesets.html) to choose what and how to export.
+Now that the plugin is running, you are ready to export your data from articy:draft.
+Open your articy:draft project and open the export window. Here you will find the unreal engine export. Please note that the unreal export uses [Rulesets](https://www.nevigo.com/help/Exports_Rulesets.html) to choose what and how to export.
 When exporting, chose your unreal projects **Content** folder as the target for the `.articyue4` export file.
 
 <p align="center">
