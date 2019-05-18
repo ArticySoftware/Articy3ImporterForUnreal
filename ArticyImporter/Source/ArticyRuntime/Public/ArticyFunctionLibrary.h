@@ -6,7 +6,7 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ArticyObject.h"
-
+#include "ArticyFlowPlayer.h"
 #include "ArticyFunctionLibrary.generated.h"
 
 /**
