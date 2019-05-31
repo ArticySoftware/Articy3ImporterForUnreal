@@ -520,8 +520,10 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 						if (currentChar == ' ' || currentChar == '<' || currentChar == '>' || currentChar == '=' || currentChar == '+' || currentChar == '-')
 							continue;
 						else if (currentChar == '\"' && i > 0)
+						{
 							valueStr.InsertAt(i, "(FString)");
-
+							offset += strlen("(FString)");
+						}
 						break;
 					}
 					
