@@ -121,7 +121,7 @@ After enabling the plugin the window will prompt you to restart the editor which
 ## Export project from articy:draft
 
 Now that the plugin is running, you are ready to export your data from articy:draft.
-Open your articy:draft project and open the export window. Here you will find the unreal engine export. Please note that the unreal export uses [Rulesets](https://www.nevigo.com/help/Exports_Rulesets.html) to choose what and how to export.
+Open your articy:draft project and open the export window. Here you will find the Unreal Engine export. Please note that the Unreal export uses [Rulesets](https://www.nevigo.com/help/Exports_Rulesets.html) to choose what and how to export.
 When exporting, chose your Unreal projects **Content** folder as the target for the `.articyue4` export file.
 
 <p align="center">
