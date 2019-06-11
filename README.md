@@ -46,7 +46,7 @@ After you have created a new project, close the Unreal editor for now.
 
 ## For already existing projects
 
-Projects that existed prior to using the plugin and used only Blueprints can be converted to C++ projects by adding any C++ class that inherits from UObject (such as the actor class) to the project as shown below. Be aware that
+Projects that existed prior to using the plugin and used only Blueprints can be converted to C++ projects by adding any C++ class that inherits from UObject (such as the actor class) to the project as shown below.
 
 >> Insert "click "Add new C++ class" image here << 
 >> Insert "Select actor class" image here <<
