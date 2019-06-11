@@ -4,7 +4,7 @@
 
 # ArticyImporter for Unreal Engine 4
 
-This Unreal Engine 4 plugin allows you to import your articy:draft content into your Unreal project and gives you a simple C++ and blueprint interface to work with your data. While this is not meant as a full product release, it is still considered a working foundation for integrating your articy:draft content into your Unreal Engine project.
+This Unreal Engine 4 plugin allows importing articy:draft content into Unreal projects and provides a simple C++ and blueprint interface to work with the data. While this is not meant as a full product release, it is still considered a working foundation for integrating your articy:draft content into your Unreal Engine project.
 
 # Table of contents
 
@@ -16,12 +16,12 @@ This Unreal Engine 4 plugin allows you to import your articy:draft content into 
 
 # Goals
 
-We release our current progress for the plugin as a github open source project in the hopes that this will give you a substantial headstart into incorporating your articy:draft data into your Unreal project while still give you enough flexibility to adjust the plugin to your needs. 
-We also would love to hear about suggestions or even better for you to directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the plugin.
+We release this plugin as a github open source project which will provide a substantial headstart into incorporating articy:draft data into Unreal projects while still allowing enough flexibility to adjust the plugin to personal needs. 
+We also would love to hear your suggestions or even better directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the plugin.
 
 # Features
 
-You can expect the following features including but not limited to:
+This plugin provides a working foundation for integrating articy:draft content into Unreal Engine projects. You can expect the following features including but not limited to:
 
  * Everything accessible via **C++** and **Blueprint**
  * **Flow player** for automatic configurable flow traversal as an actor component
@@ -120,23 +120,8 @@ After enabling the plugin the window will prompt you to restart the editor which
 
 ## Export project from articy:draft
 
-Now that the plugin is running, you are ready to export your data from articy:draft. If you still use a articy:draft version below 3.1.14 you first need to enable the experimental Unreal export. To do that you need to start articy:draft with the `-experimental.unreal` command line switch.
-
-In the explorer you can do that by modifying the shortcut for articy:draft.
-
-<p align="center">
-  <img src="https://www.nevigo.com/articy-importer/unreal/enable_explorer_export.png">
-</p>
-
-If you are using steam, you can add it in the launch options of your articy:draft version.
-
-<p align="center">
-  <img src="https://www.nevigo.com/articy-importer/unreal/enable_steam_export.png">
-</p>
-
-> Please note that the experimental Unreal export needs at least articy:draft version **3.1.6.31945**
-
-Now open your articy:draft project and open the export window. Here you will find the Unreal Engine export. Please note that the Unreal export uses [Rulesets](https://www.nevigo.com/help/Exports_Rulesets.html) to choose what and how to export.
+Now that the plugin is running, you are ready to export your data from articy:draft.
+Open your articy:draft project and open the export window. Here you will find the unreal engine export. Please note that the unreal export uses [Rulesets](https://www.nevigo.com/help/Exports_Rulesets.html) to choose what and how to export.
 When exporting, chose your Unreal projects **Content** folder as the target for the `.articyue4` export file.
 
 <p align="center">
