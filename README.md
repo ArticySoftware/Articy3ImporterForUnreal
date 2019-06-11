@@ -4,7 +4,7 @@
 
 # ArticyImporter for Unreal Engine 4
 
-This unreal engine 4 plugin allows you to import your articy:draft content into your unreal project and gives you a simple C++ and blueprint interface to work with your data.
+This Unreal Engine 4 plugin allows you to import your articy:draft content into your Unreal project and gives you a simple C++ and blueprint interface to work with your data. While this is not meant as a full product release, it is still considered a working foundation for integrating your articy:draft content into your Unreal Engine project.
 
 # Table of contents
 
@@ -16,19 +16,18 @@ This unreal engine 4 plugin allows you to import your articy:draft content into 
 
 # Goals
 
-We release our current progress for the plugin as a github open source project in the hopes that this will give you a substantial headstart into incorporating your articy:draft data into your unreal project while still give you enough flexibility to adjust the plugin to your needs. 
+We release our current progress for the plugin as a github open source project in the hopes that this will give you a substantial headstart into incorporating your articy:draft data into your Unreal project while still give you enough flexibility to adjust the plugin to your needs. 
 We also would love to hear about suggestions or even better for you to directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the plugin.
 
 # Features
 
-While this is not meant as a full product release, it is still considered a working foundation for integrating your articy:draft content into your unreal engine project.
-So you can expect the following features including but not limited to:
+You can expect the following features including but not limited to:
 
  * Everything accessible via **C++** and **Blueprint**
  * **Flow player** for automatic configurable flow traversal as an actor component
  * Automatic import
  * Database with your project data. *Excluding Journeys, Settings, Template constraints* 
- * Uses of unreal engines localization
+ * Uses of Unreal Engine's localization
 
 # Setup
 
@@ -53,7 +52,7 @@ Projects that existed prior to using the plugin and used only Blueprints can be 
 >> Insert "Select actor class" image here <<
 
 
-## Clone/Copy the plugin into the unreal project
+## Clone/Copy the plugin into the Unreal project
 
 *Unreal Engine 4.18 and below use [the UE-4.18 tagged version](https://github.com/ArticySoftware/ArticyImporterForUnreal/releases) of the plugin*
 
@@ -66,7 +65,7 @@ Copy the plugin folder **ArticyImporter** into this **Plugins** folder. Your pro
 
 ## Adjust build configuration
 
-For unreal to correctly build the plugin we need to add it as an dependency, to do that locate the file **Source/\<ProjectName>/\<ProjectName\>Cpp.Build.cs**
+For Unreal to correctly build the plugin we need to add it as an dependency, to do that locate the file **Source/\<ProjectName>/\<ProjectName\>Cpp.Build.cs**
 
 <p align="center">
   <img src="https://www.nevigo.com/articy-importer/unreal/buildconfigfile.png">
@@ -108,20 +107,20 @@ public class MyArticyProject : ModuleRules
 
 Make sure to save the file and close the editor.
 
-## Enable plugin in unreal
+## Enable plugin in Unreal
 
-Now you can open your unreal project and open the Plugins window by selecting Edit->Plugins in the main window menu bar.
+Now you can open your Unreal project and open the Plugins window by selecting Edit->Plugins in the main window menu bar.
 Inside this window scroll in the list of groups down until you find the Group **Project** and the sub group **Articy**, click on Articy and enable the ArticyImporter plugin on the right.
 
 <p align="center">
   <img src="https://www.nevigo.com/articy-importer/unreal/enable_plugin.png">
 </p>
 
-After enabling the plugin the window will prompt you to restart the editor which you should to do activate it for your project. When the editor restarts it will prompt you to rebuild missing dll files for the plugin which you should confirm. This can take a bit depending on the size of the project and the power of your computer but once finished the unreal editor should be back up again.
+After enabling the plugin the window will prompt you to restart the editor which you should to do activate it for your project. When the editor restarts it will prompt you to rebuild missing dll files for the plugin which you should confirm. This can take a bit depending on the size of the project and the power of your computer but once finished the Unreal editor should be back up again.
 
 ## Export project from articy:draft
 
-Now that the plugin is running, you are ready to export your data from articy:draft. If you still use a articy:draft version below 3.1.14 you first need to enable the experimental unreal export. To do that you need to start articy:draft with the `-experimental.unreal` command line switch.
+Now that the plugin is running, you are ready to export your data from articy:draft. If you still use a articy:draft version below 3.1.14 you first need to enable the experimental Unreal export. To do that you need to start articy:draft with the `-experimental.unreal` command line switch.
 
 In the explorer you can do that by modifying the shortcut for articy:draft.
 
@@ -135,16 +134,16 @@ If you are using steam, you can add it in the launch options of your articy:draf
   <img src="https://www.nevigo.com/articy-importer/unreal/enable_steam_export.png">
 </p>
 
-> Please note that the experimental unreal export needs at least articy:draft version **3.1.6.31945**
+> Please note that the experimental Unreal export needs at least articy:draft version **3.1.6.31945**
 
-Now open your articy:draft project and open the export window. Here you will find the unreal engine export. Please note that the unreal export uses [Rulesets](https://www.nevigo.com/help/Exports_Rulesets.html) to choose what and how to export.
-When exporting, chose your unreal projects **Content** folder as the target for the `.articyue4` export file.
+Now open your articy:draft project and open the export window. Here you will find the Unreal Engine export. Please note that the Unreal export uses [Rulesets](https://www.nevigo.com/help/Exports_Rulesets.html) to choose what and how to export.
+When exporting, chose your Unreal projects **Content** folder as the target for the `.articyue4` export file.
 
 <p align="center">
   <img src="https://www.nevigo.com/articy-importer/unreal/export_options.png">
 </p>
 
-After every export, going back to unreal will trigger the ArticyImporter plugin to automatically parse the new file and import the changes.
+After every export, going back to Unreal will trigger the ArticyImporter plugin to automatically parse the new file and import the changes.
 
 Make sure to confirm the prompt after the import to save all assets generated by the plugin.
 
@@ -178,7 +177,7 @@ All those respective objects have their expected properties, so you will find th
 > You will also find classes with the `Articy` prefix. Those are the base classes for the generated classes and casting into them works almost the same. This would allow you to create code that is reusable
 > independant of any imported project.  
 
-Dealing with templates is a bit more complicated. First thing to understand is that **all your articy:draft templates are new types** inside unreal. 
+Dealing with templates is a bit more complicated. First thing to understand is that **all your articy:draft templates are new types** inside Unreal. 
 
 The name of your template types also follows a similar structure as the one mentioned before, but utilizing the Templates technical name: `<ProjectName><TemplateTechnicalName>`. So if your project is called *ManiacManfred* and your templates technical name is *Conditional_Zone* your correct type would be called `ManiacManfredConditional_Zone`.
 Its also worth mentioning that even if it is a new type, it is still derived from the base type with all its properties.
