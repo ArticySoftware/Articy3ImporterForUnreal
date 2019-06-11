@@ -32,18 +32,26 @@ So you can expect the following features including but not limited to:
 
 # Setup
 
-There are a couple of steps needed to get the plugin up and running:
+There are a couple of steps needed to get the plugin up and running. Since the plugin requires the Unreal project to be C++ compatible, you have to ensure that you have the required tools installed, such as Visual Studio for Windows or XCode for Mac. We have the following options when we want to use the plugin:
 
 ## Create a new project
 
-You need to create a C++ unreal project or make sure that your existing project is capable of compiling C++ projects.
+If you want to create a new project, select one of the templates under the C++ tab during the project creation.
 
 
 <p align="center">
   <img height="400" src="https://www.nevigo.com/articy-importer/unreal/create_new_cpp_project.png">
 </p>
 
-After you have created a new project, close the unreal editor for now.
+After you have created a new project, close the Unreal editor for now.
+
+## For already existing projects
+
+Projects that existed prior to using the plugin and used only Blueprints can be converted to C++ projects by adding any C++ class that inherits from UObject (such as the actor class) to the project as shown below. Be aware that
+
+>> Insert "click "Add new C++ class" image here << 
+>> Insert "Select actor class" image here <<
+
 
 ## Clone/Copy the plugin into the unreal project
 
