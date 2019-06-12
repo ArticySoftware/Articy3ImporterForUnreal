@@ -63,3 +63,5 @@ void FArticyPluginSettingsCustomization::CustomizeDetails(IDetailLayoutBuilder& 
 			]
 		];
 }
+
+#undef LOCTEXT_NAMESPACE

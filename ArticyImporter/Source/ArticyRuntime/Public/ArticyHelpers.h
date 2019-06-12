@@ -73,6 +73,11 @@ namespace ArticyHelpers
 static const FString ArticyFolder = FString(TEXT("/Game/ArticyContent/"));
 static const FString ArticyAssetsFolder = ArticyFolder / TEXT("Resources");
 static const FString ArticyGeneratedFolder = ArticyFolder / TEXT("Generated");
+static const FString ArticyGeneratedPackagesFolder = ArticyGeneratedFolder / TEXT("Packages");
+static const FString ArticyFolderRelativeToContent = FString(TEXT("ArticyContent/"));
+static const FString ArticyGeneratedFolderRelativeToContent = ArticyFolderRelativeToContent / TEXT("Generated");
+static const FString ArticyGeneratedPackagesFolderRelativeToContent = ArticyGeneratedFolderRelativeToContent / TEXT("Packages");
+
 
 inline uint64 HexToUint64(FString str) { return FCString::Strtoui64(*str, nullptr, 16); }
 inline FString Uint64ToHex(uint64 id)

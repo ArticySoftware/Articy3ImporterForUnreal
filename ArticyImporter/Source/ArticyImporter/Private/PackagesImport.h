@@ -85,6 +85,7 @@ public:
 	FArticyPackage GenerateAssets(UArticyImportData* Data) const;
 
 	FString GetFolder() const;
+	FString GetFolderName() const;
 
 private:
 
@@ -110,6 +111,7 @@ public:
 	void ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json);
 	void GatherScripts(UArticyImportData* Data) const;
 	void GenerateAssets(UArticyImportData* Data) const;
+	TArray<FString> GetPackageFolderNames() const;
 
 private:
 
