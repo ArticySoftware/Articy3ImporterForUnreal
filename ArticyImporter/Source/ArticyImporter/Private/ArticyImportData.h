@@ -4,7 +4,8 @@
 //
 #pragma once
 
-#include "Public/ArticyHelpers.h"
+#include "CoreMinimal.h"
+#include "ArticyHelpers.h"
 #include "ObjectDefinitionsImport.h"
 #include "PackagesImport.h"
 #include "ArticyImportData.generated.h"

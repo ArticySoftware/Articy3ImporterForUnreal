@@ -4,7 +4,7 @@
 //
 #pragma once
 
-#include "ArticyImporterPrivatePCH.h"
+
 
 #include "PackagesImport.h"
 #include "ArticyImportData.h"
@@ -173,6 +173,23 @@ FString FArticyPackageDef::GetFolder() const
 	return (FString(TEXT("Packages")) / Name).Replace(TEXT(" "), TEXT("_"));
 }
 
+FString FArticyPackageDef::GetFolderName() const
+{
+	int32 pathCutOffIndex = INDEX_NONE;
+	FString folder = this->GetFolder();
+	folder.FindLastChar('/', pathCutOffIndex);
+
+	if (pathCutOffIndex != INDEX_NONE)
+	{
+		return this->GetFolder().RightChop(pathCutOffIndex);
+	}
+	else
+	{
+		UE_LOG(LogArticyImporter, Error, TEXT("Could not retrieve folder name for package %s! Did GetFolder() method change?"));
+		return FString(TEXT("Invalid"));
+	}
+}
+
 //---------------------------------------------------------------------------//
 
 void FArticyPackageDefs::ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json)
@@ -224,4 +241,15 @@ void FArticyPackageDefs::GenerateAssets(UArticyImportData* Data) const
 			}
 		}
 	}
+}
+
+TArray<FString> FArticyPackageDefs::GetPackageFolderNames() const
+{
+	TArray<FString> outArray;
+	for(FArticyPackageDef def : Packages)
+	{
+		outArray.Add(def.GetFolderName());
+	}
+
+	return outArray;
 }

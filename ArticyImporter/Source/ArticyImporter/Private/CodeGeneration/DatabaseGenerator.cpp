@@ -2,13 +2,13 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyImporterPrivatePCH.h"
 
+
+#include "DatabaseGenerator.h"
 #include "CodeGenerator.h"
 #include "ArticyDatabase.h"
 #include "ArticyImportData.h"
 #include "CodeFileGenerator.h"
-#include "DatabaseGenerator.h"
 #include "ExpressoScriptsGenerator.h"
 
 void DatabaseGenerator::GenerateCode(const UArticyImportData* Data)

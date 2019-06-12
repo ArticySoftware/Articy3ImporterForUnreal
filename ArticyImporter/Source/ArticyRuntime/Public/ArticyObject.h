@@ -4,9 +4,11 @@
 //
 #pragma once
 
+#include "CoreMinimal.h"
 #include "ArticyPrimitive.h"
 #include "ArticyBaseTypes.h"
 #include "ArticyRef.h"
+#include "Dom/JsonValue.h"
 
 #include "ArticyObject.generated.h"
 

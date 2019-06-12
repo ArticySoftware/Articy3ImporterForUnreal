@@ -9,11 +9,11 @@ public class ArticyImporter : ModuleRules
 {
 	public ArticyImporter(ReadOnlyTargetRules Target) : base(Target)
 	{
-		//OptimizeCode = CodeOptimization.Never;
-		
-#if UE_4_21_OR_LATER
-		PrivatePCHHeaderFile = "Private/ArticyImporterPrivatePCH.h";
-#endif
+
+    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
+		OptimizeCode = CodeOptimization.Never;
+
 
 		PublicIncludePaths.AddRange(
 			new string[] {
@@ -40,6 +40,7 @@ public class ArticyImporter : ModuleRules
 			new string[]
 			{
 				"Core",
+                "EditorScriptingUtilities"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -60,6 +61,8 @@ public class ArticyImporter : ModuleRules
                 "ArticyRuntime",
 				"Json",
                 "GameProjectGeneration",
+                "ContentBrowser"
+                
 			}
 			);
 		

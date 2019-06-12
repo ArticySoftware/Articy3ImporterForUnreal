@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "ArticyImporterPrivatePCH.h"
-#include "ArticyImporter.h"
+
 #include "ArticyImporterFunctionLibrary.h"
+#include "ArticyImporter.h"
 #include "ArticyJSONFactory.h"
 #include "CodeGeneration/CodeGenerator.h"
 
@@ -57,5 +57,5 @@ bool FArticyImporterFunctionLibrary::EnsureImportFile(UArticyImportData** Import
 		}
 	}
 
-	return *ImportData;
+	return *ImportData != nullptr; // update for VS2019: Fixed Error C4800. Was just *ImportData before
 }

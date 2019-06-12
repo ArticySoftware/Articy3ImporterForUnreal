@@ -2,7 +2,7 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyImporterPrivatePCH.h"
+
 
 #include "CodeGenerator.h"
 #include "ArticyImportData.h"
@@ -16,9 +16,16 @@
 #include "ArticyDatabase.h"
 #include "ExpressoScriptsGenerator.h"
 #include "FileHelpers.h"
+#include <IProjectManager.h>
+#include <GameProjectGenerationModule.h>
+#include <UnrealEdMisc.h>
+#include <GenericPlatformMisc.h>
+#include <Dialogs.h>
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
+//---------------------------------------------------------------------------// 
+#define LOCTEXT_NAMESPACE "CodeGenerator"
 
 FString CodeGenerator::GetSourceFolder()
 {
@@ -65,9 +72,9 @@ FString CodeGenerator::GetFeatureInterfaceClassName(const UArticyImportData* Dat
 	return (bOmittPrefix ? "" : "I") + Data->GetProject().TechnicalName + "ObjectWith" + Feature.GetTechnicalName() + "Feature";
 }
 
-bool CodeGenerator::DeleteGeneratedCode(const FString &Filename)
+bool CodeGenerator::DeleteGeneratedCode(const FString& Filename)
 {
-	if(Filename.IsEmpty())
+	if (Filename.IsEmpty())
 		return FPlatformFileManager::Get().GetPlatformFile().DeleteDirectoryRecursively(*GetSourceFolder());
 
 	return FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*(GetSourceFolder() / Filename));
@@ -75,11 +82,11 @@ bool CodeGenerator::DeleteGeneratedCode(const FString &Filename)
 
 void CodeGenerator::GenerateCode(UArticyImportData* Data)
 {
-	if(!Data)
+	if (!Data)
 		return;
 
 	//generate GVs and ObjectDefinitions only if needed
-	if(Data->GetSettings().DidObjectDefsOrGVsChange())
+	if (Data->GetSettings().DidObjectDefsOrGVsChange())
 	{
 		//DeleteGeneratedCode();
 
@@ -87,10 +94,11 @@ void CodeGenerator::GenerateCode(UArticyImportData* Data)
 		DatabaseGenerator::GenerateCode(Data);
 		InterfacesGenerator::GenerateCode(Data);
 		ObjectDefinitionsGenerator::GenerateCode(Data);
+
 	}
 
 	//gather all the scripts in all packages
-	if(Data->GetSettings().set_UseScriptSupport)
+	if (Data->GetSettings().set_UseScriptSupport)
 		Data->GatherScripts();
 
 	//generate the expresso class, containing all the c++ script fragments
@@ -117,14 +125,14 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 
 	// We can only hot-reload via DoHotReloadFromEditor when we already had code in our project
 	IHotReloadInterface& HotReloadSupport = FModuleManager::LoadModuleChecked<IHotReloadInterface>("HotReload");
-	if(HotReloadSupport.IsCurrentlyCompiling())
+	if (HotReloadSupport.IsCurrentlyCompiling())
 	{
 		bWaitingForOtherCompile = true;
 		UE_LOG(LogArticyImporter, Warning, TEXT("Already compiling, waiting until it's done."));
 	}
 
 	static FDelegateHandle lambdaHandle;
-	if(lambdaHandle.IsValid())
+	if (lambdaHandle.IsValid())
 		IHotReloadModule::Get().OnModuleCompilerFinished().Remove(lambdaHandle);
 
 	lambdaHandle = IHotReloadModule::Get().OnModuleCompilerFinished().AddLambda([=](FString OutputLog, ECompilationResult::Type Result, bool bShowLog)
@@ -132,23 +140,23 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 		OnCompiled(Result, Data, bWaitingForOtherCompile);
 	});
 
-	if(!bWaitingForOtherCompile)
+	if (!bWaitingForOtherCompile)
 		HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None /*async*/);
 }
 
 void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImportData* Data, const bool bWaitingForOtherCompile)
 {
 	bool succeeded = Result == ECompilationResult::Succeeded || Result == ECompilationResult::UpToDate;
-	if(!succeeded)
+	if (!succeeded)
 	{
 		//compile failed
 		UE_LOG(LogArticyImporter, Error, TEXT("Compile failed, cannot continue importing articy:draft data!"));
 		return;
 	}
 
-	if(bWaitingForOtherCompile || Data->GetSettings().DidObjectDefsOrGVsChange())
+	if (bWaitingForOtherCompile || Data->GetSettings().DidObjectDefsOrGVsChange())
 	{
-		if(!bWaitingForOtherCompile)
+		if (!bWaitingForOtherCompile)
 		{
 			//the object definitions are up to date now
 			Data->GetSettings().SetObjectDefinitionsRebuilt();
@@ -158,12 +166,12 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 		Compile(Data);
 		return;
 	}
-	
+
 	//compiling is done!
 	//check if UArticyBaseGlobalVariables can be found, otherwise something went wrong!
 	auto className = GetGlobalVarsClassname(Data, true);
 	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *className);
-	if(!ensure(ConstructorHelpersInternal::FindOrLoadClass(fullClassName, UArticyGlobalVariables::StaticClass())))
+	if (!ensure(ConstructorHelpersInternal::FindOrLoadClass(fullClassName, UArticyGlobalVariables::StaticClass())))
 		UE_LOG(LogArticyImporter, Error, TEXT("Could not find generated global variables class after compile!"));
 
 	ensure(DeleteGeneratedAssets());
@@ -176,9 +184,26 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 	PackagesGenerator::GenerateAssets(Data);
 
 	//register the newly imported packages in the database
-	if(ensureMsgf(db, TEXT("Could not create ArticyDatabase asset!")))
+	if (ensureMsgf(db, TEXT("Could not create ArticyDatabase asset!")))
 		db->SetLoadedPackages(Data->GetPackages());
 
 	//promt the user to save newly generated packages
-	FEditorFileUtils::SaveDirtyPackages(true, false, /*bSaveContentPackages*/ true, false, false, true);
+	FEditorFileUtils::SaveDirtyPackages(true, true, /*bSaveContentPackages*/ true, false, false, true);
+
+	FText Message = LOCTEXT("GenerationRestartMessage", "To properly update articy:draft data, the editor needs to be restarted.");
+	FText Title = LOCTEXT("GenerationRestartTitle", "Restart editor");
+	EAppReturnType::Type returnType = OpenMsgDlgInt(EAppMsgType::Ok, EAppReturnType::Ok, Message, Title);
+
+	if (returnType == EAppReturnType::Ok)
+	{
+		FGameProjectGenerationModule::Get().TryMakeProjectFileWriteable(FPaths::GetProjectFilePath());
+
+		FText FailMessage;
+		IProjectManager::Get().SaveCurrentProjectToDisk(FailMessage);
+
+		const bool bWarn = false;
+		FUnrealEdMisc::Get().RestartEditor(bWarn);
+	}
 }
+
+#undef LOCTEXT_NAMESPACE

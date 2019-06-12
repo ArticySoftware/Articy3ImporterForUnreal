@@ -2,7 +2,7 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
+
 
 #include "ArticyDatabase.h"
 #include "ArticyBaseTypes.h"
@@ -210,7 +210,7 @@ void UArticyDatabase::SetLoadedPackages(const TArray<FArticyPackage> Packages)
 
 void UArticyDatabase::LoadDefaultPackages()
 {
-	LoadAllPackages(true);
+	LoadAllPackages(false);
 }
 
 void UArticyDatabase::LoadAllPackages(bool bDefaultOnly)

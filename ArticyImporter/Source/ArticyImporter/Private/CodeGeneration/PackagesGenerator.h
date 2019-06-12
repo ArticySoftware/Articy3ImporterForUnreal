@@ -16,4 +16,10 @@ public:
 private:
 	PackagesGenerator() {}
 	virtual ~PackagesGenerator() {}
+
+	static bool LoadAssetsIfNeeded(const TArray<FString>& ObjectPaths, TArray<UObject*>& LoadedObjects, bool bAllowedToPromptToLoadAssets, bool bLoadRedirects);
+
+	static void ExecuteFixUpRedirectorsInGeneratedFolder();
+
+	static UClass* LoadClassFromPath(const FString& Path);
 };
