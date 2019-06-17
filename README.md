@@ -31,7 +31,11 @@ This plugin provides a working foundation for integrating articy:draft content i
 
 # Setup
 
-There are a couple of steps needed to get the plugin up and running. Since the plugin requires the Unreal project to be C++ compatible, you have to ensure that you have the required tools installed, such as Visual Studio for Windows or XCode for Mac. We have the following options when we want to use the plugin:
+There are a couple of steps needed to get the plugin up and running. Since the plugin requires the Unreal project to be C++ compatible, you have to ensure that you have the required tools installed, such as Visual Studio for Windows or XCode for Mac.
+
+To find out more about how to set up Visual Studio, click [here](https://docs.unrealengine.com/en-US/Programming/Development/VisualStudioSetup/index.html).
+
+We have the following options when we want to first use the plugin:
 
 ## Create a new project
 
