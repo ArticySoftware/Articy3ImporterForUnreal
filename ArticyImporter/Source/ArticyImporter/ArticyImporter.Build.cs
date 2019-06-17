@@ -9,6 +9,8 @@ public class ArticyImporter : ModuleRules
 {
 	public ArticyImporter(ReadOnlyTargetRules Target) : base(Target)
 	{
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		OptimizeCode = CodeOptimization.Never;
 
     PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
