@@ -44,13 +44,19 @@ If you want to create a new project, select one of the templates under the C++ t
 
 After you have created a new project, close the Unreal editor for now.
 
-## For already existing projects
+## For already existing Blueprint-only projects
 
-Projects that existed prior to using the plugin and used only Blueprints can be converted to C++ projects by adding any C++ class that inherits from UObject (such as the actor class) to the project as shown below.
+Projects that existed prior to using the plugin and used only Blueprints can be converted to C++ projects by adding any C++ class that inherits from UObject to the project. It is important that an option <b>other</b> than None gets selected. As an example, we choose the Actor class.
 
->> Insert "click "Add new C++ class" image here << 
->> Insert "Select actor class" image here <<
+<p align="center">
+  <img height="400" src="https://www.nevigo.com/articy-importer/unreal/create_new_cpp_class.jpg">
+</p>
 
+<p align="center">
+  <img height="400" src="https://www.nevigo.com/articy-importer/unreal/select_actor_as_parent_class.png">
+</p>
+
+Click Next, name the class "MyActor" and finish the setup. Unreal Engine should now compile the "MyActor" class. After having compiled, your project now also works with C++.
 
 ## Clone/Copy the plugin into the Unreal project
 
