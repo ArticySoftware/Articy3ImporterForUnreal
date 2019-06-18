@@ -42,7 +42,8 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 	bDoOldFilesExist = ExistingObjectsData.Num() > 0;
 
 	TMap<FString, UArticyObject*> existingObjectsMapping;
-	for (FAssetData data : ExistingObjectsData) {
+	for (FAssetData data : ExistingObjectsData) 
+	{
 		UArticyObject* obj = Cast<UArticyObject>(data.GetAsset());
 		existingObjectsMapping.Add(obj->GetName(), obj);
 	}
@@ -52,8 +53,8 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 
 	// mark all previously existing articy objects to be destroyed
 	TArray<UObject*> objectsToDelete;
-	for (UArticyObject* obj : OldObjects) {
-
+	for (UArticyObject* obj : OldObjects) 
+	{
 		UObject* uobj = obj;
 		objectsToDelete.Add(uobj);
 	}
@@ -61,6 +62,15 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 	// generate new articy objects
 	auto pack = Data->GetPackageDefs();
 	pack.GenerateAssets(Data);
+
+	// filter out assets that were invalidated
+	for(UArticyObject * obj : OldObjects)
+	{
+		if(!obj->IsValidLowLevel())
+		{
+			objectsToDelete.Remove(obj);
+		}
+	}
 
 	TArray<FArticyPackage> packages = Data->GetPackages();
 	TArray<FString> ArticyPackageFolders = Data->GetPackageDefs().GetPackageFolderNames();
@@ -86,7 +96,7 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 		for (UArticyObject* oldObject : OldObjects)
 		{
 			// break should be removable now
-			//if (!oldObject->IsValidLowLevel()) break;
+			if (!oldObject->IsValidLowLevel()) continue;
 			if (newObjectsMapping.Contains(oldObject->GetName()))
 			{
 				// if the new objects contain the updated old object it will get deleted by consolidation or is the same so will only get updated
