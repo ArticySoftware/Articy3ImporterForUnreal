@@ -76,7 +76,7 @@ namespace ArticyImporterHelpers
 			EObjectFlags Flags = RF_Public | RF_Standalone;
 
 			AssetType* createdAsset = nullptr;
-			if (existingAsset)
+			if (existingAsset && !existingAsset->GetClass()->GetName().Equals(FString(ClassName)))
 			{
 				FString packageName;
 				FName tempUniqueName = MakeUniqueObjectName(existingAsset, uclass, FName(*AssetName));
