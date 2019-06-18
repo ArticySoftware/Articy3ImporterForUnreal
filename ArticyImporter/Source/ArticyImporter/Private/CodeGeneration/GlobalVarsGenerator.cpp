@@ -9,6 +9,7 @@
 #include "CodeFileGenerator.h"
 #include "ArticyImportData.h"
 #include "ArticyGlobalVariables.h"
+#include "ArticyImporterHelpers.h"
 
 void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 {
@@ -117,5 +118,5 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 void GlobalVarsGenerator::GenerateAsset(const UArticyImportData* Data)
 {
 	const auto className = CodeGenerator::GetGlobalVarsClassname(Data, true);
-	ArticyHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName());
+	ArticyImporterHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName());
 }

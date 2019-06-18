@@ -10,6 +10,7 @@
 #include "ArticyImportData.h"
 #include "CodeFileGenerator.h"
 #include "ExpressoScriptsGenerator.h"
+#include "ArticyImporterHelpers.h"
 
 void DatabaseGenerator::GenerateCode(const UArticyImportData* Data)
 {
@@ -60,5 +61,5 @@ void DatabaseGenerator::GenerateCode(const UArticyImportData* Data)
 UArticyDatabase* DatabaseGenerator::GenerateAsset(const UArticyImportData* Data)
 {
 	const auto className = CodeGenerator::GetDatabaseClassname(Data, true);
-	return ArticyHelpers::GenerateAsset<UArticyDatabase>(*className, FApp::GetProjectName());
+	return ArticyImporterHelpers::GenerateAsset<UArticyDatabase>(*className, FApp::GetProjectName());
 }

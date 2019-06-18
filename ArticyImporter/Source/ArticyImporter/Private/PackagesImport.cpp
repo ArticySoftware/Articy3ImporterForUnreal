@@ -11,6 +11,7 @@
 #include "CodeGeneration/CodeGenerator.h"
 #include "ArticyObject.h"
 #include <string>
+#include "ArticyImporterHelpers.h"
 
 #define STRINGIFY(x) #x
 
@@ -65,7 +66,7 @@ UArticyObject* FArticyModelDef::GenerateAsset(const UArticyImportData* Data, con
 	className.RemoveAt(0);
 
 	//generate the asset
-	auto obj = ArticyHelpers::GenerateAsset<UArticyObject>(*className, FApp::GetProjectName(), GetNameAndId(), Package);
+	auto obj = ArticyImporterHelpers::GenerateAsset<UArticyObject>(*className, FApp::GetProjectName(), GetNameAndId(), Package);
 	if(ensure(obj))
 	{
 		obj->Initialize();
