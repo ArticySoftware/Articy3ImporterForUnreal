@@ -63,15 +63,6 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 	auto pack = Data->GetPackageDefs();
 	pack.GenerateAssets(Data);
 
-	// filter out assets that were invalidated
-	for(UArticyObject * obj : OldObjects)
-	{
-		if(!obj->IsValidLowLevel())
-		{
-			objectsToDelete.Remove(obj);
-		}
-	}
-
 	TArray<FArticyPackage> packages = Data->GetPackages();
 	TArray<FString> ArticyPackageFolders = Data->GetPackageDefs().GetPackageFolderNames();
 	TArray<FString> OutdatedArticyPackageFolders;
@@ -95,8 +86,7 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 	{
 		for (UArticyObject* oldObject : OldObjects)
 		{
-			// break should be removable now
-			if (!oldObject->IsValidLowLevel()) continue;
+
 			if (newObjectsMapping.Contains(oldObject->GetName()))
 			{
 				// if the new objects contain the updated old object it will get deleted by consolidation or is the same so will only get updated
@@ -143,30 +133,14 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 			}
 		}
 
-		// go through all old directories, gather the redirectors and then execute the fix up. It's a slow task!
-		TArray<UObjectRedirector*> redirectors;
-		for (FString directoryPath : DirectoryPathsOfOldAssets)
-		{
-			TArray<FAssetData> Folders;
-			AssetRegistryModule.Get().GetAssetsByPath(FName(*directoryPath), Folders, true);
-
-			for (FAssetData data : Folders)
-			{
-				UObjectRedirector* redirector = Cast<UObjectRedirector>(data.GetAsset());
-				if (redirector)
-				{
-					redirectors.Add(redirector);
-				}
-			}
-		}
-
+		// fix up redirectors : it's a slow process!
 		ExecuteFixUpRedirectorsInGeneratedFolder();
 
-		// force delete all objects that did not receive an update or a new version in another package
+		// force delete all objects that did not receive an update or a replacement in another package
 		// #BUG somehow 1-2 assets in Maniac Manfred survive this process sometimes. Cleanup down below
 		ObjectTools::ForceDeleteObjects(objectsToDelete, false);
 
-		// Delete remaining assets (there shouldn't be any) and delete the now empty folders
+		// Delete remaining assets (there shouldn't be any) and delete the now empty directories
 		FString RelativeContentPath = FPaths::ProjectContentDir();
 		FString FullContentPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativeContentPath);
 		FString FullArticyGeneratedPackagesPath = FullContentPath / ArticyHelpers::ArticyGeneratedPackagesFolderRelativeToContent;
@@ -187,7 +161,7 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 			}
 		}
 
-		// unregister the path, to make sure
+		// unregister the path to old directories, to make sure
 		for (FString directoryPath : DirectoryPathsOfOldAssets)
 		{
 			bool bPathRemoved = AssetRegistryModule.Get().RemovePath(directoryPath);

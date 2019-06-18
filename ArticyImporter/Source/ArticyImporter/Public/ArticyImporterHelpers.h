@@ -65,81 +65,21 @@ namespace ArticyImporterHelpers
 		auto uclass = ConstructorHelpersInternal::FindOrLoadClass(fullClassName, AssetType::StaticClass());
 		if (uclass)
 		{
-			FAssetRegistryModule& AssetRegistry = FModuleManager::GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
-			FString objectPath = (ArticyHelpers::ArticyGeneratedFolder / fileName) + TEXT(".") + assetName;
-			FAssetData existingAssetData = AssetRegistry.Get().GetAssetByObjectPath(FName(*objectPath));
-
-			UObject* existingAsset = existingAssetData.GetAsset();
-
 			auto AssetPackage = FindOrCreatePackage(fileName);
-
 			EObjectFlags Flags = RF_Public | RF_Standalone;
 
-			AssetType* createdAsset = nullptr;
-			if (existingAsset && !existingAsset->GetClass()->GetName().Equals(FString(ClassName)))
-			{
-				FString packageName;
-				FName tempUniqueName = MakeUniqueObjectName(existingAsset, uclass, FName(*AssetName));
+			auto asset = NewObject<AssetType>(AssetPackage, uclass, *assetName, Flags);
 
-				FString relativeTempPath = (SubFolder.IsEmpty() ? tempUniqueName.ToString() : SubFolder / tempUniqueName.ToString()).Replace(TEXT(" "), TEXT("_"));
-				UPackage* packageOfTempObject = FindOrCreatePackage(relativeTempPath);
-				createdAsset = NewObject<AssetType>(packageOfTempObject, uclass, *tempUniqueName.ToString(), Flags);
-
-				UObject* newObject = Cast<UObject>(createdAsset);
-				TArray<UObject*> ReplacementObjects;
-				ReplacementObjects.Add(existingAsset);
-
-				ObjectTools::ConsolidateObjects(newObject, ReplacementObjects, false);
-
-				FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
-
-				// Form a filter from the paths
-				FARFilter Filter;
-				Filter.bRecursivePaths = true;
-				Filter.PackagePaths.Emplace(*ArticyHelpers::ArticyGeneratedFolder);
-				Filter.ClassNames.Emplace(TEXT("ObjectRedirector"));
-
-				// Query for a list of assets in the selected paths
-				TArray<FAssetData> AssetList;
-				AssetRegistry.Get().GetAssets(Filter, AssetList);
-				TArray<UObjectRedirector*> Redirectors;
-
-				for (FAssetData objectRedirectorData : AssetList)
-				{
-					UObjectRedirector* redirector = Cast<UObjectRedirector>(objectRedirectorData.GetAsset());
-					if (redirector)
-					{
-						Redirectors.Add(redirector);
-					}
-				}
-
-				AssetToolsModule.Get().FixupReferencers(Redirectors);
-
-				FString newDirectoryName;
-				GetPathToDirectoryOfAsset(newObject, newDirectoryName);
-
-				TWeakObjectPtr<UObject> weakPtrToObject = newObject;
-				FAssetRenameData renameData(weakPtrToObject, newDirectoryName, *assetName);
-				TArray<FAssetRenameData> assetsToRename;
-				assetsToRename.Add(renameData);
-
-				AssetToolsModule.Get().RenameAssets(assetsToRename);
-			}
-			else
-			{
-				createdAsset = NewObject<AssetType>(AssetPackage, uclass, *assetName, Flags);
-			}
-
-			if (createdAsset)
+			if (asset)
 			{
 				// Notify the asset registry
-				FAssetRegistryModule::AssetCreated(Cast<UObject>(createdAsset));
+				FAssetRegistryModule::AssetCreated(Cast<UObject>(asset));
 
 				// Mark the package dirty...
 				AssetPackage->MarkPackageDirty();
 			}
 
-			return createdAsset;
+			return asset;
 		}
 
 		//NOTE: cannot use LogArticyRuntime here, causes linker error
