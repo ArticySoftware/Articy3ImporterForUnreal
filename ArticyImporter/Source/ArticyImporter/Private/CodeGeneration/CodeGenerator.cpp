@@ -185,8 +185,10 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 
 	//register the newly imported packages in the database
 	if (ensureMsgf(db, TEXT("Could not create ArticyDatabase asset!")))
+	{
 		db->SetLoadedPackages(Data->GetPackages());
-
+		db->MarkPackageDirty();
+	}
 	//promt the user to save newly generated packages
 	FEditorFileUtils::SaveDirtyPackages(true, true, /*bSaveContentPackages*/ true, false, false, true);
 
