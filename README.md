@@ -4,7 +4,10 @@
 
 # ArticyImporter for Unreal Engine 4
 
-This Unreal Engine 4 plugin allows importing articy:draft content into Unreal projects and provides a simple C++ and blueprint interface to work with the data. While this is not meant as a full product release, it is still considered a working foundation for integrating your articy:draft content into your Unreal Engine project.
+The Unreal Engine 4 importer allows integrating articy:draft content into Unreal projects and provides a simple C++ and blueprint interface to work with the data. We release this importer as a github open source project that will provide a substantial headstart into incorporating articy:draft data into Unreal projects while still allowing enough flexibility to adjust the importer to personal needs. 
+
+While full support is not guaranteed for this product, we're constantly working on improvemets and would love to hear your suggestions. Feel free to forward us your ideas or even better directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the importer.
+
 
 # Table of contents
 
@@ -14,14 +17,10 @@ This Unreal Engine 4 plugin allows importing articy:draft content into Unreal pr
 * [Using the plugin](https://github.com/ArticySoftware/ArticyImporterForUnreal#using-the-plugin)
 
 
-# Goals
-
-We release this plugin as a github open source project which will provide a substantial headstart into incorporating articy:draft data into Unreal projects while still allowing enough flexibility to adjust the plugin to personal needs. 
-We also would love to hear your suggestions or even better directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the plugin.
 
 # Features
 
-This plugin provides a working foundation for integrating articy:draft content into Unreal Engine projects. You can expect the following features including but not limited to:
+This importer provides a working foundation for integrating articy:draft content into Unreal Engine projects. You can expect the following features including but not limited to:
 
  * Everything accessible via **C++** and **Blueprint**
  * **Flow player** for automatic configurable flow traversal as an actor component
@@ -31,15 +30,15 @@ This plugin provides a working foundation for integrating articy:draft content i
 
 # Setup
 
-There are a couple of steps needed to get the plugin up and running. Since the plugin requires the Unreal project to be C++ compatible, you have to ensure that you have the required tools installed, such as Visual Studio for Windows or XCode for Mac.
+There are a couple of steps needed to get the importer up and running. The Unreal project must be C++ compatible, therefore please ensure that the required tools are installed, such as Visual Studio for Windows or XCode for Mac.
 
 To find out more about how to set up Visual Studio, click [here](https://docs.unrealengine.com/en-US/Programming/Development/VisualStudioSetup/index.html).
 
-We have the following options when we want to first use the plugin:
+Following options are available when first using the importer:
 
 ## Create a new project
 
-If you want to create a new project, select one of the templates under the C++ tab during the project creation.
+To create a new project, select one of the templates under the C++ tab during the project creation.
 
 
 <p align="center">
@@ -50,7 +49,7 @@ After you have created a new project, close the Unreal editor for now.
 
 ## For already existing Blueprint-only projects
 
-Projects that existed prior to using the plugin and used only Blueprints can be converted to C++ projects by adding any C++ class that inherits from UObject to the project. It is important that an option <b>other</b> than None gets selected. As an example, we choose the Actor class.
+Projects that existed prior to using the importer and used only Blueprints can be converted to C++ projects by adding any C++ class that inherits from UObject to the project. It is important that an option <b>other</b> than None gets selected. As an example, we choose the Actor class.
 
 <p align="center">
   <img height="400" src="https://www.nevigo.com/articy-importer/unreal/create_new_cpp_class.jpg">
@@ -62,12 +61,12 @@ Projects that existed prior to using the plugin and used only Blueprints can be 
 
 Click Next, name the class "MyActor" and finish the setup. Unreal Engine should now compile the "MyActor" class. After having compiled, your project now also works with C++.
 
-## Clone/Copy the plugin into the Unreal project
+## Clone/Copy the importer into the Unreal project
 
-*Unreal Engine 4.18 and below use [the UE-4.18 tagged version](https://github.com/ArticySoftware/ArticyImporterForUnreal/releases) of the plugin*
+*Unreal Engine 4.18 and below use [the UE-4.18 tagged version](https://github.com/ArticySoftware/ArticyImporterForUnreal/releases) of the importer*
 
-Get a copy of the plugin and copy it into your projects **Plugins** folder. It is possible that you don't have one if it is a new project, so you can just create it.
-Copy the plugin folder **ArticyImporter** into this **Plugins** folder. Your project structure should now look something like this.
+Get a copy of the importer and copy it into your projects **Plugins** folder. It is possible that you don't have one if it is a new project, so you can just create it.
+Copy the folder **ArticyImporter** into this **Plugins** folder. Your project structure should now look something like this.
 
 <p align="center">
   <img src="https://www.nevigo.com/articy-importer/unreal/copy_plugin.png">
@@ -75,7 +74,7 @@ Copy the plugin folder **ArticyImporter** into this **Plugins** folder. Your pro
 
 ## Adjust build configuration
 
-For Unreal to correctly build the plugin we need to add it as an dependency, to do that locate the file **Source/\<ProjectName>/\<ProjectName\>Cpp.Build.cs**
+For Unreal to correctly build the importer we need to add it as a dependency, to do that locate the file **Source/\<ProjectName>/\<ProjectName\>Cpp.Build.cs**
 
 <p align="center">
   <img src="https://www.nevigo.com/articy-importer/unreal/buildconfigfile.png">
@@ -83,7 +82,7 @@ For Unreal to correctly build the plugin we need to add it as an dependency, to 
 
 And open it in your favorite text or code editor.
 
-Now we need to adjust the existing code and make sure that the Importer is an dependency for the project. Locate the `PublicDependencyModuleNames` array and add `"ArticyRuntime"` as an additional dependency. Furthermore you should add the plugin header files to the public include path by adding `PublicIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "../../Plugins/ArticyImporter/Source/ArticyRuntime/Public") });` below the dependencies.  
+Now we need to adjust the existing code and make sure that the Importer is a dependency for the project. Locate the `PublicDependencyModuleNames` array and add `"ArticyRuntime"` as an additional dependency. Furthermore you should add the plugin header files to the public include path by adding `PublicIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "../../Plugins/ArticyImporter/Source/ArticyRuntime/Public") });` below the dependencies.  
 If you are working on macOS, you should also add `"Json"` to `PrivateDependencyModuleNames`.
 
 Your file should now look something like this:
@@ -117,20 +116,20 @@ public class MyArticyProject : ModuleRules
 
 Make sure to save the file and close the editor.
 
-## Enable plugin in Unreal
+## Enable the importer in Unreal
 
 Now you can open your Unreal project and open the Plugins window by selecting Edit->Plugins in the main window menu bar.
-Inside this window scroll in the list of groups down until you find the Group **Project** and the sub group **Articy**, click on Articy and enable the ArticyImporter plugin on the right.
+Inside this window scroll in the list of groups down until you find the Group **Project** and the sub group **Articy**, click on Articy and enable the ArticyImporter on the right.
 
 <p align="center">
   <img src="https://www.nevigo.com/articy-importer/unreal/enable_plugin.png">
 </p>
 
-After enabling the plugin the window will prompt you to restart the editor which you should to do activate it for your project. When the editor restarts it will prompt you to rebuild missing dll files for the plugin which you should confirm. This can take a bit depending on the size of the project and the power of your computer but once finished the Unreal editor should be back up again.
+After enabling the importer the window will prompt you to restart the editor, please do so to activate it for your project. When the editor restarts it will prompt you to rebuild missing dll files for the importer which you should confirm. This can take a bit depending on the size of the project and the power of your computer but once finished the Unreal editor should be back up again.
 
 ## Export project from articy:draft
 
-Now that the plugin is running, you are ready to export your data from articy:draft.
+Now that the importer is running, you are ready to export your data from articy:draft.
 Open your articy:draft project and open the export window. Here you will find the Unreal Engine export. Please note that the Unreal export uses [Rulesets](https://www.nevigo.com/help/Exports_Rulesets.html) to choose what and how to export.
 When exporting, chose your Unreal projects **Content** folder as the target for the `.articyue4` export file.
 
@@ -140,11 +139,11 @@ When exporting, chose your Unreal projects **Content** folder as the target for 
 
 After every export, going back to Unreal will trigger the ArticyImporter plugin to automatically parse the new file and import the changes.
 
-Make sure to confirm the prompt after the import to save all assets generated by the plugin.
+Make sure to confirm the prompt after the import to save all assets generated by the importer.
 
-# Using the plugin
+# Using the importer
 
-Now that the plugin is installed and your project data is imported you can start working on your project. 
+Now that the importer is installed and your project data is imported you can start working on your project. 
 Here are some quick tips at what to look for so you won't go in completely blind:
 
 ## Get object
@@ -256,4 +255,4 @@ If you want to learn more about the flow player and its events you can read the 
 
 # Contributing
 
-We are very grateful for any kind of contribution that you bring to the ArticyImporter plugin, no matter if it is reporting any issues, or by actively adding new features, or fixing existing issues. If you want to know more about how to contribute please check our [Contribution](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) article.
+We are very grateful for any kind of contribution that you bring to the ArticyImporter, no matter if it is reporting any issues, or by actively adding new features, or fixing existing issues. If you want to know more about how to contribute please check our [Contribution](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) article.
