@@ -14,7 +14,7 @@ While full support is not guaranteed for this product, we're constantly working 
 * [Features](https://github.com/ArticySoftware/ArticyImporterForUnreal#features)
 * [Setup](https://github.com/ArticySoftware/ArticyImporterForUnreal#setup)
 * [Export from articy:draft](https://github.com/ArticySoftware/ArticyImporterForUnreal#export-project-from-articydraft)
-* [Using the plugin](https://github.com/ArticySoftware/ArticyImporterForUnreal#using-the-plugin)
+* [Using the importer](https://github.com/ArticySoftware/ArticyImporterForUnreal#using-the-importer)
 
 
 
