@@ -189,7 +189,7 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 		db->SetLoadedPackages(Data->GetPackages());
 		db->MarkPackageDirty();
 	}
-	//promt the user to save newly generated packages
+	//prompt the user to save newly generated packages
 	FEditorFileUtils::SaveDirtyPackages(true, true, /*bSaveContentPackages*/ true, false, false, true);
 
 	FText Message = LOCTEXT("GenerationRestartMessage", "To properly update articy:draft data, the editor needs to be restarted.");

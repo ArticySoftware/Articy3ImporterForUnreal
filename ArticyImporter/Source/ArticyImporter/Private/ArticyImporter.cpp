@@ -12,6 +12,9 @@
 #include "Developer/Settings/Public/ISettingsSection.h"
 #include "Developer/Settings/Public/ISettingsContainer.h"
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
+#include "ArticyImporterHelpers.h"
+#include <Dialogs.h>
+#include <SWindow.h>
 
 DEFINE_LOG_CATEGORY(LogArticyImporter)
 
@@ -53,6 +56,43 @@ void FArticyImporterModule::UnregisterPluginSettings()
 	{
 		SettingsModule->UnregisterSettings("Project", "Plugins", "ArticyImporter");
 	}
+}
+
+bool FArticyImporterModule::IsImportQueued()
+{
+	return bIsImportQueued;
+}
+
+void FArticyImporterModule::SetImportCreationData(ArticyImporterHelpers::ArticyImportCreationData creationData)
+{
+	ImportDataCreationData = creationData;
+}
+
+void FArticyImporterModule::QueueImport(ArticyImporterHelpers::ArticyImportCreationData creationData)
+{
+	bIsImportQueued = true;
+	SetImportCreationData(creationData);
+	FOnMsgDlgResult OnDialogClosed;
+	FText Message = LOCTEXT("ImportWhilePlaying", "To import articy:draft data, the play mode has to be quit. Import will begin after exiting play.");
+	FText Title = LOCTEXT("ImportWhilePlaying_Title", "Import not possible");
+	TSharedRef<SWindow> window = OpenMsgDlgInt_NonModal(EAppMsgType::Ok, Message, Title, OnDialogClosed);
+	FEditorDelegates::EndPIE.AddRaw(this, &FArticyImporterModule::TriggerQueuedImport);
+}
+
+void FArticyImporterModule::UnqueueImport()
+{
+	FEditorDelegates::EndPIE.RemoveAll(this);
+	bIsImportQueued = false;
+	ImportDataCreationData = ArticyImporterHelpers::ArticyImportCreationData();
+}
+
+void FArticyImporterModule::TriggerQueuedImport(bool b)
+{
+	UArticyJSONFactory* factory = NewObject<UArticyJSONFactory>();
+	UPackage * package = CreatePackage(nullptr, *(ImportDataCreationData.PackageName));
+	factory->ImportObject(ImportDataCreationData.InClass, package, ImportDataCreationData.InName, ImportDataCreationData.Flags, ImportDataCreationData.Filename, ImportDataCreationData.Parms, ImportDataCreationData.bOutOperationCanceled);
+	// important to unqueue in the end to reset the state
+	UnqueueImport();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -39,4 +39,8 @@ private:
 
 	/** Performs the actual import task, converting the json data into UArticyImportData. */
 	bool ImportFromFile(const FString& FileName, UArticyImportData* Asset) const;
+
+	void DelayedReimport(bool bIsSimulating, UObject* obj);
+	void ActivateDelayedReimport(UObject* Obj);
+
 };

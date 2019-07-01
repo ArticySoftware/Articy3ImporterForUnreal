@@ -12,6 +12,37 @@
 
 namespace ArticyImporterHelpers
 {
+
+	// struct to save the data that gets passed in upon the initial import for delayed import.
+	// the InParent is a package that gets deleted since no object resides in it. That's why we save the path instead to recreate the package later on
+	struct ArticyImportCreationData
+	{
+		UClass* InClass;
+		FString PackageName;
+		FName InName;
+		EObjectFlags Flags;
+		FString Filename;
+		const TCHAR* Parms;
+		FFeedbackContext* Warn;
+		bool bOutOperationCanceled;
+
+		ArticyImportCreationData(UClass* InClass, UObject* InParent,FName InName,EObjectFlags Flags,const FString& Filename, const TCHAR* Parms,FFeedbackContext* Warn,bool bOutOperationCanceled)
+		{
+			this->InClass = InClass;
+			this->PackageName = Cast<UPackage>(InParent)->GetPathName();
+			this->InName = InName;
+			this->Flags = Flags;
+			this->Filename = FString(*Filename);
+			this->Parms = Parms;
+			this->Warn = Warn;
+			this->bOutOperationCanceled = bOutOperationCanceled;
+		}
+
+		ArticyImportCreationData()
+		{
+
+		}
+	};
 	inline UPackage* FindOrCreatePackage(const FString Name)
 	{
 		FString PackageName = ArticyHelpers::ArticyGeneratedFolder / Name;
@@ -86,6 +117,18 @@ namespace ArticyImporterHelpers
 		UE_LOG(LogTemp, Error, TEXT("ArticyImporter: Could not find class %s!"), ClassName);
 
 		return nullptr;
+	}
+
+	static bool IsPlayInEditor()
+	{
+		for (const FWorldContext& Context : GEngine->GetWorldContexts())
+		{
+			if (Context.World()->IsPlayInEditor())
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
