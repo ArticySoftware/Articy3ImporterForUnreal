@@ -22,7 +22,7 @@ void FArticyModelDef::ImportFromJson(const TSharedPtr<FJsonObject> JsonModel)
 
 	FString Category;
 	JSON_TRY_STRING(JsonModel, Category);
-	this->Category = GetAssetCategoryFromString(Category);
+	this->AssetCategory = GetAssetCategoryFromString(Category);
 
 	{
 		PropertiesJsonString = "";
@@ -107,14 +107,14 @@ TSharedPtr<FJsonObject> FArticyModelDef::GetTemplatesJson() const
 	return CachedTemplateJson;
 }
 
-EArticyAssetCategory FArticyModelDef::GetAssetCategoryFromString(const FString AssetCategory)
+EArticyAssetCategory FArticyModelDef::GetAssetCategoryFromString(const FString Category)
 {
-	if (AssetCategory == "Image") return EArticyAssetCategory::Image;
-	else if (AssetCategory == "Video") return EArticyAssetCategory::Video;
-	else if (AssetCategory == "Audio") return EArticyAssetCategory::Audio;
-	else if (AssetCategory == "Document") return EArticyAssetCategory::Document;
-	else if (AssetCategory == "Misc") return EArticyAssetCategory::Misc;
-	else if (AssetCategory == "All") return EArticyAssetCategory::All;
+	if (Category == "Image") return EArticyAssetCategory::Image;
+	else if (Category == "Video") return EArticyAssetCategory::Video;
+	else if (Category == "Audio") return EArticyAssetCategory::Audio;
+	else if (Category == "Document") return EArticyAssetCategory::Document;
+	else if (Category == "Misc") return EArticyAssetCategory::Misc;
+	else if (Category == "All") return EArticyAssetCategory::All;
 	else return EArticyAssetCategory::None;
 }
 
