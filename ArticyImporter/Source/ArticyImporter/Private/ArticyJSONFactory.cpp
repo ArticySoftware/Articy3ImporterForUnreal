@@ -10,6 +10,8 @@
 #include "Editor.h"
 #include <Dialogs.h>
 #include "ArticyImporterHelpers.h"
+#include "CoreMinimal.h"
+#include "../Launch/Resources/Version.h"
 
 #define LOCTEXT_NAMESPACE "ArticyJSONFactory"
 
