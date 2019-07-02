@@ -21,6 +21,7 @@
 #include <UnrealEdMisc.h>
 #include <GenericPlatformMisc.h>
 #include <Dialogs.h>
+#include "../Launch/Resources/Version.h"
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
@@ -194,7 +195,12 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 
 	FText Message = LOCTEXT("GenerationRestartMessage", "To properly update articy:draft data, the editor needs to be restarted.");
 	FText Title = LOCTEXT("GenerationRestartTitle", "Restart editor");
-	EAppReturnType::Type returnType = OpenMsgDlgInt(EAppMsgType::Ok, EAppReturnType::Ok, Message, Title);
+	EAppReturnType::Type returnType;
+#if ENGINE_MINOR_VERSION >= 20
+	returnType = OpenMsgDlgInt(EAppMsgType::Ok, EAppReturnType::Ok, Message, Title);
+#elif ENGINE_MINOR_VERSION == 19
+	returnType = OpenMsgDlgInt(EAppMsgType::Ok, Message, Title);
+#endif
 
 	if (returnType == EAppReturnType::Ok)
 	{
