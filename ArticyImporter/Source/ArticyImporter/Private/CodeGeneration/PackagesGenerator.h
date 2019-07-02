@@ -13,6 +13,8 @@ public:
 
 	static void GenerateAssets(class UArticyImportData* Data);
 
+	static bool DoesEditorNeedRestart();
+
 private:
 	PackagesGenerator() {}
 	virtual ~PackagesGenerator() {}
@@ -22,4 +24,10 @@ private:
 	static void ExecuteFixUpRedirectorsInGeneratedFolder();
 
 	static UClass* LoadClassFromPath(const FString& Path);
+
+
+private:
+	// we need to restart the engine if an asset was moved via change of package definitions and references were consolidated
+	// see UE-29768 for further details
+	static bool bEditorNeedsRestart;
 };

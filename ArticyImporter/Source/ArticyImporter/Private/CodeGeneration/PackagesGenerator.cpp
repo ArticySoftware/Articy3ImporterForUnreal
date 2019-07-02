@@ -25,6 +25,8 @@
 
 #define LOCTEXT_NAMESPACE "PackagesGenerator"
 
+bool PackagesGenerator::bEditorNeedsRestart = false;
+
 void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 {
 
@@ -99,6 +101,7 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 				// Update references and delete oldObject
 				if (newObject != oldObject)
 				{
+					PackagesGenerator::bEditorNeedsRestart = true;
 					UObject* newUObject = newObject;
 					UObject* oldUObject = oldObject;
 
@@ -177,6 +180,11 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 			bool bMarkedDirty = object->MarkPackageDirty();
 		}
 	}
+}
+
+bool PackagesGenerator::DoesEditorNeedRestart()
+{
+	return bEditorNeedsRestart;
 }
 
 bool PackagesGenerator::LoadAssetsIfNeeded(const TArray<FString>& ObjectPaths, TArray<UObject*>& LoadedObjects, bool bAllowedToPromptToLoadAssets, bool bLoadRedirects)
