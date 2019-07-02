@@ -28,9 +28,9 @@ struct FArticyObjectShadow
 
 public:
 	UPROPERTY()
-	uint32 ShadowLevel;
+	uint32 ShadowLevel = 0;
 	UPROPERTY()
-	UArticyPrimitive* Object;
+	UArticyPrimitive* Object = nullptr;
 };
 
 USTRUCT(BlueprintType)
