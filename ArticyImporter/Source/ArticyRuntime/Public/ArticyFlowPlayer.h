@@ -124,7 +124,10 @@ public:
 	 * The explore can be performed as shadowed operation.
 	 * If the node is submergeable, a submerge is performed.
 	 */
-	TArray<FArticyBranch> Explore(IArticyFlowObject* Node, bool bShadowed, uint32 Depth);
+	TArray<FArticyBranch> Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth);
+
+	UFUNCTION(BlueprintCallable, Category = "Flow", meta = (ClampMin = 0))
+	TArray<FArticyBranch> ExploreTree(UObject* Node, bool bShadowed, int32 Depth);
 
 	/** Returns true if Node is one of the PauseOn types. */
 	bool ShouldPauseOn(IArticyFlowObject* Node) const;

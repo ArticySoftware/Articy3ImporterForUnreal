@@ -185,14 +185,14 @@ IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 
 //---------------------------------------------------------------------------//
 
-TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, uint32 Depth)
+TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth)
 {
 	TArray<FArticyBranch> OutBranches;
 
 	//check stop condition
-	if((Depth > uint32(ExploreDepthLimit) || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))))
+	if((Depth > ExploreDepthLimit || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))))
 	{
-		if(Depth > uint32(ExploreDepthLimit))
+		if(Depth > ExploreDepthLimit)
 			UE_LOG(LogArticyRuntime, Warning, TEXT("ExploreDepthLimit (%d) reached, stopping exploration!"), ExploreDepthLimit);
 		if(!Node)
 			UE_LOG(LogArticyRuntime, Warning, TEXT("Found a nullptr Node when exploring a branch!"));
@@ -282,6 +282,21 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 	}
 
 	return OutBranches;
+}
+
+TArray<FArticyBranch> UArticyFlowPlayer::ExploreTree(UObject* Node, bool bShadowed, int32 Depth)
+{
+	if(Depth < 0)
+	{
+		UE_LOG(LogArticyRuntime, Error, TEXT("Attempted to explore an articy node with a depth smaller than 0!"));
+	}
+	auto iArticyFlowObject = Cast<IArticyFlowObject>(Node);
+	if (iArticyFlowObject)
+	{
+		return Explore(iArticyFlowObject, bShadowed, Depth);
+	}
+
+	return TArray<FArticyBranch>();
 }
 
 //---------------------------------------------------------------------------//
