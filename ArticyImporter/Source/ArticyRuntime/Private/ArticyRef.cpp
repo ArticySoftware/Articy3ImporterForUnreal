@@ -27,10 +27,16 @@ void FArticyRef::SetReference(UArticyPrimitive* Object)
 
 const FArticyId& FArticyRef::GetId() const
 {
-	//only overwrite the id if the Reference object does exist and was loaded
-	if(Reference && Reference->WasLoaded())
+	// overwrite the id if the Reference object does exist and was loaded
+	if (Reference && Reference->WasLoaded())
+	{
 		Id = Reference->GetId();
-	
+	}
+	// if the reference object isn't valid (due to clearing for example), reset the Id too
+	else
+	{
+		Id = 0;
+	}
 	return Id;
 }
 
