@@ -137,13 +137,14 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 		}
 
 		// fix up redirectors : it's a slow process!
+		// #BUG Sometimes some redirectors created by the consolidation before survive this process somehow. Cleanup in folder cleanup below.
 		ExecuteFixUpRedirectorsInGeneratedFolder();
 
-		// force delete all objects that did not receive an update or a replacement in another package
-		// #BUG somehow 1-2 assets in Maniac Manfred survive this process sometimes. Cleanup down below
+		// force delete all objects that did not receive an update or a replacement in another package - meaning the objects were simply deleted in articy draft
 		ObjectTools::ForceDeleteObjects(objectsToDelete, false);
 
-		// Delete remaining assets (there shouldn't be any) and delete the now empty directories
+		// Folder cleanup
+		// Delete remaining assets (there shouldn't be any, but sometimes there are due to an engine bug) and delete the now empty directories
 		FString RelativeContentPath = FPaths::ProjectContentDir();
 		FString FullContentPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativeContentPath);
 		FString FullArticyGeneratedPackagesPath = FullContentPath / ArticyHelpers::ArticyGeneratedPackagesFolderRelativeToContent;
@@ -154,7 +155,15 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 
 			TArray<FAssetData> outdatedAssets;
 			AssetRegistryModule.Get().GetAssetsByPath(FName(*(ArticyHelpers::ArticyGeneratedPackagesFolder / folderName)), outdatedAssets, true);
-			ObjectTools::DeleteAssets(outdatedAssets, false);
+
+			TArray<UObject*> outdatedObjects;
+
+			for(FAssetData data : outdatedAssets)
+			{
+				outdatedObjects.Add(data.GetAsset());
+			}
+
+			ObjectTools::ForceDeleteObjects(outdatedObjects, false);
 
 			// delete the folder as well
 			if (FPlatformFileManager::Get().GetPlatformFile().DirectoryExists(*FullDirectoryPath))
