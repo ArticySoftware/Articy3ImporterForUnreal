@@ -196,28 +196,28 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 	// check if we need to restart the editor: true if at least one asset was moved/changed due to articy package changes. Might have other causes in the future, too.
 	// due to an engine bug, blueprints making use of the moved/changed assets need to be reloaded (easiest done by restarting engine)
 	// reference: UE-29768
-	if(!PackagesGenerator::DoesEditorNeedRestart())
-	{
-		return;
-	}
-
-	FText Message = LOCTEXT("GenerationRestartMessage", "Since articy:draft packages were changed, the editor will now be restarted to properly reflect the changes");
-	FText Title = LOCTEXT("GenerationRestartTitle", "Restart editor");
-	EAppReturnType::Type returnType;
-	// once the code returns from the message, the engine is forcefully restarted
-#if ENGINE_MINOR_VERSION >= 20
-	returnType = OpenMsgDlgInt(EAppMsgType::Ok, EAppReturnType::Ok, Message, Title);
-#elif ENGINE_MINOR_VERSION == 19
-	returnType = OpenMsgDlgInt(EAppMsgType::Ok, Message, Title);
-#endif
-
-	FGameProjectGenerationModule::Get().TryMakeProjectFileWriteable(FPaths::GetProjectFilePath());
-
-	FText FailMessage;
-	IProjectManager::Get().SaveCurrentProjectToDisk(FailMessage);
-
-	const bool bWarn = false;
-	FUnrealEdMisc::Get().RestartEditor(bWarn);
+//	if(!PackagesGenerator::DoesEditorNeedRestart())
+//	{
+//		return;
+//	}
+//
+//	FText Message = LOCTEXT("GenerationRestartMessage", "Since articy:draft packages were changed, the editor will now be restarted to properly reflect the changes");
+//	FText Title = LOCTEXT("GenerationRestartTitle", "Restart editor");
+//	EAppReturnType::Type returnType;
+//	// once the code returns from the message, the engine is forcefully restarted
+//#if ENGINE_MINOR_VERSION >= 20
+//	returnType = OpenMsgDlgInt(EAppMsgType::Ok, EAppReturnType::Ok, Message, Title);
+//#elif ENGINE_MINOR_VERSION == 19
+//	returnType = OpenMsgDlgInt(EAppMsgType::Ok, Message, Title);
+//#endif
+//
+//	FGameProjectGenerationModule::Get().TryMakeProjectFileWriteable(FPaths::GetProjectFilePath());
+//
+//	FText FailMessage;
+//	IProjectManager::Get().SaveCurrentProjectToDisk(FailMessage);
+//
+//	const bool bWarn = false;
+//	FUnrealEdMisc::Get().RestartEditor(bWarn);
 	
 }
 
