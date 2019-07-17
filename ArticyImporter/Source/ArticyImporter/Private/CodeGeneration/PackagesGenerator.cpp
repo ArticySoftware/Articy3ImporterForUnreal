@@ -54,11 +54,11 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 	existingObjectsMapping.GenerateValueArray(OldObjects);
 
 	// mark all previously existing articy objects to be destroyed
-	TArray<UObject*> objectsToDelete;
+	TArray<UObject*> deletedArticyObjects;
 	for (UArticyObject* obj : OldObjects) 
 	{
 		UObject* uobj = obj;
-		objectsToDelete.Add(uobj);
+		deletedArticyObjects.Add(uobj);
 	}
 
 	// generate new articy objects
@@ -92,7 +92,7 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 			if (newObjectsMapping.Contains(oldObject->GetName()))
 			{
 				// if the new objects contain the updated old object it will get deleted by consolidation or is the same so will only get updated
-				objectsToDelete.Remove(oldObject);
+				deletedArticyObjects.Remove(oldObject);
 
 				UArticyObject* newObject = newObjectsMapping[oldObject->GetName()];
 
@@ -137,18 +137,21 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 		}
 
 		// fix up redirectors : it's a slow process!
-		// #BUG Sometimes some redirectors created by the consolidation before survive this process somehow. Cleanup in folder cleanup below.
+		// #BUG Sometimes some redirectors created by the consolidation before survive this process somehow. Cleanup below
 		ExecuteFixUpRedirectorsInGeneratedFolder();
 
-		// force delete all objects that did not receive an update or a replacement in another package - meaning the objects were simply deleted in articy draft
-		ObjectTools::ForceDeleteObjects(objectsToDelete, false);
-
 		// Folder cleanup
-		// Delete remaining assets (there shouldn't be any, but sometimes there are due to an engine bug) and delete the now empty directories
+		// Delete remaining assets (there shouldn't be any, but sometimes there are leftover redirectors due to an engine bug) and delete the now empty directories
 		FString RelativeContentPath = FPaths::ProjectContentDir();
 		FString FullContentPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativeContentPath);
 		FString FullArticyGeneratedPackagesPath = FullContentPath / ArticyHelpers::ArticyGeneratedPackagesFolderRelativeToContent;
 
+		// gather all objects to be force deleted
+		TArray<UObject*> objectsToDelete;
+		// append the former objects to be deleted. Those that neither got an update nor a package move, meaning they were deleted
+		objectsToDelete.Append(deletedArticyObjects);
+
+		// gather all assets inside the outdated articy package folders to delete them - references should be fixed already
 		for (FString folderName : OutdatedArticyPackageFolders)
 		{
 			FString FullDirectoryPath = FullArticyGeneratedPackagesPath / folderName;
@@ -156,16 +159,35 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 			TArray<FAssetData> outdatedAssets;
 			AssetRegistryModule.Get().GetAssetsByPath(FName(*(ArticyHelpers::ArticyGeneratedPackagesFolder / folderName)), outdatedAssets, true);
 
-			TArray<UObject*> outdatedObjects;
-
 			for(FAssetData data : outdatedAssets)
 			{
-				outdatedObjects.Add(data.GetAsset());
+				objectsToDelete.Add(data.GetAsset());
 			}
+		}
 
-			ObjectTools::ForceDeleteObjects(outdatedObjects, false);
+		// Gather all remaining redirectors that somehow survived the fix up process to delete them
+		// since the prior reference fixup seems to have worked, it's fine to delete them without fixing them up anymore
+		FARFilter Filter;
+		Filter.bRecursivePaths = true;
+		Filter.PackagePaths.Emplace(*ArticyHelpers::ArticyGeneratedFolder);
+		Filter.ClassNames.Emplace(TEXT("ObjectRedirector"));
 
-			// delete the folder as well
+		TArray<FAssetData> RemainingRedirectors;
+		AssetRegistryModule.Get().GetAssets(Filter, RemainingRedirectors);
+
+		for(FAssetData data : RemainingRedirectors)
+		{
+			objectsToDelete.Add(data.GetAsset());
+		}
+
+
+		ObjectTools::ForceDeleteObjects(objectsToDelete, false);
+
+		// delete the outdated folders after having force deleted their contents
+		for (FString folderName : OutdatedArticyPackageFolders)
+		{
+			FString FullDirectoryPath = FullArticyGeneratedPackagesPath / folderName;
+
 			if (FPlatformFileManager::Get().GetPlatformFile().DirectoryExists(*FullDirectoryPath))
 			{
 				FPlatformFileManager::Get().GetPlatformFile().SetReadOnly(*FullDirectoryPath, false);
@@ -173,7 +195,7 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 			}
 		}
 
-		// unregister the path to old directories, to make sure
+		// unregister the path to old directories
 		for (FString directoryPath : DirectoryPathsOfOldAssets)
 		{
 			bool bPathRemoved = AssetRegistryModule.Get().RemovePath(directoryPath);
