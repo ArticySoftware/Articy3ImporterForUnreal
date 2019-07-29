@@ -127,10 +127,9 @@ namespace ArticyImporterHelpers
 			// Direct class references will break, however
 			else
 			{
-				FString packageName;
 				FName tempUniqueName = MakeUniqueObjectName(existingObject, uclass, FName(*AssetName));
-
 				FString relativeTempPath = (SubFolder.IsEmpty() ? tempUniqueName.ToString() : SubFolder / tempUniqueName.ToString()).Replace(TEXT(" "), TEXT("_"));
+
 				AssetPackage = FindOrCreatePackage(relativeTempPath);
 				createdAsset = NewObject<AssetType>(AssetPackage, uclass, *tempUniqueName.ToString(), Flags);
 
@@ -138,7 +137,6 @@ namespace ArticyImporterHelpers
 				TArray<UObject*> ReplacementObjects;
 				ReplacementObjects.Add(existingObject);
 				ObjectTools::ConsolidateObjects(newObject, ReplacementObjects, false);
-
 
 				// Form a filter from the paths
 				FARFilter Filter;
