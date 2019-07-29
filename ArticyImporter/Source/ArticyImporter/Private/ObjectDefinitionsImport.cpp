@@ -545,6 +545,7 @@ void FArticyObjectDefinitions::ImportFromJson(const TArray<TSharedPtr<FJsonValue
 {
 	Types.Reset();
 	FeatureTypes.Reset();
+	FeatureDefs.Reset();
 
 	if(!Json)
 		return;
