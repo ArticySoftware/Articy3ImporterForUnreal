@@ -290,21 +290,6 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 	return OutBranches;
 }
 
-TArray<FArticyBranch> UArticyFlowPlayer::ExploreTree(UObject* Node, bool bShadowed, int32 Depth)
-{
-	if(Depth < 0)
-	{
-		UE_LOG(LogArticyRuntime, Error, TEXT("Attempted to explore an articy node with a depth smaller than 0!"));
-	}
-	auto iArticyFlowObject = Cast<IArticyFlowObject>(Node);
-	if (iArticyFlowObject)
-	{
-		return Explore(iArticyFlowObject, bShadowed, Depth);
-	}
-
-	return TArray<FArticyBranch>();
-}
-
 //---------------------------------------------------------------------------//
 
 void UArticyFlowPlayer::UpdateAvailableBranches()

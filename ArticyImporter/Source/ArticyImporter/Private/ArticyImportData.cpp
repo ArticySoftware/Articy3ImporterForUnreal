@@ -544,16 +544,6 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 	ScriptFragments.Add(frag);
 }
 
-void UArticyImportData::ReimportArticyAssets()
-{
-	const auto factory = NewObject<UArticyJSONFactory>();
-	if (factory)
-	{
-		factory->Reimport(this);
-		//GC will destroy factory
-	}
-}
-
 void UArticyImportData::AddChildToParentCache(const FArticyId Parent, const FArticyId Child)
 {
 	FArticyIdArray* childrenPtr = ParentChildrenCache.Find(Parent);

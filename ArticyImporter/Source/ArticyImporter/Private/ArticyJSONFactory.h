@@ -21,12 +21,9 @@ class UArticyJSONFactory : public UFactory, public FReimportHandler
 	UArticyJSONFactory();
 	virtual ~UArticyJSONFactory();
 
-
 public:
-
 	bool FactoryCanImport(const FString& Filename) override;
 	UClass* ResolveSupportedClass() override;
-
 	UObject* FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn, bool& bOutOperationCanceled) override;
 
 	//FReimportHandler
@@ -36,7 +33,6 @@ public:
 	//~FReimportHandler
 
 private:
-
 	/** Performs the actual import task, converting the json data into UArticyImportData. */
 	bool ImportFromFile(const FString& FileName, UArticyImportData* Asset) const;
 

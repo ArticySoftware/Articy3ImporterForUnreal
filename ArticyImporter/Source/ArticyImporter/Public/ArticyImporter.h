@@ -9,6 +9,7 @@
 #include "Misc/CompilationResult.h"
 #include "ArticyJSONFactory.h"
 #include "ArticyImporterHelpers.h"
+#include "IDelegateInstance.h"
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogArticyImporter, Log, All)
@@ -41,8 +42,8 @@ private:
 	void SetImportCreationData(ArticyImporterHelpers::ArticyImportCreationData creationData);
 
 private:
+
 	bool bIsImportQueued = false;
 	ArticyImporterHelpers::ArticyImportCreationData ImportDataCreationData;
-
-
+	FDelegateHandle QueuedImportHandle;
 };

@@ -288,7 +288,6 @@ public:
 
 	void GatherScripts();
 	void AddScriptFragment(const FString& Fragment, const bool bIsInstruction);
-	void ReimportArticyAssets();
 	const TSet<FArticyExpressoFragment>& GetScriptFragments() const { return ScriptFragments; }
 
 	void AddChildToParentCache(FArticyId Parent, FArticyId Child);

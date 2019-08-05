@@ -26,7 +26,7 @@ namespace ArticyImporterHelpers
 		FFeedbackContext* Warn;
 		bool bOutOperationCanceled;
 
-		ArticyImportCreationData(UClass* InClass, UObject* InParent,FName InName,EObjectFlags Flags,const FString& Filename, const TCHAR* Parms,FFeedbackContext* Warn,bool bOutOperationCanceled)
+		ArticyImportCreationData(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn, bool bOutOperationCanceled)
 		{
 			this->InClass = InClass;
 			this->PackageName = Cast<UPackage>(InParent)->GetPathName();
@@ -103,14 +103,9 @@ namespace ArticyImporterHelpers
 			const TMap<FString, UArticyObject*> CachedExistingPackageObjects = PackagesGenerator::GetCachedExistingObjects();
 			bool objectIsCached = CachedExistingPackageObjects.Contains(assetName);
 
-			UArticyObject* existingObject = nullptr;
-			if (objectIsCached)
-			{
-				existingObject = *CachedExistingPackageObjects.Find(assetName);
-			}
+			UArticyObject* existingObject = objectIsCached ? *CachedExistingPackageObjects.Find(assetName) : nullptr;
 	
-
-			auto AssetPackage = FindOrCreatePackage(fileName);
+			auto assetPackage = FindOrCreatePackage(fileName);
 
 			EObjectFlags Flags = RF_Public | RF_Standalone;
 
@@ -118,20 +113,20 @@ namespace ArticyImporterHelpers
 			// if there is no existing object or there is one in the same path with the same class, just create a new asset/update the old asset
 			if (!existingObject || (existingObject->GetPathName().Equals(ArticyHelpers::ArticyGeneratedFolder / fileName + TEXT(".") + assetName) && existingObject->UObject::GetClass() == uclass))
 			{
-				createdAsset = NewObject<AssetType>(AssetPackage, uclass, *assetName, Flags);				
+				createdAsset = NewObject<AssetType>(assetPackage, uclass, *assetName, Flags);				
 			}
-			// if there is an existing cached object with the same name (should be ID in the future probably) + different location 
-			// Or same name + same location + different class 
-			// create a new one with a temp name, consolidate it, delete the old object and then rename the new one so it's the same as the old one, effectively moving it
-			// This also ensures that an update in class (due to template renaming etc.) gets handled properly
-			// Direct class references will break, however
+			/* if there is an existing cached object with the same name (should be ID in the future probably) + different location 
+			 Or same name + same location + different class 
+			 create a new one with a temp name, consolidate it, delete the old object and then rename the new one so it's the same as the old one, effectively moving it
+			 This also ensures that an update in class (due to template renaming etc.) gets handled properly
+			 Direct class references will break, however*/
 			else
 			{
 				FName tempUniqueName = MakeUniqueObjectName(existingObject, uclass, FName(*AssetName));
 				FString relativeTempPath = (SubFolder.IsEmpty() ? tempUniqueName.ToString() : SubFolder / tempUniqueName.ToString()).Replace(TEXT(" "), TEXT("_"));
 
-				AssetPackage = FindOrCreatePackage(relativeTempPath);
-				createdAsset = NewObject<AssetType>(AssetPackage, uclass, *tempUniqueName.ToString(), Flags);
+				assetPackage = FindOrCreatePackage(relativeTempPath);
+				createdAsset = NewObject<AssetType>(assetPackage, uclass, *tempUniqueName.ToString(), Flags);
 
 				UObject* newObject = Cast<UObject>(createdAsset);
 				TArray<UObject*> ReplacementObjects;
@@ -139,14 +134,14 @@ namespace ArticyImporterHelpers
 				ObjectTools::ConsolidateObjects(newObject, ReplacementObjects, false);
 
 				// Form a filter from the paths
-				FARFilter Filter;
-				Filter.bRecursivePaths = true;
-				Filter.PackagePaths.Emplace(*ArticyHelpers::ArticyGeneratedFolder);
-				Filter.ClassNames.Emplace(TEXT("ObjectRedirector"));
+				FARFilter filter;
+				filter.bRecursivePaths = true;
+				filter.PackagePaths.Emplace(*ArticyHelpers::ArticyGeneratedFolder);
+				filter.ClassNames.Emplace(TEXT("ObjectRedirector"));
 
 				// Query for a list of assets in the selected paths
 				TArray<FAssetData> AssetList;
-				AssetRegistry.Get().GetAssets(Filter, AssetList);
+				AssetRegistry.Get().GetAssets(filter, AssetList);
 				TArray<UObjectRedirector*> Redirectors;
 
 				for (FAssetData objectRedirectorData : AssetList)
@@ -166,10 +161,8 @@ namespace ArticyImporterHelpers
 
 				TWeakObjectPtr<UObject> weakPtrToObject = newObject;
 				FAssetRenameData renameData(weakPtrToObject, newDirectoryName, *assetName);
-				TArray<FAssetRenameData> assetsToRename;
-				assetsToRename.Add(renameData);
 
-				AssetToolsModule.Get().RenameAssets(assetsToRename);
+				AssetToolsModule.Get().RenameAssets({ renameData });
 			}
 
 			if (createdAsset)
@@ -178,7 +171,7 @@ namespace ArticyImporterHelpers
 				FAssetRegistryModule::AssetCreated(Cast<UObject>(createdAsset));
 
 				// Mark the package dirty...
-				AssetPackage->MarkPackageDirty();
+				assetPackage->MarkPackageDirty();
 			}
 
 			return createdAsset;

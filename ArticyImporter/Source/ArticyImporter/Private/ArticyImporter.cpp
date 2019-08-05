@@ -76,12 +76,12 @@ void FArticyImporterModule::QueueImport(ArticyImporterHelpers::ArticyImportCreat
 	FText Message = LOCTEXT("ImportWhilePlaying", "To import articy:draft data, the play mode has to be quit. Import will begin after exiting play.");
 	FText Title = LOCTEXT("ImportWhilePlaying_Title", "Import not possible");
 	TSharedRef<SWindow> window = OpenMsgDlgInt_NonModal(EAppMsgType::Ok, Message, Title, OnDialogClosed);
-	FEditorDelegates::EndPIE.AddRaw(this, &FArticyImporterModule::TriggerQueuedImport);
+	QueuedImportHandle = FEditorDelegates::EndPIE.AddRaw(this, &FArticyImporterModule::TriggerQueuedImport);
 }
 
 void FArticyImporterModule::UnqueueImport()
 {
-	FEditorDelegates::EndPIE.RemoveAll(this);
+	FEditorDelegates::EndPIE.Remove(QueuedImportHandle);
 	bIsImportQueued = false;
 	ImportDataCreationData = ArticyImporterHelpers::ArticyImportCreationData();
 }
