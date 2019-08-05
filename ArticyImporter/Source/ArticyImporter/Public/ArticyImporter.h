@@ -29,21 +29,16 @@ public:
 	void RegisterPluginSettings();
 	void UnregisterPluginSettings();
 
+	void QueueImport();
 	bool IsImportQueued();
 
-	void QueueImport(ArticyImporterHelpers::ArticyImportCreationData creationData);
-	
 private:
 
 	void UnqueueImport();
-
 	void TriggerQueuedImport(bool b);
-
-	void SetImportCreationData(ArticyImporterHelpers::ArticyImportCreationData creationData);
 
 private:
 
 	bool bIsImportQueued = false;
-	ArticyImporterHelpers::ArticyImportCreationData ImportDataCreationData;
 	FDelegateHandle QueuedImportHandle;
 };

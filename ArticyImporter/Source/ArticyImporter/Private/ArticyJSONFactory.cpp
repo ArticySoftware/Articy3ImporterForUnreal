@@ -41,17 +41,7 @@ UObject* UArticyJSONFactory::FactoryCreateFile(UClass* InClass, UObject* InParen
 {
 	auto asset = NewObject<UArticyImportData>(InParent, InName, Flags);
 
-	bool bIsPlaying = ArticyImporterHelpers::IsPlayInEditor();
-	FArticyImporterModule& importerModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
-
-	// if we are already queued, that means we just ended play mode. bIsPlaying will still be true in this case, so we need another check
-	if(bIsPlaying && !importerModule.IsImportQueued()) 
-	{
-		// we have to abuse the module to queue the import since this factory will be deleted immediately
-		ArticyImporterHelpers::ArticyImportCreationData data(InClass, InParent, InName, Flags, Filename,Parms, Warn, bOutOperationCanceled);
-		importerModule.QueueImport(data);
-		return nullptr;
-	}
+	bool bImportQueued = HandleImportDuringPlay(asset);
 
 #if ENGINE_MINOR_VERSION >= 22
 	GEditor->GetEditorSubsystem<UImportSubsystem>()->BroadcastAssetPreImport(this, InClass, InParent, InName, *FPaths::GetExtension(Filename));
@@ -59,16 +49,22 @@ UObject* UArticyJSONFactory::FactoryCreateFile(UClass* InClass, UObject* InParen
 	FEditorDelegates::OnAssetPreImport.Broadcast(this, InClass, InParent, InName, *FPaths::GetExtension(Filename));
 #endif
 
-	if(ImportFromFile(Filename, asset) && asset)
+	asset->ImportData->Update(GetCurrentFilename());
+
+	if(!bImportQueued)
 	{
-		asset->ImportData->Update(GetCurrentFilename());
+		if (ImportFromFile(Filename, asset) && asset)
+		{
+
+		}
+		else
+		{
+			bOutOperationCanceled = true;
+			//the asset will be GCed because there are no references to it, no need to delete it
+			asset = nullptr;
+		}
 	}
-	else
-	{
-		bOutOperationCanceled = true;
-		//the asset will be GCed because there are no references to it, no need to delete it
-		asset = nullptr;
-	}
+	
 
 #if ENGINE_MINOR_VERSION >= 22
 	GEditor->GetEditorSubsystem<UImportSubsystem>()->BroadcastAssetPostImport(this, asset);
@@ -81,16 +77,11 @@ UObject* UArticyJSONFactory::FactoryCreateFile(UClass* InClass, UObject* InParen
 
 bool UArticyJSONFactory::CanReimport(UObject* Obj, TArray<FString>& OutFilenames)
 {
-
-	// gets called upon pressing "Import"
 	auto asset = Cast<UArticyImportData>(Obj);
-	bool bIsPlaying = ArticyImporterHelpers::IsPlayInEditor();
-
-	if (bIsPlaying && asset)
+	
+	bool bImportQueued = HandleImportDuringPlay(Obj);
+	if(bImportQueued)
 	{
-		ActivateDelayedReimport(Obj);
-
-		UE_LOG(LogArticyImporter, Log, TEXT("Can't import right now!"));
 		return false;
 	}
 
@@ -146,24 +137,20 @@ bool UArticyJSONFactory::ImportFromFile(const FString& FileName, UArticyImportDa
 	return true;
 }
 
-void UArticyJSONFactory::DelayedReimport(bool bIsSimulating, UObject* obj)
+bool UArticyJSONFactory::HandleImportDuringPlay(UObject* Obj)
 {
-	FEditorDelegates::EndPIE.RemoveAll(this);
+	bool bIsPlaying = ArticyImporterHelpers::IsPlayInEditor();
+	FArticyImporterModule& importerModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
 
-	if (obj->IsValidLowLevel())
+	// if we are already queued, that means we just ended play mode. bIsPlaying will still be true in this case, so we need another check
+	if (bIsPlaying && !importerModule.IsImportQueued())
 	{
-		Reimport(obj);
+		// we have to abuse the module to queue the import since this factory might not exist later on
+		importerModule.QueueImport();
+		return true;
 	}
-}
 
-void UArticyJSONFactory::ActivateDelayedReimport(UObject* Obj)
-{
-	FEditorDelegates::EndPIE.AddUObject(this, &UArticyJSONFactory::DelayedReimport, Obj);
-
-	FOnMsgDlgResult OnDialogClosed;
-	FText Message = LOCTEXT("ImportWhilePlaying", "To import articy:draft data, the play mode has to be exited. Import will begin after exiting play.");
-	FText Title = LOCTEXT("ImportWhilePlaying_Title", "Import not possible");
-	TSharedRef<SWindow> window = OpenMsgDlgInt_NonModal(EAppMsgType::Ok, Message, Title, OnDialogClosed);
+	return false;
 }
 
 #undef LOCTEXT_NAMESPACE
