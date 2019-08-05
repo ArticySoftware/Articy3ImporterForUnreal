@@ -158,33 +158,43 @@ UArticyBaseVariableSet* UArticyGlobalVariables::GetNamespace(const FName Namespa
 void UArticyGlobalVariables::PrintGlobalVariable(FArticyGvName GvName)
 {
 	bool bTmpLogVariableAccess = bLogVariableAccess;
+	bool bPrintSuccessful = false;
 	// turn off variable access logging for this function so that the result only prints once
 	bLogVariableAccess = false;
+	
+	auto set = GetNamespace(GvName.GetNamespace());
+	if(set) 
+	{
+		UArticyVariable** basePtr = set->GetPropPtr<UArticyVariable*>(GvName.GetVariable());
 
-	bool stringSucceeded = false;
-	auto stringValue = GetStringVariable(GvName, stringSucceeded);
-	bool boolSucceeded = false;
-	auto boolValue = GetBoolVariable(GvName, boolSucceeded);
-	bool intSucceeded = false;
-	auto intValue = GetIntVariable(GvName, intSucceeded);
+		if (Cast<UArticyBool>(*basePtr))
+		{
+			bool boolSucceeded = false;
+			auto boolValue = GetBoolVariable(GvName, boolSucceeded);
+			UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), boolValue ? "True" : "False");
+			bPrintSuccessful = true;
+		}
+		else if (Cast<UArticyInt>(*basePtr))
+		{
+			bool intSucceeded = false;
+			auto intValue = GetIntVariable(GvName, intSucceeded);
+			UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %d"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), intValue);
+			bPrintSuccessful = true;
+		}
+		else if (Cast<UArticyString>(*basePtr))
+		{
+			bool stringSucceeded = false;
+			auto stringValue = GetStringVariable(GvName, stringSucceeded);
+			UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), *stringValue);
+			bPrintSuccessful = true;
+		}
+	}
 
-	if (stringSucceeded)
-	{
-		UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), *stringValue);
-	}
-	else if (boolSucceeded)
-	{
-		UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), boolValue ? "True" : "False");
-	}
-	else if (intSucceeded)
-	{
-		UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %d"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), intValue);
-	}
-	else
+	if(!bPrintSuccessful)
 	{
 		UE_LOG(LogArticyRuntime, Error, TEXT("Unable to find variable: %s::%s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString());
 	}
-	
+
 	// restore prior logging mode
 	bLogVariableAccess = bTmpLogVariableAccess;
 }
