@@ -216,10 +216,10 @@ protected:
 	/**
 	 * Invalid branches will not be part of the AvailableBranches.
 	 */
-	UPROPERTY(EditAnywhere, Category = "Setup")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
 	bool bIgnoreInvalidBranches = true;
 
-	UPROPERTY(EditAnywhere, Category = "Setup")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
 	FArticyRef StartOn;
 
 	/** All the branches available at the current flow position. */
