@@ -86,6 +86,9 @@ public:
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Set Start Node (ArticyRef)"), Category = "Setup")
 	void SetStartNode(FArticyRef NewId);
 
+	UFUNCTION(BlueprintCallable, meta=(DisplayName="Set Start Node (ArticyID)"), Category = "Setup")
+	void SetStartNodeById(FArticyId NewId);
+
 	/** Set the StartOn node to a certain node. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Set Start Node (FlowObject)"), Category = "Setup")
 	void SetStartNodeWithFlowObject(TScriptInterface<IArticyFlowObject> Node);

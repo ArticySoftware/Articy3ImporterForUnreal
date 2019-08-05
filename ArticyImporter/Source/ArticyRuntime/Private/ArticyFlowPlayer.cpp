@@ -40,6 +40,12 @@ void UArticyFlowPlayer::SetStartNodeWithFlowObject(TScriptInterface<IArticyFlowO
 	SetStartNode(ArticyRef);
 }
 
+void UArticyFlowPlayer::SetStartNodeById(FArticyId NewId)
+{
+	StartOn.SetId(NewId);
+	SetCursorToStartNode();
+}
+
 void UArticyFlowPlayer::SetCursorTo(TScriptInterface<IArticyFlowObject> Node)
 {
 	Cursor = Node;
