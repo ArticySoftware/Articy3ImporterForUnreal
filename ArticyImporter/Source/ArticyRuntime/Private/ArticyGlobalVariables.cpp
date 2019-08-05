@@ -144,11 +144,49 @@ UArticyBaseVariableSet* UArticyGlobalVariables::GetNamespace(const FName Namespa
 	auto set = GetProp<UArticyBaseVariableSet*>(Namespace);
 	if(!set)
 	{
-		UE_LOG(LogArticyRuntime, Error, TEXT("GV Namespace %s not found!"), *Namespace.ToString());
+		if(bLogVariableAccess)
+		{
+			UE_LOG(LogArticyRuntime, Error, TEXT("GV Namespace %s not found!"), *Namespace.ToString());
+		}
 		return nullptr;
 	}
 
 	return set;
+}
+
+
+void UArticyGlobalVariables::PrintGlobalVariable(FArticyGvName GvName)
+{
+	bool bTmpLogVariableAccess = bLogVariableAccess;
+	// turn off variable access logging for this function so that the result only prints once
+	bLogVariableAccess = false;
+
+	bool stringSucceeded = false;
+	auto stringValue = GetStringVariable(GvName, stringSucceeded);
+	bool boolSucceeded = false;
+	auto boolValue = GetBoolVariable(GvName, boolSucceeded);
+	bool intSucceeded = false;
+	auto intValue = GetIntVariable(GvName, intSucceeded);
+
+	if (stringSucceeded)
+	{
+		UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), *stringValue);
+	}
+	else if (boolSucceeded)
+	{
+		UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), boolValue ? "True" : "False");
+	}
+	else if (intSucceeded)
+	{
+		UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %d"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), intValue);
+	}
+	else
+	{
+		UE_LOG(LogArticyRuntime, Error, TEXT("Unable to find variable: %s::%s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString());
+	}
+	
+	// restore prior logging mode
+	bLogVariableAccess = bTmpLogVariableAccess;
 }
 
 const bool& UArticyGlobalVariables::GetBoolVariable(FArticyGvName GvName, bool& bSucceeded)
@@ -181,4 +219,15 @@ void UArticyGlobalVariables::SetStringVariable(FArticyGvName GvName, const FStri
 	SetVariableValue<UArticyString>(GvName.GetNamespace(), GvName.GetVariable(), Value);
 }
 
+void UArticyGlobalVariables::EnableDebugLogging()
+{
+	bLogVariableAccess = true;
+}
+
+void UArticyGlobalVariables::DisableDebugLogging()
+{
+	bLogVariableAccess = false;
+}
+
 TWeakObjectPtr<UArticyGlobalVariables> UArticyGlobalVariables::Clone;
+
