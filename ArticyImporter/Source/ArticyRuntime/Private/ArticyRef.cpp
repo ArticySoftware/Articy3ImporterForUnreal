@@ -7,6 +7,7 @@
 #include "ArticyRef.h"
 #include "ArticyObject.h"
 #include "ArticyDatabase.h"
+#include "ArticyRuntime.h"
 
 void FArticyRef::SetId(FArticyId NewId)
 {
@@ -35,7 +36,7 @@ const FArticyId& FArticyRef::GetId() const
 	// if the reference object isn't valid (due to clearing for example), reset the Id too
 	else
 	{
-		Id = 0;
+	//	Id = 0;
 	}
 	return Id;
 }
