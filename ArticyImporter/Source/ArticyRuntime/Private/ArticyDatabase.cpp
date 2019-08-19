@@ -108,7 +108,8 @@ void FArticyClonableObject::AddClone(UArticyPrimitive* Clone, int32 CloneId)
 
 void UArticyDatabase::Init()
 {
-	LoadDefaultPackages();
+	bool bLoadAllPackages = GetDefault<UArticyPluginSettings>()->bLoadAllPackages;
+	LoadAllPackages(!bLoadAllPackages);
 }
 
 UArticyDatabase* UArticyDatabase::Get(const UObject* WorldContext)

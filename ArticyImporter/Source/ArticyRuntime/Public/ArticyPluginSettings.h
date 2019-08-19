@@ -32,6 +32,10 @@ public:
 	UPROPERTY(EditAnywhere, config, Category=RuntimeSettings, meta=(DisplayName="Keep global variables between worlds"))
 	bool bKeepGlobalVariablesBetweenWorlds;
 
+	/** Whether to let the database load all packages upon cloning or only the default packages */
+	UPROPERTY(EditAnywhere, config, Category = RuntimeSettings)
+	bool bLoadAllPackages = true;
+
 	/* --------------------------------------------------------------------- */
 
 	static const UArticyPluginSettings* Get();
