@@ -22,6 +22,7 @@
 #include <GenericPlatformMisc.h>
 #include <Dialogs.h>
 #include "../Launch/Resources/Version.h"
+#include "ArticyImporter.h"
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
@@ -176,12 +177,18 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 
 	ensure(DeleteGeneratedAssets());
 
+	// cache currently existing articy data for cleanup
+	PackagesGenerator::CacheExistingArticyData(Data);
+
 	//generate the global variables asset
 	GlobalVarsGenerator::GenerateAsset(Data);
 	//generate the database asset
 	auto db = DatabaseGenerator::GenerateAsset(Data);
 	//generate assets for all the imported objects
 	PackagesGenerator::GenerateAssets(Data);
+
+	// execute cleanup: delete old assets, rename assets to what they should be, delete old directories
+	PackagesGenerator::ExecuteCleanup();
 
 	//register the newly imported packages in the database
 	if (ensureMsgf(db, TEXT("Could not create ArticyDatabase asset!")))
@@ -191,6 +198,9 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 	}
 	//prompt the user to save newly generated packages
 	FEditorFileUtils::SaveDirtyPackages(true, true, /*bSaveContentPackages*/ true, false, false, true);	
+
+	FArticyImporterModule& importerModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
+	importerModule.OnImportFinished.Broadcast();
 }
 
 #undef LOCTEXT_NAMESPACE

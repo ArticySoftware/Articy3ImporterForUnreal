@@ -25,110 +25,49 @@
 
 #define LOCTEXT_NAMESPACE "PackagesGenerator"
 
-TMap<FString, UArticyObject*> PackagesGenerator::CachedArticyObjectsMapping = { {"None", nullptr} };
-
 void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 {
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-
-	bool bIsReimport = PackagesGenerator::CacheExistingArticyObjects();
-
-	TArray<UArticyObject*> CachedArticyObjects;
-	CachedArticyObjectsMapping.GenerateValueArray(CachedArticyObjects);
-
-	// GetOutdatedPackageNames has to be called early since asset generation invalidates the cached objects. Maybe change to something more robust
-	TArray<FString> OutdatedArticyPackageFolders = PackagesGenerator::GetOutdatedPackageNamesFromCachedObjects(Data);
+	bool bIsReimport = PackagesGenerator::GetCachedExistingObjects().Num() > 0;
 
 	// generate new articy objects
 	auto pack = Data->GetPackageDefs();
 	pack.GenerateAssets(Data);
 
-	TArray<FArticyPackage> Packages = Data->GetPackages();
-
-	// create a map of the newly generated assets so we can compare both old and new assets
-	TMap<FString, UArticyObject*> NewObjectsMapping;
-	for (FArticyPackage package : Packages)
-	{
-		for (UArticyPrimitive* prim : package.Objects) {
-			UArticyObject* obj = Cast<UArticyObject>(prim);
-			if (obj)
-			{
-				NewObjectsMapping.Add(obj->GetName(), obj);
-			}
-		}
-	}
-
-	// gather all old articy objects that aren't contained in the import data and mark the respective assets as deleted
-	TArray<UObject*> ArticyObjectsToDelete;
-	for (UArticyObject* obj : CachedArticyObjects)
-	{
-		// filter out assets that were invalidated by the asset generation (assets deleted due to consolidation etc.)
-		if (!obj->IsValidLowLevel() || !obj->IsA(UArticyObject::StaticClass()))
-		{
-			continue;
-		}
-		// if the asset is still valid and is not contained within the new import data (meaning it wasn't exported or it was deleted in articy draft, mark it to be deleted
-		else if (!NewObjectsMapping.Contains(obj->GetName()))
-		{
-			ArticyObjectsToDelete.Add(obj);
-		}
-	}
-
-	// if old files exist (reimport), execute a cleanup: deletion of outdated assets and redirectors, deletion of outdated packages
+	// if old files exist (reimport), prepare a cleanup: deletion of outdated assets, directories etc.
 	if (bIsReimport)
 	{
-		FString RelativeContentPath = FPaths::ProjectContentDir();
-		FString FullContentPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativeContentPath);
-		FString FullArticyGeneratedPackagesPath = FullContentPath / ArticyHelpers::ArticyGeneratedPackagesFolderRelativeToContent;
+		TArray<FArticyPackage> Packages = Data->GetPackages();
+		TArray<UArticyObject*> CachedArticyObjects;
+		PackagesGenerator::GetCachedExistingObjects().GenerateValueArray(CachedArticyObjects);
 
-		// gather all objects to be force deleted
-		TArray<UObject*> ObjectsToDelete;
-		// append the former articy objects that were marked as to be deleted
-		ObjectsToDelete.Append(ArticyObjectsToDelete);
-
-		// gather all assets inside the outdated articy package folders to delete them - references should be fixed at this point
-		for (FString folderName : OutdatedArticyPackageFolders)
+		// create a map of the newly generated assets so we can compare both old and new assets
+		TMap<FString, UArticyObject*> NewObjectsMapping;
+		for (FArticyPackage package : Packages)
 		{
-			TArray<FAssetData> OutdatedAssets;
-			AssetRegistryModule.Get().GetAssetsByPath(FName(*(ArticyHelpers::ArticyGeneratedPackagesFolder / folderName)), OutdatedAssets, true);
-
-			for(FAssetData data : OutdatedAssets)
-			{
-				ObjectsToDelete.Add(data.GetAsset());
+			for (UArticyPrimitive* prim : package.Objects) {
+				UArticyObject* obj = Cast<UArticyObject>(prim);
+				if (obj)
+				{
+					NewObjectsMapping.Add(obj->GetName(), obj);
+				}
 			}
 		}
 
-		// gather all remaining redirectors that somehow survived the fix up process to delete them
-		// since the prior reference fixup worked, it's fine to delete them without fixing them up anymore
-		FARFilter Filter;
-		Filter.bRecursivePaths = true;
-		Filter.PackagePaths.Emplace(*ArticyHelpers::ArticyGeneratedFolder);
-		Filter.ClassNames.Emplace(TEXT("ObjectRedirector"));
-
-		TArray<FAssetData> RemainingRedirectors;
-		AssetRegistryModule.Get().GetAssets(Filter, RemainingRedirectors);
-
-		for(FAssetData data : RemainingRedirectors)
+		// gather all old articy objects that aren't contained in the import data and mark the respective assets as deleted
+		for (UArticyObject* obj : CachedArticyObjects)
 		{
-			ObjectsToDelete.Add(data.GetAsset());
-		}
-
-		// force delete old articy assets + assets in outdated folders + objectredirectors that weren't deleted on their own
-		ObjectTools::ForceDeleteObjects(ObjectsToDelete, false);
-
-		IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
-		// delete the outdated folders after having force deleted their contents
-		for (FString folderName : OutdatedArticyPackageFolders)
-		{
-			FString fullDirectoryPath = FullArticyGeneratedPackagesPath / folderName;
-
-			if (platformFile.DirectoryExists(*fullDirectoryPath))
+			// filter out assets that were invalidated by the asset generation (assets deleted due to consolidation etc.)
+			if (!obj->IsValidLowLevel() || !obj->IsA(UArticyObject::StaticClass()))
 			{
-				platformFile.SetReadOnly(*fullDirectoryPath, false);
-				platformFile.DeleteDirectory(*fullDirectoryPath);
+				continue;
+			}
+			// if the asset is still valid and is not contained within the new import data (meaning it wasn't exported or it was deleted in articy draft, mark it to be deleted
+			else if (!NewObjectsMapping.Contains(obj->GetName()))
+			{
+				PackagesGenerator::PostGenerationCleanupData.ObjectsToDelete.Add(obj);
 			}
 		}
-
 	}
 
 	// mark all generated assets dirty to save them later on
@@ -141,13 +80,13 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 	}
 }
 
-bool PackagesGenerator::CacheExistingArticyObjects()
+void PackagesGenerator::CacheExistingArticyData(UArticyImportData * Data)
 {
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> ExistingObjectsData;
 	AssetRegistryModule.Get().GetAssetsByClass(UArticyObject::StaticClass()->GetFName(), ExistingObjectsData, true);
 
-	ClearExistingObjectsCache();
+	ClearCleanupData();
 
 	for(FAssetData assetData : ExistingObjectsData)
 	{
@@ -155,12 +94,13 @@ bool PackagesGenerator::CacheExistingArticyObjects()
 		CachedArticyObjectsMapping.Add(currentObject->GetName(), currentObject);
 	}
 
-	return CachedArticyObjectsMapping.Num() > 0;
+	CacheOutdatedPackageNamesToDelete(Data);
 }
 
-void PackagesGenerator::ClearExistingObjectsCache()
+void PackagesGenerator::ClearCleanupData()
 {
 	CachedArticyObjectsMapping.Empty();
+	PostGenerationCleanupData = {};
 }
 
 const TMap<FString, UArticyObject*> PackagesGenerator::GetCachedExistingObjects()
@@ -168,10 +108,56 @@ const TMap<FString, UArticyObject*> PackagesGenerator::GetCachedExistingObjects(
 	return CachedArticyObjectsMapping;
 }
 
-TArray<FString> PackagesGenerator::GetOutdatedPackageNamesFromCachedObjects(UArticyImportData* Data)
+void PackagesGenerator::ExecuteCleanup()
 {
-	TArray<FString> ArticyPackageFolders = Data->GetPackageDefs().GetPackageFolderNames();
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 
+	// mark all remaining assets in the outdated directories/packages to be deleted
+	for (FString folderName : PackagesGenerator::PostGenerationCleanupData.DirectoriesToDelete)
+	{
+		TArray<FAssetData> OutdatedAssets;
+		AssetRegistryModule.Get().GetAssetsByPath(FName(*(ArticyHelpers::ArticyGeneratedPackagesFolder / folderName)), OutdatedAssets, true);
+
+		for (FAssetData data : OutdatedAssets)
+		{
+			PackagesGenerator::PostGenerationCleanupData.ObjectsToDelete.Add(data.GetAsset());
+		}
+	}
+
+	// force delete cached objects
+	ObjectTools::ForceDeleteObjects(PackagesGenerator::PostGenerationCleanupData.ObjectsToDelete.Array(), false);
+
+	// rename cached objects (if new assets were created with the same path, but have different classes)
+	FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+	AssetToolsModule.Get().RenameAssets({ PackagesGenerator::PostGenerationCleanupData.ObjectsToRename });
+
+	// delete directories themselves that should be empty by now
+	FString RelativeContentPath = FPaths::ProjectContentDir();
+	FString FullContentPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativeContentPath);
+	FString FullArticyGeneratedPackagesPath = FullContentPath / ArticyHelpers::ArticyGeneratedPackagesFolderRelativeToContent;
+
+	IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
+
+	for (FString folderName : PackagesGenerator::PostGenerationCleanupData.DirectoriesToDelete)
+	{
+		FString fullDirectoryPath = FullArticyGeneratedPackagesPath / folderName;
+
+		if (platformFile.DirectoryExists(*fullDirectoryPath))
+		{
+			platformFile.SetReadOnly(*fullDirectoryPath, false);
+			platformFile.DeleteDirectory(*fullDirectoryPath);
+		}
+	}
+
+	// reset cleanup data & caches
+	ClearCleanupData();
+}
+
+void PackagesGenerator::CacheOutdatedPackageNamesToDelete(UArticyImportData* Data)
+{
+	PackagesGenerator::PostGenerationCleanupData.DirectoriesToDelete.Empty();
+
+	TArray<FString> ArticyPackageFolders = Data->GetPackageDefs().GetPackageFolderNames();
 	TArray<FString> OutdatedPackageNames;
 
 	TArray<UArticyObject*> cachedObjects;
@@ -197,7 +183,11 @@ TArray<FString> PackagesGenerator::GetOutdatedPackageNamesFromCachedObjects(UArt
 		}
 	}
 
-	return OutdatedPackageNames;
+	PackagesGenerator::PostGenerationCleanupData.DirectoriesToDelete.Append(OutdatedPackageNames);
 }
+
+TMap<FString, UArticyObject*> PackagesGenerator::CachedArticyObjectsMapping;
+ArticyImporterHelpers::ArticyCleanupData PackagesGenerator::PostGenerationCleanupData;
+
 
 #undef LOCTEXT_NAMESPACE

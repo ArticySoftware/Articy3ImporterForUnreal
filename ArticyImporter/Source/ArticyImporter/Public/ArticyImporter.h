@@ -10,9 +10,12 @@
 #include "ArticyJSONFactory.h"
 #include "ArticyImporterHelpers.h"
 #include "IDelegateInstance.h"
+#include "ArticyRef.h"
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogArticyImporter, Log, All)
+
+DECLARE_MULTICAST_DELEGATE(FOnImportFinished);
 
 class FToolBarBuilder;
 class FMenuBuilder;
@@ -31,6 +34,8 @@ public:
 
 	void QueueImport();
 	bool IsImportQueued();
+		
+	FOnImportFinished OnImportFinished;
 
 private:
 

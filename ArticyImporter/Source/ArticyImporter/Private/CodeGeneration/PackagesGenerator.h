@@ -6,11 +6,13 @@
 #include "CoreMinimal.h"
 #include "ArticyObject.h"
 #include "UnrealString.h"
+#include "ArticyImporterHelpers.h"
 
 
 /**
  * Generates the package assets.
  */
+
 class PackagesGenerator
 {
 public:
@@ -19,18 +21,24 @@ public:
 
 	static const TMap<FString, UArticyObject*> GetCachedExistingObjects();
 
+	static void CacheExistingArticyData(UArticyImportData * Data);
+
+	// cleanup function to be performed after generation has finished
+	static void ExecuteCleanup();
+
+	static ArticyImporterHelpers::ArticyCleanupData PostGenerationCleanupData;
+
 private:
 	PackagesGenerator() {}
 	virtual ~PackagesGenerator() {}
 
-	static bool CacheExistingArticyObjects();
-
-	static void ClearExistingObjectsCache();
+	static void ClearCleanupData();
 
 	/* Compared package names of the cached existing objects and the new imported data
 	 * Returns a list of package names currently in the Unreal project that are not part of the articy export anymore */
-	static TArray<FString> GetOutdatedPackageNamesFromCachedObjects(UArticyImportData* Data);
+	static void CacheOutdatedPackageNamesToDelete(UArticyImportData* Data);
 
 private:
 	static TMap<FString, UArticyObject*> CachedArticyObjectsMapping;
+
 };
