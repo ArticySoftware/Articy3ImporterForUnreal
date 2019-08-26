@@ -108,8 +108,7 @@ void FArticyClonableObject::AddClone(UArticyPrimitive* Clone, int32 CloneId)
 
 void UArticyDatabase::Init()
 {
-	bool bLoadAllPackages = GetDefault<UArticyPluginSettings>()->bLoadAllPackages;
-	LoadAllPackages(!bLoadAllPackages);
+	LoadAllPackages(true);
 }
 
 UArticyDatabase* UArticyDatabase::Get(const UObject* WorldContext)
@@ -188,6 +187,24 @@ UArticyGlobalVariables* UArticyDatabase::GetGVs() const
 	return UArticyGlobalVariables::GetDefault(this);
 }
 
+TArray<FString> UArticyDatabase::GetImportedPackageNames()
+{
+	TArray<FString> outNames;
+	ImportedPackages.GenerateKeyArray(outNames);
+	return outNames;
+}
+
+bool UArticyDatabase::IsPackageDefaultPackage(FString packageName)
+{
+	if(ImportedPackages.Contains(packageName))
+	{
+		const FArticyPackage& package = ImportedPackages[packageName];
+		return package.bIsDefaultPackage;
+	}
+
+	return false;
+}
+
 UWorld* UArticyDatabase::GetWorld() const
 {
 	return GetOuter() ? GetOuter()->GetWorld() : nullptr;
@@ -216,9 +233,10 @@ void UArticyDatabase::LoadDefaultPackages()
 
 void UArticyDatabase::LoadAllPackages(bool bDefaultOnly)
 {
+	const UArticyPluginSettings* settings = GetDefault<UArticyPluginSettings>();
 	for(const auto pack : ImportedPackages)
 	{
-		if(!bDefaultOnly || pack.Value.bIsDefaultPackage
+		if(!bDefaultOnly || settings->IsLoadingPackageByDefault(pack.Key)
 #if WITH_EDITOR
 			//TODO add "or is edit mode"
 #endif

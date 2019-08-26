@@ -149,6 +149,12 @@ public:
 	UFUNCTION(BlueprintPure, meta=(DisplayName="Is in shadow state?"), Category = "Script Methods")
 	bool IsInShadowState() const { return GetShadowLevel()  > 0; }
 
+	UFUNCTION(BlueprintPure, meta = (DisplayName="Get imported package names"), Category = "Articy")
+	TArray<FString> GetImportedPackageNames();
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName="Is package default package?"), Category = "Articy")
+	bool IsPackageDefaultPackage(FString packageName);
+
 	UWorld* GetWorld() const override;
 
 	//---------------------------------------------------------------------------//

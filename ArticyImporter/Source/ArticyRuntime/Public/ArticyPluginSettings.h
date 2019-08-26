@@ -4,8 +4,11 @@
 //
 #pragma once
 
+#include "CoreMinimal.h"
+#include "SharedPointer.h"
+#include "Object.h"
+#include "Archive.h"
 #include "ArticyPluginSettings.generated.h"
-
 
 UCLASS(config = Engine, defaultconfig)
 class ARTICYRUNTIME_API UArticyPluginSettings : public UObject
@@ -32,11 +35,22 @@ public:
 	UPROPERTY(EditAnywhere, config, Category=RuntimeSettings, meta=(DisplayName="Keep global variables between worlds"))
 	bool bKeepGlobalVariablesBetweenWorlds;
 
-	/** Whether to let the database load all packages upon cloning or only the default packages */
-	UPROPERTY(EditAnywhere, config, Category = RuntimeSettings)
-	bool bLoadAllPackages = true;
+	// PackageLoadSettings is a temp fix. This should be on its own panel later on.
+	// Problems: Tried custom UI, but due to serialization behavior in project settings not advisable due to:
+	// ListView (for custom list UI) requires UObject (not config compatible), TSharedRef or TSharedPtr (both not UPROPERTY compatible)
+	// #TODO create custom widgets based on TMap below, hide map itself, modify map with custom widgets OR write custom list view
 
+	/** The packages to load automatically upon cloning the database. DO NOT MODIFY PACKAGE NAMES MANUALLY */
+	UPROPERTY(EditAnywhere, EditFixedSize, config, Category=RuntimeSettings, meta=(DisplayName="Packages to load by default"))
+	TMap<FString, bool> PackageLoadSettings;
+
+	bool IsLoadingPackageByDefault(FString packageName) const;
+
+	bool doesPackageSettingExist(FString packageName);
 	/* --------------------------------------------------------------------- */
 
 	static const UArticyPluginSettings* Get();
+
+	void UpdatePackageLoadSettings();
+
 };

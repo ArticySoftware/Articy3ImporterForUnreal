@@ -201,6 +201,9 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 
 	FArticyImporterModule& importerModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
 	importerModule.OnImportFinished.Broadcast();
+
+	UArticyPluginSettings * settings = GetMutableDefault<UArticyPluginSettings>();
+	settings->UpdatePackageLoadSettings();
 }
 
 #undef LOCTEXT_NAMESPACE
