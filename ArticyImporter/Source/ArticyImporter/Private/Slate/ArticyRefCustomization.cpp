@@ -7,6 +7,7 @@
 #include "IPropertyChangeListener.h"
 #include "Delegate.h"
 #include "ArticyPrimitive.h"
+#include "ArticyRef.h"
 
 
 TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
@@ -26,21 +27,18 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	UObject* Reference;
 	EntityPropertyHandle->GetValue(Reference);
 
+	void* refPointer;
+	ArticyRefPropertyHandle->GetValueData(refPointer);
+
+	FArticyRef* ref = static_cast<FArticyRef*>(refPointer);
+	ref->GetReference();
+
 	HeaderRow.NameContent()
 	[
 		ArticyRefPropertyHandle->CreatePropertyNameWidget()
 	];
 
-	/*FPropertyEditorModule& propertyEditorModule = FModuleManager::Get().GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	TSharedRef<IPropertyChangeListener> propertyChangeListener = propertyEditorModule.CreatePropertyChangeListener();
-	FPropertyListenerSettings listenerSettings;
-	listenerSettings.bIgnoreArrayProperties = true;
-	listenerSettings.bIgnoreObjectProperties = false;
-	listenerSettings.RequiredPropertyFlags = 0;
-	listenerSettings.DisallowedPropertyFlags = 0;
-	propertyChangeListener->SetObject(*Reference, listenerSettings);
-
-	propertyChangeListener->GetOnPropertyChangedDelegate().AddRaw(this, &FArticyRefCustomization::OnReferenceUpdated);*/
+	
 
 	EntityPropertyHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateSP(this, &FArticyRefCustomization::OnReferenceUpdated));
 

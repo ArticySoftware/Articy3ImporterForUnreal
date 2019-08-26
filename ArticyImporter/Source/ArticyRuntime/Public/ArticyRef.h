@@ -18,7 +18,7 @@ struct ARTICYRUNTIME_API FArticyRef
 
 public:
 	/** The original object corresponding to the Id. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Setup")
+	UPROPERTY(EditAnywhere, Category="Setup")
 	UArticyPrimitive* Reference = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Setup")
