@@ -58,25 +58,25 @@ UArticyPrimitive* FArticyRef::GetObjectInternal(const UObject* WorldContext) con
 	return UArticyDatabase::Get(WorldContext)->GetOrClone<UArticyPrimitive>(GetId(), CloneId);
 }
 
-bool FArticyRef::Serialize(FArchive& Ar)
-{
-	//we use this as pre-saving hook
-	if(!Ar.IsLoading())
-	{
-		//make sure the Id is up to date before saving
-		Id = GetId();
-	}
-
-	return false; //..so it is still serialized with default serialization
-}
-
-void FArticyRef::PostSerialize(const FArchive& Ar)
-{
-	//we use this as post-loading hook
-#if WITH_EDITOR
-	if(Ar.IsLoading())
-	{
-		GetReference();
-	}
-#endif
-}
+//bool FArticyRef::Serialize(FArchive& Ar)
+//{
+//	//we use this as pre-saving hook
+//	if(!Ar.IsLoading())
+//	{
+//		//make sure the Id is up to date before saving
+//		Id = GetId();
+//	}
+//
+//	return false; //..so it is still serialized with default serialization
+//}
+//
+//void FArticyRef::PostSerialize(const FArchive& Ar)
+//{
+//	//we use this as post-loading hook
+//#if WITH_EDITOR
+//	if(Ar.IsLoading())
+//	{
+//		GetReference();
+//	}
+//#endif
+//}
