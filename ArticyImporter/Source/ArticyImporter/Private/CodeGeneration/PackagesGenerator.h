@@ -6,8 +6,8 @@
 #include "CoreMinimal.h"
 #include "ArticyObject.h"
 #include "UnrealString.h"
-#include "ArticyImporterHelpers.h"
 
+struct ArticyCleanupData;
 
 /**
  * Generates the package assets.
@@ -26,7 +26,7 @@ public:
 	// cleanup function to be performed after generation has finished
 	static void ExecuteCleanup();
 
-	static ArticyImporterHelpers::ArticyCleanupData PostGenerationCleanupData;
+	static ArticyCleanupData PostGenerationCleanupData;
 
 private:
 	PackagesGenerator() {}

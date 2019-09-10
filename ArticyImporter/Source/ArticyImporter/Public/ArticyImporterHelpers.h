@@ -6,19 +6,21 @@
 #include "Dom/JsonValue.h"
 #include "UObject/Package.h"
 #include "Dom/JsonObject.h"
-#include <ObjectTools.h>
-#include <AssetToolsModule.h>
+#include "ObjectTools.h"
+#include "AssetToolsModule.h"
 #include "ArticyHelpers.h"
+#include "CodeGeneration/PackagesGenerator.h"
+
+struct ArticyCleanupData
+{
+	TSet<UObject*> ObjectsToDelete;
+	TArray<FAssetRenameData> ObjectsToRename;
+	TSet<FString> DirectoriesToDelete;
+};
 
 namespace ArticyImporterHelpers
 {
 
-	struct ArticyCleanupData
-	{
-		TSet<UObject*> ObjectsToDelete;
-		TArray<FAssetRenameData> ObjectsToRename;
-		TSet<FString> DirectoriesToDelete;
-	};
 
 	inline UPackage* FindOrCreatePackage(const FString Name)
 	{

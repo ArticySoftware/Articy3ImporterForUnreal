@@ -187,7 +187,6 @@ void PackagesGenerator::CacheOutdatedPackageNamesToDelete(UArticyImportData* Dat
 }
 
 TMap<FString, UArticyObject*> PackagesGenerator::CachedArticyObjectsMapping;
-ArticyImporterHelpers::ArticyCleanupData PackagesGenerator::PostGenerationCleanupData;
-
+ArticyCleanupData PackagesGenerator::PostGenerationCleanupData;
 
 #undef LOCTEXT_NAMESPACE
