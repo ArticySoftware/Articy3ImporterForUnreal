@@ -150,10 +150,10 @@ public:
 	bool IsInShadowState() const { return GetShadowLevel()  > 0; }
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName="Get imported package names"), Category = "Articy")
-	TArray<FString> GetImportedPackageNames();
+	TArray<FString> GetImportedPackageNames() const;
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName="Is package default package?"), Category = "Articy")
-	bool IsPackageDefaultPackage(FString packageName);
+	bool IsPackageDefaultPackage(FString PackageName);
 
 	UWorld* GetWorld() const override;
 
@@ -300,6 +300,10 @@ public:
 	 */
 	UArticyExpressoScripts* GetExpressoInstance() const;
 
+	static UArticyDatabase* GetMutableOriginal();
+
+	void ChangePackageDefault(FName PackageName, bool bIsDefaultPackage);
+	
 protected:
 
 	/** A list of all packages that were imported from articy:draft. */

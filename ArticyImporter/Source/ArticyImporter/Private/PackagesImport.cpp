@@ -186,7 +186,7 @@ FString FArticyPackageDef::GetFolderName() const
 	}
 	else
 	{
-		UE_LOG(LogArticyImporter, Error, TEXT("Could not retrieve folder name for package %s! Did GetFolder() method change?"));
+		UE_LOG(LogArticyImporter, Error, TEXT("Could not retrieve folder name for package %s! Did GetFolder() method change?"), *this->Name);
 		return FString(TEXT("Invalid"));
 	}
 }

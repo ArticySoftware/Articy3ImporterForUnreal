@@ -4,6 +4,9 @@
 //
 
 #include "ArticyPluginSettings.h"
+#include "ModuleManager.h"
+#include "AssetRegistryModule.h"
+#include "ArticyDatabase.h"
 
 UArticyPluginSettings::UArticyPluginSettings()
 {
@@ -13,30 +16,10 @@ UArticyPluginSettings::UArticyPluginSettings()
 
 	// update package load settings after all files have been loaded
 	FAssetRegistryModule& assetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
-	assetRegistry.Get().OnFilesLoaded().AddUObject(this, &UArticyPluginSettings::UpdatePackageLoadSettings);
+	assetRegistry.Get().OnFilesLoaded().AddUObject(this, &UArticyPluginSettings::UpdatePackageSettings);
 }
 
-bool UArticyPluginSettings::IsLoadingPackageByDefault(FString packageName) const
-{
-	FAssetRegistryModule& assetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
-	TArray<FAssetData> importData;
-	assetRegistry.Get().GetAssetsByClass(UArticyDatabase::StaticClass()->GetFName(), importData, true);
-
-	check(importData.Num() >= 1);
-
-	UArticyDatabase* articyDatabase = Cast<UArticyDatabase>(importData[0].GetAsset());
-
-	// find the setting and return the user defined value
-	if(PackageLoadSettings.Contains(packageName))
-	{
-		return PackageLoadSettings[packageName];
-	}
-
-	// if the setting object for the package doesn't exist, use the default values instead
-	return articyDatabase->IsPackageDefaultPackage(packageName);
-}
-
-bool UArticyPluginSettings::doesPackageSettingExist(FString packageName)
+bool UArticyPluginSettings::DoesPackageSettingExist(FString packageName)
 {
 	return PackageLoadSettings.Contains(packageName);
 }
@@ -53,15 +36,9 @@ const UArticyPluginSettings* UArticyPluginSettings::Get()
 	return Settings.Get();
 }
 
-void UArticyPluginSettings::UpdatePackageLoadSettings()
+void UArticyPluginSettings::UpdatePackageSettings()
 {
-	FAssetRegistryModule& assetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
-	TArray<FAssetData> importData;
-	assetRegistry.Get().GetAssetsByClass(UArticyDatabase::StaticClass()->GetFName(), importData, true);
-
-	if (importData.Num() == 0) return;
-
-	UArticyDatabase* articyDatabase = Cast<UArticyDatabase>(importData[0].GetAsset());
+	UArticyDatabase* articyDatabase = UArticyDatabase::GetMutableOriginal();
 
 	TArray<FString> importedPackageNames = articyDatabase->GetImportedPackageNames();
 
@@ -80,10 +57,24 @@ void UArticyPluginSettings::UpdatePackageLoadSettings()
 
 	for (FString name : importedPackageNames)
 	{
-		// if the old name isn't contained in the new packages, remove its loading rule
+		// if the new name isn't contained in the serialized data, add it with its default package value
 		if (!currentNames.Contains(name))
 		{
 			PackageLoadSettings.Add(name, articyDatabase->IsPackageDefaultPackage(name));
 		}
+	}
+
+	// apply previously existing settings for the packages so that user tweaked values don't get reset
+	ApplyPreviousSettings();
+}
+
+void UArticyPluginSettings::ApplyPreviousSettings()
+{
+	// restore the package default settings with the cached data of the plugin settings
+	UArticyDatabase* OriginalDatabase = UArticyDatabase::GetMutableOriginal();
+
+	for(FString packageName : OriginalDatabase->GetImportedPackageNames())
+	{
+		OriginalDatabase->ChangePackageDefault(FName(*packageName), GetDefault<UArticyPluginSettings>()->PackageLoadSettings[packageName]);
 	}
 }

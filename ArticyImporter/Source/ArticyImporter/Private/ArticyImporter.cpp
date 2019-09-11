@@ -16,6 +16,7 @@
 #include <Dialogs.h>
 #include <SWindow.h>
 #include "ArticyImporterFunctionLibrary.h"
+#include "Editor.h"
 
 DEFINE_LOG_CATEGORY(LogArticyImporter)
 
@@ -75,8 +76,8 @@ void FArticyImporterModule::QueueImport()
 	FOnMsgDlgResult OnDialogClosed;
 	FText Message = LOCTEXT("ImportWhilePlaying", "To import articy:draft data, the play mode has to be quit. Import will begin after exiting play.");
 	FText Title = LOCTEXT("ImportWhilePlaying_Title", "Import not possible");
-	TSharedRef<SWindow> window = OpenMsgDlgInt_NonModal(EAppMsgType::Ok, Message, Title, OnDialogClosed);
-	window->BringToFront(true);
+	TSharedRef<SWindow> Window = OpenMsgDlgInt_NonModal(EAppMsgType::Ok, Message, Title, OnDialogClosed);
+	Window->BringToFront(true);
 	QueuedImportHandle = FEditorDelegates::EndPIE.AddRaw(this, &FArticyImporterModule::TriggerQueuedImport);
 }
 
@@ -89,8 +90,8 @@ void FArticyImporterModule::UnqueueImport()
 
 void FArticyImporterModule::TriggerQueuedImport(bool b)
 {
-	UArticyImportData* importData = nullptr;
-	FArticyImporterFunctionLibrary::ForceCompleteReimport(importData);
+	UArticyImportData* ArticyImportData = nullptr;
+	FArticyImporterFunctionLibrary::ForceCompleteReimport(ArticyImportData);
 	// important to unqueue in the end to reset the state
 	UnqueueImport();
 }

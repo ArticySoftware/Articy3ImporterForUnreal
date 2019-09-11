@@ -35,22 +35,17 @@ public:
 	UPROPERTY(EditAnywhere, config, Category=RuntimeSettings, meta=(DisplayName="Keep global variables between worlds"))
 	bool bKeepGlobalVariablesBetweenWorlds;
 
-	// PackageLoadSettings is a temp fix. This should be on its own panel later on.
-	// Problems: Tried custom UI, but due to serialization behavior in project settings not advisable due to:
-	// ListView (for custom list UI) requires UObject (not config compatible), TSharedRef or TSharedPtr (both not UPROPERTY compatible)
-	// #TODO create custom widgets based on TMap below, hide map itself, modify map with custom widgets OR write custom list view
-
-	/** The packages to load automatically upon cloning the database. DO NOT MODIFY PACKAGE NAMES MANUALLY */
-	UPROPERTY(EditAnywhere, EditFixedSize, config, Category=RuntimeSettings, meta=(DisplayName="Packages to load by default"))
+	// internal cached data for data consistency between imports (setting restoration etc.)
+	UPROPERTY()
 	TMap<FString, bool> PackageLoadSettings;
 
-	bool IsLoadingPackageByDefault(FString packageName) const;
-
-	bool doesPackageSettingExist(FString packageName);
+	bool DoesPackageSettingExist(FString packageName);
 	/* --------------------------------------------------------------------- */
 
 	static const UArticyPluginSettings* Get();
 
-	void UpdatePackageLoadSettings();
+	void UpdatePackageSettings();
+
+	void ApplyPreviousSettings();
 
 };

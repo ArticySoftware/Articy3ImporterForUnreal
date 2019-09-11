@@ -187,19 +187,19 @@ UArticyGlobalVariables* UArticyDatabase::GetGVs() const
 	return UArticyGlobalVariables::GetDefault(this);
 }
 
-TArray<FString> UArticyDatabase::GetImportedPackageNames()
+TArray<FString> UArticyDatabase::GetImportedPackageNames() const
 {
 	TArray<FString> outNames;
 	ImportedPackages.GenerateKeyArray(outNames);
 	return outNames;
 }
 
-bool UArticyDatabase::IsPackageDefaultPackage(FString packageName)
+bool UArticyDatabase::IsPackageDefaultPackage(FString PackageName)
 {
-	if(ImportedPackages.Contains(packageName))
+	if(ImportedPackages.Contains(PackageName))
 	{
-		const FArticyPackage& package = ImportedPackages[packageName];
-		return package.bIsDefaultPackage;
+		const FArticyPackage& Package = ImportedPackages[PackageName];
+		return Package.bIsDefaultPackage;
 	}
 
 	return false;
@@ -236,7 +236,7 @@ void UArticyDatabase::LoadAllPackages(bool bDefaultOnly)
 	const UArticyPluginSettings* settings = GetDefault<UArticyPluginSettings>();
 	for(const auto pack : ImportedPackages)
 	{
-		if(!bDefaultOnly || settings->IsLoadingPackageByDefault(pack.Key)
+		if(!bDefaultOnly || pack.Value.bIsDefaultPackage
 #if WITH_EDITOR
 			//TODO add "or is edit mode"
 #endif
@@ -428,6 +428,38 @@ UArticyExpressoScripts* UArticyDatabase::GetExpressoInstance() const
 	}
 
 	return CachedExpressoScripts;
+}
+
+UArticyDatabase* UArticyDatabase::GetMutableOriginal()
+{
+	static TWeakObjectPtr<UArticyDatabase> Asset = nullptr;
+
+	if (!Asset.IsValid())
+	{
+		//create a clone of the database
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+		TArray<FAssetData> AssetData;
+		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetFName(), AssetData, true);
+
+		if (ensureMsgf(AssetData.Num() != 0, TEXT("Could not find original asset of ArticyDraftDatabase!")))
+		{
+			if (AssetData.Num() > 1)
+				UE_LOG(LogTemp, Warning, TEXT("More than one ArticyDraftDatabase was found, this is not supported! The first one will be selected."));
+
+			Asset = Cast<UArticyDatabase>(AssetData[0].GetAsset());
+		}
+	}
+
+	return Asset.Get();
+}
+
+void UArticyDatabase::ChangePackageDefault(FName PackageName, bool bIsDefaultPackage)
+{
+	if(ImportedPackages.Contains(PackageName.ToString()))
+	{
+		FArticyPackage* Package = ImportedPackages.Find(PackageName.ToString());
+		Package->bIsDefaultPackage = bIsDefaultPackage;
+	}
 }
 
 TMap<TWeakObjectPtr<UWorld>, TWeakObjectPtr<UArticyDatabase>> UArticyDatabase::Clones;

@@ -23,6 +23,7 @@
 #include <Dialogs.h>
 #include "../Launch/Resources/Version.h"
 #include "ArticyImporter.h"
+#include "ArticyPluginSettings.h"
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
@@ -199,11 +200,14 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 	//prompt the user to save newly generated packages
 	FEditorFileUtils::SaveDirtyPackages(true, true, /*bSaveContentPackages*/ true, false, false, true);	
 
+	// update the internal save state of the package settings (add settings for new packages, remove outdated package settings, restore previous settings for still existing packages)
+	UArticyPluginSettings* settings = GetMutableDefault<UArticyPluginSettings>();
+	settings->UpdatePackageSettings();
+	
 	FArticyImporterModule& importerModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
 	importerModule.OnImportFinished.Broadcast();
 
-	UArticyPluginSettings * settings = GetMutableDefault<UArticyPluginSettings>();
-	settings->UpdatePackageLoadSettings();
+	
 }
 
 #undef LOCTEXT_NAMESPACE
