@@ -20,10 +20,10 @@ void FArticyImporterFunctionLibrary::ReimportChanges(UArticyImportData* ImportDa
 	if (!EnsureImportFile(&ImportData))
 		return;
 
-	const auto factory = NewObject<UArticyJSONFactory>();
-	if (factory)
+	const auto Factory = NewObject<UArticyJSONFactory>();
+	if (Factory)
 	{
-		factory->Reimport(ImportData);
+		Factory->Reimport(ImportData);
 		//GC will destroy factory
 	}
 }
@@ -57,5 +57,5 @@ bool FArticyImporterFunctionLibrary::EnsureImportFile(UArticyImportData** Import
 		}
 	}
 
-	return *ImportData != nullptr; // update for VS2019: Fixed Error C4800. Was just *ImportData before
+	return *ImportData != nullptr;
 }

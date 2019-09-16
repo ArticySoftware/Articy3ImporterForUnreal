@@ -9,11 +9,8 @@ public class ArticyImporter : ModuleRules
 {
 	public ArticyImporter(ReadOnlyTargetRules Target) : base(Target)
 	{
-
-    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		//OptimizeCode = CodeOptimization.Never;
-
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		OptimizeCode = CodeOptimization.Never;
 
 		PublicIncludePaths.AddRange(
 			new string[] {
@@ -39,7 +36,7 @@ public class ArticyImporter : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core",
+				"Core"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -60,6 +57,9 @@ public class ArticyImporter : ModuleRules
                 "ArticyRuntime",
 				"Json",
                 "GameProjectGeneration",
+                "ContentBrowser",
+				"PropertyEditor",
+				"EditorStyle"
 			}
 			);
 		

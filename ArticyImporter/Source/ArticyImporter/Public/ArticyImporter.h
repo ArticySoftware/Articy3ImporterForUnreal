@@ -7,9 +7,15 @@
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
 #include "Misc/CompilationResult.h"
+#include "ArticyJSONFactory.h"
+#include "ArticyImporterHelpers.h"
+#include "IDelegateInstance.h"
+#include "ArticyRef.h"
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogArticyImporter, Log, All)
+
+DECLARE_MULTICAST_DELEGATE(FOnImportFinished);
 
 class FToolBarBuilder;
 class FMenuBuilder;
@@ -25,4 +31,19 @@ public:
 	/* Plugin settings menu */
 	void RegisterPluginSettings();
 	void UnregisterPluginSettings();
+
+	void QueueImport();
+	bool IsImportQueued();
+		
+	FOnImportFinished OnImportFinished;
+
+private:
+
+	void UnqueueImport();
+	void TriggerQueuedImport(bool b);
+
+private:
+
+	bool bIsImportQueued = false;
+	FDelegateHandle QueuedImportHandle;
 };

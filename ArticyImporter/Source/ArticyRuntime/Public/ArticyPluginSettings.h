@@ -4,8 +4,11 @@
 //
 #pragma once
 
+#include "CoreMinimal.h"
+#include "SharedPointer.h"
+#include "Object.h"
+#include "Archive.h"
 #include "ArticyPluginSettings.generated.h"
-
 
 UCLASS(config = Engine, defaultconfig)
 class ARTICYRUNTIME_API UArticyPluginSettings : public UObject
@@ -32,7 +35,17 @@ public:
 	UPROPERTY(EditAnywhere, config, Category=RuntimeSettings, meta=(DisplayName="Keep global variables between worlds"))
 	bool bKeepGlobalVariablesBetweenWorlds;
 
+	// internal cached data for data consistency between imports (setting restoration etc.)
+	UPROPERTY()
+	TMap<FString, bool> PackageLoadSettings;
+
+	bool DoesPackageSettingExist(FString packageName);
 	/* --------------------------------------------------------------------- */
 
 	static const UArticyPluginSettings* Get();
+
+	void UpdatePackageSettings();
+
+	void ApplyPreviousSettings() const;
+
 };

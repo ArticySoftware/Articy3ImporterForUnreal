@@ -8,12 +8,11 @@ using System.IO;
 public class ArticyRuntime : ModuleRules
 {
 	public ArticyRuntime(ReadOnlyTargetRules Target) : base(Target)
-  {
-    
-    PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+    {
 
-    //OptimizeCode = CodeOptimization.Never;
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        OptimizeCode = CodeOptimization.Never;
 
 		PublicIncludePaths.AddRange(
 			new string[] {

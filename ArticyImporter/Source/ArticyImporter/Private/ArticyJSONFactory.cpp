@@ -8,6 +8,12 @@
 #include "ArticyImporter.h"
 #include "ArticyImportData.h"
 #include "Editor.h"
+#include <Dialogs.h>
+#include "ArticyImporterHelpers.h"
+#include "CoreMinimal.h"
+#include "../Launch/Resources/Version.h"
+
+#define LOCTEXT_NAMESPACE "ArticyJSONFactory"
 
 UArticyJSONFactory::UArticyJSONFactory()
 {
@@ -33,31 +39,55 @@ UClass* UArticyJSONFactory::ResolveSupportedClass()
 
 UObject* UArticyJSONFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn, bool& bOutOperationCanceled)
 {
-	auto asset = NewObject<UArticyImportData>(InParent, InName, Flags);
+	auto ArticyImportData = NewObject<UArticyImportData>(InParent, InName, Flags);
 
+	const bool bImportQueued = HandleImportDuringPlay(ArticyImportData);
+
+#if ENGINE_MINOR_VERSION >= 22
+	GEditor->GetEditorSubsystem<UImportSubsystem>()->BroadcastAssetPreImport(this, InClass, InParent, InName, *FPaths::GetExtension(Filename));
+#else
 	FEditorDelegates::OnAssetPreImport.Broadcast(this, InClass, InParent, InName, *FPaths::GetExtension(Filename));
+#endif
 
-	if(ImportFromFile(Filename, asset) && asset)
-	{
-		asset->ImportData->Update(GetCurrentFilename());
-	}
-	else
-	{
-		bOutOperationCanceled = true;
-		//the asset will be GCed because there are no references to it, no need to delete it
-		asset = nullptr;
-	}
+	ArticyImportData->ImportData->Update(GetCurrentFilename());
 
+	if(!bImportQueued)
+	{
+		if (ImportFromFile(Filename, ArticyImportData) && ArticyImportData)
+		{
+
+		}
+		else
+		{
+			bOutOperationCanceled = true;
+			//the asset will be GCed because there are no references to it, no need to delete it
+			ArticyImportData = nullptr;
+		}
+	}
+	
+
+#if ENGINE_MINOR_VERSION >= 22
+	GEditor->GetEditorSubsystem<UImportSubsystem>()->BroadcastAssetPostImport(this, ArticyImportData);
+#else
 	FEditorDelegates::OnAssetPostImport.Broadcast(this, asset);
-	return asset;
+#endif
+
+	return ArticyImportData;
 }
 
 bool UArticyJSONFactory::CanReimport(UObject* Obj, TArray<FString>& OutFilenames)
 {
-	auto asset = Cast<UArticyImportData>(Obj);
-	if(asset)
+	const auto Asset = Cast<UArticyImportData>(Obj);
+	
+	const bool bImportQueued = HandleImportDuringPlay(Obj);
+	if(bImportQueued)
 	{
-		asset->ImportData->ExtractFilenames(OutFilenames);
+		return false;
+	}
+
+	if(Asset)
+	{
+		Asset->ImportData->ExtractFilenames(OutFilenames);
 		return true;
 	}
 
@@ -66,20 +96,20 @@ bool UArticyJSONFactory::CanReimport(UObject* Obj, TArray<FString>& OutFilenames
 
 void UArticyJSONFactory::SetReimportPaths(UObject* Obj, const TArray<FString>& NewReimportPaths)
 {
-	auto asset = Cast<UArticyImportData>(Obj);
-	if(asset)
-		asset->ImportData->UpdateFilenameOnly(NewReimportPaths[0]);
+	auto Asset = Cast<UArticyImportData>(Obj);
+	if(Asset)
+		Asset->ImportData->UpdateFilenameOnly(NewReimportPaths[0]);
 }
 
 EReimportResult::Type UArticyJSONFactory::Reimport(UObject* Obj)
 {
-	auto asset = Cast<UArticyImportData>(Obj);
-	if(asset)
+	auto Asset = Cast<UArticyImportData>(Obj);
+	if(Asset)
 	{
-		if(!asset->ImportData || asset->ImportData->GetFirstFilename().Len() == 0)
+		if(!Asset->ImportData || Asset->ImportData->GetFirstFilename().Len() == 0)
 			return EReimportResult::Failed;
 
-		if(ImportFromFile(asset->ImportData->GetFirstFilename(), asset))
+		if(ImportFromFile(Asset->ImportData->GetFirstFilename(), Asset))
 			return EReimportResult::Succeeded;
 	}
 
@@ -106,3 +136,21 @@ bool UArticyJSONFactory::ImportFromFile(const FString& FileName, UArticyImportDa
 
 	return true;
 }
+
+bool UArticyJSONFactory::HandleImportDuringPlay(UObject* Obj)
+{
+	const bool bIsPlaying = ArticyImporterHelpers::IsPlayInEditor();
+	FArticyImporterModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
+
+	// if we are already queued, that means we just ended play mode. bIsPlaying will still be true in this case, so we need another check
+	if (bIsPlaying && !ArticyImporterModule.IsImportQueued())
+	{
+		// we have to abuse the module to queue the import since this factory might not exist later on
+		ArticyImporterModule.QueueImport();
+		return true;
+	}
+
+	return false;
+}
+
+#undef LOCTEXT_NAMESPACE

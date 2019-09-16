@@ -11,6 +11,7 @@
 #include "CodeGeneration/CodeGenerator.h"
 #include "ArticyObject.h"
 #include <string>
+#include "ArticyImporterHelpers.h"
 
 #define STRINGIFY(x) #x
 
@@ -21,7 +22,7 @@ void FArticyModelDef::ImportFromJson(const TSharedPtr<FJsonObject> JsonModel)
 
 	FString Category;
 	JSON_TRY_STRING(JsonModel, Category);
-	this->Category = GetAssetCategoryFromString(Category);
+	this->AssetCategory = GetAssetCategoryFromString(Category);
 
 	{
 		PropertiesJsonString = "";
@@ -65,7 +66,7 @@ UArticyObject* FArticyModelDef::GenerateAsset(const UArticyImportData* Data, con
 	className.RemoveAt(0);
 
 	//generate the asset
-	auto obj = ArticyHelpers::GenerateAsset<UArticyObject>(*className, FApp::GetProjectName(), GetNameAndId(), Package);
+	auto obj = ArticyImporterHelpers::GenerateAsset<UArticyObject>(*className, FApp::GetProjectName(), GetNameAndId(), Package);
 	if(ensure(obj))
 	{
 		obj->Initialize();
@@ -106,14 +107,14 @@ TSharedPtr<FJsonObject> FArticyModelDef::GetTemplatesJson() const
 	return CachedTemplateJson;
 }
 
-EArticyAssetCategory FArticyModelDef::GetAssetCategoryFromString(const FString AssetCategory)
+EArticyAssetCategory FArticyModelDef::GetAssetCategoryFromString(const FString Category)
 {
-	if (AssetCategory == "Image") return EArticyAssetCategory::Image;
-	else if (AssetCategory == "Video") return EArticyAssetCategory::Video;
-	else if (AssetCategory == "Audio") return EArticyAssetCategory::Audio;
-	else if (AssetCategory == "Document") return EArticyAssetCategory::Document;
-	else if (AssetCategory == "Misc") return EArticyAssetCategory::Misc;
-	else if (AssetCategory == "All") return EArticyAssetCategory::All;
+	if (Category == "Image") return EArticyAssetCategory::Image;
+	else if (Category == "Video") return EArticyAssetCategory::Video;
+	else if (Category == "Audio") return EArticyAssetCategory::Audio;
+	else if (Category == "Document") return EArticyAssetCategory::Document;
+	else if (Category == "Misc") return EArticyAssetCategory::Misc;
+	else if (Category == "All") return EArticyAssetCategory::All;
 	else return EArticyAssetCategory::None;
 }
 
@@ -173,6 +174,23 @@ FString FArticyPackageDef::GetFolder() const
 	return (FString(TEXT("Packages")) / Name).Replace(TEXT(" "), TEXT("_"));
 }
 
+FString FArticyPackageDef::GetFolderName() const
+{
+	int32 pathCutOffIndex = INDEX_NONE;
+	FString folder = this->GetFolder();
+	folder.FindLastChar('/', pathCutOffIndex);
+
+	if (pathCutOffIndex != INDEX_NONE)
+	{
+		return this->GetFolder().RightChop(pathCutOffIndex);
+	}
+	else
+	{
+		UE_LOG(LogArticyImporter, Error, TEXT("Could not retrieve folder name for package %s! Did GetFolder() method change?"), *this->Name);
+		return FString(TEXT("Invalid"));
+	}
+}
+
 //---------------------------------------------------------------------------//
 
 void FArticyPackageDefs::ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json)
@@ -224,4 +242,15 @@ void FArticyPackageDefs::GenerateAssets(UArticyImportData* Data) const
 			}
 		}
 	}
+}
+
+TArray<FString> FArticyPackageDefs::GetPackageFolderNames() const
+{
+	TArray<FString> outArray;
+	for(FArticyPackageDef def : Packages)
+	{
+		outArray.Add(def.GetFolderName());
+	}
+
+	return outArray;
 }

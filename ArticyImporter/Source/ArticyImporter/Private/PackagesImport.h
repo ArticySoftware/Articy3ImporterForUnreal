@@ -30,13 +30,13 @@ public:
 	const FArticyId& GetParent() const { return Parent; }
 
 	const FString& GetAssetRef() const { return AssetRef; }
-	const EArticyAssetCategory& GetAssetCat() const { return Category; }
+	const EArticyAssetCategory& GetAssetCat() const { return AssetCategory; }
 	TSharedPtr<FJsonObject> GetPropertiesJson() const;
 	TSharedPtr<FJsonObject> GetTemplatesJson() const;
 
 private:
 
-	EArticyAssetCategory GetAssetCategoryFromString(const FString AssetCategory);
+	EArticyAssetCategory GetAssetCategoryFromString(const FString Category);
 
 	/** The original type of the model as read in from json. */
 	UPROPERTY(VisibleAnywhere, Category = "Model")
@@ -62,7 +62,7 @@ private:
 	FString AssetRef;
 	/** The asset category, if this is an asset. */
 	UPROPERTY(VisibleAnywhere, Category = "Model Meta")
-	EArticyAssetCategory Category = EArticyAssetCategory::None;
+	EArticyAssetCategory AssetCategory = EArticyAssetCategory::None;
 
 	UPROPERTY(VisibleAnywhere, Category = "Model")
 	FString PropertiesJsonString;
@@ -85,6 +85,7 @@ public:
 	FArticyPackage GenerateAssets(UArticyImportData* Data) const;
 
 	FString GetFolder() const;
+	FString GetFolderName() const;
 
 private:
 
@@ -110,6 +111,7 @@ public:
 	void ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json);
 	void GatherScripts(UArticyImportData* Data) const;
 	void GenerateAssets(UArticyImportData* Data) const;
+	TArray<FString> GetPackageFolderNames() const;
 
 private:
 

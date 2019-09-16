@@ -9,8 +9,8 @@
 #include "AssetRegistryModule.h"
 #include "ShadowStateManager.h"
 #include "ArticyExpressoScripts.h"
-
 #include "ArticyGlobalVariables.generated.h"
+
 
 //implicit convertion operator (= getter)
 //ReSharper disable once CppNonExplicitConversionOperator
@@ -395,7 +395,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Getter")
 	const TArray<UArticyBaseVariableSet*> GetVariableSets() const { return VariableSets; }
 	
-	UFUNCTION(BlueprintCallable, Category = "Getter")
+	/* Exec functions are only supported by a couple singleton classes
+	 * To make this exec compatible, one of those exec classes has to forward the call
+	 * See https://wiki.unrealengine.com/Exec_Functions for reference*/
+	UFUNCTION(BlueprintCallable, Exec)
+	void PrintGlobalVariable(FArticyGvName GvName);
+
+	UFUNCTION(BlueprintCallable, Category="Getter")
 	const bool& GetBoolVariable(FArticyGvName GvName, bool& bSucceeded);
 	UFUNCTION(BlueprintCallable, Category="Getter")
 	const int32& GetIntVariable(FArticyGvName GvName, bool& bSucceeded);
@@ -409,10 +415,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Setter")
 	void SetStringVariable(FArticyGvName GvName, const FString Value);
 
+	UFUNCTION(BlueprintCallable, Category="Debug")
+	void EnableDebugLogging();
+	UFUNCTION(BlueprintCallable, Category="Debug")
+	void DisableDebugLogging();
+
 protected:
 
 	UPROPERTY()
 	TArray<UArticyBaseVariableSet*> VariableSets;
+
+	UPROPERTY()
+	bool bLogVariableAccess = false;
 
 private:
 
@@ -467,12 +481,26 @@ void UArticyGlobalVariables::SetVariableValue(const FName Namespace, const FName
 	auto set = GetNamespace(Namespace);
 	if (set)
 	{
-		auto ptr = set->GetPropPtr<ArticyVariableType *>(Variable);
-		if (ptr)
+		UArticyVariable** basePtr = set->GetPropPtr<UArticyVariable*>(Variable);
+		ArticyVariableType* typedPtr = dynamic_cast<ArticyVariableType*>(*basePtr);
+
+		if (typedPtr)
 		{
-			auto& propValue = (**ptr);
+			auto& propValue = (*typedPtr);
 			propValue = Value;
-		}
+
+			if (bLogVariableAccess)
+			{
+				UE_LOG(LogArticyRuntime, Display, TEXT("Set variable %s::%s : Success"), *Namespace.ToString(), *Variable.ToString());
+			}
+
+			return;
+		}		
+	}
+
+	if (bLogVariableAccess)
+	{
+		UE_LOG(LogArticyRuntime, Error, TEXT("Unable to find variable: %s::%s"), *Namespace.ToString(), *Variable.ToString());
 	}
 }
 
@@ -482,13 +510,27 @@ const VariablePayloadType& UArticyGlobalVariables::GetVariableValue(const FName 
 	auto set = GetNamespace(Namespace);
 	if (set)
 	{
-		auto ptr = set->GetPropPtr<ArticyVariableType *>(Variable);
-		if (ptr)
+		UArticyVariable** basePtr = set->GetPropPtr<UArticyVariable*>(Variable);
+
+		ArticyVariableType* typedPtr = dynamic_cast<ArticyVariableType*>(*basePtr);
+
+		if (typedPtr)
 		{
-			auto& propValue = (**ptr);
+			auto& propValue = (*typedPtr);
 			bSucceeded = true;
+
+			if (bLogVariableAccess)
+			{
+				UE_LOG(LogArticyRuntime, Display, TEXT("Get variable %s::%s : Success"), *Namespace.ToString(), *Variable.ToString());
+			}
+
 			return propValue.Get();
 		}
+	}
+
+	if(bLogVariableAccess)
+	{
+		UE_LOG(LogArticyRuntime, Error, TEXT("Unable to find variable: %s::%s"), *Namespace.ToString(), *Variable.ToString());
 	}
 
 	bSucceeded = false;

@@ -7,6 +7,9 @@
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
 #include "DetailCategoryBuilder.h"
+#include "ArticyDatabase.h"
+#include "SPackageSettings.h"
+#include "ArticyImporter.h"
 
 #define LOCTEXT_NAMESPACE "ArticyPluginSettings"
 
@@ -22,8 +25,14 @@ TSharedRef<IDetailCustomization> FArticyPluginSettingsCustomization::MakeInstanc
 
 void FArticyPluginSettingsCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 {
-	IDetailCategoryBuilder& ImportActionsCategory = DetailLayout.EditCategory("ImportActions");
+	LayoutBuilder = &DetailLayout;
 
+	// after importing, refresh the custom UI
+	FArticyImporterModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
+	ArticyImporterModule.OnImportFinished.AddSP(this, &FArticyPluginSettingsCustomization::RefreshSettingsUI);
+	
+	IDetailCategoryBuilder& ImportActionsCategory = DetailLayout.EditCategory("ImportActions");
+	
 	ImportActionsCategory.AddCustomRow(LOCTEXT("ForceCompleteReimport_Row", ""))
 		[
 			SNew(SHorizontalBox)
@@ -62,4 +71,49 @@ void FArticyPluginSettingsCustomization::CustomizeDetails(IDetailLayoutBuilder& 
 				.OnClicked_Lambda([]()->FReply { FArticyImporterFunctionLibrary::RegenerateAssets(); return FReply::Handled(); })
 			]
 		];
+
+
+	const UArticyDatabase* OriginalDatabase = UArticyDatabase::GetMutableOriginal();
+	
+	if (!OriginalDatabase) {
+
+		// if there was no database found, check if we are still loading assets; if we are, refresh the custom UI once it's done
+		FAssetRegistryModule& AssetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
+
+		if (AssetRegistry.Get().IsLoadingAssets()) {
+			AssetRegistry.Get().OnFilesLoaded().AddSP(this, &FArticyPluginSettingsCustomization::RefreshSettingsUI);
+		}
+		
+		return;
+	}
+	IDetailCategoryBuilder& DefaultPackagesCategory= DetailLayout.EditCategory("Default packages");
+
+	TArray<TSharedPtr<SPackageSettings>> PackageSettingsWidgets;
+
+	// create a custom widget per package
+	for(FString PackageName : OriginalDatabase->GetImportedPackageNames())
+	{
+		const FName PackageNameAsName = FName(*PackageName);
+		TSharedPtr<SPackageSettings> NewSettingsWidget = 
+			SNew(SPackageSettings)
+			.PackageToDisplay(PackageNameAsName);
+
+		PackageSettingsWidgets.Add(NewSettingsWidget);
+	}
+
+	// add the custom widgets to the UI
+	for (TSharedPtr<SPackageSettings> PackageSettingsWidget : PackageSettingsWidgets)
+	{
+		DefaultPackagesCategory.AddCustomRow(LOCTEXT("PackageSetting", ""))
+		[
+			PackageSettingsWidget.ToSharedRef()
+		];
+	}
 }
+
+void FArticyPluginSettingsCustomization::RefreshSettingsUI()
+{
+	LayoutBuilder->ForceRefreshDetails();
+}
+
+#undef LOCTEXT_NAMESPACE
