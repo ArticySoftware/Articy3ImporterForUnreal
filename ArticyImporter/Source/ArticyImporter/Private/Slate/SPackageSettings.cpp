@@ -1,6 +1,9 @@
 #include "SPackageSettings.h"
 #include "ArticyDatabase.h"
 #include "ArticyPluginSettings.h"
+#include "SSplitter.h"
+#include "SBorder.h"
+#include "EditorStyle.h"
 
 
 void SPackageSettings::Construct(const FArguments& InArgs)
@@ -9,21 +12,32 @@ void SPackageSettings::Construct(const FArguments& InArgs)
 	
 	this->ChildSlot
 	[
-		SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
+		SNew(SSplitter)
+		.Style(FEditorStyle::Get(), "DetailsView.Splitter")
+		.PhysicalSplitterHandleSize(1.0f)
+		.HitDetectionSplitterHandleSize(5.0f)
+		+ SSplitter::Slot().Value(0.328f)
 		[
-			SNew(STextBlock)
-			.Text(this, &SPackageSettings::GetPackageName)
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			[
+				SNew(STextBlock)
+				.Text(this, &SPackageSettings::GetPackageName)
+			]
 		]
-
-		+ SHorizontalBox::Slot()
-		.HAlign(HAlign_Left)
+		+ SSplitter::Slot().Value(0.672f)
 		[
-			SNew(SCheckBox)
-			.OnCheckStateChanged(this, &SPackageSettings::OnCheckStateChanged)
-			.IsChecked(this, &SPackageSettings::IsChecked)
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			.HAlign(HAlign_Left)
+			.Padding(FMargin(5, 0, 0, 5))
+			[
+				SNew(SCheckBox)
+				.OnCheckStateChanged(this, &SPackageSettings::OnCheckStateChanged)
+				.IsChecked(this, &SPackageSettings::IsChecked)
+			]
 		]
-	];
+	]; 
 
 }
 
@@ -40,7 +54,6 @@ void SPackageSettings::OnCheckStateChanged(ECheckBoxState NewState) const
 	
 	UArticyPluginSettings* settings = GetMutableDefault<UArticyPluginSettings>();
 	settings->PackageLoadSettings.Add(PackageToDisplay.ToString(), bChecked);
-
 }
 
 ECheckBoxState SPackageSettings::IsChecked() const

@@ -58,7 +58,8 @@ public class ArticyImporter : ModuleRules
 				"Json",
                 "GameProjectGeneration",
                 "ContentBrowser",
-				"PropertyEditor"
+				"PropertyEditor",
+				"EditorStyle"
 			}
 			);
 		
