@@ -148,8 +148,8 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 
 void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImportData* Data, const bool bWaitingForOtherCompile)
 {
-	bool succeeded = Result == ECompilationResult::Succeeded || Result == ECompilationResult::UpToDate;
-	if (!succeeded)
+	const bool bSucceeded = Result == ECompilationResult::Succeeded || Result == ECompilationResult::UpToDate;
+	if (!bSucceeded)
 	{
 		//compile failed
 		UE_LOG(LogArticyImporter, Error, TEXT("Compile failed, cannot continue importing articy:draft data!"));
@@ -203,9 +203,9 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 	TArray<FAssetData> GeneratedAssets;
 	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), GeneratedAssets, true);
 
-	for (FAssetData assetData : GeneratedAssets)
+	for (FAssetData AssetData : GeneratedAssets)
 	{
-		assetData.GetAsset()->MarkPackageDirty();
+		AssetData.GetAsset()->MarkPackageDirty();
 	}
 	//prompt the user to save newly generated packages
 	FEditorFileUtils::SaveDirtyPackages(true, true, /*bSaveContentPackages*/ true, false, false, true);	
@@ -214,8 +214,8 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 	UArticyPluginSettings* settings = GetMutableDefault<UArticyPluginSettings>();
 	settings->UpdatePackageSettings();
 	
-	FArticyImporterModule& importerModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
-	importerModule.OnImportFinished.Broadcast();
+	FArticyImporterModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
+	ArticyImporterModule.OnImportFinished.Broadcast();
 
 	
 }

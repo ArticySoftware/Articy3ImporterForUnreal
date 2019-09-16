@@ -46,6 +46,6 @@ public:
 
 	void UpdatePackageSettings();
 
-	void ApplyPreviousSettings();
+	void ApplyPreviousSettings() const;
 
 };

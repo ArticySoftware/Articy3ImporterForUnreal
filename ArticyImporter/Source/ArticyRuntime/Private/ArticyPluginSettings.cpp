@@ -15,8 +15,8 @@ UArticyPluginSettings::UArticyPluginSettings()
 	bKeepGlobalVariablesBetweenWorlds = true;
 
 	// update package load settings after all files have been loaded
-	FAssetRegistryModule& assetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
-	assetRegistry.Get().OnFilesLoaded().AddUObject(this, &UArticyPluginSettings::UpdatePackageSettings);
+	FAssetRegistryModule& AssetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	AssetRegistry.Get().OnFilesLoaded().AddUObject(this, &UArticyPluginSettings::UpdatePackageSettings);
 }
 
 bool UArticyPluginSettings::DoesPackageSettingExist(FString packageName)
@@ -38,29 +38,29 @@ const UArticyPluginSettings* UArticyPluginSettings::Get()
 
 void UArticyPluginSettings::UpdatePackageSettings()
 {
-	UArticyDatabase* articyDatabase = UArticyDatabase::GetMutableOriginal();
+	UArticyDatabase* ArticyDatabase = UArticyDatabase::GetMutableOriginal();
 
-	TArray<FString> importedPackageNames = articyDatabase->GetImportedPackageNames();
+	TArray<FString> ImportedPackageNames = ArticyDatabase->GetImportedPackageNames();
 
 	// remove outdated settings
-	TArray<FString> currentNames;
-	PackageLoadSettings.GenerateKeyArray(currentNames);
+	TArray<FString> CurrentNames;
+	PackageLoadSettings.GenerateKeyArray(CurrentNames);
 
-	for (FString name : currentNames)
+	for (FString Name : CurrentNames)
 	{
 		// if the old name isn't contained in the new packages, remove its loading rule
-		if(!importedPackageNames.Contains(name))
+		if(!ImportedPackageNames.Contains(Name))
 		{
-			PackageLoadSettings.Remove(name);
+			PackageLoadSettings.Remove(Name);
 		}
 	}
 
-	for (FString name : importedPackageNames)
+	for (FString Name : ImportedPackageNames)
 	{
 		// if the new name isn't contained in the serialized data, add it with its default package value
-		if (!currentNames.Contains(name))
+		if (!CurrentNames.Contains(Name))
 		{
-			PackageLoadSettings.Add(name, articyDatabase->IsPackageDefaultPackage(name));
+			PackageLoadSettings.Add(Name, ArticyDatabase->IsPackageDefaultPackage(Name));
 		}
 	}
 
@@ -68,13 +68,13 @@ void UArticyPluginSettings::UpdatePackageSettings()
 	ApplyPreviousSettings();
 }
 
-void UArticyPluginSettings::ApplyPreviousSettings()
+void UArticyPluginSettings::ApplyPreviousSettings() const
 {
 	// restore the package default settings with the cached data of the plugin settings
 	UArticyDatabase* OriginalDatabase = UArticyDatabase::GetMutableOriginal();
 
-	for(FString packageName : OriginalDatabase->GetImportedPackageNames())
+	for(FString PackageName : OriginalDatabase->GetImportedPackageNames())
 	{
-		OriginalDatabase->ChangePackageDefault(FName(*packageName), GetDefault<UArticyPluginSettings>()->PackageLoadSettings[packageName]);
+		OriginalDatabase->ChangePackageDefault(FName(*PackageName), GetDefault<UArticyPluginSettings>()->PackageLoadSettings[PackageName]);
 	}
 }

@@ -20,10 +20,10 @@ void FArticyImporterFunctionLibrary::ReimportChanges(UArticyImportData* ImportDa
 	if (!EnsureImportFile(&ImportData))
 		return;
 
-	const auto factory = NewObject<UArticyJSONFactory>();
-	if (factory)
+	const auto Factory = NewObject<UArticyJSONFactory>();
+	if (Factory)
 	{
-		factory->Reimport(ImportData);
+		Factory->Reimport(ImportData);
 		//GC will destroy factory
 	}
 }

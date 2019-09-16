@@ -28,11 +28,11 @@
 void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 {
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-	bool bIsReimport = PackagesGenerator::GetCachedExistingObjects().Num() > 0;
+	const bool bIsReimport = PackagesGenerator::GetCachedExistingObjects().Num() > 0;
 
 	// generate new articy objects
-	auto pack = Data->GetPackageDefs();
-	pack.GenerateAssets(Data);
+	const auto ArticyPackageDefs = Data->GetPackageDefs();
+	ArticyPackageDefs.GenerateAssets(Data);
 
 	// if old files exist (reimport), prepare a cleanup: deletion of outdated assets, directories etc.
 	if (bIsReimport)
@@ -43,29 +43,29 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 
 		// create a map of the newly generated assets so we can compare both old and new assets
 		TMap<FString, UArticyObject*> NewObjectsMapping;
-		for (FArticyPackage package : Packages)
+		for (FArticyPackage ArticyPackage : Packages)
 		{
-			for (UArticyPrimitive* prim : package.Objects) {
-				UArticyObject* obj = Cast<UArticyObject>(prim);
-				if (obj)
+			for (UArticyPrimitive* Prim : ArticyPackage.Objects) {
+				UArticyObject* ArticyObject = Cast<UArticyObject>(Prim);
+				if (ArticyObject)
 				{
-					NewObjectsMapping.Add(obj->GetName(), obj);
+					NewObjectsMapping.Add(ArticyObject->GetName(), ArticyObject);
 				}
 			}
 		}
 
 		// gather all old articy objects that aren't contained in the import data and mark the respective assets as deleted
-		for (UArticyObject* obj : CachedArticyObjects)
+		for (UArticyObject* CachedArticyObject : CachedArticyObjects)
 		{
 			// filter out assets that were invalidated by the asset generation (assets deleted due to consolidation etc.)
-			if (!obj->IsValidLowLevel() || !obj->IsA(UArticyObject::StaticClass()))
+			if (!CachedArticyObject->IsValidLowLevel() || !CachedArticyObject->IsA(UArticyObject::StaticClass()))
 			{
 				continue;
 			}
 			// if the asset is still valid and is not contained within the new import data (meaning it wasn't exported or it was deleted in articy draft, mark it to be deleted
-			else if (!NewObjectsMapping.Contains(obj->GetName()))
+			else if (!NewObjectsMapping.Contains(CachedArticyObject->GetName()))
 			{
-				PackagesGenerator::PostGenerationCleanupData.ObjectsToDelete.Add(obj);
+				PackagesGenerator::PostGenerationCleanupData.ObjectsToDelete.Add(CachedArticyObject);
 			}
 		}
 	}
@@ -79,10 +79,10 @@ void PackagesGenerator::CacheExistingArticyData(UArticyImportData * Data)
 
 	ClearCleanupData();
 
-	for(FAssetData assetData : ExistingObjectsData)
+	for(FAssetData AssetData : ExistingObjectsData)
 	{
-		UArticyObject* currentObject = Cast<UArticyObject>(assetData.GetAsset());
-		CachedArticyObjectsMapping.Add(currentObject->GetName(), currentObject);
+		UArticyObject* CurrentObject = Cast<UArticyObject>(AssetData.GetAsset());
+		CachedArticyObjectsMapping.Add(CurrentObject->GetName(), CurrentObject);
 	}
 
 	CacheOutdatedPackageNamesToDelete(Data);
@@ -91,7 +91,7 @@ void PackagesGenerator::CacheExistingArticyData(UArticyImportData * Data)
 void PackagesGenerator::ClearCleanupData()
 {
 	CachedArticyObjectsMapping.Empty();
-	PostGenerationCleanupData = {};
+	PackagesGenerator::PostGenerationCleanupData = {};
 }
 
 const TMap<FString, UArticyObject*> PackagesGenerator::GetCachedExistingObjects()
@@ -104,14 +104,14 @@ void PackagesGenerator::ExecuteCleanup()
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 
 	// mark all remaining assets in the outdated directories/packages to be deleted
-	for (FString folderName : PackagesGenerator::PostGenerationCleanupData.DirectoriesToDelete)
+	for (FString FolderName : PackagesGenerator::PostGenerationCleanupData.DirectoriesToDelete)
 	{
 		TArray<FAssetData> OutdatedAssets;
-		AssetRegistryModule.Get().GetAssetsByPath(FName(*(ArticyHelpers::ArticyGeneratedPackagesFolder / folderName)), OutdatedAssets, true);
+		AssetRegistryModule.Get().GetAssetsByPath(FName(*(ArticyHelpers::ArticyGeneratedPackagesFolder / FolderName)), OutdatedAssets, true);
 
-		for (FAssetData data : OutdatedAssets)
+		for (FAssetData OutdatedAsset : OutdatedAssets)
 		{
-			PackagesGenerator::PostGenerationCleanupData.ObjectsToDelete.Add(data.GetAsset());
+			PackagesGenerator::PostGenerationCleanupData.ObjectsToDelete.Add(OutdatedAsset.GetAsset());
 		}
 	}
 
@@ -123,20 +123,20 @@ void PackagesGenerator::ExecuteCleanup()
 	AssetToolsModule.Get().RenameAssets({ PackagesGenerator::PostGenerationCleanupData.ObjectsToRename });
 
 	// delete directories themselves that should be empty by now
-	FString RelativeContentPath = FPaths::ProjectContentDir();
-	FString FullContentPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativeContentPath);
-	FString FullArticyGeneratedPackagesPath = FullContentPath / ArticyHelpers::ArticyGeneratedPackagesFolderRelativeToContent;
+	const FString RelativeContentPath = FPaths::ProjectContentDir();
+	const FString FullContentPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativeContentPath);
+	const FString FullArticyGeneratedPackagesPath = FullContentPath / ArticyHelpers::ArticyGeneratedPackagesFolderRelativeToContent;
 
-	IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 
-	for (FString folderName : PackagesGenerator::PostGenerationCleanupData.DirectoriesToDelete)
+	for (FString FolderName : PackagesGenerator::PostGenerationCleanupData.DirectoriesToDelete)
 	{
-		FString fullDirectoryPath = FullArticyGeneratedPackagesPath / folderName;
+		FString FullDirectoryPath = FullArticyGeneratedPackagesPath / FolderName;
 
-		if (platformFile.DirectoryExists(*fullDirectoryPath))
+		if (PlatformFile.DirectoryExists(*FullDirectoryPath))
 		{
-			platformFile.SetReadOnly(*fullDirectoryPath, false);
-			platformFile.DeleteDirectory(*fullDirectoryPath);
+			PlatformFile.SetReadOnly(*FullDirectoryPath, false);
+			PlatformFile.DeleteDirectory(*FullDirectoryPath);
 		}
 	}
 
@@ -148,28 +148,28 @@ void PackagesGenerator::CacheOutdatedPackageNamesToDelete(UArticyImportData* Dat
 {
 	PackagesGenerator::PostGenerationCleanupData.DirectoriesToDelete.Empty();
 
-	TArray<FString> ArticyPackageFolders = Data->GetPackageDefs().GetPackageFolderNames();
+	const TArray<FString> ArticyPackageFolders = Data->GetPackageDefs().GetPackageFolderNames();
 	TArray<FString> OutdatedPackageNames;
 
-	TArray<UArticyObject*> cachedObjects;
-	CachedArticyObjectsMapping.GenerateValueArray(cachedObjects);
+	TArray<UArticyObject*> CachedObjects;
+	CachedArticyObjectsMapping.GenerateValueArray(CachedObjects);
 
-	for (UArticyObject* obj : cachedObjects)
+	for (UArticyObject* Object : CachedObjects)
 	{
-		FString pathName = obj->GetOutermost()->GetPathName();
-		int32 pathCutOffIndex = INDEX_NONE;
-		pathName.FindLastChar('/', pathCutOffIndex);
+		FString PathName = Object->GetOutermost()->GetPathName();
+		int32 PathCutOffIndex = INDEX_NONE;
+		PathName.FindLastChar('/', PathCutOffIndex);
 
-		if (pathCutOffIndex != INDEX_NONE)
+		if (PathCutOffIndex != INDEX_NONE)
 		{
-			FString directoryPath = pathName.Left(pathCutOffIndex);
-			directoryPath.FindLastChar('/', pathCutOffIndex);
-			FString directoryName = directoryPath.RightChop(pathCutOffIndex);
+			FString DirectoryPath = PathName.Left(PathCutOffIndex);
+			DirectoryPath.FindLastChar('/', PathCutOffIndex);
+			FString DirectoryName = DirectoryPath.RightChop(PathCutOffIndex);
 
 			// if the directory name of an asset is invalid, mark the directory to be deleted later on
-			if (!ArticyPackageFolders.Contains(directoryName))
+			if (!ArticyPackageFolders.Contains(DirectoryName))
 			{
-				OutdatedPackageNames.AddUnique(directoryName);
+				OutdatedPackageNames.AddUnique(DirectoryName);
 			}
 		}
 	}
@@ -178,6 +178,6 @@ void PackagesGenerator::CacheOutdatedPackageNamesToDelete(UArticyImportData* Dat
 }
 
 TMap<FString, UArticyObject*> PackagesGenerator::CachedArticyObjectsMapping;
-ArticyCleanupData PackagesGenerator::PostGenerationCleanupData;
+FArticyCleanupData PackagesGenerator::PostGenerationCleanupData;
 
 #undef LOCTEXT_NAMESPACE

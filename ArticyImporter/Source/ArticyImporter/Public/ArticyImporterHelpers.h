@@ -11,7 +11,7 @@
 #include "ArticyHelpers.h"
 #include "CodeGeneration/PackagesGenerator.h"
 
-struct ArticyCleanupData
+struct FArticyCleanupData
 {
 	TSet<UObject*> ObjectsToDelete;
 	TArray<FAssetRenameData> ObjectsToRename;
@@ -24,39 +24,39 @@ namespace ArticyImporterHelpers
 
 	inline UPackage* FindOrCreatePackage(const FString Name)
 	{
-		FString PackageName = ArticyHelpers::ArticyGeneratedFolder / Name;
+		const FString PackageName = ArticyHelpers::ArticyGeneratedFolder / Name;
 		UPackage* AssetPackage = CreatePackage(nullptr, *PackageName);
 		AssetPackage->FullyLoad();
 
 		return AssetPackage;
 	}
 
-	inline bool GetPathToDirectoryOfAsset(UObject* object, FString& outString)
+	inline bool GetPathToDirectoryOfAsset(UObject* Object, FString& outString)
 	{
-		FString pathName = object->GetOutermost()->GetPathName();
-		int32 cutoffIndex = INDEX_NONE;
-		pathName.FindLastChar('/', cutoffIndex);
+		FString PathName = Object->GetOutermost()->GetPathName();
+		int32 CutoffIndex = INDEX_NONE;
+		PathName.FindLastChar('/', CutoffIndex);
 
-		if (cutoffIndex != INDEX_NONE)
+		if (CutoffIndex != INDEX_NONE)
 		{
-			outString = pathName.Left(cutoffIndex);
+			outString = PathName.Left(CutoffIndex);
 			return true;
 		}
 
 		return false;
 	}
 
-	inline bool GetPackageNameOfDirectoryOfAsset(UObject* object, FString& outString)
+	inline bool GetPackageNameOfDirectoryOfAsset(UObject* Object, FString& outString)
 	{
-		FString packageName;
-		GetPathToDirectoryOfAsset(object, packageName);
+		FString PackageName;
+		GetPathToDirectoryOfAsset(Object, PackageName);
 
-		int32 cutoffIndex = INDEX_NONE;
-		packageName.FindLastChar('/', cutoffIndex);
+		int32 CutoffIndex = INDEX_NONE;
+		PackageName.FindLastChar('/', CutoffIndex);
 
-		if (cutoffIndex != INDEX_NONE)
+		if (CutoffIndex != INDEX_NONE)
 		{
-			outString = packageName.RightChop(cutoffIndex);
+			outString = PackageName.RightChop(CutoffIndex);
 			outString.RemoveAt(0);
 			return true;
 		}
@@ -68,71 +68,69 @@ namespace ArticyImporterHelpers
 	template <typename AssetType>
 	AssetType* GenerateAsset(const TCHAR* ClassName, const TCHAR* ModuleName, const FString AssetName = "", const FString SubFolder = "")
 	{
-		const auto assetName = AssetName.IsEmpty() ? ClassName : AssetName;
-		const auto fileName = (SubFolder.IsEmpty() ? assetName : SubFolder / assetName).Replace(TEXT(" "), TEXT("_"));
+		const auto ActualAssetName = AssetName.IsEmpty() ? ClassName : AssetName;
+		const auto FileName = (SubFolder.IsEmpty() ? ActualAssetName : SubFolder / ActualAssetName).Replace(TEXT(" "), TEXT("_"));
 
-		auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), ModuleName, ClassName);
-		auto uclass = ConstructorHelpersInternal::FindOrLoadClass(fullClassName, AssetType::StaticClass());
-		if (uclass)
+		auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), ModuleName, ClassName);
+		auto UClass = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, AssetType::StaticClass());
+		if (UClass)
 		{
-			FAssetRegistryModule& AssetRegistry = FModuleManager::GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
-
 			const TMap<FString, UArticyObject*> CachedExistingPackageObjects = PackagesGenerator::GetCachedExistingObjects();
-			bool objectIsCached = CachedExistingPackageObjects.Contains(assetName);
+			const bool bObjectIsCached = CachedExistingPackageObjects.Contains(ActualAssetName);
 
-			UArticyObject* existingArticyObject = objectIsCached ? *CachedExistingPackageObjects.Find(assetName) : nullptr;
-			auto assetPackage = FindOrCreatePackage(fileName);
+			UArticyObject* CachedArticyObject = bObjectIsCached ? *CachedExistingPackageObjects.Find(ActualAssetName) : nullptr;
+			auto AssetPackage = FindOrCreatePackage(FileName);
 			EObjectFlags Flags = RF_Public | RF_Standalone;
-			AssetType* createdAsset = nullptr;
+			AssetType* CreatedAsset = nullptr;
 
 			// if there is no existing object or there is one in the same path with the same class, just create a new asset/update the old asset
-			if (!existingArticyObject || (existingArticyObject->GetPathName().Equals(ArticyHelpers::ArticyGeneratedFolder / fileName + TEXT(".") + assetName) && existingArticyObject->UObject::GetClass() == uclass))
+			if (!CachedArticyObject || (CachedArticyObject->GetPathName().Equals(ArticyHelpers::ArticyGeneratedFolder / FileName + TEXT(".") + ActualAssetName) && CachedArticyObject->UObject::GetClass() == UClass))
 			{
-				createdAsset = NewObject<AssetType>(assetPackage, uclass, *assetName, Flags);			
+				CreatedAsset = NewObject<AssetType>(AssetPackage, UClass, *ActualAssetName, Flags);
 			}
 
 			// if there is an  object with the same path but a different class, we can't simply update like above with NewObject. Create the new object with a temp name  and rename late in cleanup
-			else if(existingArticyObject->GetPathName().Equals(ArticyHelpers::ArticyGeneratedFolder / fileName + TEXT(".") + assetName) && existingArticyObject->UObject::GetClass() != uclass)
+			else if(CachedArticyObject->GetPathName().Equals(ArticyHelpers::ArticyGeneratedFolder / FileName + TEXT(".") + ActualAssetName) && CachedArticyObject->UObject::GetClass() != UClass)
 			{
-				FName tempUniqueName = MakeUniqueObjectName(existingArticyObject, uclass, FName(*AssetName));
-				FString relativeTempPath = (SubFolder.IsEmpty() ? tempUniqueName.ToString() : SubFolder / tempUniqueName.ToString()).Replace(TEXT(" "), TEXT("_"));
+				FName TempUniqueName = MakeUniqueObjectName(CachedArticyObject, UClass, FName(*AssetName));
+				FString RelativeTempPath = (SubFolder.IsEmpty() ? TempUniqueName.ToString() : SubFolder / TempUniqueName.ToString()).Replace(TEXT(" "), TEXT("_"));
 
-				assetPackage = FindOrCreatePackage(relativeTempPath);
-				createdAsset = NewObject<AssetType>(assetPackage, uclass, *tempUniqueName.ToString(), Flags);
-				UObject* newObject = Cast<UObject>(createdAsset);
+				AssetPackage = FindOrCreatePackage(RelativeTempPath);
+				CreatedAsset = NewObject<AssetType>(AssetPackage, UClass, *TempUniqueName.ToString(), Flags);
+				UObject* NewObject = Cast<UObject>(CreatedAsset);
 
 				// cache old asset to be deleted in cleanup
-				PackagesGenerator::PostGenerationCleanupData.ObjectsToDelete.Add(existingArticyObject);
+				PackagesGenerator::PostGenerationCleanupData.ObjectsToDelete.Add(CachedArticyObject);
 
 				// create rename data so that the new assets will have the old name after the cleanup
 				// using temp name + rename is not required if it's a different path to begin with #TODO
-				FString newDirectoryName;
-				GetPathToDirectoryOfAsset(newObject, newDirectoryName);
-				TWeakObjectPtr<UObject> weakPtrToObject = newObject;
-				FAssetRenameData renameData(weakPtrToObject, newDirectoryName, *assetName);
+				FString NewDirectoryName;
+				GetPathToDirectoryOfAsset(NewObject, NewDirectoryName);
+				TWeakObjectPtr<UObject> WeakObjectPtr = NewObject;
+				FAssetRenameData AssetRenameData(WeakObjectPtr, NewDirectoryName, *ActualAssetName);
 
 				// cache the rename data to execute in cleanup
-				PackagesGenerator::PostGenerationCleanupData.ObjectsToRename.Add(renameData);
+				PackagesGenerator::PostGenerationCleanupData.ObjectsToRename.Add(AssetRenameData);
 			}
 
 			// if there exists an original object but the path is different, create the new object but mark the old one to be deleted
 			else
 			{
-				createdAsset = NewObject<AssetType>(assetPackage, uclass, *assetName, Flags);
-				PackagesGenerator::PostGenerationCleanupData.ObjectsToDelete.Add(existingArticyObject);
+				CreatedAsset = NewObject<AssetType>(AssetPackage, UClass, *ActualAssetName, Flags);
+				PackagesGenerator::PostGenerationCleanupData.ObjectsToDelete.Add(CachedArticyObject);
 			}
 
 			// if we successfully created the asset, notify the asset registry and mark it dirty
-			if (createdAsset)
+			if (CreatedAsset)
 			{
 				// Notify the asset registry
-				FAssetRegistryModule::AssetCreated(Cast<UObject>(createdAsset));
+				FAssetRegistryModule::AssetCreated(Cast<UObject>(CreatedAsset));
 
 				// Mark the package dirty...
-				assetPackage->MarkPackageDirty();
+				AssetPackage->MarkPackageDirty();
 			}
 
-			return createdAsset;
+			return CreatedAsset;
 		}
 
 		//NOTE: cannot use LogArticyRuntime here, causes linker error

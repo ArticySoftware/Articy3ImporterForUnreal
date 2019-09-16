@@ -20,13 +20,12 @@ FArticyPluginSettingsCustomization::FArticyPluginSettingsCustomization()
 
 TSharedRef<IDetailCustomization> FArticyPluginSettingsCustomization::MakeInstance()
 {
-	TSharedRef<FArticyPluginSettingsCustomization> Instance = MakeShareable(new FArticyPluginSettingsCustomization);
-	return Instance;
+	return MakeShareable(new FArticyPluginSettingsCustomization);
 }
 
 void FArticyPluginSettingsCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 {
-	layoutBuilder = &DetailLayout;
+	LayoutBuilder = &DetailLayout;
 
 	// after importing, refresh the custom UI
 	FArticyImporterModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
@@ -110,13 +109,11 @@ void FArticyPluginSettingsCustomization::CustomizeDetails(IDetailLayoutBuilder& 
 			PackageSettingsWidget.ToSharedRef()
 		];
 	}
-
-	
 }
 
 void FArticyPluginSettingsCustomization::RefreshSettingsUI()
 {
-	layoutBuilder->ForceRefreshDetails();
+	LayoutBuilder->ForceRefreshDetails();
 }
 
 #undef LOCTEXT_NAMESPACE

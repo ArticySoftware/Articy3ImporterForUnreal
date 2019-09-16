@@ -13,7 +13,6 @@
 TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 {
 	return MakeShareable(new FArticyRefCustomization());
-
 }
 
 void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
@@ -24,15 +23,15 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 
 	check(EntityPropertyHandle->IsValidHandle());
 
-	UObject* Reference;
-	EntityPropertyHandle->GetValue(Reference);
+	UObject* AssetReference;
+	EntityPropertyHandle->GetValue(AssetReference);
 
-	void* refPointer;
-	ArticyRefPropertyHandle->GetValueData(refPointer);
+	void* ArticyRefAddress;
+	ArticyRefPropertyHandle->GetValueData(ArticyRefAddress);
 
 	// update the reference upon selecting the ref
-	FArticyRef* ref = static_cast<FArticyRef*>(refPointer);
-	ref->GetReference();
+	FArticyRef* ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
+	ArticyRef->GetReference();
 
 	HeaderRow.NameContent()
 	[
@@ -58,31 +57,32 @@ void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Prop
 
 void FArticyRefCustomization::OnReferenceUpdated()
 {
-	TSharedRef<IPropertyHandle> EntityPropertyHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("Reference")).ToSharedRef();
+	const TSharedRef<IPropertyHandle> EntityPropertyHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("Reference")).ToSharedRef();
 
 	check(EntityPropertyHandle->IsValidHandle());
 
 	UObject* Reference;
 	EntityPropertyHandle->GetValue(Reference);
 	
-	TSharedRef<IPropertyHandle> ArticyIdHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("Id")).ToSharedRef();
+	const TSharedRef<IPropertyHandle> ArticyIdHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("Id")).ToSharedRef();
 
-	void* address;
-	ArticyIdHandle->GetValueData(address);
-	FArticyId* currentIdPointer = static_cast<FArticyId*>(address);
+	void* ArticyIdPtr;
+	ArticyIdHandle->GetValueData(ArticyIdPtr);
+	
+	FArticyId* CurrentIdPointer = static_cast<FArticyId*>(ArticyIdPtr);
 	// new asset selected
 	if(Reference)
 	{
-		UArticyPrimitive* articyPrimitive = Cast<UArticyPrimitive>(Reference);
-		FArticyId newId = articyPrimitive->GetId();
+		UArticyPrimitive* ArticyPrimitive = Cast<UArticyPrimitive>(Reference);
+		const FArticyId NewId = ArticyPrimitive->GetId();
 
-		currentIdPointer->High = newId.High;
-		currentIdPointer->Low = newId.Low;
+		CurrentIdPointer->High = NewId.High;
+		CurrentIdPointer->Low = NewId.Low;
 	}
 	else
 	{
-		currentIdPointer->High = 0;
-		currentIdPointer->Low = 0;
+		CurrentIdPointer->High = 0;
+		CurrentIdPointer->Low = 0;
 	}
 	
 }

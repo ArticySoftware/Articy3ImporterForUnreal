@@ -7,7 +7,7 @@
 #include "ArticyObject.h"
 #include "UnrealString.h"
 
-struct ArticyCleanupData;
+struct FArticyCleanupData;
 
 /**
  * Generates the package assets.
@@ -26,7 +26,7 @@ public:
 	// cleanup function to be performed after generation has finished
 	static void ExecuteCleanup();
 
-	static ArticyCleanupData PostGenerationCleanupData;
+	static FArticyCleanupData PostGenerationCleanupData;
 
 private:
 	PackagesGenerator() {}

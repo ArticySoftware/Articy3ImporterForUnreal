@@ -17,5 +17,5 @@ public:
 	// used to trigger a refresh on the custom UI
 	void RefreshSettingsUI();
 
-	IDetailLayoutBuilder* layoutBuilder;
+	IDetailLayoutBuilder* LayoutBuilder;
 };
