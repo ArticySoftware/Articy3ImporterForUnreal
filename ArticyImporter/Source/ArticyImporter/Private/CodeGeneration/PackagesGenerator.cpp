@@ -69,15 +69,6 @@ void PackagesGenerator::GenerateAssets(UArticyImportData* Data)
 			}
 		}
 	}
-
-	// mark all generated assets dirty to save them later on
-	TArray<FAssetData> GeneratedAssets;
-	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), GeneratedAssets, true);
-
-	for (FAssetData assetData : GeneratedAssets)
-	{
-		assetData.GetAsset()->MarkPackageDirty();
-	}
 }
 
 void PackagesGenerator::CacheExistingArticyData(UArticyImportData * Data)

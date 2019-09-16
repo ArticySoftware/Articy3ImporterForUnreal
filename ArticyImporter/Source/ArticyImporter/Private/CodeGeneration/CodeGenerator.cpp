@@ -197,6 +197,16 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 		db->SetLoadedPackages(Data->GetPackages());
 		db->MarkPackageDirty();
 	}
+
+	// mark all generated assets dirty to save them later on
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	TArray<FAssetData> GeneratedAssets;
+	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), GeneratedAssets, true);
+
+	for (FAssetData assetData : GeneratedAssets)
+	{
+		assetData.GetAsset()->MarkPackageDirty();
+	}
 	//prompt the user to save newly generated packages
 	FEditorFileUtils::SaveDirtyPackages(true, true, /*bSaveContentPackages*/ true, false, false, true);	
 
