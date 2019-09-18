@@ -4,7 +4,7 @@
 //
 #pragma once
 
-#include "Regex.h"
+#include "Internationalization/Regex.h"
 #include "ArticyRef.h"
 #include "ArticyObject.h"
 #include "ArticyDatabase.h"

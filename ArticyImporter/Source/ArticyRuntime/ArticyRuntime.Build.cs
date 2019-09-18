@@ -9,11 +9,10 @@ public class ArticyRuntime : ModuleRules
 {
 	public ArticyRuntime(ReadOnlyTargetRules Target) : base(Target)
     {
-		//OptimizeCode = CodeOptimization.Never;
-		
-#if UE_4_21_OR_LATER
-		PrivatePCHHeaderFile = "Private/ArticyRuntimePrivatePCH.h";
-#endif
+
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        OptimizeCode = CodeOptimization.Never;
 
 		PublicIncludePaths.AddRange(
 			new string[] {
@@ -24,6 +23,7 @@ public class ArticyRuntime : ModuleRules
 #else
 				"MediaAssets/Public",
 #endif
+                Path.Combine(ModuleDirectory, "Public", "Interfaces")
 			}
 			);
 

@@ -2,7 +2,7 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
+
 
 #include "ArticyDatabase.h"
 #include "ArticyBaseTypes.h"
@@ -108,7 +108,7 @@ void FArticyClonableObject::AddClone(UArticyPrimitive* Clone, int32 CloneId)
 
 void UArticyDatabase::Init()
 {
-	LoadDefaultPackages();
+	LoadAllPackages(true);
 }
 
 UArticyDatabase* UArticyDatabase::Get(const UObject* WorldContext)
@@ -187,6 +187,24 @@ UArticyGlobalVariables* UArticyDatabase::GetGVs() const
 	return UArticyGlobalVariables::GetDefault(this);
 }
 
+TArray<FString> UArticyDatabase::GetImportedPackageNames() const
+{
+	TArray<FString> outNames;
+	ImportedPackages.GenerateKeyArray(outNames);
+	return outNames;
+}
+
+bool UArticyDatabase::IsPackageDefaultPackage(FString PackageName)
+{
+	if(ImportedPackages.Contains(PackageName))
+	{
+		const FArticyPackage& Package = ImportedPackages[PackageName];
+		return Package.bIsDefaultPackage;
+	}
+
+	return false;
+}
+
 UWorld* UArticyDatabase::GetWorld() const
 {
 	return GetOuter() ? GetOuter()->GetWorld() : nullptr;
@@ -215,6 +233,7 @@ void UArticyDatabase::LoadDefaultPackages()
 
 void UArticyDatabase::LoadAllPackages(bool bDefaultOnly)
 {
+	const UArticyPluginSettings* settings = GetDefault<UArticyPluginSettings>();
 	for(const auto pack : ImportedPackages)
 	{
 		if(!bDefaultOnly || pack.Value.bIsDefaultPackage
@@ -409,6 +428,38 @@ UArticyExpressoScripts* UArticyDatabase::GetExpressoInstance() const
 	}
 
 	return CachedExpressoScripts;
+}
+
+UArticyDatabase* UArticyDatabase::GetMutableOriginal()
+{
+	static TWeakObjectPtr<UArticyDatabase> Asset = nullptr;
+
+	if (!Asset.IsValid())
+	{
+		//create a clone of the database
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+		TArray<FAssetData> AssetData;
+		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetFName(), AssetData, true);
+
+		if (ensureMsgf(AssetData.Num() != 0, TEXT("Could not find original asset of ArticyDraftDatabase!")))
+		{
+			if (AssetData.Num() > 1)
+				UE_LOG(LogTemp, Warning, TEXT("More than one ArticyDraftDatabase was found, this is not supported! The first one will be selected."));
+
+			Asset = Cast<UArticyDatabase>(AssetData[0].GetAsset());
+		}
+	}
+
+	return Asset.Get();
+}
+
+void UArticyDatabase::ChangePackageDefault(FName PackageName, bool bIsDefaultPackage)
+{
+	if(ImportedPackages.Contains(PackageName.ToString()))
+	{
+		FArticyPackage* Package = ImportedPackages.Find(PackageName.ToString());
+		Package->bIsDefaultPackage = bIsDefaultPackage;
+	}
 }
 
 TMap<TWeakObjectPtr<UWorld>, TWeakObjectPtr<UArticyDatabase>> UArticyDatabase::Clones;

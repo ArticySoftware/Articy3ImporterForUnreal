@@ -2,13 +2,14 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyImporterPrivatePCH.h"
 
+
+#include "GlobalVarsGenerator.h"
 #include "CodeGenerator.h"
 #include "CodeFileGenerator.h"
-#include "GlobalVarsGenerator.h"
 #include "ArticyImportData.h"
 #include "ArticyGlobalVariables.h"
+#include "ArticyImporterHelpers.h"
 
 void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 {
@@ -117,5 +118,5 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 void GlobalVarsGenerator::GenerateAsset(const UArticyImportData* Data)
 {
 	const auto className = CodeGenerator::GetGlobalVarsClassname(Data, true);
-	ArticyHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName());
+	ArticyImporterHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName());
 }

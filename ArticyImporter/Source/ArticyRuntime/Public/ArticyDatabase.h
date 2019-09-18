@@ -5,10 +5,10 @@
 #pragma once
 
 #include "Engine/DataAsset.h"
-#include "ArticyBaseObject.h"
-#include "Private/ShadowStateManager.h"
-#include "AssetRegistryModule.h"
 #include "ArticyObject.h"
+#include "ArticyBaseObject.h"
+#include "ShadowStateManager.h"
+#include "AssetRegistryModule.h"
 #include "Serialization/Archive.h"
 
 #include "ArticyDatabase.generated.h"
@@ -28,9 +28,9 @@ struct FArticyObjectShadow
 
 public:
 	UPROPERTY()
-	uint32 ShadowLevel;
+	uint32 ShadowLevel = 0;
 	UPROPERTY()
-	UArticyPrimitive* Object;
+	UArticyPrimitive* Object = nullptr;
 };
 
 USTRUCT(BlueprintType)
@@ -148,6 +148,12 @@ public:
 	 */
 	UFUNCTION(BlueprintPure, meta=(DisplayName="Is in shadow state?"), Category = "Script Methods")
 	bool IsInShadowState() const { return GetShadowLevel()  > 0; }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName="Get imported package names"), Category = "Articy")
+	TArray<FString> GetImportedPackageNames() const;
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName="Is package default package?"), Category = "Articy")
+	bool IsPackageDefaultPackage(FString PackageName);
 
 	UWorld* GetWorld() const override;
 
@@ -294,6 +300,10 @@ public:
 	 */
 	UArticyExpressoScripts* GetExpressoInstance() const;
 
+	static UArticyDatabase* GetMutableOriginal();
+
+	void ChangePackageDefault(FName PackageName, bool bIsDefaultPackage);
+	
 protected:
 
 	/** A list of all packages that were imported from articy:draft. */

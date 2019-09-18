@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "ArticyImporterPrivatePCH.h"
-#include "ArticyImporter.h"
+
 #include "ArticyImporterFunctionLibrary.h"
+#include "ArticyImporter.h"
 #include "ArticyJSONFactory.h"
 #include "CodeGeneration/CodeGenerator.h"
 
@@ -20,10 +20,10 @@ void FArticyImporterFunctionLibrary::ReimportChanges(UArticyImportData* ImportDa
 	if (!EnsureImportFile(&ImportData))
 		return;
 
-	const auto factory = NewObject<UArticyJSONFactory>();
-	if (factory)
+	const auto Factory = NewObject<UArticyJSONFactory>();
+	if (Factory)
 	{
-		factory->Reimport(ImportData);
+		Factory->Reimport(ImportData);
 		//GC will destroy factory
 	}
 }
@@ -57,5 +57,5 @@ bool FArticyImporterFunctionLibrary::EnsureImportFile(UArticyImportData** Import
 		}
 	}
 
-	return *ImportData;
+	return *ImportData != nullptr;
 }

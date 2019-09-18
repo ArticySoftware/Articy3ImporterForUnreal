@@ -2,11 +2,12 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
+
 
 #include "ArticyRef.h"
 #include "ArticyObject.h"
 #include "ArticyDatabase.h"
+#include "ArticyRuntime.h"
 
 void FArticyRef::SetId(FArticyId NewId)
 {
@@ -27,10 +28,16 @@ void FArticyRef::SetReference(UArticyPrimitive* Object)
 
 const FArticyId& FArticyRef::GetId() const
 {
-	//only overwrite the id if the Reference object does exist and was loaded
-	if(Reference && Reference->WasLoaded())
+	// overwrite the id if the Reference object does exist and was loaded
+	if (Reference && Reference->WasLoaded())
+	{
 		Id = Reference->GetId();
-	
+	}
+	// if the reference object isn't valid (due to clearing for example), reset the Id too
+	else
+	{
+	//	Id = 0;
+	}
 	return Id;
 }
 
@@ -51,25 +58,25 @@ UArticyPrimitive* FArticyRef::GetObjectInternal(const UObject* WorldContext) con
 	return UArticyDatabase::Get(WorldContext)->GetOrClone<UArticyPrimitive>(GetId(), CloneId);
 }
 
-bool FArticyRef::Serialize(FArchive& Ar)
-{
-	//we use this as pre-saving hook
-	if(!Ar.IsLoading())
-	{
-		//make sure the Id is up to date before saving
-		Id = GetId();
-	}
-
-	return false; //..so it is still serialized with default serialization
-}
-
-void FArticyRef::PostSerialize(const FArchive& Ar)
-{
-	//we use this as post-loading hook
-#if WITH_EDITOR
-	if(Ar.IsLoading())
-	{
-		GetReference();
-	}
-#endif
-}
+//bool FArticyRef::Serialize(FArchive& Ar)
+//{
+//	//we use this as pre-saving hook
+//	if(!Ar.IsLoading())
+//	{
+//		//make sure the Id is up to date before saving
+//		Id = GetId();
+//	}
+//
+//	return false; //..so it is still serialized with default serialization
+//}
+//
+//void FArticyRef::PostSerialize(const FArchive& Ar)
+//{
+//	//we use this as post-loading hook
+//#if WITH_EDITOR
+//	if(Ar.IsLoading())
+//	{
+//		GetReference();
+//	}
+//#endif
+//}

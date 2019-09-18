@@ -18,7 +18,7 @@ struct ARTICYRUNTIME_API FArticyRef
 
 public:
 	/** The original object corresponding to the Id. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Setup")
+	UPROPERTY(EditAnywhere, Category="Setup")
 	UArticyPrimitive* Reference = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Setup")
@@ -51,17 +51,17 @@ private:
 
 private:
 
-	//the SerializeOrNot method is our friend!
-	template<class CPPSTRUCT>
-	friend typename TEnableIf<TStructOpsTypeTraits<CPPSTRUCT>::WithSerializer, bool>::Type SerializeOrNot(FArchive& Ar, CPPSTRUCT *Data);
+	////the SerializeOrNot method is our friend!
+	//template<class CPPSTRUCT>
+	//friend typename TEnableIf<TStructOpsTypeTraits<CPPSTRUCT>::WithSerializer, bool>::Type SerializeOrNot(FArchive& Ar, CPPSTRUCT *Data);
 
-	bool Serialize(FArchive& Ar);
+	//bool Serialize(FArchive& Ar);
 
-	//the PostSerializeOrNot method is our friend as well!
-	template<class CPPSTRUCT>
-	friend typename TEnableIf<TStructOpsTypeTraits<CPPSTRUCT>::WithPostSerialize>::Type PostSerializeOrNot(const FArchive& Ar, CPPSTRUCT *Data);
+	////the PostSerializeOrNot method is our friend as well!
+	//template<class CPPSTRUCT>
+	//friend typename TEnableIf<TStructOpsTypeTraits<CPPSTRUCT>::WithPostSerialize>::Type PostSerializeOrNot(const FArchive& Ar, CPPSTRUCT *Data);
 
-	void PostSerialize(const FArchive& Ar);
+	//void PostSerialize(const FArchive& Ar);
 };
 
 template<typename T>
@@ -83,12 +83,12 @@ inline UArticyPrimitive* FArticyRef::GetObject(const UObject* WorldContext) cons
 	return CachedObject.Get();
 }
 
-template<>
-struct TStructOpsTypeTraits<FArticyRef> : public TStructOpsTypeTraitsBase2<FArticyRef>
-{
-	enum
-	{
-		WithSerializer = true,
-		WithPostSerialize = true
-	};
-};
+//template<>
+//struct TStructOpsTypeTraits<FArticyRef> : public TStructOpsTypeTraitsBase2<FArticyRef>
+//{
+//	enum
+//	{
+//		WithSerializer = true,
+//		WithPostSerialize = true
+//	};
+//};

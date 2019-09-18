@@ -4,9 +4,11 @@
 //
 #pragma once
 
+#include "CoreMinimal.h"
 #include "ArticyPrimitive.h"
 #include "ArticyBaseTypes.h"
 #include "ArticyRef.h"
+#include "Dom/JsonValue.h"
 
 #include "ArticyObject.generated.h"
 
@@ -20,7 +22,10 @@ class ARTICYRUNTIME_API UArticyObject : public UArticyPrimitive
 
 public:
 	FName GetTechnicalName() const;
+
+	UFUNCTION(BlueprintCallable)
 	UArticyObject* GetParent() const;
+
 	TArray<TWeakObjectPtr<UArticyObject>> GetChildren() const;
 
 protected:

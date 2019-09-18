@@ -2,10 +2,10 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
 
-#include "ArticyRuntime.h"
+
 #include "ArticyFlowPlayer.h"
+#include "ArticyRuntime.h"
 #include "ArticyFlowObject.h"
 #include "ArticyObjectWithSpeaker.h"
 #include "ArticyExpressoScripts.h"
@@ -38,6 +38,12 @@ void UArticyFlowPlayer::SetStartNodeWithFlowObject(TScriptInterface<IArticyFlowO
 	FArticyRef ArticyRef;
 	ArticyRef.SetReference(Cast<UArticyPrimitive>(Node.GetObject()));
 	SetStartNode(ArticyRef);
+}
+
+void UArticyFlowPlayer::SetStartNodeById(FArticyId NewId)
+{
+	StartOn.SetId(NewId);
+	SetCursorToStartNode();
 }
 
 void UArticyFlowPlayer::SetCursorTo(TScriptInterface<IArticyFlowObject> Node)
@@ -185,14 +191,14 @@ IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 
 //---------------------------------------------------------------------------//
 
-TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, uint32 Depth)
+TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth)
 {
 	TArray<FArticyBranch> OutBranches;
 
 	//check stop condition
-	if((Depth > uint32(ExploreDepthLimit) || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))))
+	if((Depth > ExploreDepthLimit || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))))
 	{
-		if(Depth > uint32(ExploreDepthLimit))
+		if(Depth > ExploreDepthLimit)
 			UE_LOG(LogArticyRuntime, Warning, TEXT("ExploreDepthLimit (%d) reached, stopping exploration!"), ExploreDepthLimit);
 		if(!Node)
 			UE_LOG(LogArticyRuntime, Warning, TEXT("Found a nullptr Node when exploring a branch!"));
