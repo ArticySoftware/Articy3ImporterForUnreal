@@ -40,6 +40,7 @@ void UArticyPluginSettings::UpdatePackageSettings()
 {
 	UArticyDatabase* ArticyDatabase = UArticyDatabase::GetMutableOriginal();
 
+	if (!ArticyDatabase) return;
 	TArray<FString> ImportedPackageNames = ArticyDatabase->GetImportedPackageNames();
 
 	// remove outdated settings
