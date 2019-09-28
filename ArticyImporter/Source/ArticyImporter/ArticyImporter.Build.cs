@@ -13,22 +13,16 @@ public class ArticyImporter : ModuleRules
 		OptimizeCode = CodeOptimization.Never;
 
 		PublicIncludePaths.AddRange(
-			new string[] {
-				Path.Combine(ModuleDirectory, "Public"),
-				Path.Combine(ModuleDirectory, "../ArticyImporter/Public"),
+			new string[] 
+			{
 				// ... add public include paths required here ...
-#if UE_4_20_OR_LATER
-				Path.Combine(EngineDirectory, "Source/Editor/GameProjectGeneration"),
-#else
-				"GameProjectGeneration",
-#endif
 			}
 			);
 
 
 		PrivateIncludePaths.AddRange(
-			new string[] {
-				Path.Combine(ModuleDirectory, "Private"),
+			new string[] 
+			{
 				// ... add other private include paths required here ...
 			}
 			);

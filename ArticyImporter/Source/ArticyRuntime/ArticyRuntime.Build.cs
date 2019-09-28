@@ -9,37 +9,29 @@ public class ArticyRuntime : ModuleRules
 {
 	public ArticyRuntime(ReadOnlyTargetRules Target) : base(Target)
     {
-
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-
         OptimizeCode = CodeOptimization.Never;
 
 		PublicIncludePaths.AddRange(
-			new string[] {
-				Path.Combine(ModuleDirectory, "Public"),
-				// ... add public include paths required here ...
-#if UE_4_20_OR_LATER
-				Path.Combine(EngineDirectory, "Source/Runtime/MediaAssets/Public"),
-#else
-				"MediaAssets/Public",
-#endif
-                Path.Combine(ModuleDirectory, "Public", "Interfaces")
+			new string[] 
+			{
+				// ... add other public include paths required here ...
 			}
 			);
 
 		PrivateIncludePaths.AddRange(
-			new string[] {
-				Path.Combine(ModuleDirectory, "Private"),
+			new string[] 
+			{
 				// ... add other private include paths required here ...
 			}
 			);
 
-			PublicDependencyModuleNames.AddRange(
+		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
-                "MediaAssets",
+                "MediaAssets"
 			}
 			);
 			
@@ -54,7 +46,7 @@ public class ArticyRuntime : ModuleRules
 				"Slate",
 				"SlateCore",
 				// ... add private dependencies that you statically link with here ...	
-				"Json",
+				"Json"
 			}
 			);
 		
