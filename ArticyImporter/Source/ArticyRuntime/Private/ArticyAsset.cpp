@@ -2,35 +2,30 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-
-
 #include "ArticyAsset.h"
 #include "FileMediaSource.h"
-#include "Misc/Paths.h"
-#include "UObject/ConstructorHelpers.h"
-#include "ArticyHelpers.h"
 
 UTexture* UArticyAsset::LoadAsTexture() const
 {
-	return Cast<UTexture>(LoadAsset());
+	return Cast<UTexture>(GetAsset());
 }
 
 UTexture2D* UArticyAsset::LoadAsTexture2D() const
 {
-	return Cast<UTexture2D>(LoadAsset());
+	return Cast<UTexture2D>(GetAsset());
 }
 
 USoundWave* UArticyAsset::LoadAsSoundWave() const
 {
-	return Cast<USoundWave>(LoadAsset());
+	return Cast<USoundWave>(GetAsset());
 }
 
 UFileMediaSource* UArticyAsset::LoadAsFileMediaSource() const
 {
-	return Cast<UFileMediaSource>(LoadAsset());
+	return Cast<UFileMediaSource>(GetAsset());
 }
 
-UObject* UArticyAsset::LoadAsset() const
+UObject* UArticyAsset::GetAsset() const
 {
 	//if(!Asset.IsValid())
 	{
