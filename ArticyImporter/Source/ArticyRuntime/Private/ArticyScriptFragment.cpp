@@ -43,7 +43,7 @@ bool UArticyCondition::Evaluate(UArticyGlobalVariables* GV, UObject* MethodProvi
 
 void UArticyCondition::Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>& OutBranches, const uint32& Depth)
 {
-	auto pins = GetOutputPins();
+	auto pins = GetOutputPinsPtr();
 	if(!pins || !ensure(pins->Num() == 2))
 	{
 		//conditions MUST have 2 output pins!

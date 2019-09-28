@@ -81,7 +81,7 @@ void UArticyFlowPlayer::FinishCurrentPausedObject(int PinIndex)
 	IArticyOutputPinsProvider* outputPinOwner = Cast<IArticyOutputPinsProvider>(Cursor.GetObject());
 	if (outputPinOwner)
 	{
-		auto outputPins = outputPinOwner->GetOutputPins();
+		auto outputPins = outputPinOwner->GetOutputPinsPtr();
 
 		if (outputPins->Num() > 0)
 		{
@@ -173,7 +173,7 @@ IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 		auto inputPinsOwner = Cast<IArticyInputPinsProvider>(pinOwner);
 		pins.Append(*inputPinsOwner->GetInputPins());
 		auto outputPinsOwner = Cast<IArticyOutputPinsProvider>(pinOwner);
-		pins.Append(*outputPinsOwner->GetOutputPins());
+		pins.Append(*outputPinsOwner->GetOutputPinsPtr());
 
 		auto targetId = Cast<UArticyPrimitive>(Node)->GetId();
 		for (auto pin : pins)
