@@ -103,12 +103,10 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 		});
 	}, "", false, "", "const override");
 
-	auto methodsProviderClassname = CodeGenerator::GetMethodsProviderClassname(Data);
-
 	header->Line();
 	header->Method("UClass*", "GetUserMethodsProviderInterface", "", [&]
 	{
-		header->Line(FString::Printf(TEXT("return %s::StaticClass();"), *methodsProviderClassname));
+		header->Line(FString::Printf(TEXT("return %s::StaticClass();"), *CodeGenerator::GetMethodsProviderClassname(Data)));
 	}, "", false, "", "override");
 
 	header->Line();
