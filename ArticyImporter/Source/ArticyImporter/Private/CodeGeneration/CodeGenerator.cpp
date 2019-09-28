@@ -118,7 +118,24 @@ void CodeGenerator::Recompile(UArticyImportData* Data)
 
 bool CodeGenerator::DeleteGeneratedAssets()
 {
-	return FPlatformFileManager::Get().GetPlatformFile().DeleteDirectoryRecursively(*ArticyHelpers::ArticyGeneratedFolder);
+	FAssetRegistryModule& AssetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	TArray<FAssetData> OutAssets;
+	AssetRegistry.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedPackagesFolder), OutAssets, true, false);
+
+	TArray<UObject*> ExistingAssets;
+	
+	for(FAssetData data : OutAssets)
+	{
+		ExistingAssets.Add(data.GetAsset());
+	}
+
+	if(ExistingAssets.Num() > 0)
+	{
+		return ObjectTools::ForceDeleteObjects(ExistingAssets, false) > 0;
+	}
+
+	// returns true if there is nothing to delete to not trigger the ensure
+	return true;
 }
 
 void CodeGenerator::Compile(UArticyImportData* Data)
@@ -178,9 +195,6 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 
 	ensure(DeleteGeneratedAssets());
 
-	// cache currently existing articy data for cleanup
-	PackagesGenerator::CacheExistingArticyData(Data);
-
 	//generate the global variables asset
 	GlobalVarsGenerator::GenerateAsset(Data);
 	//generate the database asset
@@ -188,15 +202,14 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 	//generate assets for all the imported objects
 	PackagesGenerator::GenerateAssets(Data);
 
-	// execute cleanup: delete old assets, rename assets to what they should be, delete old directories
-	PackagesGenerator::ExecuteCleanup();
-
 	//register the newly imported packages in the database
 	if (ensureMsgf(db, TEXT("Could not create ArticyDatabase asset!")))
 	{
+		//db->SetLoadedPackages(Data->GetPackages());
 		db->SetLoadedPackages(Data->GetPackages());
-		db->MarkPackageDirty();
 	}
+
+	Data->MarkPackageDirty();
 
 	// mark all generated assets dirty to save them later on
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");

@@ -7,6 +7,7 @@
 #include "IPropertyChangeListener.h"
 #include "Delegate.h"
 #include "ArticyPrimitive.h"
+#include "ArticyObject.h"
 #include "ArticyRef.h"
 
 
@@ -19,9 +20,10 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 {
 	ArticyRefPropertyHandle = PropertyHandle;
 
-	TSharedRef<IPropertyHandle> EntityPropertyHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("Reference")).ToSharedRef();
+	TSharedRef<IPropertyHandle> TechnicalNameHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("TechnicalName")).ToSharedRef();
+	const TSharedRef<IPropertyHandle> EntityPropertyHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("Reference")).ToSharedRef();
 
-	check(EntityPropertyHandle->IsValidHandle());
+	check(TechnicalNameHandle->IsValidHandle());
 
 	UObject* AssetReference;
 	EntityPropertyHandle->GetValue(AssetReference);
@@ -29,17 +31,18 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	void* ArticyRefAddress;
 	ArticyRefPropertyHandle->GetValueData(ArticyRefAddress);
 
-	// update the reference upon selecting the ref
+	// update the reference upon selecting the ref; this only serves cosmetic purposes. The underlying Id will not be changed
 	FArticyRef* ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
-	ArticyRef->GetReference();
+	ArticyRef->UpdateReference();
 
+	
 	HeaderRow.NameContent()
 	[
 		ArticyRefPropertyHandle->CreatePropertyNameWidget()
 	];
 
 	// handle the articy ID whenever the asset selection changes
-	EntityPropertyHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateSP(this, &FArticyRefCustomization::OnReferenceUpdated));
+	TechnicalNameHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateSP(this, &FArticyRefCustomization::OnReferenceUpdated));
 }
 
 void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
@@ -55,35 +58,20 @@ void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Prop
 	}
 }
 
-void FArticyRefCustomization::OnReferenceUpdated()
+void FArticyRefCustomization::OnReferenceUpdated() const
 {
-	const TSharedRef<IPropertyHandle> EntityPropertyHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("Reference")).ToSharedRef();
+	const TSharedRef<IPropertyHandle> TechnicalNameHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("TechnicalName")).ToSharedRef();
 
-	check(EntityPropertyHandle->IsValidHandle());
+	check(TechnicalNameHandle->IsValidHandle());
 
-	UObject* Reference;
-	EntityPropertyHandle->GetValue(Reference);
-	
-	const TSharedRef<IPropertyHandle> ArticyIdHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("Id")).ToSharedRef();
+	FString TechnicalName;
+	TechnicalNameHandle->GetValue(TechnicalName);
 
-	void* ArticyIdPtr;
-	ArticyIdHandle->GetValueData(ArticyIdPtr);
-	
-	FArticyId* CurrentIdPointer = static_cast<FArticyId*>(ArticyIdPtr);
-	// new asset selected
-	if(Reference)
-	{
-		UArticyPrimitive* ArticyPrimitive = Cast<UArticyPrimitive>(Reference);
-		const FArticyId NewId = ArticyPrimitive->GetId();
+	void* ArticyRefAddress;
+	ArticyRefPropertyHandle->GetValueData(ArticyRefAddress);
+	FArticyRef* ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
 
-		CurrentIdPointer->High = NewId.High;
-		CurrentIdPointer->Low = NewId.Low;
-	}
-	else
-	{
-		CurrentIdPointer->High = 0;
-		CurrentIdPointer->Low = 0;
-	}
-	
+	// find the asset that matches the new technical name, and set it as the target
+	UArticyObject * NewReference = UArticyObject::FindAsset(TechnicalName);
+	ArticyRef->SetReference(NewReference);
 }
-

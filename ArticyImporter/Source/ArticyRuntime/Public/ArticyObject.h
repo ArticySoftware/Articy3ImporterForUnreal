@@ -25,8 +25,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UArticyObject* GetParent() const;
-
 	TArray<TWeakObjectPtr<UArticyObject>> GetChildren() const;
+
+	static UArticyObject* FindAsset(const FArticyId& Id);
+	static UArticyObject* FindAsset(const FString& TechnicalName);// MM_CHANGE
 
 protected:
 

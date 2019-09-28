@@ -50,3 +50,54 @@ TArray<TWeakObjectPtr<UArticyObject>> UArticyObject::GetChildren() const
 
 	return CachedChildren;
 }
+
+UArticyObject* UArticyObject::FindAsset(const FArticyId& Id)
+{
+	//UArticyDatabase::LoadAllObjects();
+
+	//get the reference object by Id
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryConstants::ModuleName);
+	TArray<FAssetData> AssetData;
+
+	AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), AssetData, true);
+
+	for (const auto ArticyPackage : AssetData)
+	{
+		const auto Package = Cast<UArticyPackage>(ArticyPackage.GetAsset());
+
+		if (Package != nullptr)
+		{
+			for (const auto asset : Package->GetAssets())
+			{
+				const auto obj = Cast<UArticyObject>(asset);
+				if (obj && obj->WasLoaded() && obj->GetId() == Id)
+					return obj;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
+UArticyObject* UArticyObject::FindAsset(const FString& TechnicalName)// MM_CHANGE
+{
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryConstants::ModuleName);
+	TArray<FAssetData> AssetData;
+
+	AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), AssetData, true);
+
+	for (const auto ArticyPackage : AssetData)
+	{
+		const auto Package = Cast<UArticyPackage>(ArticyPackage.GetAsset());
+
+		if (Package != nullptr)
+		{
+			const auto assetsDict = Package->GetAssetsDict();
+
+			if (assetsDict.Contains(*TechnicalName))
+				return assetsDict[*TechnicalName].Get();
+		}
+	}
+
+	return nullptr;
+}

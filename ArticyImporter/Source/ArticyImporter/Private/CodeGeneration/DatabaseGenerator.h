@@ -4,6 +4,7 @@
 //
 #pragma once
 
+class UArticyImportData;
 struct FArticyGVInfo;
 
 /**

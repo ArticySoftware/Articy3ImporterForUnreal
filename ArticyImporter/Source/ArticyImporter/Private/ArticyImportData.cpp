@@ -546,11 +546,8 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 
 void UArticyImportData::AddChildToParentCache(const FArticyId Parent, const FArticyId Child)
 {
-	FArticyIdArray* childrenPtr = ParentChildrenCache.Find(Parent);
-	if (!childrenPtr)
-	{
-		childrenPtr = &ParentChildrenCache.Add(Parent, FArticyIdArray());
-	}
-
-	childrenPtr->Values.AddUnique(Child);
+	// Changed because of the way Map.Find works. In original version there were cases, when first element wasn't added because children was declared out of the scope.
+	// It lead to situation when first element of children array wasn't added and for example Codex Locations weren't properly initialized
+	auto& childrenRef = ParentChildrenCache.FindOrAdd(Parent);
+	childrenRef.Values.AddUnique(Child);
 }

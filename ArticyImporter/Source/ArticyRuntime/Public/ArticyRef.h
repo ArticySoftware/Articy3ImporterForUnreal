@@ -17,9 +17,12 @@ struct ARTICYRUNTIME_API FArticyRef
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")//MM_CHANGE
+	FString TechnicalName;
+	
 	/** The original object corresponding to the Id. */
-	UPROPERTY(EditAnywhere, Category="Setup")
-	UArticyPrimitive* Reference = nullptr;
+	UPROPERTY(VisibleAnywhere, Category="Setup")
+	TSoftObjectPtr<UArticyObject> Reference = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Setup")
 	bool bReferenceBaseObject = true;
@@ -28,26 +31,27 @@ public:
 	mutable int32 CloneId;
 
 	void SetId(FArticyId NewId);
-	void SetReference(UArticyPrimitive* Object);
+	void SetReference(UArticyObject* Object);
 
 	const FArticyId& GetId() const;
-	UArticyPrimitive* GetReference();
+	UArticyObject* GetReference();
 
 	/** Get a (single-instance) copy of the referenced asset. */
 	template<typename T = UArticyObject>
 	T* GetObject(const UObject* WorldContext) const;
 
+	void UpdateReference();
 private:
 	/** The actual reference: we keep track of the Reference's Id. */
 	UPROPERTY(VisibleAnywhere, Category="Setup")
 	mutable FArticyId Id = 0;
 
 	/** The single-instance object copy of this ArticyRef. */
-	mutable TWeakObjectPtr<UArticyPrimitive> CachedObject = nullptr;
+	mutable TWeakObjectPtr<UArticyObject> CachedObject = nullptr;
 	mutable FArticyId CachedId = 0;
 	mutable int32 CachedCloneId = 0;
 
-	UArticyPrimitive* GetObjectInternal(const UObject* WorldContext) const;
+	UArticyObject* GetObjectInternal(const UObject* WorldContext) const;
 
 private:
 
@@ -67,12 +71,6 @@ private:
 template<typename T>
 T* FArticyRef::GetObject(const UObject* WorldContext) const
 {
-	return Cast<T>(GetObject<UArticyPrimitive>(WorldContext));
-}
-
-template<>
-inline UArticyPrimitive* FArticyRef::GetObject(const UObject* WorldContext) const
-{
 	if (!CachedObject.IsValid() || CachedId != Id || CloneId != CachedCloneId)
 	{
 		CachedId = Id;
@@ -80,7 +78,7 @@ inline UArticyPrimitive* FArticyRef::GetObject(const UObject* WorldContext) cons
 		CachedObject = GetObjectInternal(WorldContext);
 	}
 
-	return CachedObject.Get();
+	return Cast<T>(CachedObject.Get());
 }
 
 //template<>

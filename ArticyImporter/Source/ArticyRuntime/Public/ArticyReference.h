@@ -35,6 +35,6 @@ public:
 	UArticyPrimitive* GetObject(const UObject* WorldContext);
 	/** Set the referenced object */
 	UFUNCTION(BlueprintCallable, Category = "Objects")
-	void SetReference(UArticyPrimitive* Object);
+	void SetReference(UArticyObject* Object);
 	
 };

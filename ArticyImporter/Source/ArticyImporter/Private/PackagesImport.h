@@ -6,6 +6,8 @@
 
 #include "ArticyAsset.h"
 #include "ArticyBaseTypes.h"
+#include "ArticyPackage.h"
+
 
 #include "PackagesImport.generated.h"
 
@@ -21,7 +23,8 @@ public:
 	
 	void ImportFromJson(const TSharedPtr<FJsonObject> JsonModel);
 	void GatherScripts(UArticyImportData* Data) const;
-	UArticyObject* GenerateAsset(const UArticyImportData* Data, const FString Package) const;
+	UArticyObject* GenerateSubAsset(const UArticyImportData* Data, UObject* Outer) const;//MM_CHANGE
+
 
 	FName GetType() const { return Type; }
 	const FString& GetTechnicalName() const { return TechnicalName; }
@@ -82,10 +85,12 @@ public:
 
 	void ImportFromJson(const TSharedPtr<FJsonObject> JsonPackage);
 	void GatherScripts(UArticyImportData* Data) const;
-	FArticyPackage GenerateAssets(UArticyImportData* Data) const;
+	UArticyPackage* GeneratePackageAsset(UArticyImportData* Data) const;//MM_CHANGE
+
 
 	FString GetFolder() const;
 	FString GetFolderName() const;
+	const FString GetName() const;
 
 private:
 
@@ -110,9 +115,9 @@ public:
 	
 	void ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json);
 	void GatherScripts(UArticyImportData* Data) const;
-	void GenerateAssets(UArticyImportData* Data) const;
-	TArray<FString> GetPackageFolderNames() const;
+	void GenerateAssets(UArticyImportData* Data) const;//MM_CHANGE
 
+	TSet<FString> GetPackageNames() const;
 private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Packages")

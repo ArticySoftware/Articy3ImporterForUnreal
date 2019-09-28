@@ -22,7 +22,7 @@ UArticyPrimitive* UArticyReference::GetObject(const UObject* WorldContext)
 	return Reference.GetObject<UArticyPrimitive>(WorldContext);
 }
 
-void UArticyReference::SetReference(UArticyPrimitive* Object)
+void UArticyReference::SetReference(UArticyObject* Object)
 {
 	Reference.SetReference(Object);
 }

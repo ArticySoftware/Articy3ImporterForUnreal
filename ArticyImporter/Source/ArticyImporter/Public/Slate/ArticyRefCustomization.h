@@ -18,6 +18,6 @@ public:
 private:
 	TSharedPtr<IPropertyHandle> ArticyRefPropertyHandle;
 
-	void OnReferenceUpdated();
+	void OnReferenceUpdated() const;
 
 };

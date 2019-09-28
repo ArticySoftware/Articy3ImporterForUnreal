@@ -8,6 +8,7 @@
 #include "ArticyHelpers.h"
 #include "ObjectDefinitionsImport.h"
 #include "PackagesImport.h"
+#include "ArticyPackage.h"
 #include "ArticyImportData.generated.h"
 
 class UArticyImportData;
@@ -256,7 +257,7 @@ inline uint32 GetTypeHash(const FArticyExpressoFragment& A)
  * 
  */
 UCLASS()
-class UArticyImportData : public UDataAsset
+class ARTICYIMPORTER_API UArticyImportData : public UDataAsset
 {
 	GENERATED_BODY()
 	
@@ -281,8 +282,8 @@ public:
 	const FArticyObjectDefinitions& GetObjectDefs() const { return ObjectDefinitions; }
 	const FArticyPackageDefs& GetPackageDefs() const { return PackageDefs; }
 
-	TArray<FArticyPackage>& GetPackages() { return ImportedPackages; }
-	const TArray<FArticyPackage>& GetPackages() const { return ImportedPackages; }
+	TArray<UArticyPackage*>& GetPackages() { return ImportedPackages; }
+	const TArray<UArticyPackage*>& GetPackages() const { return ImportedPackages; }
 
 	const TArray<FAIDScriptMethod>& GetUserMethods() const { return UserMethods.ScriptMethods; }
 
@@ -329,8 +330,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category="ImportData")
 	TSet<FArticyExpressoFragment> ScriptFragments;
 
-	UPROPERTY(VisibleAnywhere, Category="Imported")
-	TArray<FArticyPackage> ImportedPackages;
+	UPROPERTY(VisibleAnywhere, Category = "Imported")
+	TArray<UArticyPackage*> ImportedPackages;
 
 	UPROPERTY(VisibleAnywhere, Category="Imported")
 	TMap<FArticyId, FArticyIdArray> ParentChildrenCache;
