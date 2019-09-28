@@ -125,6 +125,10 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 	header->Line("public:", false, true, -1);
 
 	header->Line();
+	// disable "optimization cannot be applied due to function size" compile error. This error is caused by the huge constructor when all expresso
+	// scripts are added to the collection and this pragma disables the optimizations. 
+	header->Line("#pragma warning(push)");
+	header->Line("#pragma warning(disable: 4883) //<disable \"optimization cannot be applied due to function size\" compile error.");
 	header->Method("", CodeGenerator::GetExpressoScriptsClassname(Data), "", [&]
 	{
 		const auto fragments = Data->GetScriptFragments();
@@ -163,6 +167,7 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 			}
 		}
 	});
+	header->Line("#pragma warning(pop)");
 }
 
 void ExpressoScriptsGenerator::GenerateCode(const UArticyImportData* Data)
