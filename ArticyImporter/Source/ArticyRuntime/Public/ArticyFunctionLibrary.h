@@ -23,7 +23,7 @@ public:
 	static UArticyObject* ArticyRef_GetObject(UPARAM(Ref) const FArticyRef& Ref, TSubclassOf<class UArticyObject> CastTo, const UObject* WorldContext);
 	/** Sets the referenced object of an ArticyRef */
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Object", DefaultToSelf = "WorldContext"), Category = "ArticyRef")
-	static void ArticyRef_SetObject(UPARAM(Ref) FArticyRef& Ref, UPARAM(Ref) UArticyPrimitive* Object);
+	static void ArticyRef_SetObject(UPARAM(Ref) FArticyRef& Ref, UPARAM(Ref) UArticyObject* Object);
 	/** Converts an ArticyRef to FArticyId. */
 	UFUNCTION(BlueprintPure, meta=(DisplayName = "Get Object Id", DefaultToSelf = "WorldContext", BlueprintAutoCast), Category="ArticyRef")
 	static FArticyId ArticyRef_GetObjectId(UPARAM(Ref) const FArticyRef& Ref);

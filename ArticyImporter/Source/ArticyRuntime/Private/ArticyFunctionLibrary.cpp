@@ -13,7 +13,7 @@ UArticyObject* UArticyFunctionLibrary::ArticyRef_GetObject(const FArticyRef& Ref
 	return Ref.GetObject(WorldContext);
 }
 
-void UArticyFunctionLibrary::ArticyRef_SetObject(FArticyRef& Ref, UArticyPrimitive* Object)
+void UArticyFunctionLibrary::ArticyRef_SetObject(FArticyRef& Ref, UArticyObject* Object)
 {
 	Ref.SetReference(Object);
 }
