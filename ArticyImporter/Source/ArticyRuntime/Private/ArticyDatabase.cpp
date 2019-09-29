@@ -40,7 +40,7 @@ UArticyPrimitive* FArticyShadowableObject::Get(const IShadowStateManager* Shadow
 		return nullptr;
 
 	//create a new shadow copy
-	auto& mostRecentShadow = ShadowCopies.Last();// .GetObject();
+	auto& mostRecentShadow = ShadowCopies.Last();
 	auto SourceObject = mostRecentShadow.GetObject();
 	auto obj = DuplicateObject(SourceObject, SourceObject);
 	ShadowCopies.Add(FArticyObjectShadow(ShadowLvl, obj, mostRecentShadow.GetCloneId()) );

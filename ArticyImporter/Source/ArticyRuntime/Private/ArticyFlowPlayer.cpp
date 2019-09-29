@@ -36,7 +36,7 @@ void UArticyFlowPlayer::SetStartNode(FArticyRef StartNodeId)
 void UArticyFlowPlayer::SetStartNodeWithFlowObject(TScriptInterface<IArticyFlowObject> Node)
 {
 	FArticyRef ArticyRef;
-	ArticyRef.SetReference(Cast<UArticyPrimitive>(Node.GetObject()));
+	ArticyRef.SetReference(Cast<UArticyObject>(Node.GetObject()));
 	SetStartNode(ArticyRef);
 }
 
