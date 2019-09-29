@@ -216,6 +216,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
 	bool bIgnoreInvalidBranches = true;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
+	bool bDisableExecutingOutputPins = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
 	FArticyRef StartOn;
 
