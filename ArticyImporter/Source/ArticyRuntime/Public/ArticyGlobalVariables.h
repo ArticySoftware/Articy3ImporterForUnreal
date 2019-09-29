@@ -372,7 +372,7 @@ private:
 /**
  * The base class for the (generated) ArticyGlobalVariables class.
  */
-UCLASS()
+UCLASS(BlueprintType)
 class ARTICYRUNTIME_API UArticyGlobalVariables : public UDataAsset, public IShadowStateManager, public IArticyReflectable
 {
 	GENERATED_BODY()	
