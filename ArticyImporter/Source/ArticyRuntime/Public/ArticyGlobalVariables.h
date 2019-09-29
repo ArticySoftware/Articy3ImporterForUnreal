@@ -124,12 +124,9 @@ protected:
 			ensure(storeLevel == shadowLevel);
 		}
 		
-		if (Instance->Value != NewValue)
-		{
-			Instance->Value = NewValue;
-			if (storeLevel == 0)
-				OnVariableChanged.Broadcast(this);
-		}
+		Instance->Value = NewValue;															
+		if(storeLevel == 0)
+			OnVariableChanged.Broadcast(this);
 
 		return Instance->Value;
 	}																							
