@@ -39,7 +39,7 @@ void FArticyGvName::SetByNamespaceAndVariable(const FName VariableNamespace, con
 	{
 		Namespace = VariableNamespace;
 		Variable = VariableName;
-		FullName = FName(*FString::Printf(TEXT("%s.%s"), *Variable.ToString(), *Namespace.ToString()));
+		FullName = FName(*FString::Printf(TEXT("%s.%s"), *Namespace.ToString(), *Variable.ToString()));
 	}
 }
 
