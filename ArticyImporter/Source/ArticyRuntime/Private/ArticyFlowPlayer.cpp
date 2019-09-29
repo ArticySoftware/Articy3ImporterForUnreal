@@ -414,13 +414,9 @@ void UArticyFlowPlayer::PlayBranch(const FArticyBranch& Branch)
 		return;
 	}
 
-	if (!bDisableExecutingOutputPins)
-	{
-		for (auto node : Branch.Path)
-			node->Execute(GetGVs(), GetMethodsProvider());
-	}
+	for(auto node : Branch.Path)
+		node->Execute(GetGVs(), GetMethodsProvider());
 
-	bDisableExecutingOutputPins = false;
 	Cursor = Branch.Path.Last();
 	UpdateAvailableBranches();
 }
