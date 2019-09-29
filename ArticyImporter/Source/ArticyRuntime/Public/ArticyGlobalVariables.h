@@ -347,6 +347,29 @@ class ARTICYRUNTIME_API UArticyBaseVariableSet : public UObject, public IArticyR
 {
 	GENERATED_BODY()
 
+	template<class T>
+	const TArray<T*> GetVariables()
+	{
+		TArray<UObject*> subobjects;
+		GetDefaultSubobjects(subobjects);
+		TArray<T*> articyVars;
+		for (int i = 0; i < subobjects.Num(); i++)
+		{
+			T* isT = Cast<T>(subobjects[i]);
+			if (isT != nullptr)
+			{
+				articyVars.Add(isT);
+			}
+		}
+		return articyVars;
+	}
+
+protected:
+
+	UPROPERTY()
+	TArray<UArticyVariable*> Variables;
+
+
 public:
 	/**
 	 * This delegate is broadcast every time a variable inside this namespace changes.
@@ -355,13 +378,23 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Callback")
 	FOnGVChanged OnVariableChanged;
 
-	UFUNCTION(BlueprintCallable, Category = "Variables")
-	const TArray<UArticyVariable*> GetVariables() const { return Variables; }
+	UFUNCTION(BlueprintCallable, Category = "ArticyGlobalVariables", meta = (keywords = "global variables"))
+	const TArray<UArticyBool*> GetBooleanVariables()
+	{
+		return GetVariables<UArticyBool>();
+	}
 
-protected:
+	UFUNCTION(BlueprintCallable, Category = "ArticyGlobalVariables", meta = (keywords = "global variables"))
+	const TArray<UArticyString*> GetStringVariables()
+	{
+		return GetVariables<UArticyString>();
+	}
 
-	UPROPERTY()
-	TArray<UArticyVariable*> Variables;
+	UFUNCTION(BlueprintCallable, Category = "ArticyGlobalVariables", meta = (keywords = "global variables"))
+	const TArray<UArticyInt*> GetIntVariables()
+	{
+		return GetVariables<UArticyInt>();
+	}
 
 private:
 
