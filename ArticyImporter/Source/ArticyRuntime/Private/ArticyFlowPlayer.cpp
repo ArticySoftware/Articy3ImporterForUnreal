@@ -345,7 +345,7 @@ void UArticyFlowPlayer::SetCursorToStartNode()
 
 bool UArticyFlowPlayer::FastForwardToPause()
 {
-	checkNoRecursion(); //this cannot recurse!
+	//checkNoRecursion(); //this cannot recurse!
 
 	if(AvailableBranches.Num() <= 0)
 		return false;
