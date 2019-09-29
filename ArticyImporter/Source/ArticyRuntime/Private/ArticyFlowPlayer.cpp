@@ -114,6 +114,10 @@ UObject* UArticyFlowPlayer::GetMethodsProvider() const
 {
 	auto expressoInstance = GetDB()->GetExpressoInstance();
 	auto provider = expressoInstance->GetUserMethodsProviderInterface();
+	
+	if (expressoInstance->UserMethodsProvider != nullptr && UserMethodsProvider == nullptr)//MM_CHANGE
+		UserMethodsProvider = expressoInstance->UserMethodsProvider;
+
 	if(ensure(provider))
 	{
 		//check if the set provider implements the required interface
