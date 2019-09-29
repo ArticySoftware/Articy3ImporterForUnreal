@@ -34,7 +34,7 @@ public:
 	int32 GetCloneId() const { return CloneId; }
 private:
 	UPROPERTY()
-	UArticyPrimitive* Object;
+	UArticyPrimitive* Object = nullptr;
 
 	TWeakObjectPtr<UObject> Outer;
 
