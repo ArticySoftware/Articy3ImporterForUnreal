@@ -48,6 +48,12 @@ void UArticyFlowPlayer::SetStartNodeById(FArticyId NewId)
 
 void UArticyFlowPlayer::SetCursorTo(TScriptInterface<IArticyFlowObject> Node)
 {
+	if(!Node.GetObject())
+	{
+		UE_LOG(LogArticyRuntime, Warning, TEXT("Could not set cursor in flow player of actor %s: invalid node"), *this->GetOwner()->GetName());
+		return;
+	}
+	
 	Cursor = Node;
 	UpdateAvailableBranches();
 }
