@@ -27,7 +27,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FArticyId Id;
 
-	// TODO k2 - changed to UArticyClonableObject
+	// TODO k2 - changed to UArticyCloneableObject
 	//friend struct FArticyClonableObject;
 	friend struct FArticyObjectShadow;
 	/** The ID of this instance (0 is the original object). */

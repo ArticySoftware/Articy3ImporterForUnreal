@@ -73,12 +73,12 @@ private:
  * Contains a reference to a UArticyObject, and to its clones if any.
  */
 UCLASS(BlueprintType)
-class ARTICYRUNTIME_API UArticyClonableObject : public UObject
+class ARTICYRUNTIME_API UArticyCloneableObject : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	void Init(UArticyPrimitive* BaseObject) { AddClone(BaseObject, 0); }
+	void Init(UArticyPrimitive* InitialClone) { AddClone(InitialClone, 0); }
 
 	//========================================//
 
@@ -117,7 +117,7 @@ struct ARTICYRUNTIME_API FArticyDatabaseObjectArray
 
 public:
 	UPROPERTY()
-	TArray<UArticyClonableObject *> Objects;
+	TArray<UArticyCloneableObject *> Objects;
 };
 
 /**
@@ -325,7 +325,7 @@ protected:
 	TArray<FString> LoadedPackages;
 
 	UPROPERTY()
-	TMap<FArticyId, UArticyClonableObject*> LoadedObjectsById;
+	TMap<FArticyId, UArticyCloneableObject*> LoadedObjectsById;
 	UPROPERTY()
 	TMap<FName, FArticyDatabaseObjectArray> LoadedObjectsByName;
 	

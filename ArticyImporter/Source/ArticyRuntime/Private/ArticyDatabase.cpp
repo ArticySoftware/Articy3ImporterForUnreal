@@ -56,13 +56,13 @@ UArticyPrimitive* FArticyShadowableObject::Get(const IShadowStateManager* Shadow
 	return obj;
 }
 
-UArticyPrimitive* UArticyClonableObject::Get(const IShadowStateManager* ShadowManager, int32 CloneId, bool bForceUnshadowed) const
+UArticyPrimitive* UArticyCloneableObject::Get(const IShadowStateManager* ShadowManager, int32 CloneId, bool bForceUnshadowed) const
 {
 	auto info = Clones.Find(CloneId);
 	return info ? info->Get(ShadowManager, bForceUnshadowed) : nullptr;
 }
 
-UArticyPrimitive* UArticyClonableObject::Clone(const IShadowStateManager* ShadowManager, int32 CloneId, bool bFailIfExists)
+UArticyPrimitive* UArticyCloneableObject::Clone(const IShadowStateManager* ShadowManager, int32 CloneId, bool bFailIfExists)
 {
 	auto clone = Get(ShadowManager, CloneId);
 
@@ -84,7 +84,7 @@ UArticyPrimitive* UArticyClonableObject::Clone(const IShadowStateManager* Shadow
 	return clone;
 }
 
-void UArticyClonableObject::AddClone(UArticyPrimitive* Clone, int32 CloneId)
+void UArticyCloneableObject::AddClone(UArticyPrimitive* Clone, int32 CloneId)
 {
 	if(!ensure(Clone))
 		return;
@@ -287,14 +287,15 @@ void UArticyDatabase::LoadPackage(FString PackageName)
 		if (!ensureMsgf(!LoadedObjectsById.Contains(id), TEXT("Object with id [%d,%d] already in list!"), id.High, id.Low))
 			continue;
 
-		auto clone = NewObject<UArticyClonableObject>(this);
-
-		clone->Init(ArticyObject);
-		LoadedObjectsById.Add(id, clone);
+		auto CloneContainer = NewObject<UArticyCloneableObject>(this);
+		UArticyPrimitive* InitialClone = DuplicateObject<UArticyPrimitive>(ArticyObject, this);
+		CloneContainer->Init(InitialClone);
+		
+		LoadedObjectsById.Add(id, CloneContainer);
 
 		if (!ArticyObject->GetTechnicalName().ToString().IsEmpty())
 		{
-			LoadedObjectsByName.FindOrAdd(ArticyObject->GetTechnicalName()).Objects.Add(clone);
+			LoadedObjectsByName.FindOrAdd(ArticyObject->GetTechnicalName()).Objects.Add(CloneContainer);
 		}
 	}
 
@@ -461,7 +462,7 @@ UArticyPrimitive* UArticyDatabase::GetObjectUnshadowed(FArticyId Id, int32 Clone
 
 UArticyPrimitive* UArticyDatabase::GetObjectInternal(FArticyId Id, int32 CloneId, bool bForceUnshadowed) const
 {
-	UArticyClonableObject* const * info = LoadedObjectsById.Find(Id);
+	UArticyCloneableObject* const * info = LoadedObjectsById.Find(Id);
 	return info && (*info) ? (*info)->Get(this, CloneId, bForceUnshadowed) : nullptr;
 }
 
@@ -483,7 +484,7 @@ TArray<UArticyObject*> UArticyDatabase::GetObjects(FName TechnicalName, int32 Cl
 TArray<UArticyObject*> UArticyDatabase::GetObjectsOfClass(TSubclassOf<class UArticyObject> Type, int32 CloneId) const
 {
 	TArray<UArticyObject*> arr;
-	TArray<UArticyClonableObject*> Objects;
+	TArray<UArticyCloneableObject*> Objects;
 	LoadedObjectsById.GenerateValueArray(Objects);
 	for (auto ClonableObject : Objects)
 	{
@@ -498,7 +499,7 @@ TArray<UArticyObject*> UArticyDatabase::GetObjectsOfClass(TSubclassOf<class UArt
 TArray<UArticyPrimitive*> UArticyDatabase::GetAllObjects() const
 {
 	TArray<UArticyPrimitive*> arr;
-	TArray<UArticyClonableObject*> Objects;
+	TArray<UArticyCloneableObject*> Objects;
 	LoadedObjectsById.GenerateValueArray(Objects);
 	for (auto ClonableObject : Objects)
 	{
