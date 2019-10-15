@@ -33,7 +33,7 @@ void FArticyImporterFunctionLibrary::RegenerateAssets(UArticyImportData* ImportD
 	if (!EnsureImportFile(&ImportData))
 		return;
 
-	CodeGenerator::Recompile(ImportData);
+	CodeGenerator::GenerateAssets(ImportData);
 }
 
 bool FArticyImporterFunctionLibrary::EnsureImportFile(UArticyImportData** ImportData)

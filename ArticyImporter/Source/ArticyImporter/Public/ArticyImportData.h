@@ -35,10 +35,17 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="Settings")
 	FString ObjectDefinitionsHash = "";
 
+	UPROPERTY(VisibleAnywhere, Category = "Settings")
+	FString ScriptFragmentsHash = "";
+
 	void ImportFromJson(const TSharedPtr<FJsonObject> JsonRoot);
 
 	bool DidObjectDefsOrGVsChange() const { return bObjectDefsOrGVsChanged; }
+	bool DidScriptFragmentsChange() const { return bScriptFragmentsChanged; }
+
 	void SetObjectDefinitionsRebuilt() { bObjectDefsOrGVsChanged = false; }
+	void SetScriptFragmentsRebuilt() { bScriptFragmentsChanged = false; }
+
 
 protected:
 	//unused in the UE plugin
@@ -47,6 +54,8 @@ protected:
 
 private:
 	bool bObjectDefsOrGVsChanged = true;
+
+	bool bScriptFragmentsChanged = true;
 };
 
 /**
@@ -268,6 +277,8 @@ public:
 	class UAssetImportData* ImportData;
 
 	void GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const override;
+	
+	static void PostImport();
 #if WITH_EDITORONLY_DATA
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif

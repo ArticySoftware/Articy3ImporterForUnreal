@@ -88,6 +88,8 @@ void CodeGenerator::GenerateCode(UArticyImportData* Data)
 	if (!Data)
 		return;
 
+	bool bCodeGenerated = false;
+	
 	//generate GVs and ObjectDefinitions only if needed
 	if (Data->GetSettings().DidObjectDefsOrGVsChange())
 	{
@@ -97,18 +99,22 @@ void CodeGenerator::GenerateCode(UArticyImportData* Data)
 		DatabaseGenerator::GenerateCode(Data);
 		InterfacesGenerator::GenerateCode(Data);
 		ObjectDefinitionsGenerator::GenerateCode(Data);
+		bCodeGenerated = true;
 	}
-
-	//gather all the scripts in all packages
-	if (Data->GetSettings().set_UseScriptSupport)
-		Data->GatherScripts();
 
 	//generate the expresso class, containing all the c++ script fragments
 	//the class is also generated if script support is disabled, it's just empty in that case
-	ExpressoScriptsGenerator::GenerateCode(Data);
+	if (Data->GetSettings().DidScriptFragmentsChange())
+	{
+		ExpressoScriptsGenerator::GenerateCode(Data);
+		bCodeGenerated = true;
+	}
 
-	//trigger compile
-	Compile(Data);
+	//trigger compile if we generated any new code
+	if(bCodeGenerated)
+	{
+		Compile(Data);
+	}
 }
 
 void CodeGenerator::Recompile(UArticyImportData* Data)
@@ -163,37 +169,17 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 		HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None /*async*/);
 }
 
-void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImportData* Data, const bool bWaitingForOtherCompile)
+void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 {
-	const bool bSucceeded = Result == ECompilationResult::Succeeded || Result == ECompilationResult::UpToDate;
-	if (!bSucceeded)
-	{
-		//compile failed
-		UE_LOG(LogArticyImporter, Error, TEXT("Compile failed, cannot continue importing articy:draft data!"));
-		return;
-	}
-
-	if (bWaitingForOtherCompile || Data->GetSettings().DidObjectDefsOrGVsChange())
-	{
-		if (!bWaitingForOtherCompile)
-		{
-			//the object definitions are up to date now
-			Data->GetSettings().SetObjectDefinitionsRebuilt();
-		}
-
-		//another compile is needed
-		Compile(Data);
-		return;
-	}
-
 	//compiling is done!
 	//check if UArticyBaseGlobalVariables can be found, otherwise something went wrong!
 	auto className = GetGlobalVarsClassname(Data, true);
 	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *className);
 	if (!ensure(ConstructorHelpersInternal::FindOrLoadClass(fullClassName, UArticyGlobalVariables::StaticClass())))
-		UE_LOG(LogArticyImporter, Error, TEXT("Could not find generated global variables class after compile!"));
+	UE_LOG(LogArticyImporter, Error, TEXT("Could not find generated global variables class after compile!"));
 
 	ensure(DeleteGeneratedAssets());
+
 
 	//generate the global variables asset
 	GlobalVarsGenerator::GenerateAsset(Data);
@@ -205,32 +191,73 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 	//register the newly imported packages in the database
 	if (ensureMsgf(db, TEXT("Could not create ArticyDatabase asset!")))
 	{
-		//db->SetLoadedPackages(Data->GetPackages());
 		db->SetLoadedPackages(Data->GetPackages());
 	}
 
-	Data->MarkPackageDirty();
+	//Data->MarkPackageDirty();
 
 	// mark all generated assets dirty to save them later on
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> GeneratedAssets;
 	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), GeneratedAssets, true);
 
+	TArray<UPackage*> PackagesToSave;
+
+	PackagesToSave.Add(Data->GetOutermost());
 	for (FAssetData AssetData : GeneratedAssets)
 	{
-		AssetData.GetAsset()->MarkPackageDirty();
+		//AssetData.GetAsset()->MarkPackageDirty();
+		PackagesToSave.Add(AssetData.GetAsset()->GetOutermost());
 	}
 	//prompt the user to save newly generated packages
-	FEditorFileUtils::SaveDirtyPackages(true, true, /*bSaveContentPackages*/ true, false, false, true);	
+	//FEditorFileUtils::SaveDirtyPackages(true, true, /*bSaveContentPackages*/ true, false, false, true);
 
-	// update the internal save state of the package settings (add settings for new packages, remove outdated package settings, restore previous settings for still existing packages)
-	UArticyPluginSettings* settings = GetMutableDefault<UArticyPluginSettings>();
-	settings->UpdatePackageSettings();
-	
-	FArticyImporterModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
-	ArticyImporterModule.OnImportFinished.Broadcast();
+	TArray<UPackage*> FailedToSavePackages;
+	FEditorFileUtils::PromptForCheckoutAndSave(PackagesToSave, false, false, &FailedToSavePackages);
 
+	for (auto Package : FailedToSavePackages)
+	{
+		UE_LOG(LogArticyImporter, Error, TEXT("Could not save package %s"), *Package->GetName());
+	}
+}
+
+void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImportData* Data, const bool bWaitingForOtherCompile)
+{
+	const bool bSucceeded = Result == ECompilationResult::Succeeded || Result == ECompilationResult::UpToDate;
+	if (!bSucceeded)
+	{
+		//compile failed
+		UE_LOG(LogArticyImporter, Error, TEXT("Compile failed, cannot continue importing articy:draft data!"));
+		return;
+	}
+
+	if(!bWaitingForOtherCompile)
+	{
+		Data->GetSettings().SetObjectDefinitionsRebuilt();
+		Data->GetSettings().SetScriptFragmentsRebuilt();
+		// broadcast that compilation has finished. ArticyImportData will then generate the assets and perform post import operations
+		FArticyImporterModule::Get().OnCompilationFinished.Broadcast();
+	}
+	else
+	{
+		// if we were waiting for another compile, that means our generated code hasn't been compiled yet. Trigger another compile
+		Compile(Data);
+	}
 	
+	//if (bWaitingForOtherCompile || Data->GetSettings().DidObjectDefsOrGVsChange() || Data->GetSettings().DidScriptFragmentsChange())
+	//{
+	//	if (!bWaitingForOtherCompile)
+	//	{
+	//		//the object definitions are up to date now
+	//		Data->GetSettings().SetObjectDefinitionsRebuilt();
+	//		Data->GetSettings().SetScriptFragmentsRebuilt();
+	//		FArticyImporterModule::Get().OnCompilationFinished.Broadcast();
+	//		return;
+	//	}
+
+	//	//another compile is needed
+	//	Compile(Data);
+	//}
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -23,9 +23,13 @@ void FADISettings::ImportFromJson(TSharedPtr<FJsonObject> Json)
 	JSON_TRY_BOOL(Json, set_UseScriptSupport);
 	JSON_TRY_STRING(Json, ExportVersion);
 
-	auto oldHash = ObjectDefinitionsHash;
+	const auto oldObjectDefsHash = ObjectDefinitionsHash;
+	const auto oldScriptFragmentHash = ScriptFragmentsHash;
 	JSON_TRY_STRING(Json, ObjectDefinitionsHash);
-	bObjectDefsOrGVsChanged = oldHash != ObjectDefinitionsHash;
+	JSON_TRY_STRING(Json, ScriptFragmentsHash);
+	bObjectDefsOrGVsChanged = oldObjectDefsHash != ObjectDefinitionsHash;
+	bScriptFragmentsChanged = oldScriptFragmentHash != ScriptFragmentsHash;
+	
 }
 
 void FArticyProjectDef::ImportFromJson(const TSharedPtr<FJsonObject> Json)
@@ -372,6 +376,16 @@ void UArticyImportData::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags)
 }
 #endif
 
+void UArticyImportData::PostImport()
+{
+	// update the internal save state of the package settings (add settings for new packages, remove outdated package settings, restore previous settings for still existing packages)
+	UArticyPluginSettings* settings = GetMutableDefault<UArticyPluginSettings>();
+	settings->UpdatePackageSettings();
+
+	FArticyImporterModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
+	ArticyImporterModule.OnImportFinished.Broadcast();
+}
+
 void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 {
 	//import the main sections
@@ -381,17 +395,39 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	Hierarchy.ImportFromJson(this, RootObject->GetObjectField(JSON_SECTION_HIERARCHY));
 	UserMethods.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_SCRIPTMEETHODS));
 
+	bool bNeedsCodeGeneration = false;
 	//import GVs and ObjectDefs only if needed
 	if(Settings.DidObjectDefsOrGVsChange())
 	{
 		GlobalVariables.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_GLOBALVARS), this);
 		ObjectDefinitions.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_OBJECTDEFS), this);
+		bNeedsCodeGeneration = true;
 	}
 
+	if(Settings.DidScriptFragmentsChange())
+	{
+		// clearing and adding script fragments happens in GenerateCode
+		this->GatherScripts();
+		bNeedsCodeGeneration = true;
+	}
 	//===================================//
 
-	ScriptFragments.Reset();
-	CodeGenerator::GenerateCode(this);
+	// if we are generating code, generate and compile it; after it has finished, generate assets and perform post import logic
+	if(bNeedsCodeGeneration)
+	{
+		CodeGenerator::GenerateCode(this);
+
+		FArticyImporterModule::Get().OnCompilationFinished.AddLambda([this] {
+			CodeGenerator::GenerateAssets(this);
+			UArticyImportData::PostImport();
+		});
+	}
+	// if we are importing but no code needed to be generated, generate assets immediately and perform post import
+	else
+	{
+		CodeGenerator::GenerateAssets(this);
+		UArticyImportData::PostImport();
+	}
 }
 
 void UArticyImportData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -416,12 +452,13 @@ void UArticyImportData::PostEditChangeProperty(FPropertyChangedEvent& PropertyCh
 	{
 		bRegenerateAssets = false;
 
-		CodeGenerator::Recompile(this);
+		CodeGenerator::GenerateAssets(this);
 	}
 }
 
 void UArticyImportData::GatherScripts()
 {
+	ScriptFragments.Empty();
 	PackageDefs.GatherScripts(this);
 }
 

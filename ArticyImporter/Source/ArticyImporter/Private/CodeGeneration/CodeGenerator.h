@@ -20,6 +20,7 @@ class CodeGenerator
 {
 public:
 	static void GenerateCode(UArticyImportData* Data);
+	static void GenerateAssets(UArticyImportData* Data);
 	static void Recompile(UArticyImportData* Data);
 
 	/** Returns the main source folder for all the generated code. */
