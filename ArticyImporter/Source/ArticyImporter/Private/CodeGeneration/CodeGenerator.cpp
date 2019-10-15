@@ -24,6 +24,8 @@
 #include "../Launch/Resources/Version.h"
 #include "ArticyImporter.h"
 #include "ArticyPluginSettings.h"
+#include "ContentBrowserModule.h"
+#include "IContentBrowserSingleton.h"
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
@@ -158,13 +160,14 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 
 	static FDelegateHandle lambdaHandle;
 	if (lambdaHandle.IsValid())
-		IHotReloadModule::Get().OnModuleCompilerFinished().Remove(lambdaHandle);
+		IHotReloadModule::Get().OnHotReload().Remove(lambdaHandle);
 
-	lambdaHandle = IHotReloadModule::Get().OnModuleCompilerFinished().AddLambda([=](FString OutputLog, ECompilationResult::Type Result, bool bShowLog)
+	lambdaHandle = IHotReloadModule::Get().OnHotReload().AddLambda([=](bool bWasTriggeredAutomatically)
 	{
-		OnCompiled(Result, Data, bWaitingForOtherCompile);
+		OnCompiled(ECompilationResult::Succeeded, Data, bWaitingForOtherCompile);
 	});
-
+	
+	
 	if (!bWaitingForOtherCompile)
 		HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None /*async*/);
 }
@@ -194,8 +197,6 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 		db->SetLoadedPackages(Data->GetPackages());
 	}
 
-	//Data->MarkPackageDirty();
-
 	// mark all generated assets dirty to save them later on
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> GeneratedAssets;
@@ -206,12 +207,10 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	PackagesToSave.Add(Data->GetOutermost());
 	for (FAssetData AssetData : GeneratedAssets)
 	{
-		//AssetData.GetAsset()->MarkPackageDirty();
 		PackagesToSave.Add(AssetData.GetAsset()->GetOutermost());
 	}
-	//prompt the user to save newly generated packages
-	//FEditorFileUtils::SaveDirtyPackages(true, true, /*bSaveContentPackages*/ true, false, false, true);
 
+	// automatically save all articy assets
 	TArray<UPackage*> FailedToSavePackages;
 	FEditorFileUtils::PromptForCheckoutAndSave(PackagesToSave, false, false, &FailedToSavePackages);
 
@@ -243,21 +242,6 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 		// if we were waiting for another compile, that means our generated code hasn't been compiled yet. Trigger another compile
 		Compile(Data);
 	}
-	
-	//if (bWaitingForOtherCompile || Data->GetSettings().DidObjectDefsOrGVsChange() || Data->GetSettings().DidScriptFragmentsChange())
-	//{
-	//	if (!bWaitingForOtherCompile)
-	//	{
-	//		//the object definitions are up to date now
-	//		Data->GetSettings().SetObjectDefinitionsRebuilt();
-	//		Data->GetSettings().SetScriptFragmentsRebuilt();
-	//		FArticyImporterModule::Get().OnCompilationFinished.Broadcast();
-	//		return;
-	//	}
-
-	//	//another compile is needed
-	//	Compile(Data);
-	//}
 }
 
 #undef LOCTEXT_NAMESPACE
