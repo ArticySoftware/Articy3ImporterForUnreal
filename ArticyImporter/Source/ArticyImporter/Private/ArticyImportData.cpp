@@ -404,7 +404,7 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 		bNeedsCodeGeneration = true;
 	}
 
-	if(Settings.DidScriptFragmentsChange())
+	if(Settings.DidScriptFragmentsChange() && this->GetSettings().set_UseScriptSupport)
 	{
 		// clearing and adding script fragments happens in GenerateCode
 		this->GatherScripts();
