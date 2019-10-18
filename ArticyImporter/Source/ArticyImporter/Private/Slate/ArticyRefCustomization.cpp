@@ -28,14 +28,10 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	UObject* AssetReference;
 	EntityPropertyHandle->GetValue(AssetReference);
 
-	void* ArticyRefAddress;
-	ArticyRefPropertyHandle->GetValueData(ArticyRefAddress);
-
 	// update the reference upon selecting the ref; this only serves cosmetic purposes. The underlying Id will not be changed
-	FArticyRef* ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
+	FArticyRef* ArticyRef = RetrieveArticyRef();
 	ArticyRef->UpdateReference();
 
-	
 	HeaderRow.NameContent()
 	[
 		ArticyRefPropertyHandle->CreatePropertyNameWidget()
@@ -67,11 +63,27 @@ void FArticyRefCustomization::OnReferenceUpdated() const
 	FString TechnicalName;
 	TechnicalNameHandle->GetValue(TechnicalName);
 
-	void* ArticyRefAddress;
-	ArticyRefPropertyHandle->GetValueData(ArticyRefAddress);
-	FArticyRef* ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
-
+	FArticyRef* ArticyRef = RetrieveArticyRef();
+	
 	// find the asset that matches the new technical name, and set it as the target
 	UArticyObject * NewReference = UArticyObject::FindAsset(TechnicalName);
 	ArticyRef->SetReference(NewReference);
+}
+
+FArticyRef* FArticyRefCustomization::RetrieveArticyRef() const
+{
+	FArticyRef* ArticyRef = nullptr;
+
+#if ENGINE_MINOR_VERSION >=20
+	void* ArticyRefAddress;
+	ArticyRefPropertyHandle->GetValueData(ArticyRefAddress);
+	ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
+#elif ENGINE_MINOR_VERSION == 19
+	TArray<void*> Addresses;
+	ArticyRefPropertyHandle->AccessRawData(Addresses);
+	void* ArticyRefAddress = Addresses[0];
+	ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
+#endif
+
+	return ArticyRef;
 }

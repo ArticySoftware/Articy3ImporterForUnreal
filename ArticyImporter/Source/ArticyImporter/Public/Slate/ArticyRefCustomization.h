@@ -4,6 +4,7 @@
 #include <IPropertyTypeCustomization.h>
 #include <DetailLayoutBuilder.h>
 #include <IDetailCustomization.h>
+#include "ArticyRef.h"
 
 class FArticyRefCustomization : public IPropertyTypeCustomization
 {
@@ -20,4 +21,5 @@ private:
 
 	void OnReferenceUpdated() const;
 
+	FArticyRef* RetrieveArticyRef() const;
 };
