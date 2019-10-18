@@ -69,7 +69,7 @@ UObject* UArticyJSONFactory::FactoryCreateFile(UClass* InClass, UObject* InParen
 #if ENGINE_MINOR_VERSION >= 22
 	GEditor->GetEditorSubsystem<UImportSubsystem>()->BroadcastAssetPostImport(this, ArticyImportData);
 #else
-	FEditorDelegates::OnAssetPostImport.Broadcast(this, asset);
+	FEditorDelegates::OnAssetPostImport.Broadcast(this, ArticyImportData);
 #endif
 
 	return ArticyImportData;
