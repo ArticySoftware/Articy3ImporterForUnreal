@@ -4,7 +4,7 @@
 //
 #pragma once
 
-#include "CodeGeneration/CodeGenerator.h"
+#include "CodeGenerator.h"
 
 /**
  * Holds a content string which can be written to a file, specified in the constructor.

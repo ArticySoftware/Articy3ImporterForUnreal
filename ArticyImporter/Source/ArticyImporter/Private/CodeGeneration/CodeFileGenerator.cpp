@@ -5,7 +5,7 @@
 
 
 #include "CodeFileGenerator.h"
-#include "CodeGeneration/CodeGenerator.h"
+#include "CodeGenerator.h"
 
 void CodeFileGenerator::Line(const FString& Line, const bool bSemicolon, const bool bIndent, const int IndentOffset)
 {

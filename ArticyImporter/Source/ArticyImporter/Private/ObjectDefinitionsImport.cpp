@@ -7,7 +7,7 @@
 #include "ObjectDefinitionsImport.h"
 #include "ArticyImporter.h"
 #include "ArticyImportData.h"
-#include "CodeFileGenerator.h"
+#include "CodeGeneration/CodeFileGenerator.h"
 #include "ArticyBaseTypes.h"
 #include "PredefinedTypes.h"
 #include "Templates/SharedPointerInternals.h"
