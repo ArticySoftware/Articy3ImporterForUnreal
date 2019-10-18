@@ -26,11 +26,8 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	UObject* AssetReference;
 	EntityPropertyHandle->GetValue(AssetReference);
 
-	void* ArticyRefAddress;
-	ArticyRefPropertyHandle->GetValueData(ArticyRefAddress);
-
 	// update the reference upon selecting the ref
-	FArticyRef* ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
+	FArticyRef* ArticyRef = RetrieveArticyRef();
 	ArticyRef->GetReference();
 
 	HeaderRow.NameContent()
@@ -66,24 +63,40 @@ void FArticyRefCustomization::OnReferenceUpdated()
 	
 	const TSharedRef<IPropertyHandle> ArticyIdHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("Id")).ToSharedRef();
 
-	void* ArticyIdPtr;
-	ArticyIdHandle->GetValueData(ArticyIdPtr);
-	
-	FArticyId* CurrentIdPointer = static_cast<FArticyId*>(ArticyIdPtr);
+
+	FArticyId& CurrentIdPointer = RetrieveArticyRef()->GetId();
 	// new asset selected
 	if(Reference)
 	{
 		UArticyPrimitive* ArticyPrimitive = Cast<UArticyPrimitive>(Reference);
 		const FArticyId NewId = ArticyPrimitive->GetId();
 
-		CurrentIdPointer->High = NewId.High;
-		CurrentIdPointer->Low = NewId.Low;
+		CurrentIdPointer.High = NewId.High;
+		CurrentIdPointer.Low = NewId.Low;
 	}
 	else
 	{
-		CurrentIdPointer->High = 0;
-		CurrentIdPointer->Low = 0;
+		CurrentIdPointer.High = 0;
+		CurrentIdPointer.Low = 0;
 	}
 	
+}
+
+FArticyRef* FArticyRefCustomization::RetrieveArticyRef() const
+{
+	FArticyRef* ArticyRef = nullptr;
+
+#if ENGINE_MINOR_VERSION >=20
+	void* ArticyRefAddress;
+	ArticyRefPropertyHandle->GetValueData(ArticyRefAddress);
+	ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
+#elif ENGINE_MINOR_VERSION == 19
+	TArray<void*> Addresses;
+	ArticyRefPropertyHandle->AccessRawData(Addresses);
+	void* ArticyRefAddress = Addresses[0];
+	ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
+#endif
+
+	return ArticyRef;
 }
 

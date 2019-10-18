@@ -137,8 +137,10 @@ void PackagesGenerator::ExecuteCleanup()
 		{
 			PlatformFile.SetReadOnly(*FullDirectoryPath, false);
 			PlatformFile.DeleteDirectory(*FullDirectoryPath);
+			AssetRegistryModule.Get().RemovePath(ArticyHelpers::ArticyGeneratedPackagesFolder / FolderName);
 		}
 	}
+
 
 	// reset cleanup data & caches
 	ClearCleanupData();

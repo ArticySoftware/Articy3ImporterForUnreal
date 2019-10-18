@@ -31,6 +31,7 @@ public:
 	void SetReference(UArticyPrimitive* Object);
 
 	const FArticyId& GetId() const;
+	FArticyId& GetId();
 	UArticyPrimitive* GetReference();
 
 	/** Get a (single-instance) copy of the referenced asset. */

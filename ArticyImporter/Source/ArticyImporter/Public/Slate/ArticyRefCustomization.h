@@ -20,4 +20,5 @@ private:
 
 	void OnReferenceUpdated();
 
+	FArticyRef* RetrieveArticyRef() const;
 };

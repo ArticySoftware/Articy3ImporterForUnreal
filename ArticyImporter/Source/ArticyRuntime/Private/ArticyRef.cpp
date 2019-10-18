@@ -41,6 +41,11 @@ const FArticyId& FArticyRef::GetId() const
 	return Id;
 }
 
+FArticyId& FArticyRef::GetId()
+{
+	return Id;
+}
+
 UArticyPrimitive* FArticyRef::GetReference()
 {
 	//only overwrite the reference if it is nullptr or *was loaded* but differs from Id
