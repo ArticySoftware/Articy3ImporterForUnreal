@@ -37,7 +37,9 @@ class ARTICYRUNTIME_API UArticyAsset : public UArticyObject
 	GENERATED_BODY()
 
 public:
-
+	UFUNCTION(BlueprintCallable, Category="Load Asset")
+	UObject* LoadAsset() const;
+	
 	UFUNCTION(BlueprintCallable, Category="Load Asset")
 	UTexture* LoadAsTexture() const;
 
@@ -60,6 +62,4 @@ public:
 private:
 	UPROPERTY(Transient, VisibleAnywhere)
 	mutable TWeakObjectPtr<UObject> Asset = nullptr;
-
-	UObject* GetAsset() const;
 };
