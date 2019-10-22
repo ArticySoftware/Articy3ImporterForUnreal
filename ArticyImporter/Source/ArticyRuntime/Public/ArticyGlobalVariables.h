@@ -344,28 +344,9 @@ class ARTICYRUNTIME_API UArticyBaseVariableSet : public UObject, public IArticyR
 {
 	GENERATED_BODY()
 
-	template<class T>
-	const TArray<T*> GetVariables()
-	{
-		TArray<UObject*> subobjects;
-		GetDefaultSubobjects(subobjects);
-		TArray<T*> articyVars;
-		for (int i = 0; i < subobjects.Num(); i++)
-		{
-			T* isT = Cast<T>(subobjects[i]);
-			if (isT != nullptr)
-			{
-				articyVars.Add(isT);
-			}
-		}
-		return articyVars;
-	}
-
 protected:
-
 	UPROPERTY()
 	TArray<UArticyVariable*> Variables;
-
 
 public:
 	/**
@@ -376,23 +357,25 @@ public:
 	FOnGVChanged OnVariableChanged;
 
 	UFUNCTION(BlueprintCallable, Category = "ArticyGlobalVariables", meta = (keywords = "global variables"))
-	const TArray<UArticyBool*> GetBooleanVariables()
+	const TArray<UArticyVariable*> GetVariables() const { return Variables; }
+	
+	UFUNCTION(BlueprintCallable, Category = "ArticyGlobalVariables", meta =(DeterminesOutputType = "Type", keywords = "global variables"))
+	const TArray<UArticyVariable*> GetVariablesOfType(TSubclassOf<UArticyVariable> Type)
 	{
-		return GetVariables<UArticyBool>();
+		TArray<UObject*> subobjects;
+		GetDefaultSubobjects(subobjects);
+		TArray<UArticyVariable*> articyVars;
+		for (int i = 0; i < subobjects.Num(); i++)
+		{
+			const bool bIsA = subobjects[i]->IsA(Type);
+			if (bIsA)
+			{
+				UArticyVariable* Var = Cast<UArticyVariable>(subobjects[i]);
+				articyVars.Add(Var);
+			}
+		}
+		return articyVars;
 	}
-
-	UFUNCTION(BlueprintCallable, Category = "ArticyGlobalVariables", meta = (keywords = "global variables"))
-	const TArray<UArticyString*> GetStringVariables()
-	{
-		return GetVariables<UArticyString>();
-	}
-
-	UFUNCTION(BlueprintCallable, Category = "ArticyGlobalVariables", meta = (keywords = "global variables"))
-	const TArray<UArticyInt*> GetIntVariables()
-	{
-		return GetVariables<UArticyInt>();
-	}
-
 private:
 
 	UFUNCTION()
