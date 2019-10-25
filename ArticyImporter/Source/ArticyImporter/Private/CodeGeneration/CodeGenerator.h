@@ -43,7 +43,7 @@ public:
 private:
 
 	static void Compile(UArticyImportData* Data);
-	static void OnCompiled(const ECompilationResult::Type Result, UArticyImportData* Data, const bool bWaitingForOtherCompile);
+	static void OnCompiled(UArticyImportData* Data, const bool bWaitingForOtherCompile);
 
 	//========================================//
 

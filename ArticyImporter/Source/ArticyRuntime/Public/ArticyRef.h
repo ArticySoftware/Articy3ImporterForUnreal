@@ -17,13 +17,6 @@ struct ARTICYRUNTIME_API FArticyRef
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")//MM_CHANGE
-	FString TechnicalName;
-	
-	/** The original object corresponding to the Id. */
-	UPROPERTY(VisibleAnywhere, Category="Setup")
-	TSoftObjectPtr<UArticyObject> Reference = nullptr;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Setup")
 	bool bReferenceBaseObject = true;
 
@@ -34,13 +27,11 @@ public:
 	void SetReference(UArticyObject* Object);
 
 	const FArticyId& GetId() const;
-	UArticyObject* GetReference();
 
 	/** Get a (single-instance) copy of the referenced asset. */
 	template<typename T = UArticyObject>
 	T* GetObject(const UObject* WorldContext) const;
-
-	void UpdateReference();
+	
 private:
 	/** The actual reference: we keep track of the Reference's Id. */
 	UPROPERTY(VisibleAnywhere, Category="Setup")

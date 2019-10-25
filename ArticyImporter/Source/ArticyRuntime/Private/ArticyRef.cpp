@@ -11,66 +11,23 @@
 void FArticyRef::SetId(FArticyId NewId)
 {
 	Id = NewId;
-	TechnicalName = "";
-
-	//clear invalid reference, also if it *was not loaded* yet
-	if(Reference && (!Reference->WasLoaded() || Reference->GetId()))
-		Reference = nullptr;
-	//try loading the new reference
-	UpdateReference();
-
-	if(Reference)
-	{
-		TechnicalName = Reference->GetTechnicalName().ToString();
-	}
 }
 
 void FArticyRef::SetReference(UArticyObject* Object)
 {
 	if (Object != nullptr && Object->IsValidLowLevelFast())
 	{
-		Reference = Object;
 		Id = Object->GetId();
-		TechnicalName = Object->GetTechnicalName().ToString();
 	}
 	else
 	{
-		Reference = nullptr;
-		TechnicalName = "";
 		Id = {};
 	}
 }
 
-void FArticyRef::UpdateReference()
-{
-	Reference = UArticyObject::FindAsset(Id);
-}
-
 const FArticyId& FArticyRef::GetId() const
-{
-	//only overwrite the id if the Reference object does exist and was loaded
-	if(Reference && Reference->WasLoaded())
-		Id = Reference->GetId();
-	
+{	
 	return Id;
-}
-
-UArticyObject* FArticyRef::GetReference()//MM_CHANGE
-{
-	//only overwrite the reference if it is nullptr or *was loaded* but differs from Id
-	if (!Reference || (Reference->WasLoaded() && Reference->GetId() != Id))
-	{
-		Reference = UArticyObject::FindAsset(Id);
-
-		if (TechnicalName.IsEmpty())
-		{
-			UArticyObject* articyObject = Cast<UArticyObject>(Reference.Get());
-			if (articyObject != nullptr)
-				TechnicalName = articyObject->GetTechnicalName().ToString();
-		}
-	}
-
-	return Reference.Get();
 }
 
 UArticyObject* FArticyRef::GetObjectInternal(const UObject* WorldContext) const

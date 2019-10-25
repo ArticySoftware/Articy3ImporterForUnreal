@@ -7,16 +7,15 @@
 #include "ArticyImporter.h"
 #include "ArticyPluginSettings.h"
 #include "ArticyPluginSettingsCustomization.h"
-#include "ArticyRefCustomization.h"
 #include "Developer/Settings/Public/ISettingsModule.h"
 #include "Developer/Settings/Public/ISettingsSection.h"
-#include "Developer/Settings/Public/ISettingsContainer.h"
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
-#include "ArticyImporterHelpers.h"
 #include <Dialogs.h>
 #include <SWindow.h>
 #include "ArticyImporterFunctionLibrary.h"
 #include "Editor.h"
+#include "ArticyRefCustomization2.h"
+#include "ArticyImporterStyle.h"
 
 DEFINE_LOG_CATEGORY(LogArticyImporter)
 
@@ -28,8 +27,10 @@ void FArticyImporterModule::StartupModule()
 
 	// register custom details for ArticyRef struct
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	PropertyModule.RegisterCustomPropertyTypeLayout("ArticyRef", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArticyRefCustomization::MakeInstance));
+	PropertyModule.RegisterCustomPropertyTypeLayout("ArticyRef", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArticyRefCustomization2::MakeInstance));
 	PropertyModule.NotifyCustomizationModuleChanged();
+
+	FArticyImporterStyle::Initialize();
 }
 
 void FArticyImporterModule::ShutdownModule()

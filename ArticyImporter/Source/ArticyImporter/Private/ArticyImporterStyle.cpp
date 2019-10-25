@@ -40,6 +40,8 @@ FName FArticyImporterStyle::GetStyleSetName()
 const FVector2D Icon16x16(16.0f, 16.0f);
 const FVector2D Icon20x20(20.0f, 20.0f);
 const FVector2D Icon40x40(40.0f, 40.0f);
+const FVector2D Icon64x64(40.0f, 40.0f);
+
 
 TSharedRef< FSlateStyleSet > FArticyImporterStyle::Create()
 {
@@ -47,6 +49,7 @@ TSharedRef< FSlateStyleSet > FArticyImporterStyle::Create()
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("ArticyImporter")->GetBaseDir() / TEXT("Resources"));
 
 	Style->Set("ArticyImporter.OpenPluginWindow", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
+	Style->Set("ArticyImporter.NoImageAvailable", new IMAGE_BRUSH(TEXT("NoEntityImageAvailable"), Icon64x64));
 
 	return Style;
 }
