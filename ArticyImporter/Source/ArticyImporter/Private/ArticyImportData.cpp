@@ -396,6 +396,7 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	UserMethods.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_SCRIPTMEETHODS));
 
 	bool bNeedsCodeGeneration = false;
+	
 	//import GVs and ObjectDefs only if needed
 	if(Settings.DidObjectDefsOrGVsChange())
 	{
@@ -415,12 +416,17 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	// if we are generating code, generate and compile it; after it has finished, generate assets and perform post import logic
 	if(bNeedsCodeGeneration)
 	{
-		CodeGenerator::GenerateCode(this);
+		const bool bAnyCodeGenerated = CodeGenerator::GenerateCode(this);
 
-		FArticyImporterModule::Get().OnCompilationFinished.AddLambda([this] {
-			CodeGenerator::GenerateAssets(this);
-			UArticyImportData::PostImport();
-		});
+		if (bAnyCodeGenerated)
+		{
+			FArticyImporterModule::Get().OnCompilationFinished.AddLambda([this] {
+				CodeGenerator::GenerateAssets(this);
+				UArticyImportData::PostImport();
+			});
+
+			CodeGenerator::Recompile(this);
+		}
 	}
 	// if we are importing but no code needed to be generated, generate assets immediately and perform post import
 	else

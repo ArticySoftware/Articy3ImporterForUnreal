@@ -19,7 +19,7 @@ class UArticyImportData;
 class CodeGenerator
 {
 public:
-	static void GenerateCode(UArticyImportData* Data);
+	static bool GenerateCode(UArticyImportData* Data);
 	static void GenerateAssets(UArticyImportData* Data);
 	static void Recompile(UArticyImportData* Data);
 

@@ -85,14 +85,14 @@ bool CodeGenerator::DeleteGeneratedCode(const FString& Filename)
 	return FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*(GetSourceFolder() / Filename));
 }
 
-void CodeGenerator::GenerateCode(UArticyImportData* Data)
+bool CodeGenerator::GenerateCode(UArticyImportData* Data)
 {
 	if (!Data)
-		return;
+		return false;
 
 	bool bCodeGenerated = false;
 	
-	//generate GVs and ObjectDefinitions only if needed
+	//generate all files if ObjectDefs or GVs changed
 	if (Data->GetSettings().DidObjectDefsOrGVsChange())
 	{
 		//DeleteGeneratedCode();
@@ -101,22 +101,19 @@ void CodeGenerator::GenerateCode(UArticyImportData* Data)
 		DatabaseGenerator::GenerateCode(Data);
 		InterfacesGenerator::GenerateCode(Data);
 		ObjectDefinitionsGenerator::GenerateCode(Data);
+		/* generate scripts as well due to them including the generated global variables
+		 * if we remove a GV set but don't regenerate expresso scripts, the resulting class won't compile */
+		ExpressoScriptsGenerator::GenerateCode(Data);
 		bCodeGenerated = true;
 	}
-
-	//generate the expresso class, containing all the c++ script fragments
-	//the class is also generated if script support is disabled, it's just empty in that case
-	if (Data->GetSettings().DidScriptFragmentsChange())
+	// if object defs of GVs didn't change, but scripts changed, regenerate only expresso scripts
+	else if (Data->GetSettings().DidScriptFragmentsChange())
 	{
 		ExpressoScriptsGenerator::GenerateCode(Data);
 		bCodeGenerated = true;
 	}
 
-	//trigger compile if we generated any new code
-	if(bCodeGenerated)
-	{
-		Compile(Data);
-	}
+	return bCodeGenerated;
 }
 
 void CodeGenerator::Recompile(UArticyImportData* Data)
@@ -164,9 +161,8 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 
 	lambdaHandle = IHotReloadModule::Get().OnHotReload().AddLambda([=](bool bWasTriggeredAutomatically)
 	{
-		OnCompiled(ECompilationResult::Succeeded, Data, bWaitingForOtherCompile);
+		OnCompiled(Data, bWaitingForOtherCompile);
 	});
-	
 	
 	if (!bWaitingForOtherCompile)
 		HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None /*async*/);
@@ -183,7 +179,6 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 
 	ensure(DeleteGeneratedAssets());
 
-
 	//generate the global variables asset
 	GlobalVarsGenerator::GenerateAsset(Data);
 	//generate the database asset
@@ -197,7 +192,7 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 		db->SetLoadedPackages(Data->GetPackages());
 	}
 
-	// mark all generated assets dirty to save them later on
+	//gather all articy assets to save them
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> GeneratedAssets;
 	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), GeneratedAssets, true);
@@ -220,16 +215,8 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	}
 }
 
-void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImportData* Data, const bool bWaitingForOtherCompile)
+void CodeGenerator::OnCompiled(UArticyImportData* Data, const bool bWaitingForOtherCompile)
 {
-	const bool bSucceeded = Result == ECompilationResult::Succeeded || Result == ECompilationResult::UpToDate;
-	if (!bSucceeded)
-	{
-		//compile failed
-		UE_LOG(LogArticyImporter, Error, TEXT("Compile failed, cannot continue importing articy:draft data!"));
-		return;
-	}
-
 	if(!bWaitingForOtherCompile)
 	{
 		Data->GetSettings().SetObjectDefinitionsRebuilt();
