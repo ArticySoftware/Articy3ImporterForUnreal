@@ -374,8 +374,27 @@ public:
 				articyVars.Add(Var);
 			}
 		}
+		
 		return articyVars;
 	}
+
+	template<class T>
+	const TArray<T*> GetVariables()
+	{
+		TArray<UObject*> subobjects;
+		GetDefaultSubobjects(subobjects);
+		TArray<T*> articyVars;
+		for (int i = 0; i < subobjects.Num(); i++)
+		{
+			T* isT = Cast<T>(subobjects[i]);
+			if (isT != nullptr)
+			{
+				articyVars.Add(isT);
+			}
+		}
+		return articyVars;
+	}
+	
 private:
 
 	UFUNCTION()
