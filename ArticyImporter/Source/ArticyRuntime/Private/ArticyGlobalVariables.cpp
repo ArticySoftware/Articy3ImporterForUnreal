@@ -171,7 +171,7 @@ void UArticyGlobalVariables::PrintGlobalVariable(FArticyGvName GvName)
 		{
 			bool boolSucceeded = false;
 			auto boolValue = GetBoolVariable(GvName, boolSucceeded);
-			UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), boolValue ? "True" : "False");
+			UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), boolValue ? *FString("True") : *FString("False"));
 			bPrintSuccessful = true;
 		}
 		else if (Cast<UArticyInt>(*basePtr))
