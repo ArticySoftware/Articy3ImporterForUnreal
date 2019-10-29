@@ -56,7 +56,7 @@ void FArticyRefCustomization2::CustomizeHeader(TSharedRef<IPropertyHandle> Prope
 void FArticyRefCustomization2::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	FClassViewerInitializationOptions config;
-
+	config.DisplayMode = EClassViewerDisplayMode::TreeView;
 	config.ClassFilter = MakeShareable(new FArticyRefClassFilter);
 
 	ClassViewer = StaticCastSharedRef<SClassViewer>(FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(config, FOnClassPicked::CreateSP(this, &FArticyRefCustomization2::OnClassPicked)));

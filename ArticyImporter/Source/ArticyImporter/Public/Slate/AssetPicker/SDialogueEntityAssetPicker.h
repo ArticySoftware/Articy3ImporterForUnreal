@@ -48,11 +48,12 @@ public:
 
 	void RequestSlowFullListRefresh();
 
-	void UpdateValue(TWeakObjectPtr<UArticyObject> AssetItem, ESelectInfo::Type SelectInfo);
+	void UpdateValue(TWeakObjectPtr<UArticyObject> AssetItem, ESelectInfo::Type SelectInfo) const;
 private:
 	TSharedRef<class ITableRow> MakeTileViewWidget(TWeakObjectPtr<UArticyObject> Entity, const TSharedRef<STableViewBase>& OwnerTable);
 	float GetTileViewHeight() const;
 	float GetTileViewWidth() const;
+	void OnClear() const;
 	void OnSearchBoxChanged(const FText& InSearchText);
 	void OnSearchBoxCommitted(const FText& InSearchText, ETextCommit::Type CommitInfo);
 	void RefreshSourceItems();

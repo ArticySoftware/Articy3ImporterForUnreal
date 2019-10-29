@@ -16,8 +16,7 @@
 #include "SDialogueEntityAssetPicker.h"
 #include "ArticyImporterStyle.h"
 #include "Editor.h"
-#include "ArticyObjectWithDisplayName.h"
-#include "ArticyObjectWithText.h"
+#include "SButton.h"
 #include "UserInterfaceHelperFunctions.h"
 
 #define LOCTEXT_NAMESPACE "DialogueEntityProperty"
@@ -38,7 +37,7 @@ void SArticyRefSelection::Construct(const FArguments& InArgs, FArticyRef* InArti
 	}
 
 	ImageBrush = MakeShareable(new FSlateBrush());
-	ImageBrush->SetResourceObject(FArticyImporterStyle::Get().GetBrush("ArticyImporter.NoImageAvailable")->GetResourceObject());
+	ImageBrush->SetResourceObject(FArticyImporterStyle::Get().GetBrush("ArticyImporter.AssetPicker.NoImageAvailable")->GetResourceObject());
 
 	ComboButton = SNew(SComboButton)
 		.OnGetMenuContent(this, &SArticyRefSelection::CreateEntityAssetPicker)
@@ -52,7 +51,17 @@ void SArticyRefSelection::Construct(const FArguments& InArgs, FArticyRef* InArti
 		.Image(this, &SArticyRefSelection::OnGetEntityImage);
 
 
-
+	const FSlateBrush* ArticySoftwareLogo = FArticyImporterStyle::Get().GetBrush("ArticyImporter.ArticyDraftLogo.16");
+	
+	ArticyButton = SNew(SButton)
+		.OnClicked(this, &SArticyRefSelection::OnArticyButtonClicked)
+		.ToolTipText(FText::FromString("Show selected object in articy:draft"))
+		.Content()
+		[
+			SNew(SImage)
+			.Image(ArticySoftwareLogo)
+		];
+	
 	this->ChildSlot
 	[
 		SNew(SHorizontalBox)
@@ -75,10 +84,37 @@ void SArticyRefSelection::Construct(const FArguments& InArgs, FArticyRef* InArti
 			]
 		]
 		+ SHorizontalBox::Slot()
-		.FillWidth(1.f)
-		.VAlign(VAlign_Center)
+		.VAlign(VAlign_Fill)
+		.HAlign(HAlign_Fill)
 		[
-			ComboButton.ToSharedRef()
+			SNew(SVerticalBox)
+			/*+ SVerticalBox::Slot()
+			.FillHeight(1.f)
+			[
+				SNullWidget::NullWidget
+			]*/
+			+ SVerticalBox::Slot()
+			.HAlign(HAlign_Left)
+			.VAlign(VAlign_Center)
+			.Padding(3, 5, 3, 0)
+			[
+				ComboButton.ToSharedRef()
+			]
+			+ SVerticalBox::Slot()
+			.VAlign(VAlign_Center)
+			.HAlign(HAlign_Left)
+			.Padding(3, 0, 3, 2)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				[
+#if PLATFORM_WINDOWS
+					ArticyButton.ToSharedRef()
+#elif
+					SNullWidget::NullWidget
+#endif
+				]
+			]
 		]
 	];
 }
@@ -95,6 +131,13 @@ TSharedRef<SWidget> SArticyRefSelection::CreateEntityAssetPicker()
 	config.Filter.bRecursiveClasses = true;
 
 	return SNew(SDialogueEntityAssetPicker).AssetPickerConfig(config);
+}
+
+FReply SArticyRefSelection::OnArticyButtonClicked()
+{
+	UserInterfaceHelperFunctions::ShowObjectInArticy(SelectedArticyObject.Get());
+	
+	return FReply::Handled();
 }
 
 void SArticyRefSelection::SetAsset(const FAssetData& AssetData)
@@ -145,7 +188,7 @@ const FSlateBrush* SArticyRefSelection::OnGetEntityImage() const
 	}
 	else
 	{
-		return FArticyImporterStyle::Get().GetBrush("ArticyImporter.NoImageAvailable");
+		return FArticyImporterStyle::Get().GetBrush("ArticyImporter.AssetPicker.NoImageAvailable");
 	}
 	
 	return ImageBrush.Get();

@@ -62,52 +62,46 @@ void SDialogueEntityAssetPicker::Construct(const FArguments& InArgs)
 		MenuBuilder.EndSection();
 	}*/
 
-	// add edit, copy, paste buttons
-	/*if (CurrentObject.IsValid() || bAllowCopyPaste || bAllowClear)
+	MenuBuilder.BeginSection(NAME_None, LOCTEXT("CurrentAssetOperationsHeader", "Current Asset"));
 	{
-		MenuBuilder.BeginSection(NAME_None, LOCTEXT("CurrentAssetOperationsHeader", "Current Asset"));
+		/*if (CurrentObject.IsValid())
 		{
-			if (CurrentObject.IsValid())
-			{
-				MenuBuilder.AddMenuEntry(
-					LOCTEXT("EditAsset", "Edit"),
-					LOCTEXT("EditAsset_Tooltip", "Edit this asset"),
-					FSlateIcon(),
-					FUIAction(FExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::OnEdit)));
-			}
-
-			if (bAllowCopyPaste)
-			{
-				MenuBuilder.AddMenuEntry(
-					LOCTEXT("CopyAsset", "Copy"),
-					LOCTEXT("CopyAsset_Tooltip", "Copies the asset to the clipboard"),
-					FSlateIcon(),
-					FUIAction(FExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::OnCopy))
-				);
-
-				MenuBuilder.AddMenuEntry(
-					LOCTEXT("PasteAsset", "Paste"),
-					LOCTEXT("PasteAsset_Tooltip", "Pastes an asset from the clipboard to this field"),
-					FSlateIcon(),
-					FUIAction(
-						FExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::OnPaste),
-						FCanExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::CanPaste))
-				);
-			}
-
-			if (bAllowClear)
-			{
-				MenuBuilder.AddMenuEntry(
-					LOCTEXT("ClearAsset", "Clear"),
-					LOCTEXT("ClearAsset_ToolTip", "Clears the asset set on this field"),
-					FSlateIcon(),
-					FUIAction(FExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::OnClear))
-				);
-			}
+			MenuBuilder.AddMenuEntry(
+				LOCTEXT("EditAsset", "Edit"),
+				LOCTEXT("EditAsset_Tooltip", "Edit this asset"),
+				FSlateIcon(),
+				FUIAction(FExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::OnEdit)));
 		}
-		MenuBuilder.EndSection();
-	}*/
 
+		if (bAllowCopyPaste)
+		{
+			MenuBuilder.AddMenuEntry(
+				LOCTEXT("CopyAsset", "Copy"),
+				LOCTEXT("CopyAsset_Tooltip", "Copies the asset to the clipboard"),
+				FSlateIcon(),
+				FUIAction(FExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::OnCopy))
+			);
+
+			MenuBuilder.AddMenuEntry(
+				LOCTEXT("PasteAsset", "Paste"),
+				LOCTEXT("PasteAsset_Tooltip", "Pastes an asset from the clipboard to this field"),
+				FSlateIcon(),
+				FUIAction(
+					FExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::OnPaste),
+					FCanExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::CanPaste))
+			);
+		}*/
+
+		
+		MenuBuilder.AddMenuEntry(
+			LOCTEXT("ClearAsset", "Clear"),
+			LOCTEXT("ClearAsset_ToolTip", "Clears the asset set on this field"),
+			FSlateIcon(),
+			FUIAction(FExecuteAction::CreateSP(this, &SDialogueEntityAssetPicker::OnClear))
+		);
+		
+	}
+	MenuBuilder.EndSection();
 
 	MenuBuilder.BeginSection(NAME_None, LOCTEXT("BrowseHeader", "Browse"));
 	{
@@ -204,6 +198,11 @@ float SDialogueEntityAssetPicker::GetTileViewWidth() const
 	return FDialogueEntityAssetPicketConstants::TileSize.X;
 }
 
+void SDialogueEntityAssetPicker::OnClear() const
+{
+	UpdateValue(nullptr, ESelectInfo::Direct);
+}
+
 void SDialogueEntityAssetPicker::RefreshSourceItems()
 {
 	AllSpeakingEntities.Reset();
@@ -297,16 +296,10 @@ void SDialogueEntityAssetPicker::RequestSlowFullListRefresh()
 	bSlowFullListRefreshRequested = true;
 }
 
-void SDialogueEntityAssetPicker::UpdateValue(TWeakObjectPtr<UArticyObject> AssetItem, ESelectInfo::Type SelectInfo)
+void SDialogueEntityAssetPicker::UpdateValue(TWeakObjectPtr<UArticyObject> AssetItem, ESelectInfo::Type SelectInfo) const
 {
-	if(AssetItem.IsValid())
-	{
-		static const FName AssetRegistryName(TEXT("AssetRegistry"));
-		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryName);
-		// can be changed to FAssetData(AssetItem.Get())
-		FAssetData assetData = AssetRegistryModule.Get().GetAssetByObjectPath(FName(*AssetItem->GetPathName()));
-		OnAssetSelected.ExecuteIfBound(assetData);
-	}
+	FAssetData NewAsset(AssetItem.Get());
+	OnAssetSelected.ExecuteIfBound(NewAsset);
 }
 
 void SDialogueEntityAssetPicker::OnSearchBoxChanged(const FText& InSearchText)

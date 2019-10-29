@@ -37,7 +37,6 @@ public:
 	void Construct(const FArguments& InArgs);
 
 private:
-
 	TWeakObjectPtr<UArticyObject> ObjectToDisplay;
 	TSharedPtr<SImage> EntityImage;
 	TSharedPtr<STextBlock> EntityNameTextBlock;
@@ -47,11 +46,9 @@ private:
 	TSharedPtr<FTextBlockStyle> EntityNameTextStyle;
 	int32 ThumbnailSize;
 	int32 ThumbnailPadding;
-
-private:
-
+	mutable TWeakObjectPtr<UTexture2D> CachedTexture;
 	
+private:
 	FText OnGetEntityName() const;
 	const FSlateBrush* OnGetEntityImage() const;
-public:
 };

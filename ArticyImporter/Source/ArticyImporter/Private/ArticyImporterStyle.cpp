@@ -39,8 +39,9 @@ FName FArticyImporterStyle::GetStyleSetName()
 
 const FVector2D Icon16x16(16.0f, 16.0f);
 const FVector2D Icon20x20(20.0f, 20.0f);
+const FVector2D Icon32x32(32.0f, 32.0f);
 const FVector2D Icon40x40(40.0f, 40.0f);
-const FVector2D Icon64x64(40.0f, 40.0f);
+const FVector2D Icon64x64(64.0f, 64.0f);
 
 
 TSharedRef< FSlateStyleSet > FArticyImporterStyle::Create()
@@ -49,8 +50,13 @@ TSharedRef< FSlateStyleSet > FArticyImporterStyle::Create()
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("ArticyImporter")->GetBaseDir() / TEXT("Resources"));
 
 	Style->Set("ArticyImporter.OpenPluginWindow", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
-	Style->Set("ArticyImporter.NoImageAvailable", new IMAGE_BRUSH(TEXT("NoEntityImageAvailable"), Icon64x64));
+	Style->Set("ArticyImporter.AssetPicker.NoImageAvailable", new IMAGE_BRUSH(TEXT("NoEntityImageAvailable"), Icon64x64));
+	Style->Set("ArticyImporter.ArticyDraftLogo.16", new IMAGE_BRUSH(TEXT("ArticyDraft16"), Icon16x16));
+	Style->Set("ArticyImporter.ArticyDraftLogo.32", new IMAGE_BRUSH(TEXT("ArticyDraft32"), Icon32x32));
+	Style->Set("ArticyImporter.ArticySoftwareLogo.16", new IMAGE_BRUSH(TEXT("ArticySoftware16"), Icon16x16));
+	Style->Set("ArticyImporter.ArticySoftwareLogo.32", new IMAGE_BRUSH(TEXT("ArticySoftware32"), Icon32x32));
 
+	
 	return Style;
 }
 

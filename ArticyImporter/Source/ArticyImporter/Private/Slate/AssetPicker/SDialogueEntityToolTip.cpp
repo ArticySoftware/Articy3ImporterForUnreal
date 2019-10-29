@@ -46,56 +46,53 @@ void SDialogueEntityToolTip::OnClosed()
 
 TSharedRef<SWidget> SDialogueEntityToolTip::CreateToolTipContent()
 {
-	FAssetRegistryModule& ARModule = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
-	FAssetData AssetData = ARModule.Get().GetAssetByObjectPath(FName(*ObjectToDisplay->GetPathName()));
 
+	const FString AssetName = ObjectToDisplay.Get()->GetName();
+	const UClass* ClassOfObject = ObjectToDisplay.Get()->UObject::GetClass();
+	
 	// The tooltip contains the name, class, path, and asset registry tags
 	// Use asset name by default, overwrite with display name where it makes sense
-	FText NameText = FText::FromName(AssetData.AssetName);
-	const FText ClassText = FText::Format(LOCTEXT("ClassName", "({0})"), FText::FromName(*AssetData.GetClass()->GetName()));
+	FText NameText = FText::FromString(AssetName);
+	const FText ClassText = FText::Format(LOCTEXT("ClassName", "({0})"), FText::FromString(ClassOfObject->GetName()));
 
 	// Create a box to hold every line of info in the body of the tooltip
 	TSharedRef<SVerticalBox> InfoBox = SNew(SVerticalBox);
 
-
 	// overwrite the asset name with the display name
 	bool bUsingDisplayName = false;
-	IArticyObjectWithDisplayName* displayNameObject = Cast<IArticyObjectWithDisplayName>(ObjectToDisplay);
-	if (displayNameObject)
+	IArticyObjectWithDisplayName* ArticyObjectWithDisplayName = Cast<IArticyObjectWithDisplayName>(ObjectToDisplay);
+	if (ArticyObjectWithDisplayName)
 	{
-		FText displayName = displayNameObject->GetDisplayName();
-		if(!displayName.IsEmpty())
+		const FText DisplayName = ArticyObjectWithDisplayName->GetDisplayName();
+		if(!DisplayName.IsEmpty())
 		{
-			NameText = displayName;
+			NameText = DisplayName;
 			bUsingDisplayName = true;
 		}
 	}
 
-	IArticyObjectWithSpeaker* speakerObject = Cast<IArticyObjectWithSpeaker>(ObjectToDisplay);
-	if(speakerObject)
+	IArticyObjectWithSpeaker* ArticyObjectWithSpeaker = Cast<IArticyObjectWithSpeaker>(ObjectToDisplay);
+	if(ArticyObjectWithSpeaker)
 	{
-		// #TODO FOR ARTICY LATER
-		// #CONCERN
-		// GetSpeaker (articy) or ExtractSpeaker (mine) have to use the db classes
-		// with just articy db, it accesses a copy, which doesn't work at editor time
-		// Will need to change articy db so that it can access original files
-		const UArticyObject* speaker = nullptr;
-		FText displayName = FText::FromString("Extract speaker display name here");
-		AddToToolTipInfoBox(InfoBox, LOCTEXT("DialogueEntityToolTipSpeaker", "Speaker"), displayName, true);
+		const UArticyObject* Speaker = UArticyObject::FindAsset(ArticyObjectWithSpeaker->GetSpeakerId());
+		const IArticyObjectWithDisplayName* DisplayNameOfSpeaker = Cast<IArticyObjectWithDisplayName>(Speaker);
+		const FText DisplayName = DisplayNameOfSpeaker->GetDisplayName();
+		
+		AddToToolTipInfoBox(InfoBox, LOCTEXT("DialogueEntityToolTipSpeaker", "Speaker"), DisplayName, true);
 	}
 	
 	// add the text to the tooltip body if possible
-	IArticyObjectWithText* textObject = Cast<IArticyObjectWithText>(ObjectToDisplay);
-	if (textObject)
+	IArticyObjectWithText* ArticyObjectWithText = Cast<IArticyObjectWithText>(ObjectToDisplay);
+	if (ArticyObjectWithText)
 	{
-		const FText& text = textObject->GetText();
-		if (text.IsEmpty())
+		const FText& Text = ArticyObjectWithText->GetText();
+		if (Text.IsEmpty())
 		{
 			// if there is empty text, add no text at all - maybe "..." or "Empty"?
 		}
 		else
 		{
-			AddToToolTipInfoBox(InfoBox, LOCTEXT("DialogueEntityToolTipText", "Text"), FText::FromString(FString("\"").Append(text.ToString()).Append("\"")), true);
+			AddToToolTipInfoBox(InfoBox, LOCTEXT("DialogueEntityToolTipText", "Text"), FText::FromString(FString("\"").Append(Text.ToString()).Append("\"")), true);
 		}
 	}
 
@@ -103,7 +100,7 @@ TSharedRef<SWidget> SDialogueEntityToolTip::CreateToolTipContent()
 	// if we overwrote the asset name with the display name, attach the asset name in the tooltip body
 	if (bUsingDisplayName)
 	{
-		AddToToolTipInfoBox(InfoBox, LOCTEXT("DialogueEntityToolTipAssetName", "Asset Name"), FText::FromName(AssetData.AssetName), false);
+		AddToToolTipInfoBox(InfoBox, LOCTEXT("DialogueEntityToolTipAssetName", "Asset Name"), FText::FromString(AssetName), false);
 	}
 
 	// add class name
@@ -124,12 +121,10 @@ TSharedRef<SWidget> SDialogueEntityToolTip::CreateToolTipContent()
 			.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
 			[
 				SNew(SVerticalBox)
-
 				+ SVerticalBox::Slot()
 				.AutoHeight()
 				[
 					SNew(SHorizontalBox)
-
 					+ SHorizontalBox::Slot()
 					.VAlign(VAlign_Center)
 					.Padding(0, 0, 4, 0)

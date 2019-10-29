@@ -42,9 +42,11 @@ private:
 	TSharedPtr<SImage> EntityImage;
 	TSharedPtr<FSlateBrush> ImageBrush;
 	TSharedPtr<SComboButton> ComboButton;
+	TSharedPtr<SButton> ArticyButton;
 	TAttribute<UClass*> ClassRestriction;
 private:
 	TSharedRef<SWidget> CreateEntityAssetPicker();
+	FReply OnArticyButtonClicked();
 	void SetAsset(const FAssetData& AssetData);
 	FReply OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent);
 	FText OnGetEntityName() const;

@@ -9,6 +9,7 @@
 #include "ArticyObjectWithDisplayName.h"
 #include "ArticyObjectWithText.h"
 #include "Kismet/KismetStringLibrary.h"
+#include "ArticyImportData.h"
 
 UTexture2D* UserInterfaceHelperFunctions::GetDisplayImage(const UArticyObject* ArticyObject)
 {
@@ -100,4 +101,37 @@ const FString UserInterfaceHelperFunctions::GetDisplayName(const UArticyObject* 
 	}
 
 	return DisplayName;
+}
+
+const bool UserInterfaceHelperFunctions::ShowObjectInArticy(const UArticyObject* ArticyObject)
+{
+	if(ArticyObject== nullptr)
+	{
+		return false;
+	}
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+
+	TArray<FAssetData> OutAssetData;
+	AssetRegistryModule.Get().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), OutAssetData, false);
+
+	if(OutAssetData.Num() == 1)
+	{
+		UArticyImportData* ImportData = Cast<UArticyImportData>(OutAssetData[0].GetAsset());
+		FString ProjectGuid = ImportData->GetProject().Guid;
+
+		FArticyId ArticyId = ArticyObject->GetId();
+
+		// restore the original Id in decimal
+		const int32 High = ArticyId.High;
+		const int32 Low = ArticyId.Low;
+		const uint64 HighOriginal = (uint64) High <<  32;
+		const uint64 LowOriginal = Low;
+		const uint64 OriginalId = HighOriginal + LowOriginal;
+		
+		FString ArticyObjectId = FString::Printf(TEXT("%llu"), OriginalId);
+		FString ArticyURL = FString::Printf(TEXT("articy://localhost/view/%s/%s?pane=selected&tab=current"), *ProjectGuid, *ArticyObjectId);
+		UKismetSystemLibrary::LaunchURL(ArticyURL);
+	}
+	
+	return true;
 }

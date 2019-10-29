@@ -35,7 +35,7 @@ void SDialogueEntityTileView::Construct(const FArguments& InArgs)
 	Cursor = EMouseCursor::Hand;
 
 	ArticyObjectImageBrush = MakeShareable(new FSlateBrush());
-	ArticyObjectImageBrush->SetResourceObject(FArticyImporterStyle::Get().GetBrush("DialogueEntity.NoImageAvailable")->GetResourceObject());
+	ArticyObjectImageBrush->SetResourceObject(FArticyImporterStyle::Get().GetBrush("ArticyImporter.AssetPicker.NoImageAvailable")->GetResourceObject());
 	ArticyObjectImageBrush->SetImageSize(FVector2D(ThumbnailSize, ThumbnailSize));
 
 	EntityImage = SNew(SImage)
@@ -112,7 +112,6 @@ void SDialogueEntityTileView::Construct(const FArguments& InArgs)
 			[
 				SNew(SScaleBox)
 				.Stretch(EStretch::ScaleToFit)
-
 				[
 					EntityNameTextBlock.ToSharedRef()
 				]
@@ -129,15 +128,20 @@ FText SDialogueEntityTileView::OnGetEntityName() const
 
 const FSlateBrush* SDialogueEntityTileView::OnGetEntityImage() const
 {
-	UTexture2D* Texture = UserInterfaceHelperFunctions::GetDisplayImage(ObjectToDisplay.Get());
-
-	if (Texture)
+	if(CachedTexture.IsValid() && ArticyObjectImageBrush->GetResourceObject() == CachedTexture.Get())
 	{
-		ArticyObjectImageBrush->SetResourceObject(Texture);
+		return ArticyObjectImageBrush.Get();
+	}
+		
+	CachedTexture = UserInterfaceHelperFunctions::GetDisplayImage(ObjectToDisplay.Get());
+
+	if (CachedTexture.IsValid())
+	{
+		ArticyObjectImageBrush->SetResourceObject(CachedTexture.Get());
 	}
 	else
 	{
-		return FArticyImporterStyle::Get().GetBrush("ArticyImporter.NoImageAvailable");
+		return FArticyImporterStyle::Get().GetBrush("ArticyImporter.AssetPicker.NoImageAvailable");
 	}
 
 	return ArticyObjectImageBrush.Get();	

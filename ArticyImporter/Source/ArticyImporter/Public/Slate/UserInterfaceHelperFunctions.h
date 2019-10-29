@@ -17,6 +17,6 @@ namespace UserInterfaceHelperFunctions
 
 	const FString GetDisplayName(const UArticyObject* ArticyObject);
 
-
+	const bool ShowObjectInArticy(const UArticyObject* ArticyObject);
 	
 };
