@@ -24,17 +24,25 @@ namespace ArticyImporterHelpers
 	}
 
 	template <typename AssetType>
-	AssetType* GenerateAsset(const TCHAR* ClassName, const TCHAR* ModuleName, const FString AssetName = "", const FString SubFolder = "")
+	AssetType* GenerateAsset(const TCHAR* ClassName, const TCHAR* ModuleName, const FString AssetName = "", const FString SubFolder = "", const EObjectFlags AdditionalFlags = RF_NoFlags)
 	{
 		const auto ActualAssetName = AssetName.IsEmpty() ? ClassName : AssetName;
 		const auto FileName = (SubFolder.IsEmpty() ? ActualAssetName : SubFolder / ActualAssetName).Replace(TEXT(" "), TEXT("_"));
 
 		auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), ModuleName, ClassName);
 		auto UClass = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, AssetType::StaticClass());
+		
 		if (UClass)
 		{
 			auto AssetPackage = FindOrCreatePackage(FileName);
 			EObjectFlags Flags = RF_Public | RF_Standalone;
+
+			// primarily added so we can add RF_ArchetypeObject to the database and GV asset creation.
+			// It fixes a problem in which the CDO would not get refreshed after reimporting changes via Hot Reload
+			if(AdditionalFlags != RF_NoFlags)
+			{
+				Flags = Flags | AdditionalFlags;
+			}
 			AssetType* CreatedAsset = NewObject<AssetType>(AssetPackage, UClass, *ActualAssetName, Flags);;
 
 			// if we successfully created the asset, notify the asset registry and mark it dirty
