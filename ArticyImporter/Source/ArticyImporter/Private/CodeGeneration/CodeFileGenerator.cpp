@@ -5,7 +5,10 @@
 
 
 #include "CodeFileGenerator.h"
-#include "CodeGenerator.h"
+#include "ArticyImporter.h"
+#include "ISourceControlModule.h"
+#include "ISourceControlProvider.h"
+#include "SourceControlHelpers.h"
 
 void CodeFileGenerator::Line(const FString& Line, const bool bSemicolon, const bool bIndent, const int IndentOffset)
 {
@@ -128,5 +131,28 @@ void CodeFileGenerator::WriteToFile() const
 	if(BlockCount > 0)
 		UE_LOG(LogArticyImporter, Warning, TEXT("Block count is %d when writing to file!"), BlockCount);
 
-	FFileHelper::SaveStringToFile(FileContent, *Path);
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	ISourceControlModule& SCModule = ISourceControlModule::Get();
+
+	bool bCheckOutEnabled = false;
+	if(SCModule.IsEnabled())
+	{
+		bCheckOutEnabled = ISourceControlModule::Get().GetProvider().UsesCheckout();
+	}
+	
+	// try check out the file if it existed
+	bool bFileExisted = false;
+	if(PlatformFile.FileExists(*Path) && bCheckOutEnabled)
+	{
+		USourceControlHelpers::CheckOutFile(*Path);
+		bFileExisted = true;
+	}
+	
+	const bool bFileWritten = FFileHelper::SaveStringToFile(FileContent, *Path);
+
+	// mark the file for add if it's the first time we've written it
+	if(!bFileExisted && bFileWritten && SCModule.IsEnabled())
+	{
+		USourceControlHelpers::MarkFileForAdd(*Path);
+	}
 }

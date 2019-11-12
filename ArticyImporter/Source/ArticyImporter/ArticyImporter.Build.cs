@@ -54,7 +54,8 @@ public class ArticyImporter : ModuleRules
                 "ContentBrowser",
 				"PropertyEditor",
 				"EditorStyle",
-				"EditorWidgets"
+				"EditorWidgets",
+				"SourceControl"
 			}
 			);
 		
