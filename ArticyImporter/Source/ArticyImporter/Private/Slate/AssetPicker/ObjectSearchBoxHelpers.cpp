@@ -264,20 +264,17 @@ private:
 
 	bool CheckTextOfArticyObject(const FTextFilterString& InValue, const ETextFilterTextComparisonMode InTextComparisonMode) const
 	{
-		UArticyObject * object = Cast<UArticyObject>(AssetPtr->GetAsset());
-		IArticyObjectWithText* textObject = Cast<IArticyObjectWithText>(object);
+		IArticyObjectWithText* ArticyObjectWithText = Cast<IArticyObjectWithText>(AssetPtr->GetAsset());
 
-		if(textObject)
+		if(ArticyObjectWithText)
 		{
-			FName textName = FName(*textObject->GetText().ToString());
-			FTextFilterString TextToCompare(textName);
-			
-			if(TextToCompare.IsEmpty())
-			{
-				return false;
-			}
+			const FText Text = ArticyObjectWithText->GetText();
+			const FTextFilterString FilterString(Text.ToString());
 
-			return InValue.CompareName(textName, InTextComparisonMode);
+			if (!Text.IsEmptyOrWhitespace() && InValue.CompareText(FilterString, InTextComparisonMode))
+			{
+				return true;
+			}
 		}
 
 		return false;
