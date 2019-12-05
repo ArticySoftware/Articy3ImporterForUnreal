@@ -36,7 +36,7 @@ void SDialogueEntityTileView::Construct(const FArguments& InArgs)
 
 	ArticyObjectImageBrush = MakeShareable(new FSlateBrush());
 	ArticyObjectImageBrush->SetResourceObject(FArticyImporterStyle::Get().GetBrush("ArticyImporter.AssetPicker.NoImageAvailable")->GetResourceObject());
-	ArticyObjectImageBrush->SetImageSize(FVector2D(ThumbnailSize, ThumbnailSize));
+	ArticyObjectImageBrush->ImageSize = FVector2D(ThumbnailSize, ThumbnailSize);
 
 	EntityImage = SNew(SImage)
 		.Image(this, &SDialogueEntityTileView::OnGetEntityImage);

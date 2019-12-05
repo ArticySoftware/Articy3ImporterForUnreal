@@ -211,8 +211,6 @@ void SDialogueEntityAssetPicker::RefreshSourceItems()
 	// Load the asset registry module
 	static const FName AssetRegistryName(TEXT("AssetRegistry"));
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryName);
-	// Include assets in memory
-	TSet<FName> PackageNamesToSkip = AssetRegistryModule.Get().GetCachedEmptyPackages();
 
 	// retrieve all assets that pass the FARFilter
 	AssetRegistryModule.Get().GetAssets(config.Filter, AllSpeakingEntities);	

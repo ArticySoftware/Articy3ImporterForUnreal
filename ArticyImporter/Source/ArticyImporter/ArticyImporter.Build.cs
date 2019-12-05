@@ -3,7 +3,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
 using UnrealBuildTool;
-using System.IO;
 
 public class ArticyImporter : ModuleRules
 {
