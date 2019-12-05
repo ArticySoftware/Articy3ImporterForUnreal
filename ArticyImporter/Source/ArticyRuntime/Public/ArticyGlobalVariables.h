@@ -517,25 +517,28 @@ void UArticyGlobalVariables::SetVariableValue(const FName Namespace, const FName
 	if (set)
 	{
 		UArticyVariable** basePtr = set->GetPropPtr<UArticyVariable*>(Variable);
-		ArticyVariableType* typedPtr = dynamic_cast<ArticyVariableType*>(*basePtr);
 
-		if (typedPtr)
-		{
-			auto& propValue = (*typedPtr);
-			propValue = Value;
-
-			if (bLogVariableAccess)
+		if (basePtr) {
+		
+			ArticyVariableType* typedPtr = dynamic_cast<ArticyVariableType*>(*basePtr);
+			if (typedPtr)
 			{
-				UE_LOG(LogArticyRuntime, Display, TEXT("Set variable %s::%s : Success"), *Namespace.ToString(), *Variable.ToString());
-			}
+				auto& propValue = (*typedPtr);
+				propValue = Value;
 
-			return;
-		}		
+				if (bLogVariableAccess)
+				{
+					UE_LOG(LogArticyRuntime, Display, TEXT("Set variable %s::%s : Success"), *Namespace.ToString(), *Variable.ToString());
+				}
+
+				return;
+			}
+		}
 	}
 
 	if (bLogVariableAccess)
 	{
-		UE_LOG(LogArticyRuntime, Error, TEXT("Unable to find variable: %s::%s"), *Namespace.ToString(), *Variable.ToString());
+		UE_LOG(LogArticyRuntime, Error, TEXT("Unable to find variable: %s::%s. Variable does not exist or wrong type assumed."), *Namespace.ToString(), *Variable.ToString());
 	}
 }
 
