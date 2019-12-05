@@ -9,6 +9,11 @@
 #include "ArticyPrimitive.h"
 #include "ArticyObject.h"
 #include "ArticyRef.h"
+#include "ClassViewerModule.h"
+#include "EditorStyleSet.h"
+#include "ArticyImporterStyle.h"
+#include <Private/SlateEditorStyle.h>
+
 
 
 TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
@@ -18,56 +23,89 @@ TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 
 void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	//ArticyRefPropertyHandle = PropertyHandle;
+	ArticyRefPropertyHandle = PropertyHandle;
 
-	//TSharedRef<IPropertyHandle> TechnicalNameHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("TechnicalName")).ToSharedRef();
-	//const TSharedRef<IPropertyHandle> EntityPropertyHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("Reference")).ToSharedRef();
+	// update the reference upon selecting the ref; this only serves cosmetic purposes. The underlying Id will not be changed
+	FArticyRef* ArticyRef = RetrieveArticyRef();
 
-	//check(TechnicalNameHandle->IsValidHandle());
+	UArticyObject* SelectedObject = UArticyObject::FindAsset(ArticyRef->GetId());
+	// set the selected class to the currently selected object because the class selection widget has no actual property as a basis to serialize and keep its state
+	if (SelectedObject)
+	{
+		ClassRestriction = SelectedObject->UObject::GetClass();
+	}
 
-	//UObject* AssetReference;
-	//EntityPropertyHandle->GetValue(AssetReference);
+	if (ClassRestriction == nullptr)
+	{
+		ClassRestriction = UArticyObject::StaticClass();
+	}
+	ArticyRefSelection = SNew(SArticyRefSelection, ArticyRef, CustomizationUtils)
+		.ClassRestriction(this, &FArticyRefCustomization::GetClassRestriction);
 
-	//// update the reference upon selecting the ref; this only serves cosmetic purposes. The underlying Id will not be changed
-	//FArticyRef* ArticyRef = RetrieveArticyRef();
-	//ArticyRef->UpdateReference();
-
-	//HeaderRow.NameContent()
-	//[
-	//	ArticyRefPropertyHandle->CreatePropertyNameWidget()
-	//];
-
-	//// handle the articy ID whenever the asset selection changes
-	//TechnicalNameHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateSP(this, &FArticyRefCustomization::OnReferenceUpdated));
+	HeaderRow.NameContent()
+	[
+		ArticyRefPropertyHandle->CreatePropertyNameWidget()
+	]
+	.ValueContent()
+	.MinDesiredWidth(150)
+	[
+		ArticyRefSelection.ToSharedRef()
+	];
 }
 
 void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	//uint32 NumChildren;
-	//ArticyRefPropertyHandle->GetNumChildren(NumChildren);
+	FClassViewerInitializationOptions config;
+	config.DisplayMode = EClassViewerDisplayMode::TreeView;
+	config.ClassFilter = MakeShareable(new FArticyRefClassFilter);
 
-	//// restore all default editor property widgets
-	//for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
-	//{
-	//	const TSharedRef< IPropertyHandle > ChildHandle = ArticyRefPropertyHandle->GetChildHandle(ChildIndex).ToSharedRef();
-	//	ChildBuilder.AddProperty(ChildHandle);
-	//}
-}
+	ClassViewer = StaticCastSharedRef<SClassViewer>(FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(config, FOnClassPicked::CreateSP(this, &FArticyRefCustomization::OnClassPicked)));
+	ClassRestrictionButton =
+		SNew(SComboButton)
+		.OnGetMenuContent(this, &FArticyRefCustomization::CreateClassPicker)
+		.ContentPadding(2.f)
+		.ButtonContent()
+		[
+			SNew(STextBlock)
+			.Text(this, &FArticyRefCustomization::GetChosenClassName)
+			.Font(FArticyImporterStyle::Get().GetFontStyle(TEXT("DialogueEditor.GraphNode.Text.Property")))
+		];
 
-void FArticyRefCustomization::OnReferenceUpdated() const
-{
-	const TSharedRef<IPropertyHandle> TechnicalNameHandle = ArticyRefPropertyHandle->GetChildHandle(TEXT("TechnicalName")).ToSharedRef();
-
-	check(TechnicalNameHandle->IsValidHandle());
-
-	FString TechnicalName;
-	TechnicalNameHandle->GetValue(TechnicalName);
-
-	FArticyRef* ArticyRef = RetrieveArticyRef();
+	ChildBuilder.AddCustomRow(FText::FromString("Class Restriction"))
+		.NameContent()
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			.Padding(FMargin(0, 1, 0, 1))
+			.FillWidth(1)
+			[
+				SNew(SBorder)
+				.BorderImage(FSlateEditorStyle::GetBrush(TEXT("PropertyWindow.NoOverlayColor")))
+				.Padding(FMargin(0.0f, 2.0f))
+				.VAlign(VAlign_Center)
+				[
+					SNew(STextBlock)
+					.Text(FText::FromString("Class Restriction"))
+					.Font(FArticyImporterStyle::Get().GetFontStyle(TEXT("DialogueEditor.GraphNode.Text.Property")))
+				]
+			]
+		]
+		.ValueContent()
+		.MinDesiredWidth(150.f)
+		.MaxDesiredWidth(250.f)
+		[
+			ClassRestrictionButton.ToSharedRef()
+		];
 	
-	// find the asset that matches the new technical name, and set it as the target
-	UArticyObject * NewReference = UArticyObject::FindAsset(TechnicalName);
-	ArticyRef->SetReference(NewReference);
+	uint32 NumChildren;
+	ArticyRefPropertyHandle->GetNumChildren(NumChildren);
+
+	// restore all default editor property widgets
+	for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
+	{
+		const TSharedRef< IPropertyHandle > ChildHandle = ArticyRefPropertyHandle->GetChildHandle(ChildIndex).ToSharedRef();
+		ChildBuilder.AddProperty(ChildHandle);
+	}
 }
 
 FArticyRef* FArticyRefCustomization::RetrieveArticyRef() const
@@ -86,4 +124,34 @@ FArticyRef* FArticyRefCustomization::RetrieveArticyRef() const
 #endif
 
 	return ArticyRef;
+}
+
+UClass* FArticyRefCustomization::GetClassRestriction() const
+{
+	if (ClassRestriction)
+	{
+		return ClassRestriction;
+	}
+
+	return UArticyObject::StaticClass();
+}
+
+FText FArticyRefCustomization::GetChosenClassName() const
+{
+	if (ClassRestriction) {
+		return FText::FromString(ClassRestriction->GetName());
+	}
+
+	return FText::FromString("None");
+}
+
+void FArticyRefCustomization::OnClassPicked(UClass* InChosenClass)
+{
+	ClassRestriction = InChosenClass;
+	ClassRestrictionButton->SetIsOpen(false);
+}
+
+TSharedRef<SWidget> FArticyRefCustomization::CreateClassPicker() const
+{
+	return ClassViewer.ToSharedRef();
 }

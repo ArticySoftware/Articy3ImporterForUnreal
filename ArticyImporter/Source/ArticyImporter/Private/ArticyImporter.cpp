@@ -14,7 +14,7 @@
 #include <SWindow.h>
 #include "ArticyImporterFunctionLibrary.h"
 #include "Editor.h"
-#include "ArticyRefCustomization2.h"
+#include "ArticyRefCustomization.h"
 #include "ArticyImporterStyle.h"
 
 DEFINE_LOG_CATEGORY(LogArticyImporter)
@@ -24,10 +24,11 @@ DEFINE_LOG_CATEGORY(LogArticyImporter)
 void FArticyImporterModule::StartupModule()
 {
 	RegisterPluginSettings();
-
+	RegisterConsoleCommands();
+	
 	// register custom details for ArticyRef struct
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	PropertyModule.RegisterCustomPropertyTypeLayout("ArticyRef", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArticyRefCustomization2::MakeInstance));
+	PropertyModule.RegisterCustomPropertyTypeLayout("ArticyRef", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArticyRefCustomization::MakeInstance));
 	PropertyModule.NotifyCustomizationModuleChanged();
 
 	FArticyImporterStyle::Initialize();
@@ -38,7 +39,18 @@ void FArticyImporterModule::ShutdownModule()
 	if (UObjectInitialized())
 	{
 		UnregisterPluginSettings();
+
+		if(ConsoleCommands != nullptr)
+		{
+			delete ConsoleCommands;
+			ConsoleCommands = nullptr;
+		}
 	}
+}
+
+void FArticyImporterModule::RegisterConsoleCommands()
+{
+	ConsoleCommands = new FArticyImporterConsoleCommands(*this);
 }
 
 void FArticyImporterModule::RegisterPluginSettings()

@@ -5,6 +5,26 @@
 #include <DetailLayoutBuilder.h>
 #include <IDetailCustomization.h>
 #include "ArticyRef.h"
+#include "SDialogueEntityProperty.h"
+#include "ClassViewerFilter.h"
+#include "ClassViewerModule.h"
+#include "ArticyObject.h"
+
+class FArticyRefClassFilter : public IClassViewerFilter
+{
+public:
+	virtual bool IsClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const UClass* InClass, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
+	{
+		return InClass->IsChildOf(UArticyObject::StaticClass());
+		//	InFilterFuncs->IfInChildOfClassesSet()
+	}
+
+	virtual bool IsUnloadedClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const TSharedRef< const IUnloadedBlueprintData > InUnloadedClassData, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
+	{
+		// @TODO: One day would be nice to see functions on unloaded classes...
+		return false;
+	}
+};
 
 class FArticyRefCustomization : public IPropertyTypeCustomization
 {
@@ -18,8 +38,18 @@ public:
 
 private:
 	TSharedPtr<IPropertyHandle> ArticyRefPropertyHandle;
-
-	void OnReferenceUpdated() const;
+	TSharedPtr<SArticyRefSelection> ArticyRefSelection;
+	UClass* ClassRestriction = nullptr;
 
 	FArticyRef* RetrieveArticyRef() const;
+	UClass* GetClassRestriction() const;
+	FText GetChosenClassName() const;
+	void OnClassPicked(UClass* InChosenClass);
+	TSharedRef<SWidget> CreateClassPicker() const;
+
+private:
+	/** A pointer to a class viewer **/
+	TSharedPtr<class SClassViewer> ClassViewer;
+	TSharedPtr<class SComboButton> ClassRestrictionButton;
 };
+

@@ -11,6 +11,7 @@
 #include "ArticyImporterHelpers.h"
 #include "IDelegateInstance.h"
 #include "ArticyRef.h"
+#include "ArticyImporterConsoleCommands.h"
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogArticyImporter, Log, All)
@@ -34,6 +35,9 @@ public:
 		static const FName ModuleName = "ArticyImporter";
 		return FModuleManager::LoadModuleChecked<FArticyImporterModule>(ModuleName);
 	}
+
+
+	void RegisterConsoleCommands();
 	
 	/* Plugin settings menu */
 	void RegisterPluginSettings();
@@ -49,9 +53,9 @@ private:
 
 	void UnqueueImport();
 	void TriggerQueuedImport(bool b);
-
 private:
 
 	bool bIsImportQueued = false;
 	FDelegateHandle QueuedImportHandle;
+	FArticyImporterConsoleCommands* ConsoleCommands;
 };
