@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include <FrontendFilterBase.h>
 #include <TextFilterExpressionEvaluator.h>
 #include "ArticyObject.h"

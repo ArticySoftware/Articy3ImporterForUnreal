@@ -2,7 +2,6 @@
 
 
 #include "ObjectSearchBoxHelpers.h"
-#include <TextFilterExpressionEvaluator.h>
 #include "ArticyObject.h"
 #include "ArticyObjectWithDisplayName.h"
 #include "ArticyObjectWithText.h"
@@ -94,21 +93,24 @@ public:
 			return true;
 		}
 
-		if (InValue.CompareName(AssetPtr->AssetName, InTextComparisonMode))
+		FTextFilterString AssetName(AssetPtr->AssetName);
+		if (AssetName.CompareText(InValue, InTextComparisonMode))
 		{
 			return true;
 		}
 
 		if (bIncludeAssetPath)
 		{
-			if (InValue.CompareFString(AssetFullPath, InTextComparisonMode))
+			FTextFilterString AssetFullPathFilter(AssetFullPath);
+			if (AssetFullPathFilter.CompareText(InValue, InTextComparisonMode))
 			{
 				return true;
 			}
 
 			for (const FString& AssetPathPart : AssetSplitPath)
 			{
-				if (InValue.CompareFString(AssetPathPart, InTextComparisonMode))
+				FTextFilterString AssetPathPartFilter(AssetPathPart);
+				if (AssetPathPartFilter.CompareText(InValue, InTextComparisonMode))
 				{
 					return true;
 				}
@@ -117,7 +119,8 @@ public:
 
 		if (bIncludeClassName)
 		{
-			if (InValue.CompareName(AssetPtr->AssetClass, InTextComparisonMode))
+			FTextFilterString AssetClassFilter(AssetPtr->AssetClass);
+			if (AssetClassFilter.CompareText(InValue, InTextComparisonMode))
 			{
 				return true;
 			}
@@ -126,7 +129,8 @@ public:
 		if (bIncludeClassName && bIncludeAssetPath)
 		{
 			// Only test this if we're searching the class name and asset path too, as the exported text contains the type and path in the string
-			if (InValue.CompareFString(AssetExportTextName, InTextComparisonMode))
+			FTextFilterString AssetExportTextNameFilter(AssetExportTextName);
+			if (AssetExportTextNameFilter.CompareText(InValue, InTextComparisonMode))
 			{
 				return true;
 			}
@@ -239,20 +243,18 @@ private:
 
 	bool CheckDisplayName(const FTextFilterString& InValue, const ETextFilterTextComparisonMode InTextComparisonMode) const
 	{
-		UArticyObject* object = Cast<UArticyObject>(AssetPtr->GetAsset());
-		IArticyObjectWithDisplayName* displayNameObject = Cast<IArticyObjectWithDisplayName>(object);
+		IArticyObjectWithDisplayName* ArticyObjectWithDisplayName = Cast<IArticyObjectWithDisplayName>(AssetPtr->GetAsset());
 
-		if(displayNameObject)
+		if(ArticyObjectWithDisplayName)
 		{
-			FName displayName = FName(*displayNameObject->GetDisplayName().ToString());
-			FTextFilterString TextToCompare(displayName);
+			FTextFilterString TextToCompare(ArticyObjectWithDisplayName->GetDisplayName().ToString());
 
 			if (TextToCompare.IsEmpty())
 			{
 				return false;
 			}
 
-			return InValue.CompareName(displayName, InTextComparisonMode);
+			return TextToCompare.CompareText(InValue, InTextComparisonMode);
 
 			// CompareFString and CompareText somehow seem to return incorrect values
 			//return InValue.CompareFString(displayName, InTextComparisonMode);
@@ -270,8 +272,10 @@ private:
 		{
 			const FText Text = ArticyObjectWithText->GetText();
 			const FTextFilterString FilterString(Text.ToString());
-
-			if (!Text.IsEmptyOrWhitespace() && InValue.CompareText(FilterString, InTextComparisonMode))
+		
+			const bool bTextIsEmptyOrWhitespace = Text.IsEmptyOrWhitespace();
+			
+			if(!bTextIsEmptyOrWhitespace && FilterString.CompareText(InValue, InTextComparisonMode))
 			{
 				return true;
 			}
@@ -282,19 +286,18 @@ private:
 
 	bool CheckTechnicalName(const FTextFilterString& InValue, const ETextFilterTextComparisonMode InTextComparisonMode) const
 	{
-		UArticyObject* object = Cast<UArticyObject>(AssetPtr->GetAsset());
+		UArticyObject* ArticyObject = Cast<UArticyObject>(AssetPtr->GetAsset());
 
-		if (object)
+		if (ArticyObject)
 		{
-			FName technicalName = object->GetTechnicalName();
-			FTextFilterString TextToCompare(technicalName);
+			FTextFilterString TextToCompare(ArticyObject->GetTechnicalName());
 			
 			if (TextToCompare.IsEmpty())
 			{
 				return false;
 			}
 
-			return InValue.CompareName(technicalName, InTextComparisonMode);
+			return TextToCompare.CompareText(InValue, InTextComparisonMode);
 		}
 
 		return false;
