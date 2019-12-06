@@ -203,7 +203,7 @@ bool UArticyDatabase::IsPackageDefaultPackage(FString PackageName)
 		// in case the key exists but has no valid entry
 		if (!Package)
 		{
-			return nullptr;
+			return false;
 		}
 		
 		return Package->bIsDefaultPackage;

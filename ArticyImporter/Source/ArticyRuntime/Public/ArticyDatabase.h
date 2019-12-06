@@ -377,10 +377,22 @@ template<typename T>
 TArray<T*> UArticyDatabase::GetObjectsOfClass(int32 CloneId) const
 {
 	TArray<T*> arr;
-	for (auto obj : ArticyObjects)
-		if (obj->GetCloneId() == CloneId && Cast<T>(obj))
-			arr.Add(obj);
 
+	TArray<UArticyCloneableObject*> ArticyObjects;
+	LoadedObjectsById.GenerateValueArray(ArticyObjects);
+
+	for (auto obj : ArticyObjects)
+	{
+		/*if (obj->GetCloneId() == CloneId && Cast<T>(obj))
+		{
+			arr.Add(obj);
+		}*/
+
+		if(obj->Get(this, CloneId, false) && Cast<T>(obj))
+		{
+			arr.Add(obj);
+		}
+	}
 	return arr;
 }
 
