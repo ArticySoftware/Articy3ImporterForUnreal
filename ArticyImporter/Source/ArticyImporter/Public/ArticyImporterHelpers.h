@@ -58,7 +58,7 @@ namespace ArticyImporterHelpers
 			return CreatedAsset;
 		}
 
-		UE_LOG(LogArticyImporter, Error, TEXT("ArticyImporter: Could not find class %s!"), ClassName);
+		//UE_LOG(LogArticyImporter, Error, TEXT("ArticyImporter: Could not find class %s!"), ClassName);
 
 		return nullptr;
 	}
@@ -68,7 +68,7 @@ namespace ArticyImporterHelpers
 	{
 		if(!Outer)
 		{
-			UE_LOG(LogArticyImporter, Error, TEXT("Could not generate sub-asset %s: Outer is null!"), *AssetName);
+			//UE_LOG(LogArticyImporter, Error, TEXT("Could not generate sub-asset %s: Outer is null!"), *AssetName);
 			return nullptr;
 		}
 		
@@ -93,7 +93,7 @@ namespace ArticyImporterHelpers
 			return CreatedAsset;
 		}
 
-		UE_LOG(LogArticyImporter, Error, TEXT("ArticyImporter: Could not find class %s!"), ClassName);
+		//UE_LOG(LogArticyImporter, Error, TEXT("ArticyImporter: Could not find class %s!"), ClassName);
 
 		return nullptr;
 	}

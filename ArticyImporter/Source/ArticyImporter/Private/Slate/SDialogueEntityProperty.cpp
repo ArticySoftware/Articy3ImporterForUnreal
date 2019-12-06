@@ -110,7 +110,7 @@ void SArticyRefSelection::Construct(const FArguments& InArgs, FArticyRef* InArti
 				[
 #if PLATFORM_WINDOWS
 					ArticyButton.ToSharedRef()
-#elif
+#else
 					SNullWidget::NullWidget
 #endif
 				]
