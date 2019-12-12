@@ -13,6 +13,7 @@
 #include "Templates/SharedPointerInternals.h"
 #include "ArticyFlowClasses.h"
 #include "ArticyScriptFragment.h"
+#include "ArticyEntity.h"
 
 //---------------------------------------------------------------------------//
 
@@ -619,6 +620,7 @@ const FArticyObjectDefinitions::FClassInfo& FArticyObjectDefinitions::GetDefault
 		DefaultBaseClasses.Add("Condition", FClassInfo{ "UArticyCondition", UArticyCondition::StaticClass() });
 		DefaultBaseClasses.Add("Instruction", FClassInfo{ "UArticyInstruction", UArticyInstruction::StaticClass() });
 		DefaultBaseClasses.Add("Asset", FClassInfo{ "UArticyAsset", UArticyAsset::StaticClass() });
+		DefaultBaseClasses.Add("Entity", FClassInfo{ "UArticyEntity", UArticyEntity::StaticClass() });
 	}
 
 	auto base = DefaultBaseClasses.Find(OriginalType);

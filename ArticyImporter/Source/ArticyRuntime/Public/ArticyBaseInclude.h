@@ -12,6 +12,7 @@
 
 #include "ArticyAsset.h"
 #include "ArticyFlowObject.h"
+#include "ArticyEntity.h"
 #include "ArticyFlowClasses.h"
 #include "ArticyBuiltinTypes.h"
 
