@@ -12,6 +12,7 @@ void FArticyImporterFunctionLibrary::ForceCompleteReimport(UArticyImportData* Im
 		return;
 
 	ImportData->Settings.ObjectDefinitionsHash.Reset();
+	ImportData->Settings.ScriptFragmentsHash.Reset();
 	ReimportChanges(ImportData);
 }
 

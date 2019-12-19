@@ -407,7 +407,6 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 
 	if(Settings.DidScriptFragmentsChange() && this->GetSettings().set_UseScriptSupport)
 	{
-		// clearing and adding script fragments happens in GenerateCode
 		this->GatherScripts();
 		bNeedsCodeGeneration = true;
 	}
@@ -443,7 +442,10 @@ void UArticyImportData::PostEditChangeProperty(FPropertyChangedEvent& PropertyCh
 	if(bForceCompleteReimport || bReimportChanges)
 	{
 		if(bForceCompleteReimport)
+		{
 			Settings.ObjectDefinitionsHash.Reset();
+			Settings.ScriptFragmentsHash.Reset();
+		}
 
 		bForceCompleteReimport = bReimportChanges = bRegenerateAssets = false;
 
