@@ -14,33 +14,29 @@
 #include "ArticyObjectWithPreviewImage.h"
 #include <SAssetSearchBox.h>
 #include <SlateEnums.h>
-#include <FrontendFilterBase.h>
-#include <CollectionManagerTypes.h>
 #include <TextFilterExpressionEvaluator.h>
-#include <IDelegateInstance.h>
-#include <Private/Application/ActiveTimerHandle.h>
-#include "ObjectSearchBoxHelpers.h"
+#include "ArticyObjectFilterHelpers.h"
 
 #define LOCTEXT_NAMESPACE "DialogueEntityPicker"
 
-namespace FDialogueEntityAssetPicketConstants {
+namespace FArticyObjectAssetPicketConstants {
 
 	const FVector2D TileSize(96.f, 96.f);
 	const int32 ThumbnailPadding = 2;
 
 }
 
-class SDialogueEntityAssetPicker : public SCompoundWidget
+class SArticyObjectAssetPicker : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SDialogueEntityAssetPicker) {}
+	SLATE_BEGIN_ARGS(SArticyObjectAssetPicker) {}
 
 	/** A struct containing details about how the asset picker should behave */
 	SLATE_ARGUMENT(FAssetPickerConfig, AssetPickerConfig)
 
 	SLATE_END_ARGS()
 
-	~SDialogueEntityAssetPicker();
+	~SArticyObjectAssetPicker();
 
 	void Construct(const FArguments& InArgs);
 
@@ -48,34 +44,36 @@ public:
 
 	void RequestSlowFullListRefresh();
 
-	void UpdateValue(TWeakObjectPtr<UArticyObject> AssetItem, ESelectInfo::Type SelectInfo) const;
+	void SelectAsset(TWeakObjectPtr<UArticyObject> AssetItem, ESelectInfo::Type SelectInfo) const;
 private:
-	TSharedRef<class ITableRow> MakeTileViewWidget(TWeakObjectPtr<UArticyObject> Entity, const TSharedRef<STableViewBase>& OwnerTable);
+	
+	TSharedRef<class ITableRow> MakeTileViewWidget(TWeakObjectPtr<UArticyObject> Entity, const TSharedRef<STableViewBase>& OwnerTable) const;
 	float GetTileViewHeight() const;
 	float GetTileViewWidth() const;
 	void OnClear() const;
-	void OnSearchBoxChanged(const FText& InSearchText);
-	void OnSearchBoxCommitted(const FText& InSearchText, ETextCommit::Type CommitInfo);
+	void OnSearchBoxChanged(const FText& InSearchText) const;
+	void OnSearchBoxCommitted(const FText& InSearchText, ETextCommit::Type CommitInfo) const;
 	void RefreshSourceItems();
-	void SetSearchBoxText(const FText& InSearchText);
+	void SetSearchBoxText(const FText& InSearchText) const;
 	void OnFrontendFiltersChanged();
-	bool PassesCurrentFrontendFilter(const FAssetData& Item) const;
-	EActiveTimerReturnType SetFocusPostConstruct(double InCurrentTime, float InDeltaTime);
+	bool TestAgainstFrontendFilters(const FAssetData& Item) const;
+	/** parameters unused but required by the delegate */
+	EActiveTimerReturnType FocusSearchField(double InCurrentTime, float InDeltaTime) const;
 private:
-	FAssetPickerConfig config;
-	TArray<FAssetData> AllSpeakingEntities;
-	TArray<TWeakObjectPtr<UArticyObject>> FilteredEntities;
-	bool bSlowFullListRefreshRequested;
+	
+	FAssetPickerConfig AssetPickerConfig;
+	TArray<FAssetData> ArticyPackageDataAssets;
+	TArray<TWeakObjectPtr<UArticyObject>> FilteredObjects;
+	bool bSlowFullListRefreshRequested = false;
 private:
 
 	FOnAssetSelected OnAssetSelected;
-
 private:
-	// #TODO
-	TSharedPtr<SAssetSearchBox> SearchBox;
+	
+	TSharedPtr<SAssetSearchBox> SearchField;
 	TSharedPtr<FAssetFilterCollectionType> FrontendFilters;
-	TSharedPtr<FClassRestrictionFilter> ClassFilter;
-	TSharedPtr<FFrontendFilter_DialogueEntity> DialogueEntityFilter;
+	TSharedPtr<FArticyClassRestrictionFilter> ClassFilter;
+	TSharedPtr<FFrontendFilter_ArticyObject> ArticyObjectFilter;
 	TSharedPtr<SListView<TWeakObjectPtr<UArticyObject>>> AssetView;
 };
 

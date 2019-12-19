@@ -2,10 +2,12 @@
 #include <SToolTip.h>
 #include "ArticyObject.h"
 
-class SDialogueEntityToolTip : public SToolTip
+class SArticyObjectTileView;
+
+class SArticyObjectToolTip : public SToolTip
 {
 public:
-	SLATE_BEGIN_ARGS(SDialogueEntityToolTip)
+	SLATE_BEGIN_ARGS(SArticyObjectToolTip)
 		: _ObjectToDisplay(nullptr)
 	{ }
 
@@ -21,6 +23,7 @@ public:
 protected:
 
 	TWeakObjectPtr<UArticyObject> ObjectToDisplay;
+	FSlateBrush TooltipBrush;
 
 	TSharedRef<SWidget> CreateToolTipContent();
 	/** Helper function for CreateToolTipWidget. Adds a key value pair to the info box of the tooltip */
@@ -29,4 +32,6 @@ protected:
 private:
 	/** The substring to be highlighted in the name and tooltip path */
 	TAttribute<FText> HighlightText;
+private:
+	const FSlateBrush* GetTooltipImage() const;
 };

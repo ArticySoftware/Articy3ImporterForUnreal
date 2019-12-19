@@ -12,8 +12,20 @@ class UArticyObject;
 
 namespace UserInterfaceHelperFunctions
 {
+	enum EImageSize
+	{
+		Small,
+		Medium,
+		Large
+	};
+	
+	const FSlateBrush* GetArticyTypeImage(const UArticyObject* ArticyObject, EImageSize Size);
 
 	UTexture2D* GetDisplayImage(const UArticyObject* ArticyObject);
+	bool RetrievePreviewImage(const UArticyObject* ArticyObject, FSlateBrush& OutSlateBrush);
+	bool RetrieveSpeakerPreviewImage(const UArticyObject* ArticyObject, FSlateBrush& OutSlateBrush);
+
+
 
 	const FString GetDisplayName(const UArticyObject* ArticyObject);
 

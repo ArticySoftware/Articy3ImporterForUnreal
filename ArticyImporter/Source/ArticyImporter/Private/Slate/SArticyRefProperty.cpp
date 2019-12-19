@@ -1,9 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SDialogueEntityProperty.h"
+#include "SArticyRefProperty.h"
 #include <SharedPointer.h>
-#include <ClassViewerModule.h>
 #include <KismetEditorUtilities.h>
 #include <SClassPickerDialog.h>
 #include <ARFilter.h>
@@ -13,16 +12,16 @@
 #include <IPropertyTypeCustomization.h>
 #include "ArticyObject.h"
 #include "ArticyImporter.h"
-#include "SDialogueEntityAssetPicker.h"
+#include "SArticyObjectAssetPicker.h"
 #include "ArticyImporterStyle.h"
 #include "Editor.h"
 #include "SButton.h"
 #include "UserInterfaceHelperFunctions.h"
 
-#define LOCTEXT_NAMESPACE "DialogueEntityProperty"
+#define LOCTEXT_NAMESPACE "ArticyRefProperty"
 
 
-void SArticyRefSelection::Construct(const FArguments& InArgs, FArticyRef* InArticyRef, IPropertyTypeCustomizationUtils& CustomizationUtils)
+void SArticyRefProperty::Construct(const FArguments& InArgs, FArticyRef* InArticyRef, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	this->ClassRestriction = InArgs._ClassRestriction;
 
@@ -36,25 +35,23 @@ void SArticyRefSelection::Construct(const FArguments& InArgs, FArticyRef* InArti
 		this->ClassRestriction = UArticyObject::StaticClass();
 	}
 
-	ImageBrush = MakeShareable(new FSlateBrush());
-	ImageBrush->SetResourceObject(FArticyImporterStyle::Get().GetBrush("ArticyImporter.AssetPicker.NoImageAvailable")->GetResourceObject());
-
 	ComboButton = SNew(SComboButton)
-		.OnGetMenuContent(this, &SArticyRefSelection::CreateEntityAssetPicker)
+		.OnGetMenuContent(this, &SArticyRefProperty::CreateArticyObjectAssetPicker)
 		.ButtonContent()
 		[
 			SNew(STextBlock)
-			.Text(this, &SArticyRefSelection::OnGetEntityName)
+			.Text(this, &SArticyRefProperty::OnGetArticyObjectDisplayName)
 		];
 
-	EntityImage = SNew(SImage)
-		.Image(this, &SArticyRefSelection::OnGetEntityImage);
-
-
+	TileView = SNew(SArticyObjectTileView)
+		.ObjectToDisplay(SelectedArticyObject)
+		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize.X)
+		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding.X);
+	
 	const FSlateBrush* ArticySoftwareLogo = FArticyImporterStyle::Get().GetBrush("ArticyImporter.ArticyDraftLogo.16");
 	
 	ArticyButton = SNew(SButton)
-		.OnClicked(this, &SArticyRefSelection::OnArticyButtonClicked)
+		.OnClicked(this, &SArticyRefProperty::OnArticyButtonClicked)
 		.ToolTipText(FText::FromString("Show selected object in articy:draft"))
 		.Content()
 		[
@@ -73,13 +70,13 @@ void SArticyRefSelection::Construct(const FArguments& InArgs, FArticyRef* InArti
 			SAssignNew(ThumbnailBorder, SBorder)
 			.Padding(5.0f)
 			//.BorderImage(this, &SPropertyEditorAsset::GetThumbnailBorder)
-			.OnMouseDoubleClick(this, &SArticyRefSelection::OnAssetThumbnailDoubleClick)
+			.OnMouseDoubleClick(this, &SArticyRefProperty::OnAssetThumbnailDoubleClick)
 			[
-				SNew(SBox)
-				.WidthOverride(FDialogueEntityPropertyConstants::ThumbnailSize.X)
-				.HeightOverride(FDialogueEntityPropertyConstants::ThumbnailSize.Y)
+				SAssignNew(TileContainer, SBox)
+			//	.WidthOverride(ArticyRefPropertyConstants::ThumbnailSize.X)
+			//	.HeightOverride(ArticyRefPropertyConstants::ThumbnailSize.Y)
 				[
-					EntityImage.ToSharedRef()
+					TileView.ToSharedRef()
 				]
 			]
 		]
@@ -88,11 +85,6 @@ void SArticyRefSelection::Construct(const FArguments& InArgs, FArticyRef* InArti
 		.HAlign(HAlign_Fill)
 		[
 			SNew(SVerticalBox)
-			/*+ SVerticalBox::Slot()
-			.FillHeight(1.f)
-			[
-				SNullWidget::NullWidget
-			]*/
 			+ SVerticalBox::Slot()
 			.HAlign(HAlign_Left)
 			.VAlign(VAlign_Center)
@@ -119,36 +111,40 @@ void SArticyRefSelection::Construct(const FArguments& InArgs, FArticyRef* InArti
 	];
 }
 
-
-
-TSharedRef<SWidget> SArticyRefSelection::CreateEntityAssetPicker()
+TSharedRef<SWidget> SArticyRefProperty::CreateArticyObjectAssetPicker()
 {	
-	FAssetPickerConfig config;
-	config.OnAssetSelected = FOnAssetSelected::CreateRaw(this, &SArticyRefSelection::SetAsset);
-	config.bFocusSearchBoxWhenOpened = true;
-	config.Filter.ClassNames.Add(FName(*ClassRestriction.Get()->GetName()));
-	config.bPreloadAssetsForContextMenu = true;
-	config.Filter.bRecursiveClasses = true;
+	FAssetPickerConfig AssetPickerConfig;
+	AssetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateRaw(this, &SArticyRefProperty::SetAsset);
+	AssetPickerConfig.bFocusSearchBoxWhenOpened = true;
+	AssetPickerConfig.Filter.ClassNames.Add(FName(*ClassRestriction.Get()->GetName()));
 
-	return SNew(SDialogueEntityAssetPicker).AssetPickerConfig(config);
+	return SNew(SArticyObjectAssetPicker).AssetPickerConfig(AssetPickerConfig);
 }
 
-FReply SArticyRefSelection::OnArticyButtonClicked()
+FReply SArticyRefProperty::OnArticyButtonClicked() const
 {
 	UserInterfaceHelperFunctions::ShowObjectInArticy(SelectedArticyObject.Get());
 	
 	return FReply::Handled();
 }
 
-void SArticyRefSelection::SetAsset(const FAssetData& AssetData)
+void SArticyRefProperty::SetAsset(const FAssetData& AssetData)
 {
 	ComboButton->SetIsOpen(false);
 	UArticyObject* NewSelectedArticyObject = Cast<UArticyObject>(AssetData.GetAsset());
 	ArticyRef->SetReference(NewSelectedArticyObject);
+
 	SelectedArticyObject = NewSelectedArticyObject;
+
+	TileView = SNew(SArticyObjectTileView)
+		.ObjectToDisplay(SelectedArticyObject)
+		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize.X)
+		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding.X);
+
+	TileContainer->SetContent(TileView.ToSharedRef());
 }
 
-FReply SArticyRefSelection::OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent)
+FReply SArticyRefProperty::OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const
 {
 	if(SelectedArticyObject.IsValid()) 
 	{
@@ -158,40 +154,10 @@ FReply SArticyRefSelection::OnAssetThumbnailDoubleClick(const FGeometry& InMyGeo
 	return FReply::Handled();
 }
 
-FText SArticyRefSelection::OnGetEntityName() const
+FText SArticyRefProperty::OnGetArticyObjectDisplayName() const
 {
 	const FString DisplayName = UserInterfaceHelperFunctions::GetDisplayName(SelectedArticyObject.Get());
 	return FText::FromString(DisplayName);
-}
-
-void SArticyRefSelection::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
-{
-	// left in as a reminder; used in SPropertyEditorAsset to ensure it doesn't crash
-	// As we don't need it right now, the comment and code serves as reminder just in case
-	/*if (AssetThumbnail.IsValid() && !GIsSavingPackage && !IsGarbageCollecting())
-	{
-		FAssetData currentAssetData;
-		if (EntityHandle->IsValidHandle())
-		{
-			EntityHandle->GetValue(currentAssetData);
-		}
-	}*/
-}
-
-const FSlateBrush* SArticyRefSelection::OnGetEntityImage() const
-{
-	UTexture2D* Texture = UserInterfaceHelperFunctions::GetDisplayImage(SelectedArticyObject.Get());
-
-	if(Texture)
-	{
-		ImageBrush->SetResourceObject(Texture);
-	}
-	else
-	{
-		return FArticyImporterStyle::Get().GetBrush("ArticyImporter.AssetPicker.NoImageAvailable");
-	}
-	
-	return ImageBrush.Get();
 }
 
 #undef LOCTEXT_NAMESPACE

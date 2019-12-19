@@ -10,6 +10,82 @@
 #include "ArticyObjectWithText.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "ArticyImportData.h"
+#include "ArticyImporterStyle.h"
+#include "ArticyFlowClasses.h"
+#include "ArticyEntity.h"
+
+const FSlateBrush* UserInterfaceHelperFunctions::GetArticyTypeImage(const UArticyObject* ArticyObject, UserInterfaceHelperFunctions::EImageSize Size)
+{
+	if(!ArticyObject)
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.AssetPicker.NoImageAvailable")));
+	}
+
+	FString SizeString = "";
+	if(Size == EImageSize::Large)
+	{
+		SizeString.Append("64");
+	}
+	else if(Size == EImageSize::Medium)
+	{
+		SizeString.Append("32");
+	}
+	else
+	{
+		SizeString.Append("16");
+	}
+	
+	if(ArticyObject->IsA<UArticyDialogueFragment>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.DialogueFragment.").Append(SizeString)));
+	}
+	else if(ArticyObject->IsA<UArticyDialogue>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Dialogue.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyEntity>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Entity.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyFlowFragment>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.FlowFragment.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyHub>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Hub.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyJump>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Jump.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyInstruction>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Instruction.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyCondition>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Condition.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyAsset>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Asset.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyUserFolder>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.UserFolder.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyZone>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Zone.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyLocation>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Location.").Append(SizeString)));
+	}
+
+	return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.AssetPicker.NoImageAvailable")));
+}
 
 UTexture2D* UserInterfaceHelperFunctions::GetDisplayImage(const UArticyObject* ArticyObject)
 {
@@ -34,27 +110,33 @@ UTexture2D* UserInterfaceHelperFunctions::GetDisplayImage(const UArticyObject* A
 		}
 	}
 
-	// if we don't have a preview image, use the speaker image if available
-	const IArticyObjectWithSpeaker* ObjectWithSpeaker = Cast<IArticyObjectWithSpeaker>(ArticyObject);
-	if (ObjectWithSpeaker)
-	{
-		UArticyObject* SpeakerObject = UArticyObject::FindAsset(ObjectWithSpeaker->GetSpeakerId());
-		const IArticyObjectWithPreviewImage* SpeakerWithImage = Cast<IArticyObjectWithPreviewImage>(SpeakerObject);
-
-		if (SpeakerWithImage)
-		{
-			const FArticyId AssetID = SpeakerWithImage->GetPreviewImage()->Asset;
-			const UArticyObject* AssetObject = UArticyObject::FindAsset(AssetID);
-
-			if (AssetObject)
-			{
-				Image = (Cast<UArticyAsset>(AssetObject))->LoadAsTexture2D();
-				return Image;
-			}
-		}
-	}
-	
 	return Image;
+}
+
+bool UserInterfaceHelperFunctions::RetrievePreviewImage(const UArticyObject* ArticyObject, FSlateBrush& OutSlateBrush)
+{
+	UTexture2D* PreviewImage = GetDisplayImage(ArticyObject);
+
+	if(PreviewImage)
+	{
+		OutSlateBrush.SetResourceObject(PreviewImage);
+		return true;
+	}
+
+	return false;
+}
+
+bool UserInterfaceHelperFunctions::RetrieveSpeakerPreviewImage(const UArticyObject* ArticyObject, FSlateBrush& OutSlateBrush)
+{
+	const IArticyObjectWithSpeaker* ArticyObjectWithSpeaker = Cast<IArticyObjectWithSpeaker>(ArticyObject);
+
+	if(ArticyObjectWithSpeaker)
+	{
+		UArticyObject* Speaker = UArticyObject::FindAsset(ArticyObjectWithSpeaker->GetSpeakerId());
+		return RetrievePreviewImage(Speaker, OutSlateBrush);
+	}
+
+	return false;
 }
 
 const FString UserInterfaceHelperFunctions::GetDisplayName(const UArticyObject* ArticyObject)

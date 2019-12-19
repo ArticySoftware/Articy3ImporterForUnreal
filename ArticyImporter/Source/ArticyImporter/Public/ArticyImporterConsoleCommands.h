@@ -22,7 +22,7 @@ public:
 	
 	,	ReimportCommand(
 		TEXT("ArticyImporter.Reimport"),
-		*LOCTEXT("CommandText_Reimport", "Reimport newly exported articy data into Unreal").ToString(),
+		*LOCTEXT("CommandText_Reimport", "Reimport articy data into Unreal").ToString(),
 		FConsoleCommandDelegate::CreateRaw(this, &FArticyImporterConsoleCommands::Reimport) )
 	
 	{}

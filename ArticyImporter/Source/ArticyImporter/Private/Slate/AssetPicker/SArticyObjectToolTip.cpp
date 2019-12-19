@@ -1,26 +1,41 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "SDialogueEntityToolTip.h"
+#include "SArticyObjectToolTip.h"
 #include "ArticyFlowClasses.h"
-#include <AssetRegistryModule.h>
 #include "ArticyObjectWithDisplayName.h"
 #include "ArticyObjectWithText.h"
 #include <SBoxPanel.h>
 #include <STextBlock.h>
 #include <EditorStyleSet.h>
 #include <SBorder.h>
-#include <ModuleManager.h>
 #include <SToolTip.h>
 #include <Text.h>
+#include "UserInterfaceHelperFunctions.h"
 #include "ArticyObjectWithSpeaker.h"
+#include "SScaleBox.h"
 
-#define LOCTEXT_NAMESPACE "DialogueEntityToolTip"
+#define LOCTEXT_NAMESPACE "ArticyObjectToolTip"
 
-void SDialogueEntityToolTip::Construct(const FArguments& InArgs)
+void SArticyObjectToolTip::Construct(const FArguments& InArgs)
 {
 	ObjectToDisplay = InArgs._ObjectToDisplay;
 
+	TooltipBrush.ImageSize = FVector2D(64.f, 64.f);
+	// use the preview image if available
+	const bool bHasPreviewImage = UserInterfaceHelperFunctions::RetrievePreviewImage(ObjectToDisplay.Get(), TooltipBrush);
 
+	// if there is no preview image, use the preview image of the speaker, if available
+	if(!bHasPreviewImage)
+	{
+		const bool bHasSpeakerPreviewImage = UserInterfaceHelperFunctions::RetrieveSpeakerPreviewImage(ObjectToDisplay.Get(), TooltipBrush);
+
+		// if there is no speaker preview image, use the type image instead
+		if(!bHasSpeakerPreviewImage)
+		{
+			TooltipBrush = *UserInterfaceHelperFunctions::GetArticyTypeImage(ObjectToDisplay.Get(), UserInterfaceHelperFunctions::Large);
+		}
+	}
+	
 	SToolTip::Construct(
 		SToolTip::FArguments()
 		.TextMargin(1.f)
@@ -31,7 +46,7 @@ void SDialogueEntityToolTip::Construct(const FArguments& InArgs)
 
 }
 
-void SDialogueEntityToolTip::OnOpening()
+void SArticyObjectToolTip::OnOpening()
 {
 	if(ObjectToDisplay.IsValid())
 	{
@@ -39,17 +54,16 @@ void SDialogueEntityToolTip::OnOpening()
 	}
 }
 
-void SDialogueEntityToolTip::OnClosed()
+void SArticyObjectToolTip::OnClosed()
 {
 	SetContentWidget(SNullWidget::NullWidget);
 }
 
-TSharedRef<SWidget> SDialogueEntityToolTip::CreateToolTipContent()
+TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 {
-
 	const FString AssetName = ObjectToDisplay.Get()->GetName();
 	const UClass* ClassOfObject = ObjectToDisplay.Get()->UObject::GetClass();
-	
+
 	// The tooltip contains the name, class, path, and asset registry tags
 	// Use asset name by default, overwrite with display name where it makes sense
 	FText NameText = FText::FromString(AssetName);
@@ -138,17 +152,36 @@ TSharedRef<SWidget> SDialogueEntityToolTip::CreateToolTipContent()
 			]
 		];
 
-	// Bottom section (asset registry tags)
+	// Bottom section (additional information)
 	OverallTooltipVBox->AddSlot()
-		.AutoHeight()
+	.AutoHeight()
+	[		
+		SNew(SBorder)
+		.Padding(6)
+		.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
 		[
-			SNew(SBorder)
-			.Padding(6)
-			.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
 			[
 				InfoBox
 			]
-		];
+			+ SHorizontalBox::Slot()
+			.HAlign(HAlign_Center)
+			.VAlign(VAlign_Top)
+			.AutoWidth()
+			[
+				SNew(SBox)
+				.Padding(FMargin(10, 2, 2, 2))
+				[
+					SNew(SImage)
+					.Image(this, &SArticyObjectToolTip::GetTooltipImage)
+				]
+			]
+		]			
+	];
+
+	
 
 	return SNew(SBorder)
 	.Padding(6)
@@ -159,10 +192,11 @@ TSharedRef<SWidget> SDialogueEntityToolTip::CreateToolTipContent()
 		[
 			OverallTooltipVBox
 		]
+		
 	];
 }
 
-void SDialogueEntityToolTip::AddToToolTipInfoBox(const TSharedRef<SVerticalBox>& InfoBox, const FText& Key, const FText& Value, bool bImportant) const
+void SArticyObjectToolTip::AddToToolTipInfoBox(const TSharedRef<SVerticalBox>& InfoBox, const FText& Key, const FText& Value, bool bImportant) const
 {
 	FWidgetStyle ImportantStyle;
 	ImportantStyle.SetForegroundColor(FLinearColor(1, 0.5, 0, 1));
@@ -184,12 +218,17 @@ void SDialogueEntityToolTip::AddToToolTipInfoBox(const TSharedRef<SVerticalBox>&
 			.AutoWidth()
 			[
 				SNew(STextBlock).Text(Value)
-				.WrapTextAt(450)
+				.WrapTextAt(400)
 				.ColorAndOpacity(bImportant ? ImportantStyle.GetForegroundColor() : FSlateColor::UseSubduedForeground())
 				.HighlightText((Key.ToString() == TEXT("Path")) ? HighlightText : FText())
 				.WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
 			]
 		];
+}
+
+const FSlateBrush* SArticyObjectToolTip::GetTooltipImage() const
+{
+	return &TooltipBrush;
 }
 
 #undef LOCTEXT_NAMESPACE

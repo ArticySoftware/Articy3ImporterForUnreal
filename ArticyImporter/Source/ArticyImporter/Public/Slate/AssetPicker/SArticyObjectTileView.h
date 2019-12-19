@@ -10,15 +10,16 @@
 #include <SCompoundWidget.h>
 #include "ArticyObject.h"
 #include <SBorder.h>
+#include "UserInterfaceHelperFunctions.h"
 
 
 /**
  *  REFERENCE: SAssetViewItem, which is the normal asset selection widget in a picker
  */
-class ARTICYIMPORTER_API SDialogueEntityTileView : public SCompoundWidget
+class ARTICYIMPORTER_API SArticyObjectTileView : public SCompoundWidget
 {
 public:	
-	SLATE_BEGIN_ARGS(SDialogueEntityTileView) 
+	SLATE_BEGIN_ARGS(SArticyObjectTileView) 
 		: _ThumbnailSize(48.f)	
 		, _ThumbnailPadding(4.f)
 	{}
@@ -38,17 +39,25 @@ public:
 
 private:
 	TWeakObjectPtr<UArticyObject> ObjectToDisplay;
-	TSharedPtr<SImage> EntityImage;
-	TSharedPtr<STextBlock> EntityNameTextBlock;
+	TSharedPtr<SImage> PreviewImage;
+	TSharedPtr<STextBlock> DisplayNameTextBlock;
 	TSharedPtr<SBorder> WidgetContainerBorder;
 
-	TSharedPtr<FSlateBrush> ArticyObjectImageBrush;
+	mutable FSlateBrush PreviewBrush;
+	const FSlateBrush* TypeImage = nullptr;
 	TSharedPtr<FTextBlockStyle> EntityNameTextStyle;
 	int32 ThumbnailSize;
 	int32 ThumbnailPadding;
-	mutable TWeakObjectPtr<UTexture2D> CachedTexture;
+
+	bool bHasPreviewImage = false;
+	bool bHasColor = false;
+	// default articy color for objects that do not have a color but still need a border
+	FSlateColor ArticyObjectColor = FLinearColor(0.577, 0.76, 0.799);
 	
 private:
 	FText OnGetEntityName() const;
 	const FSlateBrush* OnGetEntityImage() const;
+	EVisibility OnHasPreviewImage() const;
+	const FSlateBrush* OnGetTypeImage(UserInterfaceHelperFunctions::EImageSize SizeOverride = UserInterfaceHelperFunctions::Medium) const;
+
 };

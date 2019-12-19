@@ -6,19 +6,19 @@
 #include <TextFilterExpressionEvaluator.h>
 #include "ArticyObject.h"
 
-#define LOCTEXT_NAMESPACE "DialogueEntityPicker"
+#define LOCTEXT_NAMESPACE "ArticyObjectSearchBoxHelpers"
 
-/** A filter for text search */
-class FFrontendFilter_DialogueEntity : public FFrontendFilter
+/** A filter for testing articy objects for various traits such as display name, speaker name, text etc. */
+class FFrontendFilter_ArticyObject : public FFrontendFilter
 {
 public:
-	FFrontendFilter_DialogueEntity();
-	~FFrontendFilter_DialogueEntity();
+	FFrontendFilter_ArticyObject();
+	~FFrontendFilter_ArticyObject();
 
 	// FFrontendFilter implementation
-	virtual FString GetName() const override { return TEXT("TextFilter"); }
-	virtual FText GetDisplayName() const override { return LOCTEXT("FrontendFilter_Text", "Text"); }
-	virtual FText GetToolTipText() const override { return LOCTEXT("FrontendFilter_TextTooltip", "Show only assets that match the input text"); }
+	virtual FString GetName() const override { return TEXT("ArticyObjectFilter"); }
+	virtual FText GetDisplayName() const override { return LOCTEXT("FrontendFilter_ArticyObjectFilter", "Articy Object Filter"); }
+	virtual FText GetToolTipText() const override { return LOCTEXT("FrontendFilter_ArticyObjectTooltip", "Show only articy objects that match the criteria"); }
 
 	// IFilter implementation
 	virtual bool PassesFilter(FAssetFilterType InItem) const override;
@@ -36,24 +36,19 @@ public:
 	/** If bIncludeClassName is true, the text filter will include an asset's class name in the search */
 	void SetIncludeClassName(const bool InIncludeClassName);
 
-	/** If bIncludeAssetPath is true, the text filter will match against full Asset path */
-	void SetIncludeAssetPath(const bool InIncludeAssetPath);
-
-	bool GetIncludeAssetPath() const;
-
 private:
 
 	/** Transient context data, used when calling PassesFilter. Kept around to minimize re-allocations between multiple calls to PassesFilter */
-	TSharedRef<class FFrontendFilter_DialogueEntityFilterExpressionContext> TextFilterExpressionContext;
+	TSharedRef<class FFrontendFilter_ArticyObjectFilterExpressionContext> TextFilterExpressionContext;
 
 	/** Expression evaluator that can be used to perform complex text filter queries */
 	FTextFilterExpressionEvaluator TextFilterExpressionEvaluator;
 };
 
-class FClassRestrictionFilter : public IFilter<FAssetFilterType>
+class FArticyClassRestrictionFilter : public IFilter<FAssetFilterType>
 {
 public:
-	FClassRestrictionFilter();
+	FArticyClassRestrictionFilter();
 
 	// IFilter implementation
 	virtual bool PassesFilter(FAssetFilterType InItem) const override;
@@ -61,7 +56,7 @@ public:
 	TSubclassOf<UArticyObject> AllowedClass;
 
 	// IFilter implementation
-	DECLARE_DERIVED_EVENT(FClassRestrictionFilter, IFilter<FAssetFilterType>::FChangedEvent, FChangedEvent);
+	DECLARE_DERIVED_EVENT(FArticyClassRestrictionFilter, IFilter<FAssetFilterType>::FChangedEvent, FChangedEvent);
 	virtual FChangedEvent& OnChanged() override { return ChangedEvent; }
 
 	FChangedEvent ChangedEvent;
