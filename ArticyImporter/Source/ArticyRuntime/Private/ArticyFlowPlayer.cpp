@@ -6,11 +6,11 @@
 
 #include "ArticyFlowPlayer.h"
 #include "ArticyRuntime.h"
-#include "ArticyFlowObject.h"
-#include "ArticyObjectWithSpeaker.h"
+#include "Interfaces/ArticyFlowObject.h"
+#include "Interfaces/ArticyObjectWithSpeaker.h"
 #include "ArticyExpressoScripts.h"
-#include "ArticyInputPinsProvider.h"
-#include "ArticyOutputPinsProvider.h"
+#include "Interfaces/ArticyInputPinsProvider.h"
+#include "Interfaces/ArticyOutputPinsProvider.h"
 
 TScriptInterface<IArticyFlowObject> FArticyBranch::GetTarget() const
 {

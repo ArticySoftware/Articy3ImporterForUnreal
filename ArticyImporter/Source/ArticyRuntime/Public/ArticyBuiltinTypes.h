@@ -147,3 +147,24 @@ private:
 		friend struct ArticyObjectTypeInfo;
 	void InitFromJson(TSharedPtr<FJsonValue> Json) override;
 };
+
+UCLASS()
+class ARTICYRUNTIME_API UArticyUserFolder : public UArticyObject
+{
+	GENERATED_BODY()
+
+};
+
+UCLASS()
+class ARTICYRUNTIME_API UArticyZone : public UArticyObject
+{
+	GENERATED_BODY()
+
+};
+
+UCLASS()
+class ARTICYRUNTIME_API UArticyLocation : public UArticyObject
+{
+	GENERATED_BODY()
+
+};

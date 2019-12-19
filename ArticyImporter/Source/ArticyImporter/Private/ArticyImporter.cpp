@@ -10,11 +10,11 @@
 #include "Developer/Settings/Public/ISettingsModule.h"
 #include "Developer/Settings/Public/ISettingsSection.h"
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
-#include <Dialogs.h>
-#include <SWindow.h>
+#include "Dialogs/Dialogs.h"
+#include <Widgets/SWindow.h>
 #include "ArticyImporterFunctionLibrary.h"
 #include "Editor.h"
-#include "ArticyRefCustomization.h"
+#include "Slate/ArticyRefCustomization.h"
 #include "ArticyImporterStyle.h"
 
 DEFINE_LOG_CATEGORY(LogArticyImporter)

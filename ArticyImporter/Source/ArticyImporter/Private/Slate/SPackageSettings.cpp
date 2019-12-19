@@ -1,8 +1,12 @@
-#include "SPackageSettings.h"
+//  
+// Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.  
+//
+
+#include "Slate/SPackageSettings.h"
 #include "ArticyDatabase.h"
 #include "ArticyPluginSettings.h"
-#include "SSplitter.h"
-#include "SBorder.h"
+#include "Widgets/Layout/SSplitter.h"
 #include "EditorStyle.h"
 
 

@@ -16,15 +16,10 @@
 #include "ArticyDatabase.h"
 #include "ExpressoScriptsGenerator.h"
 #include "FileHelpers.h"
-#include <IProjectManager.h>
-#include <GameProjectGenerationModule.h>
-#include <UnrealEdMisc.h>
-#include <GenericPlatformMisc.h>
-#include <Dialogs.h>
-#include "../Launch/Resources/Version.h"
+#include "UnrealEdMisc.h"
+#include "GenericPlatform/GenericPlatformMisc.h"
 #include "ArticyImporter.h"
 #include "ArticyPluginSettings.h"
-#include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 
 //---------------------------------------------------------------------------//

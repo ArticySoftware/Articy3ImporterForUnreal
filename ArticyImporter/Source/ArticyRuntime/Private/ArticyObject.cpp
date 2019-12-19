@@ -8,7 +8,7 @@
 #include "ArticyHelpers.h"
 #include "ArticyDatabase.h"
 #include "ArticyBaseTypes.h"
-#include <AssetsPackage/ArticyPackage.h>
+#include <ArticyPackage.h>
 
 void UArticyObject::InitFromJson(TSharedPtr<FJsonValue> Json)
 {

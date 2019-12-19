@@ -1,11 +1,14 @@
+//  
+// Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.  
+//
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include <IPropertyTypeCustomization.h>
-#include <DetailLayoutBuilder.h>
-#include <IDetailCustomization.h>
 #include "ArticyRef.h"
-#include "SDialogueEntityProperty.h"
+#include "SArticyRefProperty.h"
 #include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
 #include "ArticyObject.h"
@@ -16,12 +19,10 @@ public:
 	virtual bool IsClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const UClass* InClass, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
 	{
 		return InClass->IsChildOf(UArticyObject::StaticClass());
-		//	InFilterFuncs->IfInChildOfClassesSet()
 	}
 
 	virtual bool IsUnloadedClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const TSharedRef< const IUnloadedBlueprintData > InUnloadedClassData, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
 	{
-		// @TODO: One day would be nice to see functions on unloaded classes...
 		return false;
 	}
 };
@@ -38,7 +39,7 @@ public:
 
 private:
 	TSharedPtr<IPropertyHandle> ArticyRefPropertyHandle;
-	TSharedPtr<SArticyRefSelection> ArticyRefSelection;
+	TSharedPtr<SArticyRefProperty> ArticyRefProperty;
 	UClass* ClassRestriction = nullptr;
 
 	FArticyRef* RetrieveArticyRef() const;

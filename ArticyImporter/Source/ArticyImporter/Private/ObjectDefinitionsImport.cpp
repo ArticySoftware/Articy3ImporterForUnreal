@@ -9,6 +9,7 @@
 #include "ArticyImportData.h"
 #include "CodeGeneration/CodeFileGenerator.h"
 #include "ArticyBaseTypes.h"
+#include "ArticyBuiltinTypes.h"
 #include "PredefinedTypes.h"
 #include "Templates/SharedPointerInternals.h"
 #include "ArticyFlowClasses.h"
@@ -621,6 +622,9 @@ const FArticyObjectDefinitions::FClassInfo& FArticyObjectDefinitions::GetDefault
 		DefaultBaseClasses.Add("Instruction", FClassInfo{ "UArticyInstruction", UArticyInstruction::StaticClass() });
 		DefaultBaseClasses.Add("Asset", FClassInfo{ "UArticyAsset", UArticyAsset::StaticClass() });
 		DefaultBaseClasses.Add("Entity", FClassInfo{ "UArticyEntity", UArticyEntity::StaticClass() });
+		DefaultBaseClasses.Add("UserFolder", FClassInfo{ "UArticyUserFolder", UArticyUserFolder::StaticClass() });
+		DefaultBaseClasses.Add("Zone", FClassInfo{ "UArticyZone", UArticyZone::StaticClass() });
+		DefaultBaseClasses.Add("Location", FClassInfo{ "UArticyLocation", UArticyLocation::StaticClass() });
 	}
 
 	auto base = DefaultBaseClasses.Find(OriginalType);

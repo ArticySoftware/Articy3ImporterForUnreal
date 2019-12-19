@@ -1,7 +1,12 @@
+//  
+// Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.  
+//
+
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SCompoundWidget.h"
+#include "Widgets/SCompoundWidget.h"
 
 enum class ECheckBoxState : unsigned char;
 

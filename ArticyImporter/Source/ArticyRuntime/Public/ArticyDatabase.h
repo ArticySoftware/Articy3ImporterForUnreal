@@ -7,9 +7,7 @@
 #include "Engine/DataAsset.h"
 #include "ArticyBaseObject.h"
 #include "ShadowStateManager.h"
-#include "AssetRegistryModule.h"
 #include "ArticyObject.h"
-#include "Serialization/Archive.h"
 #include "ArticyPackage.h"
 
 #include "ArticyDatabase.generated.h"

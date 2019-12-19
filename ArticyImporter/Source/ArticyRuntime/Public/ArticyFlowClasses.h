@@ -5,7 +5,7 @@
 #pragma once
 
 #include "ArticyPins.h"
-#include "ArticyNode.h"
+#include "Interfaces/ArticyNode.h"
 
 #include "ArticyFlowClasses.generated.h"
 

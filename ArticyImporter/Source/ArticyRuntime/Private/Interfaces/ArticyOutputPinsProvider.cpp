@@ -6,7 +6,7 @@
 
 
 
-#include "ArticyOutputPinsProvider.h"
+#include "Interfaces/ArticyOutputPinsProvider.h"
 
 void IArticyOutputPinsProvider::Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>& OutBranches, const uint32& Depth)
 {

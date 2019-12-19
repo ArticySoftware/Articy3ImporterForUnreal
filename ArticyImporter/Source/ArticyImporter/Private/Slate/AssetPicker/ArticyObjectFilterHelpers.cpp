@@ -1,23 +1,26 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//  
+// Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.  
+//
 
 
-#include "ObjectSearchBoxHelpers.h"
+#include "Slate/AssetPicker/ArticyObjectFilterHelpers.h"
 #include "ArticyObject.h"
-#include "ArticyObjectWithDisplayName.h"
-#include "ArticyObjectWithText.h"
+#include "Interfaces/ArticyObjectWithDisplayName.h"
+#include "Interfaces/ArticyObjectWithText.h"
+#include "Interfaces/ArticyObjectWithSpeaker.h"
 
-#define LOCTEXT_NAMESPACE "DialogueEntityTileView"
+#define LOCTEXT_NAMESPACE "ArticyObjectSearchBoxHelpers"
 
 /** Expression context to test the given asset data against the current text filter */
-class FFrontendFilter_DialogueEntityFilterExpressionContext : public ITextFilterExpressionContext
+class FFrontendFilter_ArticyObjectFilterExpressionContext : public ITextFilterExpressionContext
 {
 public:
 	typedef TRemoveReference<FAssetFilterType>::Type* FAssetFilterTypePtr;
 
-	FFrontendFilter_DialogueEntityFilterExpressionContext()
+	FFrontendFilter_ArticyObjectFilterExpressionContext()
 		: AssetPtr(nullptr)
 		, bIncludeClassName(true)
-		, bIncludeAssetPath(false)
 		, NameKeyName("Name")
 		, PathKeyName("Path")
 		, ClassKeyName("Class")
@@ -29,29 +32,11 @@ public:
 	void SetAsset(FAssetFilterTypePtr InAsset)
 	{
 		AssetPtr = InAsset;
-
-		if (bIncludeAssetPath)
-		{
-			// Get the full asset path, and also split it so we can compare each part in the filter
-			AssetPtr->PackageName.AppendString(AssetFullPath);
-			AssetFullPath.ParseIntoArray(AssetSplitPath, TEXT("/"));
-			AssetFullPath.ToUpperInline();
-
-			if (bIncludeClassName)
-			{
-				// Get the full export text path as people sometimes search by copying this (requires class and asset path search to be enabled in order to match)
-				AssetPtr->GetExportTextName(AssetExportTextName);
-				AssetExportTextName.ToUpperInline();
-			}
-		}
 	}
 
 	void ClearAsset()
 	{
 		AssetPtr = nullptr;
-		AssetFullPath.Reset();
-		AssetExportTextName.Reset();
-		AssetSplitPath.Reset();
 	}
 
 	void SetIncludeClassName(const bool InIncludeClassName)
@@ -62,16 +47,6 @@ public:
 	bool GetIncludeClassName() const
 	{
 		return bIncludeClassName;
-	}
-
-	void SetIncludeAssetPath(const bool InIncludeAssetPath)
-	{
-		bIncludeAssetPath = InIncludeAssetPath;
-	}
-
-	bool GetIncludeAssetPath() const
-	{
-		return bIncludeAssetPath;
 	}
 
 	virtual bool TestBasicStringExpression(const FTextFilterString& InValue, const ETextFilterTextComparisonMode InTextComparisonMode) const override
@@ -93,44 +68,21 @@ public:
 			return true;
 		}
 
-		FTextFilterString AssetName(AssetPtr->AssetName);
+		if(CheckSpeakerDisplayName(InValue, InTextComparisonMode))
+		{
+			return true;
+		}
+
+		const FTextFilterString AssetName(AssetPtr->AssetName);
 		if (AssetName.CompareText(InValue, InTextComparisonMode))
 		{
 			return true;
 		}
 
-		if (bIncludeAssetPath)
-		{
-			FTextFilterString AssetFullPathFilter(AssetFullPath);
-			if (AssetFullPathFilter.CompareText(InValue, InTextComparisonMode))
-			{
-				return true;
-			}
-
-			for (const FString& AssetPathPart : AssetSplitPath)
-			{
-				FTextFilterString AssetPathPartFilter(AssetPathPart);
-				if (AssetPathPartFilter.CompareText(InValue, InTextComparisonMode))
-				{
-					return true;
-				}
-			}
-		}
-
 		if (bIncludeClassName)
 		{
-			FTextFilterString AssetClassFilter(AssetPtr->AssetClass);
+			const FTextFilterString AssetClassFilter(AssetPtr->AssetClass);
 			if (AssetClassFilter.CompareText(InValue, InTextComparisonMode))
-			{
-				return true;
-			}
-		}
-
-		if (bIncludeClassName && bIncludeAssetPath)
-		{
-			// Only test this if we're searching the class name and asset path too, as the exported text contains the type and path in the string
-			FTextFilterString AssetExportTextNameFilter(AssetExportTextName);
-			if (AssetExportTextNameFilter.CompareText(InValue, InTextComparisonMode))
 			{
 				return true;
 			}
@@ -219,20 +171,8 @@ private:
 	/** Pointer to the asset we're currently filtering */
 	FAssetFilterTypePtr AssetPtr;
 
-	/** Full path of the current asset */
-	FString AssetFullPath;
-
-	/** The export text name of the current asset */
-	FString AssetExportTextName;
-
-	/** Split path of the current asset */
-	TArray<FString> AssetSplitPath;
-
 	/** Are we supposed to include the class name in our basic string tests? */
 	bool bIncludeClassName;
-
-	/** Search inside the entire asset path? */
-	bool bIncludeAssetPath;
 
 	/** Keys used by TestComplexExpression */
 	const FName NameKeyName;
@@ -247,7 +187,7 @@ private:
 
 		if(ArticyObjectWithDisplayName)
 		{
-			FTextFilterString TextToCompare(ArticyObjectWithDisplayName->GetDisplayName().ToString());
+			const FTextFilterString TextToCompare(ArticyObjectWithDisplayName->GetDisplayName().ToString());
 
 			if (TextToCompare.IsEmpty())
 			{
@@ -255,10 +195,6 @@ private:
 			}
 
 			return TextToCompare.CompareText(InValue, InTextComparisonMode);
-
-			// CompareFString and CompareText somehow seem to return incorrect values
-			//return InValue.CompareFString(displayName, InTextComparisonMode);
-			//return InValue.CompareText(TextToCompare, InTextComparisonMode);
 		}
 
 		return false;
@@ -290,7 +226,7 @@ private:
 
 		if (ArticyObject)
 		{
-			FTextFilterString TextToCompare(ArticyObject->GetTechnicalName());
+			const FTextFilterString TextToCompare(ArticyObject->GetTechnicalName());
 			
 			if (TextToCompare.IsEmpty())
 			{
@@ -302,22 +238,47 @@ private:
 
 		return false;
 	}
+
+	bool CheckSpeakerDisplayName(const FTextFilterString& InValue, const ETextFilterTextComparisonMode InTextComparisonMode) const
+	{
+		IArticyObjectWithSpeaker* ArticyObjectWithSpeaker = Cast<IArticyObjectWithSpeaker>(AssetPtr->GetAsset());
+
+		if(ArticyObjectWithSpeaker)
+		{
+			UArticyObject* SpeakerObject = UArticyObject::FindAsset(ArticyObjectWithSpeaker->GetSpeakerId());
+
+			IArticyObjectWithDisplayName* SpeakerDisplayName = Cast<IArticyObjectWithDisplayName>(SpeakerObject);
+
+			FText& SpeakerName = SpeakerDisplayName->GetDisplayName();
+			const FTextFilterString TextToCompare(SpeakerName.ToString());
+
+			if (TextToCompare.IsEmpty())
+			{
+				return false;
+			}
+
+			return TextToCompare.CompareText(InValue, InTextComparisonMode);
+		}
+		
+
+		return false;
+	}
 };
 
 
-FFrontendFilter_DialogueEntity::FFrontendFilter_DialogueEntity()
+FFrontendFilter_ArticyObject::FFrontendFilter_ArticyObject()
 	: FFrontendFilter(nullptr)
-	, TextFilterExpressionContext(MakeShareable(new FFrontendFilter_DialogueEntityFilterExpressionContext()))
+	, TextFilterExpressionContext(MakeShareable(new FFrontendFilter_ArticyObjectFilterExpressionContext()))
 	, TextFilterExpressionEvaluator(ETextFilterExpressionEvaluatorMode::Complex)
 {
 }
 
-FFrontendFilter_DialogueEntity::~FFrontendFilter_DialogueEntity()
+FFrontendFilter_ArticyObject::~FFrontendFilter_ArticyObject()
 {
 
 }
 
-bool FFrontendFilter_DialogueEntity::PassesFilter(FAssetFilterType InItem) const
+bool FFrontendFilter_ArticyObject::PassesFilter(FAssetFilterType InItem) const
 {
 	TextFilterExpressionContext->SetAsset(&InItem);
 	const bool bMatched = TextFilterExpressionEvaluator.TestTextFilter(*TextFilterExpressionContext);
@@ -325,12 +286,12 @@ bool FFrontendFilter_DialogueEntity::PassesFilter(FAssetFilterType InItem) const
 	return bMatched;
 }
 
-FText FFrontendFilter_DialogueEntity::GetRawFilterText() const
+FText FFrontendFilter_ArticyObject::GetRawFilterText() const
 {
 	return TextFilterExpressionEvaluator.GetFilterText();
 }
 
-void FFrontendFilter_DialogueEntity::SetRawFilterText(const FText& InFilterText)
+void FFrontendFilter_ArticyObject::SetRawFilterText(const FText& InFilterText)
 {
 	if (TextFilterExpressionEvaluator.SetFilterText(InFilterText))
 	{
@@ -339,12 +300,12 @@ void FFrontendFilter_DialogueEntity::SetRawFilterText(const FText& InFilterText)
 	}
 }
 
-FText FFrontendFilter_DialogueEntity::GetFilterErrorText() const
+FText FFrontendFilter_ArticyObject::GetFilterErrorText() const
 {
 	return TextFilterExpressionEvaluator.GetFilterErrorText();
 }
 
-void FFrontendFilter_DialogueEntity::SetIncludeClassName(const bool InIncludeClassName)
+void FFrontendFilter_ArticyObject::SetIncludeClassName(const bool InIncludeClassName)
 {
 	if (TextFilterExpressionContext->GetIncludeClassName() != InIncludeClassName)
 	{
@@ -355,27 +316,11 @@ void FFrontendFilter_DialogueEntity::SetIncludeClassName(const bool InIncludeCla
 	}
 }
 
-void FFrontendFilter_DialogueEntity::SetIncludeAssetPath(const bool InIncludeAssetPath)
-{
-	if (TextFilterExpressionContext->GetIncludeAssetPath() != InIncludeAssetPath)
-	{
-		TextFilterExpressionContext->SetIncludeAssetPath(InIncludeAssetPath);
-
-		// Will trigger a re-filter with the new setting
-		BroadcastChangedEvent();
-	}
-}
-
-bool FFrontendFilter_DialogueEntity::GetIncludeAssetPath() const
-{
-	return TextFilterExpressionContext->GetIncludeAssetPath();
-}
-
-FClassRestrictionFilter::FClassRestrictionFilter()
+FArticyClassRestrictionFilter::FArticyClassRestrictionFilter()
 {
 }
 
-bool FClassRestrictionFilter::PassesFilter(FAssetFilterType InItem) const
+bool FArticyClassRestrictionFilter::PassesFilter(FAssetFilterType InItem) const
 {
 	return InItem.GetAsset()->IsA(AllowedClass.Get());
 }

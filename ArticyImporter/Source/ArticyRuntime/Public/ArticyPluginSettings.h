@@ -5,9 +5,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SharedPointer.h"
-#include "Object.h"
-#include "Archive.h"
+#include "Templates/SharedPointer.h"
+#include "UObject/Object.h"
 #include "ArticyPluginSettings.generated.h"
 
 UCLASS(config = Engine, defaultconfig)

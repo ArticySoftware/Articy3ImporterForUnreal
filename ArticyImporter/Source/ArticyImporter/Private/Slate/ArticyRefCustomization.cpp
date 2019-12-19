@@ -1,18 +1,20 @@
-#include "ArticyRefCustomization.h"
+//  
+// Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.  
+//
+
+#include "Slate/ArticyRefCustomization.h"
 #include "IDetailChildrenBuilder.h"
 #include "DetailWidgetRow.h"
-#include "SWidget.h"
-#include "ModuleManager.h"
+#include "Widgets/SWidget.h"
+#include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
-#include "IPropertyChangeListener.h"
-#include "Delegate.h"
-#include "ArticyPrimitive.h"
+#include "Delegates/Delegate.h"
 #include "ArticyObject.h"
 #include "ArticyRef.h"
 #include "ClassViewerModule.h"
-#include "EditorStyleSet.h"
 #include "ArticyImporterStyle.h"
-#include <Private/SlateEditorStyle.h>
+#include "EditorStyle/Private/SlateEditorStyle.h"
 
 
 
@@ -39,7 +41,7 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	{
 		ClassRestriction = UArticyObject::StaticClass();
 	}
-	ArticyRefSelection = SNew(SArticyRefSelection, ArticyRef, CustomizationUtils)
+	ArticyRefProperty = SNew(SArticyRefProperty, ArticyRef, CustomizationUtils)
 		.ClassRestriction(this, &FArticyRefCustomization::GetClassRestriction);
 
 	HeaderRow.NameContent()
@@ -49,17 +51,17 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	.ValueContent()
 	.MinDesiredWidth(150)
 	[
-		ArticyRefSelection.ToSharedRef()
+		ArticyRefProperty.ToSharedRef()
 	];
 }
 
 void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	FClassViewerInitializationOptions config;
-	config.DisplayMode = EClassViewerDisplayMode::TreeView;
-	config.ClassFilter = MakeShareable(new FArticyRefClassFilter);
+	FClassViewerInitializationOptions ClassViewerConfig;
+	ClassViewerConfig.DisplayMode = EClassViewerDisplayMode::TreeView;
+	ClassViewerConfig.ClassFilter = MakeShareable(new FArticyRefClassFilter);
 
-	ClassViewer = StaticCastSharedRef<SClassViewer>(FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(config, FOnClassPicked::CreateSP(this, &FArticyRefCustomization::OnClassPicked)));
+	ClassViewer = StaticCastSharedRef<SClassViewer>(FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(ClassViewerConfig, FOnClassPicked::CreateSP(this, &FArticyRefCustomization::OnClassPicked)));
 	ClassRestrictionButton =
 		SNew(SComboButton)
 		.OnGetMenuContent(this, &FArticyRefCustomization::CreateClassPicker)

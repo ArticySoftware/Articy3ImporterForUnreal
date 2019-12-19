@@ -8,9 +8,9 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "ArticyBaseTypes.h"
-#include "ArticyReflectable.h"
 #include "Engine/Engine.h"
 #include <Engine/World.h>
+#include "Interfaces/ArticyReflectable.h"
 
 #include "ArticyBaseObject.generated.h"
 

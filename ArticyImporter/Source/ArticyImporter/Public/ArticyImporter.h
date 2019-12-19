@@ -6,11 +6,7 @@
 
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
-#include "Misc/CompilationResult.h"
-#include "ArticyJSONFactory.h"
-#include "ArticyImporterHelpers.h"
-#include "IDelegateInstance.h"
-#include "ArticyRef.h"
+#include "Delegates/IDelegateInstance.h"
 #include "ArticyImporterConsoleCommands.h"
 
 

@@ -5,7 +5,7 @@
 #pragma once
 
 #include "ArticyRuntime.h"
-#include "ArticyReflectable.h"
+#include "Interfaces/ArticyReflectable.h"
 #include "AssetRegistryModule.h"
 #include "ShadowStateManager.h"
 #include "ArticyExpressoScripts.h"

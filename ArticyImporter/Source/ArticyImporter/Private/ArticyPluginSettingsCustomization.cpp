@@ -1,4 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//  
+// Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.  
+//
 
 
 #include "ArticyPluginSettingsCustomization.h"
@@ -8,7 +11,7 @@
 #include "DetailWidgetRow.h"
 #include "DetailCategoryBuilder.h"
 #include "ArticyDatabase.h"
-#include "SPackageSettings.h"
+#include "Slate/SPackageSettings.h"
 #include "ArticyImporter.h"
 
 #define LOCTEXT_NAMESPACE "ArticyPluginSettings"

@@ -1,16 +1,17 @@
+//  
+// Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.  
+//
+
 #pragma once
 
 #include "Engine.h"
 #include "AssetRegistryModule.h"
-#include <sstream>
-#include "Dom/JsonValue.h"
 #include "UObject/Package.h"
-#include "Dom/JsonObject.h"
 #include "ObjectTools.h"
 #include "AssetToolsModule.h"
 #include "ArticyHelpers.h"
-#include "CodeGeneration/PackagesGenerator.h"
-#include "ArticyPackage.h"
+
 
 namespace ArticyImporterHelpers
 {
