@@ -8,6 +8,8 @@
 #include <Widgets/SToolTip.h>
 #include "ArticyObject.h"
 
+// Reference: AssetViewWidgets.h: CreateToolTipWidget
+
 class SArticyObjectTileView;
 
 class SArticyObjectToolTip : public SToolTip
@@ -32,12 +34,9 @@ protected:
 	FSlateBrush TooltipBrush;
 
 	TSharedRef<SWidget> CreateToolTipContent();
-	/** Helper function for CreateToolTipWidget. Adds a key value pair to the info box of the tooltip */
+	/** Adds key value type content to the tooltip box (i.e. "Text: This Is Sample Text" */
 	void AddToToolTipInfoBox(const TSharedRef<SVerticalBox>& InfoBox, const FText& Key, const FText& Value, bool bImportant) const;
 
-private:
-	/** The substring to be highlighted in the name and tooltip path */
-	TAttribute<FText> HighlightText;
 private:
 	const FSlateBrush* GetTooltipImage() const;
 };

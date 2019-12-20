@@ -95,7 +95,7 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 		const IArticyObjectWithDisplayName* DisplayNameOfSpeaker = Cast<IArticyObjectWithDisplayName>(Speaker);
 		const FText DisplayName = DisplayNameOfSpeaker->GetDisplayName();
 		
-		AddToToolTipInfoBox(InfoBox, LOCTEXT("DialogueEntityToolTipSpeaker", "Speaker"), DisplayName, true);
+		AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyObjectToolTipSpeaker", "Speaker"), DisplayName, true);
 	}
 	
 	// add the text to the tooltip body if possible
@@ -109,7 +109,7 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 		}
 		else
 		{
-			AddToToolTipInfoBox(InfoBox, LOCTEXT("DialogueEntityToolTipText", "Text"), FText::FromString(FString("\"").Append(Text.ToString()).Append("\"")), true);
+			AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyObjectToolTipText", "Text"), FText::FromString(FString("\"").Append(Text.ToString()).Append("\"")), true);
 		}
 	}
 
@@ -117,14 +117,11 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 	// if we overwrote the asset name with the display name, attach the asset name in the tooltip body
 	if (bUsingDisplayName)
 	{
-		AddToToolTipInfoBox(InfoBox, LOCTEXT("DialogueEntityToolTipAssetName", "Asset Name"), FText::FromString(AssetName), false);
+		AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyObjectToolTipAssetName", "Asset Name"), FText::FromString(AssetName), false);
 	}
 
 	// add class name
-	AddToToolTipInfoBox(InfoBox, LOCTEXT("DialogueEntityToolTipClass", "Class"), ClassText, false);
-
-	// Add Path
-	//AddToToolTipInfoBox(InfoBox, LOCTEXT("DialogueEntityToolTipPath", "Path"), FText::FromName(AssetData.PackagePath), false);
+	AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyObjectToolTipClass", "Class"), ClassText, false);
 
 	TSharedRef<SVerticalBox> OverallTooltipVBox = SNew(SVerticalBox);
 
@@ -184,8 +181,6 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 		]			
 	];
 
-	
-
 	return SNew(SBorder)
 	.Padding(6)
 	.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.NonContentBorder"))
@@ -195,7 +190,6 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 		[
 			OverallTooltipVBox
 		]
-		
 	];
 }
 
@@ -220,10 +214,10 @@ void SArticyObjectToolTip::AddToToolTipInfoBox(const TSharedRef<SVerticalBox>& I
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
 			[
+				// highlighting text reference: AssetViewWidgets.cpp 1118
 				SNew(STextBlock).Text(Value)
 				.WrapTextAt(400)
 				.ColorAndOpacity(bImportant ? ImportantStyle.GetForegroundColor() : FSlateColor::UseSubduedForeground())
-				.HighlightText((Key.ToString() == TEXT("Path")) ? HighlightText : FText())
 				.WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
 			]
 		];
