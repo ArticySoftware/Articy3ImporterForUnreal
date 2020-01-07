@@ -6,7 +6,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ArticyRef.h"
 #include "Widgets/Input/SComboButton.h"
 #include "Widgets/Layout/SBorder.h"
 #include "ClassViewer/Private/SClassViewer.h"
@@ -36,11 +35,13 @@ public:
  *
  * @param	InArgs	The declaration data for this widget
  */
-	void Construct(const FArguments& InArgs, FArticyRef* InArticyRef, IPropertyTypeCustomizationUtils& CustomizationUtils);
+	void Construct(const FArguments& InArgs, TWeakObjectPtr<UArticyObject> InArticyObject, IPropertyHandle* InArticyRefPropHandle, IPropertyTypeCustomizationUtils& CustomizationUtils);
 
 private:
-	FArticyRef* ArticyRef = nullptr;
-	TWeakObjectPtr<UArticyObject> SelectedArticyObject;
+	// the articy object this widget currently represents
+	TWeakObjectPtr<UArticyObject> ArticyObject = nullptr;
+	// the property handle for the articy ref that will be manipulated
+	IPropertyHandle* ArticyRefPropHandle = nullptr;
 	TSharedPtr<SArticyObjectTileView> TileView;
 	TSharedPtr<SBox> TileContainer;
 	TSharedPtr<SBorder> ThumbnailBorder;
@@ -51,6 +52,7 @@ private:
 private:
 	TSharedRef<SWidget> CreateArticyObjectAssetPicker();
 	FReply OnArticyButtonClicked() const;
+	/** Updates the underlying ArticyRef to reference the new asset. Can be null */
 	void SetAsset(const FAssetData& AssetData);
 	FReply OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const;
 	FText OnGetArticyObjectDisplayName() const;

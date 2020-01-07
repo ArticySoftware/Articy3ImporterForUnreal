@@ -37,12 +37,13 @@ public:
 
 	virtual void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 
+	static FArticyRef* RetrieveArticyRef(IPropertyHandle* ArticyRefHandle);
+
 private:
 	TSharedPtr<IPropertyHandle> ArticyRefPropertyHandle;
 	TSharedPtr<SArticyRefProperty> ArticyRefProperty;
 	UClass* ClassRestriction = nullptr;
 
-	FArticyRef* RetrieveArticyRef() const;
 	UClass* GetClassRestriction() const;
 	FText GetChosenClassName() const;
 	void OnClassPicked(UClass* InChosenClass);

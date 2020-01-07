@@ -22,14 +22,12 @@
 
 #define LOCTEXT_NAMESPACE "ArticyRefProperty"
 
-
-void SArticyRefProperty::Construct(const FArguments& InArgs, FArticyRef* InArticyRef, IPropertyTypeCustomizationUtils& CustomizationUtils)
+void SArticyRefProperty::Construct(const FArguments& InArgs, TWeakObjectPtr<UArticyObject> InArticyObject, IPropertyHandle* InArticyRefPropHandle, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	this->ClassRestriction = InArgs._ClassRestriction;
 
-	ArticyRef = InArticyRef;
-	SelectedArticyObject = UArticyObject::FindAsset(ArticyRef->GetId());
-
+	ArticyObject = InArticyObject;
+	ArticyRefPropHandle = InArticyRefPropHandle;
 	Cursor = EMouseCursor::Hand;
 
 	if(!this->ClassRestriction.IsBound()) {
@@ -46,7 +44,7 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, FArticyRef* InArtic
 		];
 
 	TileView = SNew(SArticyObjectTileView)
-		.ObjectToDisplay(SelectedArticyObject)
+		.ObjectToDisplay(ArticyObject)
 		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize.X)
 		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding.X);
 	
@@ -125,32 +123,58 @@ TSharedRef<SWidget> SArticyRefProperty::CreateArticyObjectAssetPicker()
 
 FReply SArticyRefProperty::OnArticyButtonClicked() const
 {
-	UserInterfaceHelperFunctions::ShowObjectInArticy(SelectedArticyObject.Get());
+	UserInterfaceHelperFunctions::ShowObjectInArticy(ArticyObject.Get());
 	
 	return FReply::Handled();
 }
 
 void SArticyRefProperty::SetAsset(const FAssetData& AssetData)
 {
+	// retrieve the newly selected articy object
 	ComboButton->SetIsOpen(false);
-	UArticyObject* NewSelectedArticyObject = Cast<UArticyObject>(AssetData.GetAsset());
-	ArticyRef->SetReference(NewSelectedArticyObject);
+	ArticyObject = Cast<UArticyObject>(AssetData.GetAsset());
 
-	SelectedArticyObject = NewSelectedArticyObject;
+	// construct the new ID
+	FArticyId NewId;
+	NewId.Low = ArticyObject.IsValid() ? ArticyObject->GetId().Low : 0;
+	NewId.High = ArticyObject.IsValid() ? ArticyObject->GetId().High : 0;
 
+	// get the current articy ref struct as formatted string
+	FString FormattedValueString;
+	ArticyRefPropHandle->GetValueAsFormattedString(FormattedValueString);
+
+	// remove the old ID string
+	const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Low=")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+	const int32 EndOfIdIndex = FormattedValueString.Find(FString(TEXT(")")), ESearchCase::IgnoreCase, ESearchDir::FromStart, IdIndex);	
+	FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
+
+	// reconstruct the value string with the new ID
+	const FString NewIdString = FString::Format(TEXT("Low={0}, High={1}"), { NewId.Low, NewId.High, });
+	FormattedValueString.InsertAt(IdIndex, *NewIdString);
+
+	// update the actual id of the ArticyObject
+	// done via Set functions instead of accessing the ref object directly because using "Set" handles various Unreal logic, such as:
+	// - CDO default change forwarding to instances
+	// - marking dirty
+	// - transaction buffer (Undo, Redo)
+	ArticyRefPropHandle->SetValueFromFormattedString(FormattedValueString);	
+	
+	// Update visuals:
+	// recreate the tile view with the newly selected object - can be nullptr
 	TileView = SNew(SArticyObjectTileView)
-		.ObjectToDisplay(SelectedArticyObject)
+		.ObjectToDisplay(ArticyObject)
 		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize.X)
 		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding.X);
 
+	// activate the new tile view
 	TileContainer->SetContent(TileView.ToSharedRef());
 }
 
 FReply SArticyRefProperty::OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const
 {
-	if(SelectedArticyObject.IsValid()) 
+	if(ArticyObject.IsValid())
 	{
-		GEditor->EditObject(SelectedArticyObject.Get());
+		GEditor->EditObject(ArticyObject.Get());
 	}
 
 	return FReply::Handled();
@@ -158,7 +182,7 @@ FReply SArticyRefProperty::OnAssetThumbnailDoubleClick(const FGeometry& InMyGeom
 
 FText SArticyRefProperty::OnGetArticyObjectDisplayName() const
 {
-	const FString DisplayName = UserInterfaceHelperFunctions::GetDisplayName(SelectedArticyObject.Get());
+	const FString DisplayName = UserInterfaceHelperFunctions::GetDisplayName(ArticyObject.Get());
 	return FText::FromString(DisplayName);
 }
 

@@ -8,7 +8,7 @@
 #include "DetailWidgetRow.h"
 #include "Widgets/SWidget.h"
 #include "Modules/ModuleManager.h"
-#include "PropertyEditorModule.h"
+#include "IDetailPropertyRow.h"
 #include "Delegates/Delegate.h"
 #include "ArticyObject.h"
 #include "ArticyRef.h"
@@ -26,9 +26,9 @@ TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	ArticyRefPropertyHandle = PropertyHandle;
-
+	
 	// update the reference upon selecting the ref; this only serves cosmetic purposes. The underlying Id will not be changed
-	FArticyRef* ArticyRef = RetrieveArticyRef();
+	FArticyRef* ArticyRef = RetrieveArticyRef(ArticyRefPropertyHandle.Get());
 
 	UArticyObject* SelectedObject = UArticyObject::FindAsset(ArticyRef->GetId());
 	// set the selected class to the currently selected object because the class selection widget has no actual property as a basis to serialize and keep its state
@@ -41,7 +41,7 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	{
 		ClassRestriction = UArticyObject::StaticClass();
 	}
-	ArticyRefProperty = SNew(SArticyRefProperty, ArticyRef, CustomizationUtils)
+	ArticyRefProperty = SNew(SArticyRefProperty, SelectedObject, ArticyRefPropertyHandle.Get(), CustomizationUtils)
 		.ClassRestriction(this, &FArticyRefCustomization::GetClassRestriction);
 
 	HeaderRow.NameContent()
@@ -106,23 +106,30 @@ void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Prop
 	for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
 	{
 		const TSharedRef< IPropertyHandle > ChildHandle = ArticyRefPropertyHandle->GetChildHandle(ChildIndex).ToSharedRef();
-		ChildBuilder.AddProperty(ChildHandle);
+		IDetailPropertyRow& Row = ChildBuilder.AddProperty(ChildHandle);
+
+		// disable the Id property here so that the user can't manipulate the ArticyID directly
+		// UProperty is not set to ReadOnly due to needing to be editable to access "SetValue" functions from the IPropertyHandle system
+		if(ChildHandle->GetPropertyDisplayName().EqualTo(FText::FromString(TEXT("Id"))))
+		{
+			Row.IsEnabled(false);
+		}
 	}
 }
 
-FArticyRef* FArticyRefCustomization::RetrieveArticyRef() const
+FArticyRef* FArticyRefCustomization::RetrieveArticyRef(IPropertyHandle* ArticyRefHandle)
 {
 	FArticyRef* ArticyRef = nullptr;
 
 #if ENGINE_MINOR_VERSION >=20
 	void* ArticyRefAddress;
-	ArticyRefPropertyHandle->GetValueData(ArticyRefAddress);
+	ArticyRefHandle->GetValueData(ArticyRefAddress);
 	ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
 #elif ENGINE_MINOR_VERSION == 19
 	TArray<void*> Addresses;
-	ArticyRefPropertyHandle->AccessRawData(Addresses);
+	ArticyRefHandle->AccessRawData(Addresses);
 	void* ArticyRefAddress = Addresses[0];
-	ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
+	ArticyObject = static_cast<FArticyRef*>(ArticyRefAddress);
 #endif
 
 	return ArticyRef;

@@ -33,8 +33,11 @@ public:
 	T* GetObject(const UObject* WorldContext) const;
 	
 private:
-	/** The actual reference: we keep track of the Reference's Id. */
-	UPROPERTY(VisibleAnywhere, Category="Setup")
+	/** The actual reference: we keep track of the Reference's Id.
+	 * Set to EditAnywhere here to allow for a hack in manipulating properties
+	 * Set to disabled in the ArticyRefCustomization so that the user can't edit it directly
+	 */
+	UPROPERTY(EditAnywhere, Category="Setup")
 	mutable FArticyId Id = 0;
 
 	/** The single-instance object copy of this ArticyRef. */
