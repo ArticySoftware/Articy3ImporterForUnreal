@@ -11,6 +11,7 @@
 #include "Widgets/SCompoundWidget.h"
 #include "ArticyObject.h"
 #include "Widgets/Layout/SBorder.h"
+#include "ArticyBaseTypes.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
 
 
@@ -19,15 +20,15 @@
  */
 class ARTICYIMPORTER_API SArticyObjectTileView : public SCompoundWidget
 {
-public:	
+public:
 	SLATE_BEGIN_ARGS(SArticyObjectTileView) 
 		: _ThumbnailSize(48.f)	
 		, _ThumbnailPadding(4.f)
 	{}
 
-	SLATE_ARGUMENT(TWeakObjectPtr<UArticyObject>, ObjectToDisplay)
-	SLATE_ARGUMENT(int32, ThumbnailSize)
-	SLATE_ARGUMENT(int32, ThumbnailPadding)
+		SLATE_ATTRIBUTE(FArticyId, ObjectToDisplay)
+		SLATE_ARGUMENT(int32, ThumbnailSize)
+		SLATE_ARGUMENT(int32, ThumbnailPadding)
 
 	SLATE_END_ARGS()
 
@@ -37,9 +38,12 @@ public:
  * @param	InArgs	The declaration data for this widget
  */
 	void Construct(const FArguments& InArgs);
+	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 private:
-	TWeakObjectPtr<UArticyObject> ObjectToDisplay;
+	TAttribute<FArticyId> ArticyIdAttribute;
+	mutable FArticyId CachedArticyId;
+	mutable TWeakObjectPtr<UArticyObject> CachedArticyObject;
 	TSharedPtr<SImage> PreviewImage;
 	TSharedPtr<STextBlock> DisplayNameTextBlock;
 	TSharedPtr<SBorder> WidgetContainerBorder;
@@ -56,9 +60,10 @@ private:
 	FSlateColor ArticyObjectColor = FLinearColor(0.577, 0.76, 0.799);
 	
 private:
+	void UpdateDisplayedArticyObject();
+
 	FText OnGetEntityName() const;
 	const FSlateBrush* OnGetEntityImage() const;
 	EVisibility OnHasPreviewImage() const;
-	const FSlateBrush* OnGetTypeImage(UserInterfaceHelperFunctions::EImageSize SizeOverride = UserInterfaceHelperFunctions::Medium) const;
-
+	const FSlateBrush* GetTypeImage(UserInterfaceHelperFunctions::EImageSize SizeOverride = UserInterfaceHelperFunctions::Medium) const;
 };

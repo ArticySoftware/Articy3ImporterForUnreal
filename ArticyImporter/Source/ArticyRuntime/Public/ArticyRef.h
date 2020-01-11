@@ -31,7 +31,17 @@ public:
 	/** Get a (single-instance) copy of the referenced asset. */
 	template<typename T = UArticyObject>
 	T* GetObject(const UObject* WorldContext) const;
-	
+
+	// reference: color.h
+	// used in details customization 
+	bool InitFromString(const FString& SourceString) const
+	{
+		Id.High = Id.Low = 0;
+
+		const bool bSuccess = FParse::Value(*SourceString, TEXT("Low="), Id.Low) && FParse::Value(*SourceString, TEXT("High="), Id.High);
+
+		return bSuccess;
+	}
 private:
 	/** The actual reference: we keep track of the Reference's Id.
 	 * Set to EditAnywhere here to allow for a hack in manipulating properties

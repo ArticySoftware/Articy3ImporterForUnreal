@@ -22,7 +22,7 @@ namespace ArticyRefPropertyConstants {
  */
 class ARTICYIMPORTER_API SArticyRefProperty : public SCompoundWidget
 {
-public:	
+public:
 	SLATE_BEGIN_ARGS(SArticyRefProperty) 
 		: _ClassRestriction(nullptr)
 	{}
@@ -35,13 +35,17 @@ public:
  *
  * @param	InArgs	The declaration data for this widget
  */
-	void Construct(const FArguments& InArgs, TWeakObjectPtr<UArticyObject> InArticyObject, IPropertyHandle* InArticyRefPropHandle, IPropertyTypeCustomizationUtils& CustomizationUtils);
+	void Construct(const FArguments& InArgs, IPropertyHandle* InArticyRefPropHandle);
+	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 private:
+
+	mutable FArticyId CurrentObjectID;
 	// the articy object this widget currently represents
-	TWeakObjectPtr<UArticyObject> ArticyObject = nullptr;
+	TWeakObjectPtr<UArticyObject> CachedArticyObject = nullptr;
 	// the property handle for the articy ref that will be manipulated
-	IPropertyHandle* ArticyRefPropHandle = nullptr;
+	IPropertyHandle* ArticyRefPropertyHandle = nullptr;
+	
 	TSharedPtr<SArticyObjectTileView> TileView;
 	TSharedPtr<SBox> TileContainer;
 	TSharedPtr<SBorder> ThumbnailBorder;
@@ -50,11 +54,13 @@ private:
 	TSharedPtr<SButton> ArticyButton;
 	TAttribute<UClass*> ClassRestriction;
 private:
+	void UpdateWidget();
 	TSharedRef<SWidget> CreateArticyObjectAssetPicker();
 	FReply OnArticyButtonClicked() const;
-	/** Updates the underlying ArticyRef to reference the new asset. Can be null */
-	void SetAsset(const FAssetData& AssetData);
+	/** Updates the underlying ArticyRef to reference the new articy object. Can be null */
+	void SetAsset(const FAssetData& AssetData) const;
 	FReply OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const;
 	FText OnGetArticyObjectDisplayName() const;
+	FArticyId GetCurrentObjectID() const;
 	
 };

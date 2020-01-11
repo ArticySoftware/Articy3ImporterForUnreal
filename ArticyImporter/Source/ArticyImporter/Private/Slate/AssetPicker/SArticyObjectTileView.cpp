@@ -17,62 +17,47 @@
 #include "Editor.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
 #include "Interfaces/ArticyObjectWithColor.h"
+#include "ArticyImporter.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectTileView"
 
+void SArticyObjectTileView::UpdateDisplayedArticyObject()
+{
+	CachedArticyId = ArticyIdAttribute.Get();
+	CachedArticyObject = UArticyObject::FindAsset(CachedArticyId);
+
+	bHasPreviewImage = UserInterfaceHelperFunctions::RetrievePreviewImage(CachedArticyObject.Get(), PreviewBrush);
+	// if we failed getting a preview image, use the default type image instead
+	if (!bHasPreviewImage)
+	{
+		PreviewBrush = *UserInterfaceHelperFunctions::GetArticyTypeImage(CachedArticyObject.Get(), UserInterfaceHelperFunctions::Large);
+	}
+	else
+	{
+		TypeImage = GetTypeImage(UserInterfaceHelperFunctions::Medium);
+	}
+
+	// retrieve color for the border
+	IArticyObjectWithColor* ObjectWithColor = Cast<IArticyObjectWithColor>(CachedArticyObject);
+	bHasColor = ObjectWithColor ? true : false;
+	if (bHasColor)
+	{
+		ArticyObjectColor = ObjectWithColor->GetColor();
+	}
+}
+
 void SArticyObjectTileView::Construct(const FArguments& InArgs)
 {
-	ObjectToDisplay = InArgs._ObjectToDisplay;
+	ArticyIdAttribute = InArgs._ObjectToDisplay;
 	ThumbnailSize = InArgs._ThumbnailSize;
 	ThumbnailPadding = InArgs._ThumbnailPadding;
-
-	if(!ObjectToDisplay.IsValid())
-	{
-		this->ChildSlot
-			[
-				SAssignNew(WidgetContainerBorder, SBorder)
-				.Padding(ThumbnailPadding)
-				.BorderImage(FArticyImporterStyle::Get().GetBrush("ArticyImporter.AssetPicker.TileBorder.16"))
-				[
-					SNew(SScaleBox)
-					.Stretch(EStretch::ScaleToFit)
-					[
-						SNew(SImage)
-						.Image(FArticyImporterStyle::Get().GetBrush("ArticyImporter.ArticyApplication.64"))
-					]
-				]
-			];
-
-		return;
-	}
 
 	TAttribute<FOptionalSize> WidthScaleAttribute = ThumbnailSize / 3.f;
 	TAttribute<FOptionalSize> HeightScaleAttribute = ThumbnailSize / 3.f;
 
 	Cursor = EMouseCursor::Hand;
 
-	// retrieve preview image
 	PreviewBrush.ImageSize = FVector2D(ThumbnailSize, ThumbnailSize);
-	bHasPreviewImage = UserInterfaceHelperFunctions::RetrievePreviewImage(ObjectToDisplay.Get(), PreviewBrush);
-
-	// if we failed getting a preview image, use the default image instead
-	if(!bHasPreviewImage)
-	{
-		PreviewBrush = *UserInterfaceHelperFunctions::GetArticyTypeImage(ObjectToDisplay.Get(), UserInterfaceHelperFunctions::Large);
-		//TypeImage = OnGetTypeImage(UserInterfaceHelperFunctions::Large);
-	}
-	else
-	{
-		TypeImage = OnGetTypeImage(UserInterfaceHelperFunctions::Medium);
-	}
-
-	// retrieve color for the border
-	IArticyObjectWithColor* ObjectWithColor = Cast<IArticyObjectWithColor>(ObjectToDisplay);
-	bHasColor = ObjectWithColor ? true : false;
-	if(bHasColor)
-	{
-		ArticyObjectColor = ObjectWithColor->GetColor();
-	}
 	
 	PreviewImage = SNew(SImage)
 		.Image(this, &SArticyObjectTileView::OnGetEntityImage);
@@ -84,8 +69,10 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 		.TextStyle(EntityNameTextStyle.Get())
 		.Justification(ETextJustify::Center);
 
-	SetToolTip(SNew(SArticyObjectToolTip).ObjectToDisplay(ObjectToDisplay.Get()));
-	
+	UpdateDisplayedArticyObject();
+
+	SetToolTip(SNew(SArticyObjectToolTip).ObjectToDisplay(ArticyIdAttribute));
+
 	this->ChildSlot
 	[
 		SAssignNew(WidgetContainerBorder, SBorder)
@@ -153,10 +140,19 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 	];
 }
 
+void SArticyObjectTileView::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+{
+	// if the Id is different from the cached Id, update the widget
+	if(CachedArticyId != ArticyIdAttribute.Get())
+	{
+		UpdateDisplayedArticyObject();
+	}
+}
+
 
 FText SArticyObjectTileView::OnGetEntityName() const
 {
-	return FText::FromString(UserInterfaceHelperFunctions::GetDisplayName(ObjectToDisplay.Get()));
+	return FText::FromString(UserInterfaceHelperFunctions::GetDisplayName(CachedArticyObject.Get()));
 }
 
 const FSlateBrush* SArticyObjectTileView::OnGetEntityImage() const
@@ -166,7 +162,7 @@ const FSlateBrush* SArticyObjectTileView::OnGetEntityImage() const
 		return &PreviewBrush;
 	}
 
-	PreviewBrush = *FArticyImporterStyle::Get().GetBrush("ArticyImporter.AssetPicker.NoImageAvailable");
+	//PreviewBrush = *FArticyImporterStyle::Get().GetBrush("ArticyImporter.ArticyApplication.64");
 	
 	return &PreviewBrush;
 }
@@ -176,9 +172,9 @@ EVisibility SArticyObjectTileView::OnHasPreviewImage() const
 	return bHasPreviewImage ? EVisibility::Visible : EVisibility::Hidden;
 }
 
-const FSlateBrush* SArticyObjectTileView::OnGetTypeImage(UserInterfaceHelperFunctions::EImageSize SizeOverride) const
+const FSlateBrush* SArticyObjectTileView::GetTypeImage(UserInterfaceHelperFunctions::EImageSize SizeOverride) const
 {
-	const FSlateBrush* Brush = UserInterfaceHelperFunctions::GetArticyTypeImage(ObjectToDisplay.Get(), SizeOverride);
+	const FSlateBrush* Brush = UserInterfaceHelperFunctions::GetArticyTypeImage(CachedArticyObject.Get(), SizeOverride);
 	return Brush;
 }
 

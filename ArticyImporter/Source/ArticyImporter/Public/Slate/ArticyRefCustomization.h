@@ -27,6 +27,7 @@ public:
 	}
 };
 
+// reference: color struct customization
 class FArticyRefCustomization : public IPropertyTypeCustomization
 {
 public:
@@ -36,22 +37,23 @@ public:
 	virtual void CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 
 	virtual void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
-
+	
 	static FArticyRef* RetrieveArticyRef(IPropertyHandle* ArticyRefHandle);
+	static FArticyId GetIdFromValueString(FString SourceString);
 
 private:
 	TSharedPtr<IPropertyHandle> ArticyRefPropertyHandle;
 	TSharedPtr<SArticyRefProperty> ArticyRefProperty;
 	UClass* ClassRestriction = nullptr;
-
+	
 	UClass* GetClassRestriction() const;
 	FText GetChosenClassName() const;
 	void OnClassPicked(UClass* InChosenClass);
 	TSharedRef<SWidget> CreateClassPicker() const;
+
 
 private:
 	/** A pointer to a class viewer **/
 	TSharedPtr<class SClassViewer> ClassViewer;
 	TSharedPtr<class SComboButton> ClassRestrictionButton;
 };
-

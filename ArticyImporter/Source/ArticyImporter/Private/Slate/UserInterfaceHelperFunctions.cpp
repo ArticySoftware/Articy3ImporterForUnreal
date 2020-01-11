@@ -21,7 +21,7 @@ const FSlateBrush* UserInterfaceHelperFunctions::GetArticyTypeImage(const UArtic
 {
 	if(!ArticyObject)
 	{
-		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.AssetPicker.NoImageAvailable")));
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.ArticyApplication.64")));
 	}
 
 	FString SizeString = "";

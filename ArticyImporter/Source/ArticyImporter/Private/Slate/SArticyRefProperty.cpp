@@ -19,19 +19,25 @@
 #include "Editor.h"
 #include "Widgets/Input/SButton.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
+#include "Slate/ArticyRefCustomization.h"
 
 #define LOCTEXT_NAMESPACE "ArticyRefProperty"
 
-void SArticyRefProperty::Construct(const FArguments& InArgs, TWeakObjectPtr<UArticyObject> InArticyObject, IPropertyHandle* InArticyRefPropHandle, IPropertyTypeCustomizationUtils& CustomizationUtils)
+void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* InArticyRefPropHandle)
 {
 	this->ClassRestriction = InArgs._ClassRestriction;
 
-	ArticyObject = InArticyObject;
-	ArticyRefPropHandle = InArticyRefPropHandle;
-	Cursor = EMouseCursor::Hand;
+	ArticyRefPropertyHandle = InArticyRefPropHandle;
 
+	FString CurrentRefValue;
+	InArticyRefPropHandle->GetValueAsFormattedString(CurrentRefValue);
+	CurrentObjectID = FArticyRefCustomization::GetIdFromValueString(CurrentRefValue);
+	CachedArticyObject = UArticyObject::FindAsset(CurrentObjectID);
+	
+	Cursor = EMouseCursor::Hand;
+	
 	if(!this->ClassRestriction.IsBound()) {
-		UE_LOG(LogArticyImporter, Warning, TEXT("Tried constructing Dialogue entity property without valid class restriction. Using ArticyObject instead"));
+		UE_LOG(LogArticyImporter, Warning, TEXT("Tried constructing articy ref property without valid class restriction. Using ArticyObject instead"));
 		this->ClassRestriction = UArticyObject::StaticClass();
 	}
 
@@ -44,7 +50,7 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, TWeakObjectPtr<UArt
 		];
 
 	TileView = SNew(SArticyObjectTileView)
-		.ObjectToDisplay(ArticyObject)
+		.ObjectToDisplay(this, &SArticyRefProperty::GetCurrentObjectID)
 		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize.X)
 		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding.X);
 	
@@ -69,12 +75,9 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, TWeakObjectPtr<UArt
 		[
 			SAssignNew(ThumbnailBorder, SBorder)
 			.Padding(5.0f)
-			//.BorderImage(this, &SPropertyEditorAsset::GetThumbnailBorder)
 			.OnMouseDoubleClick(this, &SArticyRefProperty::OnAssetThumbnailDoubleClick)
 			[
 				SAssignNew(TileContainer, SBox)
-			//	.WidthOverride(ArticyRefPropertyConstants::ThumbnailSize.X)
-			//	.HeightOverride(ArticyRefPropertyConstants::ThumbnailSize.Y)
 				[
 					TileView.ToSharedRef()
 				]
@@ -111,6 +114,30 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, TWeakObjectPtr<UArt
 	];
 }
 
+void SArticyRefProperty::UpdateWidget()
+{
+	FString RefString;
+	const FPropertyAccess::Result Result = ArticyRefPropertyHandle->GetValueAsFormattedString(RefString);
+	// the actual update. This will be forwarded into the tile view and will cause an update
+	CurrentObjectID = FArticyRefCustomization::GetIdFromValueString(RefString);
+	CachedArticyObject = UArticyObject::FindAsset(CurrentObjectID);
+}
+
+void SArticyRefProperty::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+{
+	FString RefString;
+	const FPropertyAccess::Result Result = ArticyRefPropertyHandle->GetValueAsFormattedString(RefString);
+
+	if(Result == FPropertyAccess::Success)
+	{
+		const FArticyId CurrentRefId = FArticyRefCustomization::GetIdFromValueString(RefString);
+		if (CurrentRefId != CurrentObjectID)
+		{
+			UpdateWidget();
+		}
+	}	
+}
+
 TSharedRef<SWidget> SArticyRefProperty::CreateArticyObjectAssetPicker()
 {	
 	FAssetPickerConfig AssetPickerConfig;
@@ -123,25 +150,22 @@ TSharedRef<SWidget> SArticyRefProperty::CreateArticyObjectAssetPicker()
 
 FReply SArticyRefProperty::OnArticyButtonClicked() const
 {
-	UserInterfaceHelperFunctions::ShowObjectInArticy(ArticyObject.Get());
-	
+	UserInterfaceHelperFunctions::ShowObjectInArticy(UArticyObject::FindAsset(CurrentObjectID));
 	return FReply::Handled();
 }
 
-void SArticyRefProperty::SetAsset(const FAssetData& AssetData)
+void SArticyRefProperty::SetAsset(const FAssetData& AssetData) const
 {
 	// retrieve the newly selected articy object
 	ComboButton->SetIsOpen(false);
-	ArticyObject = Cast<UArticyObject>(AssetData.GetAsset());
+	const UArticyObject* NewSelection  = Cast<UArticyObject>(AssetData.GetAsset());
 
-	// construct the new ID
-	FArticyId NewId;
-	NewId.Low = ArticyObject.IsValid() ? ArticyObject->GetId().Low : 0;
-	NewId.High = ArticyObject.IsValid() ? ArticyObject->GetId().High : 0;
-
+	// if the new selection is not valid we cleared the selection
+	const FArticyId NewId = NewSelection ? NewSelection->GetId() : FArticyId();
+	
 	// get the current articy ref struct as formatted string
 	FString FormattedValueString;
-	ArticyRefPropHandle->GetValueAsFormattedString(FormattedValueString);
+	ArticyRefPropertyHandle->GetValueAsFormattedString(FormattedValueString);
 
 	// remove the old ID string
 	const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Low=")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
@@ -152,29 +176,19 @@ void SArticyRefProperty::SetAsset(const FAssetData& AssetData)
 	const FString NewIdString = FString::Format(TEXT("Low={0}, High={1}"), { NewId.Low, NewId.High, });
 	FormattedValueString.InsertAt(IdIndex, *NewIdString);
 
-	// update the actual id of the ArticyObject
+	// update the articy ref with the new ID:
 	// done via Set functions instead of accessing the ref object directly because using "Set" handles various Unreal logic, such as:
 	// - CDO default change forwarding to instances
 	// - marking dirty
 	// - transaction buffer (Undo, Redo)
-	ArticyRefPropHandle->SetValueFromFormattedString(FormattedValueString);	
-	
-	// Update visuals:
-	// recreate the tile view with the newly selected object - can be nullptr
-	TileView = SNew(SArticyObjectTileView)
-		.ObjectToDisplay(ArticyObject)
-		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize.X)
-		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding.X);
-
-	// activate the new tile view
-	TileContainer->SetContent(TileView.ToSharedRef());
+	ArticyRefPropertyHandle->SetValueFromFormattedString(FormattedValueString);	
 }
 
 FReply SArticyRefProperty::OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const
 {
-	if(ArticyObject.IsValid())
+	if(CachedArticyObject.IsValid())
 	{
-		GEditor->EditObject(ArticyObject.Get());
+		GEditor->EditObject(CachedArticyObject.Get());
 	}
 
 	return FReply::Handled();
@@ -182,8 +196,13 @@ FReply SArticyRefProperty::OnAssetThumbnailDoubleClick(const FGeometry& InMyGeom
 
 FText SArticyRefProperty::OnGetArticyObjectDisplayName() const
 {
-	const FString DisplayName = UserInterfaceHelperFunctions::GetDisplayName(ArticyObject.Get());
+	const FString DisplayName = UserInterfaceHelperFunctions::GetDisplayName(CachedArticyObject.Get());
 	return FText::FromString(DisplayName);
+}
+
+FArticyId SArticyRefProperty::GetCurrentObjectID() const
+{
+	return CurrentObjectID;
 }
 
 #undef LOCTEXT_NAMESPACE
