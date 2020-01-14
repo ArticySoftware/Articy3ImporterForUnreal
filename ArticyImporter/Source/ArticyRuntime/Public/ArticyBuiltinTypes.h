@@ -56,13 +56,15 @@ class ARTICYRUNTIME_API UArticyOutgoingConnection : public UArticyConnection
 public:
 
 	UArticyPrimitive* GetTarget() const;
+	FArticyId GetTargetID() const { return Target;  }
 	/** Can be an InputPin (next node) or an OutputPin (emerge to parent node). */
 	UArticyFlowPin* GetTargetPin() const;
+	FArticyId GetTargetPinID() const { return TargetPin;  }
 	
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="TargetPin"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(DisplayName="TargetPin"))
 	FArticyId TargetPin;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="Target"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(DisplayName="Target"))
 	FArticyId Target;
 
 private:

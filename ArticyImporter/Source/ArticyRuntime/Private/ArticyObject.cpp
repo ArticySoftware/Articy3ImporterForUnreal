@@ -52,6 +52,16 @@ TArray<TWeakObjectPtr<UArticyObject>> UArticyObject::GetChildren() const
 	return CachedChildren;
 }
 
+FArticyId UArticyObject::GetParentID() const
+{
+	return Parent;
+}
+
+TArray<FArticyId> UArticyObject::GetChildrenIDs() const
+{
+	return Children;
+}
+
 UArticyObject* UArticyObject::FindAsset(const FArticyId& Id)
 {
 	//UArticyDatabase::LoadAllObjects();
