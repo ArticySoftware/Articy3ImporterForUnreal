@@ -62,6 +62,21 @@ TArray<FArticyId> UArticyObject::GetChildrenIDs() const
 	return Children;
 }
 
+TArray<FArticyId> UArticyObject::GetArticyObjectChildrenIDs() const
+{
+	TArray<FArticyId> OutIDs;
+
+	for(auto ChildID : Children)
+	{
+		if(const UArticyObject* Object = UArticyObject::FindAsset(ChildID))
+		{
+			OutIDs.Add(Object->GetId());
+		}
+	}
+
+	return OutIDs;
+}
+
 UArticyObject* UArticyObject::FindAsset(const FArticyId& Id)
 {
 	//UArticyDatabase::LoadAllObjects();
