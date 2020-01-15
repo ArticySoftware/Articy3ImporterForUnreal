@@ -80,9 +80,9 @@ public:
 
 protected:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="TargetPin"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(DisplayName="TargetPin"))
 	FArticyId TargetPin;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="Target"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(DisplayName="Target"))
 	FArticyId Target;
 
 private:
