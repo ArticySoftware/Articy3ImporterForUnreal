@@ -41,7 +41,7 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	{
 		ClassRestriction = UArticyObject::StaticClass();
 	}
-	ArticyRefProperty = SNew(SArticyRefProperty, SelectedObject, ArticyRefPropertyHandle.Get(), CustomizationUtils)
+	ArticyRefProperty = SNew(SArticyRefProperty, SelectedObject, ArticyRefPropertyHandle.Get())
 		.ClassRestriction(this, &FArticyRefCustomization::GetClassRestriction);
 
 	HeaderRow.NameContent()
@@ -61,16 +61,15 @@ void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Prop
 	ClassViewerConfig.DisplayMode = EClassViewerDisplayMode::TreeView;
 	ClassViewerConfig.ClassFilter = MakeShareable(new FArticyRefClassFilter);
 
-	ClassViewer = StaticCastSharedRef<SClassViewer>(FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(ClassViewerConfig, FOnClassPicked::CreateSP(this, &FArticyRefCustomization::OnClassPicked)));
+	ClassPicker = StaticCastSharedRef<SWidget>(FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(ClassViewerConfig, FOnClassPicked::CreateSP(this, &FArticyRefCustomization::OnClassPicked)));
 	ClassRestrictionButton =
 		SNew(SComboButton)
-		.OnGetMenuContent(this, &FArticyRefCustomization::CreateClassPicker)
+		.OnGetMenuContent(this, &FArticyRefCustomization::GetClassPicker)
 		.ContentPadding(2.f)
 		.ButtonContent()
 		[
 			SNew(STextBlock)
 			.Text(this, &FArticyRefCustomization::GetChosenClassName)
-			.Font(FArticyImporterStyle::Get().GetFontStyle(TEXT("DialogueEditor.GraphNode.Text.Property")))
 		];
 
 	ChildBuilder.AddCustomRow(FText::FromString("Class Restriction"))
@@ -88,7 +87,6 @@ void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Prop
 				[
 					SNew(STextBlock)
 					.Text(FText::FromString("Class Restriction"))
-					.Font(FArticyImporterStyle::Get().GetFontStyle(TEXT("DialogueEditor.GraphNode.Text.Property")))
 				]
 			]
 		]
@@ -129,7 +127,7 @@ FArticyRef* FArticyRefCustomization::RetrieveArticyRef(IPropertyHandle* ArticyRe
 	TArray<void*> Addresses;
 	ArticyRefHandle->AccessRawData(Addresses);
 	void* ArticyRefAddress = Addresses[0];
-	ArticyObject = static_cast<FArticyRef*>(ArticyRefAddress);
+	ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
 #endif
 
 	return ArticyRef;
@@ -160,7 +158,7 @@ void FArticyRefCustomization::OnClassPicked(UClass* InChosenClass)
 	ClassRestrictionButton->SetIsOpen(false);
 }
 
-TSharedRef<SWidget> FArticyRefCustomization::CreateClassPicker() const
+TSharedRef<SWidget> FArticyRefCustomization::GetClassPicker() const
 {
-	return ClassViewer.ToSharedRef();
+	return ClassPicker.ToSharedRef();
 }

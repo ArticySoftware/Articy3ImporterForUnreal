@@ -47,11 +47,11 @@ private:
 	UClass* GetClassRestriction() const;
 	FText GetChosenClassName() const;
 	void OnClassPicked(UClass* InChosenClass);
-	TSharedRef<SWidget> CreateClassPicker() const;
+	TSharedRef<SWidget> GetClassPicker() const;
 
 private:
 	/** A pointer to a class viewer **/
-	TSharedPtr<class SClassViewer> ClassViewer;
+	TSharedPtr<SWidget> ClassPicker;
 	TSharedPtr<class SComboButton> ClassRestrictionButton;
 };
 

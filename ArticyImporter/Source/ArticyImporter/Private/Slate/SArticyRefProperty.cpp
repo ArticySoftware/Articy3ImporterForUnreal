@@ -22,7 +22,7 @@
 
 #define LOCTEXT_NAMESPACE "ArticyRefProperty"
 
-void SArticyRefProperty::Construct(const FArguments& InArgs, TWeakObjectPtr<UArticyObject> InArticyObject, IPropertyHandle* InArticyRefPropHandle, IPropertyTypeCustomizationUtils& CustomizationUtils)
+void SArticyRefProperty::Construct(const FArguments& InArgs, TWeakObjectPtr<UArticyObject> InArticyObject, IPropertyHandle* InArticyRefPropHandle)
 {
 	this->ClassRestriction = InArgs._ClassRestriction;
 
@@ -31,7 +31,7 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, TWeakObjectPtr<UArt
 	Cursor = EMouseCursor::Hand;
 
 	if(!this->ClassRestriction.IsBound()) {
-		UE_LOG(LogArticyImporter, Warning, TEXT("Tried constructing Dialogue entity property without valid class restriction. Using ArticyObject instead"));
+		UE_LOG(LogArticyImporter, Warning, TEXT("Tried constructing articy ref widget without valid class restriction. Using ArticyObject instead"));
 		this->ClassRestriction = UArticyObject::StaticClass();
 	}
 

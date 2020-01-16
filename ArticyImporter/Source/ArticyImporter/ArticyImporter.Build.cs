@@ -29,7 +29,8 @@ public class ArticyImporter : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core"
+				"Core",
+				//"ClassViewer"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -54,7 +55,8 @@ public class ArticyImporter : ModuleRules
 				"PropertyEditor",
 				"EditorStyle",
 				"EditorWidgets",
-				"SourceControl"
+				"SourceControl",
+				//"ClassViewer"
 			}
 			);
 		

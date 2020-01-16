@@ -8,7 +8,6 @@
 #include "CoreMinimal.h"
 #include "Widgets/Input/SComboButton.h"
 #include "Widgets/Layout/SBorder.h"
-#include "ClassViewer/Private/SClassViewer.h"
 #include "Slate/AssetPicker/SArticyObjectTileView.h"
 #include "IPropertyTypeCustomization.h"
 
@@ -35,7 +34,7 @@ public:
  *
  * @param	InArgs	The declaration data for this widget
  */
-	void Construct(const FArguments& InArgs, TWeakObjectPtr<UArticyObject> InArticyObject, IPropertyHandle* InArticyRefPropHandle, IPropertyTypeCustomizationUtils& CustomizationUtils);
+	void Construct(const FArguments& InArgs, TWeakObjectPtr<UArticyObject> InArticyObject, IPropertyHandle* InArticyRefPropHandle);
 
 private:
 	// the articy object this widget currently represents
