@@ -77,7 +77,7 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 	[
 		SAssignNew(WidgetContainerBorder, SBorder)
 		.ToolTip(GetToolTip())
-		.BorderBackgroundColor(ArticyObjectColor)
+		.BorderBackgroundColor(this, &SArticyObjectTileView::OnGetArticyObjectColor)
 		.BorderImage(FArticyImporterStyle::Get().GetBrush("ArticyImporter.AssetPicker.TileBorder.16"))
 		[
 			SNew(SBox)
@@ -170,6 +170,11 @@ const FSlateBrush* SArticyObjectTileView::OnGetEntityImage() const
 EVisibility SArticyObjectTileView::OnHasPreviewImage() const
 {
 	return bHasPreviewImage ? EVisibility::Visible : EVisibility::Hidden;
+}
+
+FSlateColor SArticyObjectTileView::OnGetArticyObjectColor() const
+{
+	return ArticyObjectColor;
 }
 
 const FSlateBrush* SArticyObjectTileView::GetTypeImage(UserInterfaceHelperFunctions::EImageSize SizeOverride) const

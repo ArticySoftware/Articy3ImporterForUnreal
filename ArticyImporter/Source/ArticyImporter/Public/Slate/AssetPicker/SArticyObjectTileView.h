@@ -65,5 +65,6 @@ private:
 	FText OnGetEntityName() const;
 	const FSlateBrush* OnGetEntityImage() const;
 	EVisibility OnHasPreviewImage() const;
+	FSlateColor OnGetArticyObjectColor() const;
 	const FSlateBrush* GetTypeImage(UserInterfaceHelperFunctions::EImageSize SizeOverride = UserInterfaceHelperFunctions::Medium) const;
 };
