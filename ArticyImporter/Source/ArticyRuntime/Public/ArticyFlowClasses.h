@@ -74,15 +74,17 @@ public:
 	EArticyPausableType GetType() override { return EArticyPausableType::Jump; }
 
 	UArticyPrimitive* GetTarget() const;
+	FArticyId GetTargetID() const { return Target; }
 	UArticyFlowPin* GetTargetPin() const;
+	FArticyId GetTargetPinID() const { return TargetPin; }
 
 	void Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>& OutBranches, const uint32& Depth) override;
 
 protected:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="TargetPin"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(DisplayName="TargetPin"))
 	FArticyId TargetPin;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="Target"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(DisplayName="Target"))
 	FArticyId Target;
 
 private:

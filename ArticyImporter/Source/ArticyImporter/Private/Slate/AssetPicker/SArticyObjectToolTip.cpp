@@ -21,23 +21,9 @@
 
 void SArticyObjectToolTip::Construct(const FArguments& InArgs)
 {
-	ObjectToDisplay = InArgs._ObjectToDisplay;
+	ArticyIdAttribute = InArgs._ObjectToDisplay;
 
 	TooltipBrush.ImageSize = FVector2D(64.f, 64.f);
-	// use the preview image if available
-	const bool bHasPreviewImage = UserInterfaceHelperFunctions::RetrievePreviewImage(ObjectToDisplay.Get(), TooltipBrush);
-
-	// if there is no preview image, use the preview image of the speaker, if available
-	if(!bHasPreviewImage)
-	{
-		const bool bHasSpeakerPreviewImage = UserInterfaceHelperFunctions::RetrieveSpeakerPreviewImage(ObjectToDisplay.Get(), TooltipBrush);
-
-		// if there is no speaker preview image, use the type image instead
-		if(!bHasSpeakerPreviewImage)
-		{
-			TooltipBrush = *UserInterfaceHelperFunctions::GetArticyTypeImage(ObjectToDisplay.Get(), UserInterfaceHelperFunctions::Large);
-		}
-	}
 	
 	SToolTip::Construct(
 		SToolTip::FArguments()
@@ -51,10 +37,15 @@ void SArticyObjectToolTip::Construct(const FArguments& InArgs)
 
 void SArticyObjectToolTip::OnOpening()
 {
-	if(ObjectToDisplay.IsValid())
+	if(CachedArticyObject.IsValid())
 	{
 		SetContentWidget(CreateToolTipContent());
 	}
+	else
+	{
+		SetContentWidget(CreateEmptyContent());
+	}
+
 }
 
 void SArticyObjectToolTip::OnClosed()
@@ -62,10 +53,35 @@ void SArticyObjectToolTip::OnClosed()
 	SetContentWidget(SNullWidget::NullWidget);
 }
 
+void SArticyObjectToolTip::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+{
+	if(CachedArticyId != ArticyIdAttribute.Get())
+	{
+		UpdateWidget();
+	}
+}
+
 TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 {
-	const FString AssetName = ObjectToDisplay.Get()->GetName();
-	const UClass* ClassOfObject = ObjectToDisplay.Get()->UObject::GetClass();
+	check(CachedArticyObject.IsValid());
+
+	// use the preview image if available
+	const bool bHasPreviewImage = UserInterfaceHelperFunctions::RetrievePreviewImage(CachedArticyObject.Get(), TooltipBrush);
+
+	// if there is no preview image, use the preview image of the speaker, if available
+	if (!bHasPreviewImage)
+	{
+		const bool bHasSpeakerPreviewImage = UserInterfaceHelperFunctions::RetrieveSpeakerPreviewImage(CachedArticyObject.Get(), TooltipBrush);
+
+		// if there is no speaker preview image, use the type image instead
+		if (!bHasSpeakerPreviewImage)
+		{
+			TooltipBrush = *UserInterfaceHelperFunctions::GetArticyTypeImage(CachedArticyObject.Get(), UserInterfaceHelperFunctions::Large);
+		}
+	}
+	
+	const FString AssetName = CachedArticyObject.Get()->GetName();
+	const UClass* ClassOfObject = CachedArticyObject.Get()->UObject::GetClass();
 
 	// The tooltip contains the name, class, path, and asset registry tags
 	// Use asset name by default, overwrite with display name where it makes sense
@@ -77,7 +93,7 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 
 	// overwrite the asset name with the display name
 	bool bUsingDisplayName = false;
-	IArticyObjectWithDisplayName* ArticyObjectWithDisplayName = Cast<IArticyObjectWithDisplayName>(ObjectToDisplay);
+	IArticyObjectWithDisplayName* ArticyObjectWithDisplayName = Cast<IArticyObjectWithDisplayName>(CachedArticyObject);
 	if (ArticyObjectWithDisplayName)
 	{
 		const FText DisplayName = ArticyObjectWithDisplayName->GetDisplayName();
@@ -88,7 +104,7 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 		}
 	}
 
-	IArticyObjectWithSpeaker* ArticyObjectWithSpeaker = Cast<IArticyObjectWithSpeaker>(ObjectToDisplay);
+	IArticyObjectWithSpeaker* ArticyObjectWithSpeaker = Cast<IArticyObjectWithSpeaker>(CachedArticyObject);
 	if(ArticyObjectWithSpeaker)
 	{
 		const UArticyObject* Speaker = UArticyObject::FindAsset(ArticyObjectWithSpeaker->GetSpeakerId());
@@ -99,7 +115,7 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 	}
 	
 	// add the text to the tooltip body if possible
-	IArticyObjectWithText* ArticyObjectWithText = Cast<IArticyObjectWithText>(ObjectToDisplay);
+	IArticyObjectWithText* ArticyObjectWithText = Cast<IArticyObjectWithText>(CachedArticyObject);
 	if (ArticyObjectWithText)
 	{
 		const FText& Text = ArticyObjectWithText->GetText();
@@ -193,6 +209,16 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 	];
 }
 
+TSharedRef<SWidget> SArticyObjectToolTip::CreateEmptyContent()
+{
+	check(!CachedArticyObject.IsValid());
+	
+	// Create an empty box and return it to effectively clear the tooltip.
+	// SNullWidget::NullWidget does not work because it is filtered out byy the SetContent function
+	TSharedRef<SVerticalBox> InfoBox = SNew(SVerticalBox);
+	return InfoBox;
+}
+
 void SArticyObjectToolTip::AddToToolTipInfoBox(const TSharedRef<SVerticalBox>& InfoBox, const FText& Key, const FText& Value, bool bImportant) const
 {
 	FWidgetStyle ImportantStyle;
@@ -221,6 +247,21 @@ void SArticyObjectToolTip::AddToToolTipInfoBox(const TSharedRef<SVerticalBox>& I
 				.WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
 			]
 		];
+}
+
+void SArticyObjectToolTip::UpdateWidget()
+{
+	CachedArticyId = ArticyIdAttribute.Get();
+	CachedArticyObject = UArticyObject::FindAsset(CachedArticyId);
+
+	if(CachedArticyObject.IsValid())
+	{
+		SetContentWidget(CreateToolTipContent());
+	}
+	else
+	{
+		SetContentWidget(CreateEmptyContent());
+	}
 }
 
 const FSlateBrush* SArticyObjectToolTip::GetTooltipImage() const

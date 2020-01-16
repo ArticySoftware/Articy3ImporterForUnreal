@@ -149,9 +149,10 @@ TSharedRef<class ITableRow> SArticyObjectAssetPicker::MakeTileViewWidget(TWeakOb
 		.Style(FEditorStyle::Get(), "ContentBrowser.AssetListView.TableRow")
 		.Cursor(true ? EMouseCursor::GrabHand : EMouseCursor::Default);
 
+	// create the new tile view; the object to display is fixed so it can't change without the asset picker being recreated.
 	TSharedRef<SArticyObjectTileView> Item =
 		SNew(SArticyObjectTileView)
-		.ObjectToDisplay(Entity)
+		.ObjectToDisplay(Entity->GetId())
 		.ThumbnailSize(FArticyObjectAssetPicketConstants::TileSize.X)
 		.ThumbnailPadding(FArticyObjectAssetPicketConstants::ThumbnailPadding);
 

@@ -16,8 +16,6 @@
 #include "ArticyImporterStyle.h"
 #include "EditorStyle/Private/SlateEditorStyle.h"
 
-
-
 TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 {
 	return MakeShareable(new FArticyRefCustomization());
@@ -26,7 +24,7 @@ TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	ArticyRefPropertyHandle = PropertyHandle;
-	
+
 	// update the reference upon selecting the ref; this only serves cosmetic purposes. The underlying Id will not be changed
 	FArticyRef* ArticyRef = RetrieveArticyRef(ArticyRefPropertyHandle.Get());
 
@@ -41,7 +39,7 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	{
 		ClassRestriction = UArticyObject::StaticClass();
 	}
-	ArticyRefProperty = SNew(SArticyRefProperty, SelectedObject, ArticyRefPropertyHandle.Get())
+	ArticyRefProperty = SNew(SArticyRefProperty, ArticyRefPropertyHandle.Get())
 		.ClassRestriction(this, &FArticyRefCustomization::GetClassRestriction);
 
 	HeaderRow.NameContent()
@@ -161,4 +159,15 @@ void FArticyRefCustomization::OnClassPicked(UClass* InChosenClass)
 TSharedRef<SWidget> FArticyRefCustomization::GetClassPicker() const
 {
 	return ClassPicker.ToSharedRef();
+}
+
+FArticyId FArticyRefCustomization::GetIdFromValueString(FString SourceString)
+{
+	int32 Low, High = 0;
+	const bool bSuccess = FParse::Value(*SourceString, TEXT("Low="), Low) && FParse::Value(*SourceString, TEXT("High="), High);
+
+	FArticyId Id;
+	Id.High = High;
+	Id.Low = Low;
+	return Id;
 }
