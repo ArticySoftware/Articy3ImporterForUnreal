@@ -32,7 +32,7 @@ void FArticyPluginSettingsCustomization::CustomizeDetails(IDetailLayoutBuilder& 
 
 	// after importing, refresh the custom UI
 	FArticyImporterModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
-	ArticyImporterModule.OnImportFinished.AddSP(this, &FArticyPluginSettingsCustomization::RefreshSettingsUI);
+	RefreshHandle = ArticyImporterModule.OnImportFinished.AddRaw(this, &FArticyPluginSettingsCustomization::RefreshSettingsUI);
 	
 	IDetailCategoryBuilder& ImportActionsCategory = DetailLayout.EditCategory("ImportActions");
 	
@@ -116,7 +116,13 @@ void FArticyPluginSettingsCustomization::CustomizeDetails(IDetailLayoutBuilder& 
 
 void FArticyPluginSettingsCustomization::RefreshSettingsUI()
 {
+	ensure(LayoutBuilder);
+	
 	LayoutBuilder->ForceRefreshDetails();
+	// the refresh will cause a new instance to be created and used, therefore clear the outdated refresh delegate handle
+	FArticyImporterModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
+	ArticyImporterModule.OnImportFinished.Remove(RefreshHandle);
+	
 }
 
 #undef LOCTEXT_NAMESPACE
