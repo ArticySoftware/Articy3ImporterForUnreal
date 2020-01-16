@@ -14,7 +14,6 @@
 #include "ArticyRef.h"
 #include "ClassViewerModule.h"
 #include "ArticyImporterStyle.h"
-#include "EditorStyle/Private/SlateEditorStyle.h"
 
 TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 {
@@ -79,7 +78,6 @@ void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Prop
 			.FillWidth(1)
 			[
 				SNew(SBorder)
-				.BorderImage(FSlateEditorStyle::GetBrush(TEXT("PropertyWindow.NoOverlayColor")))
 				.Padding(FMargin(0.0f, 2.0f))
 				.VAlign(VAlign_Center)
 				[
