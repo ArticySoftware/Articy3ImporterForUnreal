@@ -44,6 +44,11 @@ void SArticyObjectTileView::UpdateDisplayedArticyObject()
 	{
 		ArticyObjectColor = ObjectWithColor->GetColor();
 	}
+	else
+	{
+		// default articy color
+		ArticyObjectColor = FLinearColor(0.577, 0.76, 0.799);
+	}
 }
 
 void SArticyObjectTileView::Construct(const FArguments& InArgs)
