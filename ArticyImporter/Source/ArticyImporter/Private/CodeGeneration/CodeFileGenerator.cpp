@@ -16,30 +16,30 @@ void CodeFileGenerator::Line(const FString& Line, const bool bSemicolon, const b
 	{
 		//add indenting tabs
 		for(int i = 0; i < IndentCount + IndentOffset; ++i)
-			FileContent += "\t";
+			FileContent += TEXT("\t");
 	}
 
-	FileContent += Line + (bSemicolon ? L";" : L"") + L"\n";
+	FileContent += Line + (bSemicolon ? TEXT(";") : TEXT("")) + TEXT("\n");
 }
 
 void CodeFileGenerator::Comment(const FString& Text)
 {
-	Line(L"/** " + Text + L" */");
+	Line(TEXT("/** ") + Text + TEXT(" */"));
 }
 
 void CodeFileGenerator::AccessModifier(const FString& Text)
 {
-	Line(Text + (Text.EndsWith(TEXT(":")) ? "" : ":"), false, true, -1);
+	Line(Text + (Text.EndsWith(TEXT(":")) ? TEXT("") : TEXT(":")), false, true, -1);
 }
 
 void CodeFileGenerator::UPropertyMacro(const FString& Specifiers)
 {
-	Line(L"UPROPERTY(" + Specifiers + L")");
+	Line(TEXT("UPROPERTY(") + Specifiers + TEXT(")"));
 }
 
 void CodeFileGenerator::UFunctionMacro(const FString& Specifiers)
 {
-	Line(L"UFUNCTION(" + Specifiers + L")");
+	Line(TEXT("UFUNCTION(") + Specifiers + TEXT(")"));
 }
 
 void CodeFileGenerator::Variable(const FString& Type, const FString& Name, const FString& Value, const FString& Comment, const bool bUproperty, const FString& UpropertySpecifiers)
@@ -51,10 +51,10 @@ void CodeFileGenerator::Variable(const FString& Type, const FString& Name, const
 		this->UPropertyMacro(UpropertySpecifiers);
 
 	//type and name
-	auto str = Type + L" " + Name;
+	auto str = Type + TEXT(" ") + Name;
 	//default value if set
 	if(!Value.IsEmpty())
-		str += " = " + Value;
+		str += TEXT(" = ") + Value;
 	
 	Line(str, true);
 }
@@ -64,7 +64,7 @@ void CodeFileGenerator::Variable(const FString& Type, const FString& Name, const
 void CodeFileGenerator::StartBlock(const bool bIndent)
 {
 	++BlockCount;
-	Line(L"{");
+	Line(TEXT("{"));
 	if(bIndent)
 		PushIndent();
 }
@@ -81,7 +81,7 @@ void CodeFileGenerator::EndBlock(const bool bUnindent, const bool bSemicolon)
 	if(bUnindent)
 		PopIndent();
 
-	Line(L"}", bSemicolon);
+	Line(TEXT("}"), bSemicolon);
 }
 
 void CodeFileGenerator::StartClass(const FString& Classname, const FString& Comment, const bool bUClass, const FString& UClassSpecifiers)
@@ -89,13 +89,13 @@ void CodeFileGenerator::StartClass(const FString& Classname, const FString& Comm
 	if(!Comment.IsEmpty())
 		this->Comment(Comment);
 	if(bUClass)
-		Line("UCLASS(" + UClassSpecifiers + ")");
-	Line(L"class " + Classname);
+		Line(TEXT("UCLASS(") + UClassSpecifiers + TEXT(")"));
+	Line(TEXT("class ") + Classname);
 
 	StartBlock(true);
 	if(bUClass)
 	{
-		Line("GENERATED_BODY()");
+		Line(TEXT("GENERATED_BODY()"));
 		Line();
 	}
 }
@@ -105,13 +105,13 @@ void CodeFileGenerator::StartStruct(const FString& Structname, const FString& Co
 	if(!Comment.IsEmpty())
 		this->Comment(Comment);
 	if(bUStruct)
-		Line("USTRUCT(BlueprintType)");
-	Line(L"struct " + Structname);
+		Line(TEXT("USTRUCT(BlueprintType)"));
+	Line(TEXT("struct ") + Structname);
 
 	StartBlock(true);
 	if(bUStruct)
 	{
-		Line("GENERATED_BODY()");
+		Line(TEXT("GENERATED_BODY()"));
 		Line();
 	}
 }

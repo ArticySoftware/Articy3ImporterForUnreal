@@ -216,12 +216,12 @@ void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString
 	JSON_TRY_STRING(Json, Name);
 	JSON_TRY_STRING(Json, ReturnType);
 
-	BlueprintName = Name + "_";
-	ParameterList = "";
-	OrigininalParameterTypes = "";
+	BlueprintName = Name + TEXT("_");
+	ParameterList = TEXT("");
+	OrigininalParameterTypes = TEXT("");
 	const TArray<TSharedPtr<FJsonValue>>* items;
 
-	if(Json->TryGetArrayField(L"Parameters", items))
+	if(Json->TryGetArrayField(TEXT("Parameters"), items))
 	{
 		for(const auto item : *items)
 		{
@@ -241,14 +241,14 @@ void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString
 			OrigininalParameterTypes += ", " + Type;
 
 			//string -> const FString& (because UE4 wants a const reference for strings..)
-			if(Type == "string")
-				Type = "const FString&";
-			else if(Type == "ArticyObject")
-				Type = "UArticyObject*";
+			if(Type.Equals(TEXT("string")))
+				Type = TEXT("const FString&");
+			else if(Type.Equals(TEXT("ArticyObject")))
+				Type = TEXT("UArticyObject*");
 
 			//append to parameter list
-			ParameterList += ", " + Type + " " + Param;
-			ArgumentList += ", " + Param;
+			ParameterList += TEXT(", ") + Type + TEXT(" ") + Param;
+			ArgumentList += TEXT(", ") + Param;
 		}
 
 		//remove the leading ", "
@@ -488,8 +488,8 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 		//split into lines
 		string.ParseIntoArray(lines, TEXT("\n"));
 
-		string = "";
-		FString comments = "";
+		string = TEXT("");
+		FString comments = TEXT("");
 		for(auto line : lines)
 		{
 			//remove comment
@@ -497,7 +497,7 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 			auto doubleSlashPos = line.Find(TEXT("//"));
 			if(doubleSlashPos != INDEX_NONE)
 			{
-				comments += line.Mid(doubleSlashPos) + "\n";
+				comments += line.Mid(doubleSlashPos) + TEXT("\n");
 				line = line.Left(doubleSlashPos);
 			}
 
@@ -551,11 +551,11 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 					for (int i = 0; i < valueStr.Len(); i++)
 					{
 						auto currentChar = valueStr[i];
-						if (currentChar == ' ' || currentChar == '<' || currentChar == '>' || currentChar == '=' || currentChar == '+' || currentChar == '-')
+						if (currentChar == TEXT(' ') || currentChar == TEXT('<') || currentChar == TEXT('>') || currentChar == TEXT('=') || currentChar == TEXT('+') || currentChar == TEXT('-'))
 							continue;
 						else if (currentChar == '\"' && i > 0)
 						{
-							valueStr.InsertAt(i, "(FString)");
+							valueStr.InsertAt(i, TEXT("(FString)"));
 							offset += strlen("(FString)");
 						}
 
@@ -563,7 +563,7 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 					}
 					
 					//get the dereferenced variable
-					line = line.Left(start) + "(*" + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + ")" + valueStr;
+					line = line.Left(start) + TEXT("(*") + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + ")" + valueStr;
 					offset += strlen(".") + strlen(">") + strlen("()");
 				}
 			}

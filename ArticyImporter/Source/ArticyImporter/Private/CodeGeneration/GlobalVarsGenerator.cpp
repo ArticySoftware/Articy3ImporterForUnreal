@@ -66,23 +66,23 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 
 		//now generate the UArticyGlobalVariables class
 		const auto type = CodeGenerator::GetGlobalVarsClassname(Data, false);
-		header->Class(type + " : public UArticyGlobalVariables", L"Global Articy Variables", true, [&]
+		header->Class(type + " : public UArticyGlobalVariables", TEXT("Global Articy Variables"), true, [&]
 		{
 			header->Line("public:", false, true, -1);
 
 			//generate all the namespaces
 			for(const auto ns : Data->GetGlobalVars().Namespaces)
 			{
-				header->Variable(ns.CppTypename + "*", ns.Namespace, "nullptr", ns.Description, true,
+				header->Variable(ns.CppTypename + TEXT("*"), ns.Namespace, TEXT("nullptr"), ns.Description, true,
 								FString::Printf(TEXT("VisibleAnywhere, BlueprintReadOnly, Instanced, Category=\"%s\""), *ns.Namespace));
 			}
 
 			//---------------------------------------------------------------------------//
 			header->Line();
 
-			header->Method("", type, "", [&]
+			header->Method(TEXT(""), type, TEXT(""), [&]
 			{
-				header->Comment("create the namespaces");
+				header->Comment(TEXT("create the namespaces"));
 				for(const auto ns : Data->GetGlobalVars().Namespaces)
 					header->Line(FString::Printf(TEXT("%s = CreateDefaultSubobject<%s>(\"%s\");"), *ns.Namespace, *ns.CppTypename, *ns.Namespace));
 
@@ -93,9 +93,9 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 			//---------------------------------------------------------------------------//
 			header->Line();
 
-			header->Method("void", "Init", "", [&]
+			header->Method(TEXT("void"), TEXT("Init"), TEXT(""), [&]
 			{
-				header->Comment("initialize the namespaces");
+				header->Comment(TEXT("initialize the namespaces"));
 				for(const auto ns : Data->GetGlobalVars().Namespaces)
 				{
 					header->Line(FString::Printf(TEXT("%s->Init(this);"), *ns.Namespace));
@@ -106,11 +106,11 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 			//---------------------------------------------------------------------------//
 			header->Line();
 
-			header->Method("static " + type + "*", "GetDefault", "const UObject* WorldContext", [&]
+			header->Method(TEXT("static ") + type + TEXT("*"), TEXT("GetDefault"), TEXT("const UObject* WorldContext"), [&]
 			{
-				header->Line("return static_cast<"+type+"*>(UArticyGlobalVariables::GetDefault(WorldContext));");
-			}, "Get the default GlobalVariables (a copy of the asset).", true,
-				"BlueprintPure, Category=\"ArticyGlobalVariables\", meta=(HidePin=\"WorldContext\", DefaultToSelf=\"WorldContext\", DisplayName=\"GetArticyGV\", keywords=\"global variables\")");
+				header->Line(TEXT("return static_cast<")+type+ TEXT("*>(UArticyGlobalVariables::GetDefault(WorldContext));"));
+			}, TEXT("Get the default GlobalVariables (a copy of the asset)."), true,
+				TEXT("BlueprintPure, Category=\"ArticyGlobalVariables\", meta=(HidePin=\"WorldContext\", DefaultToSelf=\"WorldContext\", DisplayName=\"GetArticyGV\", keywords=\"global variables\")"));
 		});
 	});
 }
@@ -118,5 +118,5 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 void GlobalVarsGenerator::GenerateAsset(const UArticyImportData* Data)
 {
 	const auto className = CodeGenerator::GetGlobalVarsClassname(Data, true);
-	ArticyImporterHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName(), "", "", RF_ArchetypeObject);
+	ArticyImporterHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName(), TEXT(""), TEXT(""), RF_ArchetypeObject);
 }
