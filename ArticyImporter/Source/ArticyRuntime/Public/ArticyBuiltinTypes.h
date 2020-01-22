@@ -170,3 +170,24 @@ class ARTICYRUNTIME_API UArticyLocation : public UArticyObject
 	GENERATED_BODY()
 
 };
+
+UCLASS()
+class ARTICYRUNTIME_API UArticyLocationImage : public UArticyObject
+{
+	GENERATED_BODY()
+
+};
+
+UCLASS()
+class ARTICYRUNTIME_API UArticyLink : public UArticyObject
+{
+	GENERATED_BODY()
+
+};
+
+UCLASS()
+class ARTICYRUNTIME_API UArticyComment : public UArticyObject
+{
+	GENERATED_BODY()
+
+};

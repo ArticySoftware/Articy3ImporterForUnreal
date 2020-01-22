@@ -625,6 +625,9 @@ const FArticyObjectDefinitions::FClassInfo& FArticyObjectDefinitions::GetDefault
 		DefaultBaseClasses.Add("UserFolder", FClassInfo{ "UArticyUserFolder", UArticyUserFolder::StaticClass() });
 		DefaultBaseClasses.Add("Zone", FClassInfo{ "UArticyZone", UArticyZone::StaticClass() });
 		DefaultBaseClasses.Add("Location", FClassInfo{ "UArticyLocation", UArticyLocation::StaticClass() });
+		DefaultBaseClasses.Add("LocationImage", FClassInfo{ "UArticyLocationImage", UArticyLocationImage::StaticClass() });
+		DefaultBaseClasses.Add("Link", FClassInfo{ "UArticyLink", UArticyLink::StaticClass() });
+		DefaultBaseClasses.Add("Comment", FClassInfo{ "UArticyComment", UArticyComment::StaticClass() });
 	}
 
 	auto base = DefaultBaseClasses.Find(OriginalType);

@@ -86,8 +86,20 @@ const FSlateBrush* UserInterfaceHelperFunctions::GetArticyTypeImage(const UArtic
 	{
 		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Location.").Append(SizeString)));
 	}
+	else if (ArticyObject->IsA<UArticyLocationImage>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.LocationImage.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyLink>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Link.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyComment>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Comment.").Append(SizeString)));
+	}
 
-	return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.AssetPicker.NoImageAvailable")));
+	return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.ArticyApplication.64")));
 }
 
 UTexture2D* UserInterfaceHelperFunctions::GetDisplayImage(const UArticyObject* ArticyObject)
