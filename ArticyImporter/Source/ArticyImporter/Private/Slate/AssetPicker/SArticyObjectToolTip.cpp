@@ -108,10 +108,18 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 	if(ArticyObjectWithSpeaker)
 	{
 		const UArticyObject* Speaker = UArticyObject::FindAsset(ArticyObjectWithSpeaker->GetSpeakerId());
-		const IArticyObjectWithDisplayName* DisplayNameOfSpeaker = Cast<IArticyObjectWithDisplayName>(Speaker);
-		const FText DisplayName = DisplayNameOfSpeaker->GetDisplayName();
+		// Speaker can be nullptr in case a speaker that does not exist as an entity was specified, i.e. in the scriptwriting documents
+		if (Speaker)
+		{
+			const IArticyObjectWithDisplayName* DisplayNameOfSpeaker = Cast<IArticyObjectWithDisplayName>(Speaker);
+			const FText DisplayName = DisplayNameOfSpeaker->GetDisplayName();
+			AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyObjectToolTipSpeaker", "Speaker"), DisplayName, true);
+		}
+		else
+		{
+			UE_LOG(LogArticyImporter, Error, TEXT("Articy tooltip: Speaker object does not exist"))
+		}
 		
-		AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyObjectToolTipSpeaker", "Speaker"), DisplayName, true);
 	}
 	
 	// add the text to the tooltip body if possible

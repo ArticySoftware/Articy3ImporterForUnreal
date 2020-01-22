@@ -247,6 +247,11 @@ private:
 		{
 			UArticyObject* SpeakerObject = UArticyObject::FindAsset(ArticyObjectWithSpeaker->GetSpeakerId());
 
+			if(!SpeakerObject)
+			{
+				UE_LOG(LogArticyImporter, Error, TEXT("Articy filter: Speaker object does not exist"));
+				return false;
+			}
 			IArticyObjectWithDisplayName* SpeakerDisplayName = Cast<IArticyObjectWithDisplayName>(SpeakerObject);
 
 			FText& SpeakerName = SpeakerDisplayName->GetDisplayName();
