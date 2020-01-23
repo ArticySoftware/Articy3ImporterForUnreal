@@ -79,9 +79,8 @@ TSharedRef< FSlateStyleSet > FArticyImporterStyle::Create()
 	Style->Set("ArticyImporter.Type.TextObject.16", new IMAGE_BRUSH(TEXT("128/textobject"), Icon16x16));
 	Style->Set("ArticyImporter.Type.LocationText.16", new IMAGE_BRUSH(TEXT("128/locationtext"), Icon16x16));
 	Style->Set("ArticyImporter.Type.Document.16", new IMAGE_BRUSH(TEXT("128/document"), Icon16x16));
-	// #TODO images are missing, use placerholders for now
-	Style->Set("ArticyImporter.Type.Spot.16", new IMAGE_BRUSH(TEXT("128/location"), Icon16x16));
-	Style->Set("ArticyImporter.Type.Path.16", new IMAGE_BRUSH(TEXT("128/zone"), Icon16x16));
+	Style->Set("ArticyImporter.Type.Spot.16", new IMAGE_BRUSH(TEXT("256/spot"), Icon16x16));
+	Style->Set("ArticyImporter.Type.Path.16", new IMAGE_BRUSH(TEXT("256/path"), Icon16x16));
 
 
 	
@@ -103,8 +102,8 @@ TSharedRef< FSlateStyleSet > FArticyImporterStyle::Create()
 	Style->Set("ArticyImporter.Type.TextObject.32", new IMAGE_BRUSH(TEXT("128/textobject"), Icon32x32));
 	Style->Set("ArticyImporter.Type.LocationText.32", new IMAGE_BRUSH(TEXT("128/locationtext"), Icon32x32));
 	Style->Set("ArticyImporter.Type.Document.32", new IMAGE_BRUSH(TEXT("128/document"), Icon32x32));
-	Style->Set("ArticyImporter.Type.Spot.32", new IMAGE_BRUSH(TEXT("128/location"), Icon32x32));
-	Style->Set("ArticyImporter.Type.Path.32", new IMAGE_BRUSH(TEXT("128/zone"), Icon32x32));
+	Style->Set("ArticyImporter.Type.Spot.32", new IMAGE_BRUSH(TEXT("256/spot"), Icon32x32));
+	Style->Set("ArticyImporter.Type.Path.32", new IMAGE_BRUSH(TEXT("256/path"), Icon32x32));
 
 
 	Style->Set("ArticyImporter.Type.DialogueFragment.64", new IMAGE_BRUSH(TEXT("128/dialoguefragment"), Icon64x64));
@@ -125,8 +124,8 @@ TSharedRef< FSlateStyleSet > FArticyImporterStyle::Create()
 	Style->Set("ArticyImporter.Type.TextObject.64", new IMAGE_BRUSH(TEXT("128/textobject"), Icon64x64));
 	Style->Set("ArticyImporter.Type.LocationText.64", new IMAGE_BRUSH(TEXT("128/locationtext"), Icon64x64));
 	Style->Set("ArticyImporter.Type.Document.64", new IMAGE_BRUSH(TEXT("128/document"), Icon64x64));
-	Style->Set("ArticyImporter.Type.Spot.64", new IMAGE_BRUSH(TEXT("128/location"), Icon64x64));
-	Style->Set("ArticyImporter.Type.Path.64", new IMAGE_BRUSH(TEXT("128/zone"), Icon64x64));
+	Style->Set("ArticyImporter.Type.Spot.64", new IMAGE_BRUSH(TEXT("256/spot"), Icon64x64));
+	Style->Set("ArticyImporter.Type.Path.64", new IMAGE_BRUSH(TEXT("256/path"), Icon64x64));
 
 	
 	return Style;
