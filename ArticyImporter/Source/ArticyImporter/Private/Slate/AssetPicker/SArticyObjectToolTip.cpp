@@ -144,6 +144,17 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 		AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyObjectToolTipAssetName", "Asset Name"), FText::FromString(AssetName), false);
 	}
 
+	// if our object has a target, add the display name of the target to the tooltip
+	const FArticyId* TargetID = UserInterfaceHelperFunctions::GetTargetID(CachedArticyObject.Get());
+	if(TargetID)
+	{
+		UArticyObject* TargetObject = UArticyObject::FindAsset(*TargetID);
+		if(TargetObject)
+		{
+			AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyObjectToolTipTarget", "Target"), FText::FromString(UserInterfaceHelperFunctions::GetDisplayName(TargetObject)), false);
+		}
+	}
+	
 	// add class name
 	AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyObjectToolTipClass", "Class"), ClassText, false);
 
