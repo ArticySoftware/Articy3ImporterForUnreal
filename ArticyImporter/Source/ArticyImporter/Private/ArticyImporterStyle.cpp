@@ -70,12 +70,20 @@ TSharedRef< FSlateStyleSet > FArticyImporterStyle::Create()
 	Style->Set("ArticyImporter.Type.Instruction.16", new IMAGE_BRUSH(TEXT("128/instruction"), Icon16x16));
 	Style->Set("ArticyImporter.Type.Condition.16", new IMAGE_BRUSH(TEXT("128/condition"), Icon16x16));
 	Style->Set("ArticyImporter.Type.Asset.16", new IMAGE_BRUSH(TEXT("128/asset"), Icon16x16));
-	Style->Set("ArticyImporter.Type.UserFolder.16", new IMAGE_BRUSH(TEXT("128/assetfolder"), Icon16x16));
+	Style->Set("ArticyImporter.Type.UserFolder.16", new IMAGE_BRUSH(TEXT("128/userfolder"), Icon16x16));
 	Style->Set("ArticyImporter.Type.Zone.16", new IMAGE_BRUSH(TEXT("128/zone"), Icon16x16));
 	Style->Set("ArticyImporter.Type.Location.16", new IMAGE_BRUSH(TEXT("128/location"), Icon16x16));
 	Style->Set("ArticyImporter.Type.LocationImage.16", new IMAGE_BRUSH(TEXT("128/locationimage"), Icon16x16));
 	Style->Set("ArticyImporter.Type.Link.16", new IMAGE_BRUSH(TEXT("128/link"), Icon16x16));
 	Style->Set("ArticyImporter.Type.Comment.16", new IMAGE_BRUSH(TEXT("128/comment"), Icon16x16));
+	Style->Set("ArticyImporter.Type.TextObject.16", new IMAGE_BRUSH(TEXT("128/textobject"), Icon16x16));
+	Style->Set("ArticyImporter.Type.LocationText.16", new IMAGE_BRUSH(TEXT("128/locationtext"), Icon16x16));
+	Style->Set("ArticyImporter.Type.Document.16", new IMAGE_BRUSH(TEXT("128/document"), Icon16x16));
+	// #TODO images are missing, use placerholders for now
+	Style->Set("ArticyImporter.Type.Spot.16", new IMAGE_BRUSH(TEXT("128/location"), Icon16x16));
+	Style->Set("ArticyImporter.Type.Path.16", new IMAGE_BRUSH(TEXT("128/zone"), Icon16x16));
+
+
 	
 	Style->Set("ArticyImporter.Type.DialogueFragment.32", new IMAGE_BRUSH(TEXT("128/dialoguefragment"), Icon32x32));
 	Style->Set("ArticyImporter.Type.Dialogue.32", new IMAGE_BRUSH(TEXT("128/dialogue2"), Icon32x32));
@@ -86,12 +94,18 @@ TSharedRef< FSlateStyleSet > FArticyImporterStyle::Create()
 	Style->Set("ArticyImporter.Type.Instruction.32", new IMAGE_BRUSH(TEXT("128/instruction"), Icon32x32));
 	Style->Set("ArticyImporter.Type.Condition.32", new IMAGE_BRUSH(TEXT("128/condition"), Icon32x32));
 	Style->Set("ArticyImporter.Type.Asset.32", new IMAGE_BRUSH(TEXT("128/asset"), Icon32x32));
-	Style->Set("ArticyImporter.Type.UserFolder.32", new IMAGE_BRUSH(TEXT("128/assetfolder"), Icon32x32));
+	Style->Set("ArticyImporter.Type.UserFolder.32", new IMAGE_BRUSH(TEXT("128/userfolder"), Icon32x32));
 	Style->Set("ArticyImporter.Type.Zone.32", new IMAGE_BRUSH(TEXT("128/zone"), Icon32x32));
 	Style->Set("ArticyImporter.Type.Location.32", new IMAGE_BRUSH(TEXT("128/location"), Icon32x32));
 	Style->Set("ArticyImporter.Type.LocationImage.32", new IMAGE_BRUSH(TEXT("128/locationimage"), Icon32x32));
 	Style->Set("ArticyImporter.Type.Link.32", new IMAGE_BRUSH(TEXT("128/link"), Icon32x32));
 	Style->Set("ArticyImporter.Type.Comment.32", new IMAGE_BRUSH(TEXT("128/comment"), Icon32x32));
+	Style->Set("ArticyImporter.Type.TextObject.32", new IMAGE_BRUSH(TEXT("128/textobject"), Icon32x32));
+	Style->Set("ArticyImporter.Type.LocationText.32", new IMAGE_BRUSH(TEXT("128/locationtext"), Icon32x32));
+	Style->Set("ArticyImporter.Type.Document.32", new IMAGE_BRUSH(TEXT("128/document"), Icon32x32));
+	Style->Set("ArticyImporter.Type.Spot.32", new IMAGE_BRUSH(TEXT("128/location"), Icon32x32));
+	Style->Set("ArticyImporter.Type.Path.32", new IMAGE_BRUSH(TEXT("128/zone"), Icon32x32));
+
 
 	Style->Set("ArticyImporter.Type.DialogueFragment.64", new IMAGE_BRUSH(TEXT("128/dialoguefragment"), Icon64x64));
 	Style->Set("ArticyImporter.Type.Dialogue.64", new IMAGE_BRUSH(TEXT("128/dialogue2"), Icon64x64));
@@ -102,15 +116,17 @@ TSharedRef< FSlateStyleSet > FArticyImporterStyle::Create()
 	Style->Set("ArticyImporter.Type.Instruction.64", new IMAGE_BRUSH(TEXT("128/instruction"), Icon64x64));
 	Style->Set("ArticyImporter.Type.Condition.64", new IMAGE_BRUSH(TEXT("128/condition"), Icon64x64));
 	Style->Set("ArticyImporter.Type.Asset.64", new IMAGE_BRUSH(TEXT("128/asset"), Icon64x64));
-	Style->Set("ArticyImporter.Type.UserFolder.64", new IMAGE_BRUSH(TEXT("128/assetfolder"), Icon64x64));
+	Style->Set("ArticyImporter.Type.UserFolder.64", new IMAGE_BRUSH(TEXT("128/userfolder"), Icon64x64));
 	Style->Set("ArticyImporter.Type.Zone.64", new IMAGE_BRUSH(TEXT("128/zone"), Icon64x64));
 	Style->Set("ArticyImporter.Type.Location.64", new IMAGE_BRUSH(TEXT("128/location"), Icon64x64));
 	Style->Set("ArticyImporter.Type.LocationImage.64", new IMAGE_BRUSH(TEXT("128/locationimage"), Icon64x64));
 	Style->Set("ArticyImporter.Type.Link.64", new IMAGE_BRUSH(TEXT("128/link"), Icon64x64));
 	Style->Set("ArticyImporter.Type.Comment.64", new IMAGE_BRUSH(TEXT("128/comment"), Icon64x64));
-
-
-
+	Style->Set("ArticyImporter.Type.TextObject.64", new IMAGE_BRUSH(TEXT("128/textobject"), Icon64x64));
+	Style->Set("ArticyImporter.Type.LocationText.64", new IMAGE_BRUSH(TEXT("128/locationtext"), Icon64x64));
+	Style->Set("ArticyImporter.Type.Document.64", new IMAGE_BRUSH(TEXT("128/document"), Icon64x64));
+	Style->Set("ArticyImporter.Type.Spot.64", new IMAGE_BRUSH(TEXT("128/location"), Icon64x64));
+	Style->Set("ArticyImporter.Type.Path.64", new IMAGE_BRUSH(TEXT("128/zone"), Icon64x64));
 
 	
 	return Style;

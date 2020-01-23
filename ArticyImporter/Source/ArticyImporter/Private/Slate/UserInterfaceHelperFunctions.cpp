@@ -90,6 +90,10 @@ const FSlateBrush* UserInterfaceHelperFunctions::GetArticyTypeImage(const UArtic
 	{
 		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.LocationImage.").Append(SizeString)));
 	}
+	else if (ArticyObject->IsA<UArticyLocationText>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.LocationText.").Append(SizeString)));
+	}
 	else if (ArticyObject->IsA<UArticyLink>())
 	{
 		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Link.").Append(SizeString)));
@@ -97,6 +101,22 @@ const FSlateBrush* UserInterfaceHelperFunctions::GetArticyTypeImage(const UArtic
 	else if (ArticyObject->IsA<UArticyComment>())
 	{
 		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Comment.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyTextObject>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.TextObject.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyPath>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Path.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticyDocument>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Document.").Append(SizeString)));
+	}
+	else if (ArticyObject->IsA<UArticySpot>())
+	{
+		return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Spot.").Append(SizeString)));
 	}
 
 	return FArticyImporterStyle::Get().GetBrush(FName(*FString("ArticyImporter.ArticyApplication.64")));

@@ -613,21 +613,26 @@ const FArticyObjectDefinitions::FClassInfo& FArticyObjectDefinitions::GetDefault
 	static TMap<FName, FClassInfo> DefaultBaseClasses;
 	if(DefaultBaseClasses.Num() == 0)
 	{
-		DefaultBaseClasses.Add("FlowFragment", FClassInfo{ "UArticyFlowFragment", UArticyFlowFragment::StaticClass() });
-		DefaultBaseClasses.Add("Dialogue", FClassInfo{ "UArticyDialogue", UArticyDialogue::StaticClass() });
-		DefaultBaseClasses.Add("DialogueFragment", FClassInfo{ "UArticyDialogueFragment", UArticyDialogueFragment::StaticClass() });
-		DefaultBaseClasses.Add("Hub", FClassInfo{ "UArticyHub", UArticyHub::StaticClass() });
-		DefaultBaseClasses.Add("Jump", FClassInfo{ "UArticyJump", UArticyJump::StaticClass() });
-		DefaultBaseClasses.Add("Condition", FClassInfo{ "UArticyCondition", UArticyCondition::StaticClass() });
-		DefaultBaseClasses.Add("Instruction", FClassInfo{ "UArticyInstruction", UArticyInstruction::StaticClass() });
 		DefaultBaseClasses.Add("Asset", FClassInfo{ "UArticyAsset", UArticyAsset::StaticClass() });
+		DefaultBaseClasses.Add("Condition", FClassInfo{ "UArticyCondition", UArticyCondition::StaticClass() });
+		DefaultBaseClasses.Add("Comment", FClassInfo{ "UArticyComment", UArticyComment::StaticClass() });
+		DefaultBaseClasses.Add("DialogueFragment", FClassInfo{ "UArticyDialogueFragment", UArticyDialogueFragment::StaticClass() });
+		DefaultBaseClasses.Add("Dialogue", FClassInfo{ "UArticyDialogue", UArticyDialogue::StaticClass() });
+		DefaultBaseClasses.Add("Document", FClassInfo{ "UArticyDocument", UArticyDocument::StaticClass() });
 		DefaultBaseClasses.Add("Entity", FClassInfo{ "UArticyEntity", UArticyEntity::StaticClass() });
+		DefaultBaseClasses.Add("FlowFragment", FClassInfo{ "UArticyFlowFragment", UArticyFlowFragment::StaticClass() });
+		DefaultBaseClasses.Add("Hub", FClassInfo{ "UArticyHub", UArticyHub::StaticClass() });
+		DefaultBaseClasses.Add("LocationImage", FClassInfo{ "UArticyLocationImage", UArticyLocationImage::StaticClass() });
+		DefaultBaseClasses.Add("LocationText", FClassInfo{ "UArticyLocationText", UArticyLocationText::StaticClass() });
+		DefaultBaseClasses.Add("Instruction", FClassInfo{ "UArticyInstruction", UArticyInstruction::StaticClass() });
+		DefaultBaseClasses.Add("Jump", FClassInfo{ "UArticyJump", UArticyJump::StaticClass() });
+		DefaultBaseClasses.Add("Link", FClassInfo{ "UArticyLink", UArticyLink::StaticClass() });
+		DefaultBaseClasses.Add("Location", FClassInfo{ "UArticyLocation", UArticyLocation::StaticClass() });
+		DefaultBaseClasses.Add("Path", FClassInfo{ "UArticyPath", UArticyPath::StaticClass() });
+		DefaultBaseClasses.Add("Spot", FClassInfo{ "UArticySpot", UArticySpot::StaticClass() });
+		DefaultBaseClasses.Add("TextObject", FClassInfo{ "UArticyTextObject", UArticyTextObject::StaticClass() });
 		DefaultBaseClasses.Add("UserFolder", FClassInfo{ "UArticyUserFolder", UArticyUserFolder::StaticClass() });
 		DefaultBaseClasses.Add("Zone", FClassInfo{ "UArticyZone", UArticyZone::StaticClass() });
-		DefaultBaseClasses.Add("Location", FClassInfo{ "UArticyLocation", UArticyLocation::StaticClass() });
-		DefaultBaseClasses.Add("LocationImage", FClassInfo{ "UArticyLocationImage", UArticyLocationImage::StaticClass() });
-		DefaultBaseClasses.Add("Link", FClassInfo{ "UArticyLink", UArticyLink::StaticClass() });
-		DefaultBaseClasses.Add("Comment", FClassInfo{ "UArticyComment", UArticyComment::StaticClass() });
 	}
 
 	auto base = DefaultBaseClasses.Find(OriginalType);

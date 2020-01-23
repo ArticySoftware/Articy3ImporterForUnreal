@@ -172,11 +172,40 @@ class ARTICYRUNTIME_API UArticyLocation : public UArticyObject
 };
 
 UCLASS()
+class ARTICYRUNTIME_API UArticyDocument : public UArticyObject
+{
+	GENERATED_BODY()
+
+};
+
+UCLASS()
+class ARTICYRUNTIME_API UArticyPath : public UArticyObject
+{
+	GENERATED_BODY()
+
+};
+
+UCLASS()
+class ARTICYRUNTIME_API UArticySpot : public UArticyObject
+{
+	GENERATED_BODY()
+
+};
+
+UCLASS()
 class ARTICYRUNTIME_API UArticyLocationImage : public UArticyObject
 {
 	GENERATED_BODY()
 
 };
+
+UCLASS()
+class ARTICYRUNTIME_API UArticyLocationText : public UArticyObject
+{
+	GENERATED_BODY()
+
+};
+
 
 UCLASS()
 class ARTICYRUNTIME_API UArticyLink : public UArticyObject
@@ -187,6 +216,13 @@ class ARTICYRUNTIME_API UArticyLink : public UArticyObject
 
 UCLASS()
 class ARTICYRUNTIME_API UArticyComment : public UArticyObject
+{
+	GENERATED_BODY()
+
+};
+
+UCLASS()
+class ARTICYRUNTIME_API UArticyTextObject : public UArticyObject
 {
 	GENERATED_BODY()
 
