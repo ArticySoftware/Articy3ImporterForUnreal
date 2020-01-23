@@ -334,6 +334,7 @@ bool UArticyDatabase::UnloadPackage(const FString PackageName, const bool bQuick
 			/*
 			 *	An exported object can exist multiple times in different packages
 			 *  In the database, there can only be one object with the same Id, so if we are unloading slowly, check if the object is contained in another package first
+			 *  Only unload if it is not contained in any other package
 			*/
 			bool bIsAssetContained = false;
 			for(FString LoadedPackageName : LoadedPackages)
@@ -344,7 +345,7 @@ bool UArticyDatabase::UnloadPackage(const FString PackageName, const bool bQuick
 				}
 			}
 
-			if(bIsAssetContained)
+			if(!bIsAssetContained)
 			{
 				bShouldUnload = true;
 			}
