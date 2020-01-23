@@ -7,6 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/Texture2D.h"
+#include "ArticyBaseTypes.h"
 /**
  * 
  */
@@ -29,9 +30,9 @@ namespace UserInterfaceHelperFunctions
 	bool RetrieveSpeakerPreviewImage(const UArticyObject* ArticyObject, FSlateBrush& OutSlateBrush);
 
 
-
+	const FArticyId* GetTargetID(const UArticyObject* ArticyObject);
 	const FString GetDisplayName(const UArticyObject* ArticyObject);
-
+	const FLinearColor GetColor(const UArticyObject* ArticyObject);
 	const bool ShowObjectInArticy(const UArticyObject* ArticyObject);
 	
 };

@@ -44,6 +44,7 @@ private:
 	TAttribute<FArticyId> ArticyIdAttribute;
 	mutable FArticyId CachedArticyId;
 	mutable TWeakObjectPtr<UArticyObject> CachedArticyObject;
+	
 	TSharedPtr<SImage> PreviewImage;
 	TSharedPtr<STextBlock> DisplayNameTextBlock;
 	TSharedPtr<SBorder> WidgetContainerBorder;
@@ -55,16 +56,13 @@ private:
 	int32 ThumbnailPadding;
 
 	bool bHasPreviewImage = false;
-	bool bHasColor = false;
-	// default articy color for objects that do not have a color but still need a border
-	FSlateColor ArticyObjectColor = FLinearColor(0.577, 0.76, 0.799);
 	
 private:
 	void UpdateDisplayedArticyObject();
-
-	FText OnGetEntityName() const;
-	const FSlateBrush* OnGetEntityImage() const;
+	
+	virtual FText OnGetEntityName() const;
+	virtual const FSlateBrush* OnGetEntityImage() const;
 	EVisibility OnHasPreviewImage() const;
-	FSlateColor OnGetArticyObjectColor() const;
-	const FSlateBrush* GetTypeImage(UserInterfaceHelperFunctions::EImageSize SizeOverride = UserInterfaceHelperFunctions::Medium) const;
+	virtual FSlateColor OnGetArticyObjectColor() const;
+	const FSlateBrush* GetTypeImage(UserInterfaceHelperFunctions::EImageSize Size = UserInterfaceHelperFunctions::Medium) const;
 };

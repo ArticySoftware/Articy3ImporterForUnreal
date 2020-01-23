@@ -16,6 +16,7 @@
 #include "ArticyImporterStyle.h"
 #include "ArticyFlowClasses.h"
 #include "ArticyEntity.h"
+#include "Interfaces/ArticyObjectWithColor.h"
 
 const FSlateBrush* UserInterfaceHelperFunctions::GetArticyTypeImage(const UArticyObject* ArticyObject, UserInterfaceHelperFunctions::EImageSize Size)
 {
@@ -174,6 +175,26 @@ bool UserInterfaceHelperFunctions::RetrieveSpeakerPreviewImage(const UArticyObje
 	return false;
 }
 
+const FArticyId* UserInterfaceHelperFunctions::GetTargetID(const UArticyObject* ArticyObject)
+{
+	static const auto PropName = FName("Target");
+	UProperty* Prop = ArticyObject->GetProperty(PropName);
+
+	if(!Prop)
+	{
+		return nullptr;
+	}
+	
+	const FArticyId* TargetID = Prop->ContainerPtrToValuePtr<FArticyId>(ArticyObject);
+
+	if(TargetID)
+	{
+		return TargetID;
+	}
+
+	return nullptr;
+}
+
 const FString UserInterfaceHelperFunctions::GetDisplayName(const UArticyObject* ArticyObject)
 {
 	FString DisplayName = "None";
@@ -182,7 +203,18 @@ const FString UserInterfaceHelperFunctions::GetDisplayName(const UArticyObject* 
 	{
 		return DisplayName;
 	}
+	
+	const FArticyId* TargetID = UserInterfaceHelperFunctions::GetTargetID(ArticyObject);
+	if (TargetID)
+	{
+		const UArticyObject* TargetObject = UArticyObject::FindAsset(*TargetID);
 
+		if (TargetObject)
+		{
+			return GetDisplayName(TargetObject);
+		}
+	}
+	
 	// use the display name as display name, if available
 	const IArticyObjectWithDisplayName* ArticyObjectWithDisplayName = Cast<IArticyObjectWithDisplayName>(ArticyObject);
 	if (ArticyObjectWithDisplayName)
@@ -216,8 +248,40 @@ const FString UserInterfaceHelperFunctions::GetDisplayName(const UArticyObject* 
 			return DisplayName;
 		}
 	}
-
+	
 	return DisplayName;
+}
+
+const FLinearColor UserInterfaceHelperFunctions::GetColor(const UArticyObject* ArticyObject)
+{
+	FLinearColor Color(0.577, 0.76, 0.799);
+
+
+	if (!ArticyObject)
+	{
+		return Color;
+	}
+
+	const FArticyId* TargetID = UserInterfaceHelperFunctions::GetTargetID(ArticyObject);
+
+	if (TargetID)
+	{
+		const UArticyObject* TargetObject = UArticyObject::FindAsset(*TargetID);
+
+		if (TargetObject)
+		{
+			return GetColor(TargetObject);
+		}
+	}
+	
+	const IArticyObjectWithColor* ObjectWithColor = Cast<IArticyObjectWithColor>(ArticyObject);
+	if(ObjectWithColor)
+	{
+		Color = ObjectWithColor->GetColor();
+		return Color;
+	}	
+	
+	return Color;
 }
 
 const bool UserInterfaceHelperFunctions::ShowObjectInArticy(const UArticyObject* ArticyObject)

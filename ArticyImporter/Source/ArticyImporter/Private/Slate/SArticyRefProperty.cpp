@@ -36,7 +36,8 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* In
 	
 	Cursor = EMouseCursor::Hand;
 	
-	if(!this->ClassRestriction.IsBound()) {
+	if(!this->ClassRestriction.IsBound()) 
+	{
 		UE_LOG(LogArticyImporter, Warning, TEXT("Tried constructing articy ref property without valid class restriction. Using ArticyObject instead"));
 		this->ClassRestriction = UArticyObject::StaticClass();
 	}
@@ -131,7 +132,7 @@ void SArticyRefProperty::Tick(const FGeometry& AllottedGeometry, const double In
 	if(Result == FPropertyAccess::Success)
 	{
 		const FArticyId CurrentRefId = FArticyRefCustomization::GetIdFromValueString(RefString);
-		if (CurrentRefId != CurrentObjectID)
+		if (CurrentRefId != CurrentObjectID || !CachedArticyObject.IsValid())
 		{
 			UpdateWidget();
 		}

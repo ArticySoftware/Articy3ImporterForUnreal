@@ -36,19 +36,6 @@ void SArticyObjectTileView::UpdateDisplayedArticyObject()
 	{
 		TypeImage = GetTypeImage(UserInterfaceHelperFunctions::Medium);
 	}
-
-	// retrieve color for the border
-	IArticyObjectWithColor* ObjectWithColor = Cast<IArticyObjectWithColor>(CachedArticyObject);
-	bHasColor = ObjectWithColor ? true : false;
-	if (bHasColor)
-	{
-		ArticyObjectColor = ObjectWithColor->GetColor();
-	}
-	else
-	{
-		// default articy color
-		ArticyObjectColor = FLinearColor(0.577, 0.76, 0.799);
-	}
 }
 
 void SArticyObjectTileView::Construct(const FArguments& InArgs)
@@ -148,7 +135,7 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 void SArticyObjectTileView::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
 	// if the Id is different from the cached Id, update the widget
-	if(CachedArticyId != ArticyIdAttribute.Get())
+	if(CachedArticyId != ArticyIdAttribute.Get() || !CachedArticyObject.IsValid())
 	{
 		UpdateDisplayedArticyObject();
 	}
@@ -166,8 +153,6 @@ const FSlateBrush* SArticyObjectTileView::OnGetEntityImage() const
 	{
 		return &PreviewBrush;
 	}
-
-	//PreviewBrush = *FArticyImporterStyle::Get().GetBrush("ArticyImporter.ArticyApplication.64");
 	
 	return &PreviewBrush;
 }
@@ -179,12 +164,12 @@ EVisibility SArticyObjectTileView::OnHasPreviewImage() const
 
 FSlateColor SArticyObjectTileView::OnGetArticyObjectColor() const
 {
-	return ArticyObjectColor;
+	return UserInterfaceHelperFunctions::GetColor(CachedArticyObject.Get());
 }
 
-const FSlateBrush* SArticyObjectTileView::GetTypeImage(UserInterfaceHelperFunctions::EImageSize SizeOverride) const
+const FSlateBrush* SArticyObjectTileView::GetTypeImage(UserInterfaceHelperFunctions::EImageSize Size) const
 {
-	const FSlateBrush* Brush = UserInterfaceHelperFunctions::GetArticyTypeImage(CachedArticyObject.Get(), SizeOverride);
+	const FSlateBrush* Brush = UserInterfaceHelperFunctions::GetArticyTypeImage(CachedArticyObject.Get(), Size);
 	return Brush;
 }
 

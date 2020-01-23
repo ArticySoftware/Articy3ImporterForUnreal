@@ -54,14 +54,9 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 
 void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	FClassViewerInitializationOptions ClassViewerConfig;
-	ClassViewerConfig.DisplayMode = EClassViewerDisplayMode::TreeView;
-	ClassViewerConfig.ClassFilter = MakeShareable(new FArticyRefClassFilter);
-
-	ClassPicker = StaticCastSharedRef<SWidget>(FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(ClassViewerConfig, FOnClassPicked::CreateSP(this, &FArticyRefCustomization::OnClassPicked)));
 	ClassRestrictionButton =
 		SNew(SComboButton)
-		.OnGetMenuContent(this, &FArticyRefCustomization::GetClassPicker)
+		.OnGetMenuContent(this, &FArticyRefCustomization::CreateClassPicker)
 		.ContentPadding(2.f)
 		.ButtonContent()
 		[
@@ -151,12 +146,16 @@ FText FArticyRefCustomization::GetChosenClassName() const
 void FArticyRefCustomization::OnClassPicked(UClass* InChosenClass)
 {
 	ClassRestriction = InChosenClass;
-	ClassRestrictionButton->SetIsOpen(false);
+	ClassRestrictionButton->SetIsOpen(false, false);
 }
 
-TSharedRef<SWidget> FArticyRefCustomization::GetClassPicker() const
+TSharedRef<SWidget> FArticyRefCustomization::CreateClassPicker() const
 {
-	return ClassPicker.ToSharedRef();
+	FClassViewerInitializationOptions ClassViewerConfig;
+	ClassViewerConfig.DisplayMode = EClassViewerDisplayMode::TreeView;
+	ClassViewerConfig.bAllowViewOptions = true;
+	ClassViewerConfig.ClassFilter = MakeShareable(new FArticyRefClassFilter);
+	return FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(ClassViewerConfig, FOnClassPicked::CreateRaw(this, &FArticyRefCustomization::OnClassPicked));
 }
 
 FArticyId FArticyRefCustomization::GetIdFromValueString(FString SourceString)
