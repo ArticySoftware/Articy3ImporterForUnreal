@@ -177,6 +177,11 @@ bool UserInterfaceHelperFunctions::RetrieveSpeakerPreviewImage(const UArticyObje
 
 const FArticyId* UserInterfaceHelperFunctions::GetTargetID(const UArticyObject* ArticyObject)
 {
+	if(!ArticyObject)
+	{
+		return nullptr; 
+	}
+	
 	static const auto PropName = FName("Target");
 	UProperty* Prop = ArticyObject->GetProperty(PropName);
 
