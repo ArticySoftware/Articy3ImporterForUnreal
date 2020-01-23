@@ -109,18 +109,9 @@ void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Prop
 FArticyRef* FArticyRefCustomization::RetrieveArticyRef(IPropertyHandle* ArticyRefHandle)
 {
 	FArticyRef* ArticyRef = nullptr;
-
-#if ENGINE_MINOR_VERSION >=20
 	void* ArticyRefAddress;
 	ArticyRefHandle->GetValueData(ArticyRefAddress);
 	ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
-#elif ENGINE_MINOR_VERSION == 19
-	TArray<void*> Addresses;
-	ArticyRefHandle->AccessRawData(Addresses);
-	void* ArticyRefAddress = Addresses[0];
-	ArticyRef = static_cast<FArticyRef*>(ArticyRefAddress);
-#endif
-
 	return ArticyRef;
 }
 
