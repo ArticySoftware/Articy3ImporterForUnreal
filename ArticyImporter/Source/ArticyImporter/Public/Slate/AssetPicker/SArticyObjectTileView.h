@@ -64,5 +64,5 @@ private:
 	virtual const FSlateBrush* OnGetEntityImage() const;
 	EVisibility OnHasPreviewImage() const;
 	virtual FSlateColor OnGetArticyObjectColor() const;
-	const FSlateBrush* GetTypeImage(UserInterfaceHelperFunctions::EImageSize Size = UserInterfaceHelperFunctions::Medium) const;
+	const FSlateBrush* GetTypeImage() const;
 };

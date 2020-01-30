@@ -32,10 +32,9 @@ void SArticyObjectTileView::UpdateDisplayedArticyObject()
 	{
 		PreviewBrush = *UserInterfaceHelperFunctions::GetArticyTypeImage(CachedArticyObject.Get(), UserInterfaceHelperFunctions::Large);
 	}
-	else
-	{
-		TypeImage = GetTypeImage(UserInterfaceHelperFunctions::Medium);
-	}
+
+	TypeImage = UserInterfaceHelperFunctions::GetArticyTypeImage(CachedArticyObject.Get(), UserInterfaceHelperFunctions::Medium);
+
 }
 
 void SArticyObjectTileView::Construct(const FArguments& InArgs)
@@ -123,7 +122,7 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 					.HeightOverride(HeightScaleAttribute)
 					[
 						SNew(SImage)
-						.Image(TypeImage)
+						.Image(this, &SArticyObjectTileView::GetTypeImage)
 						.Visibility(this, &SArticyObjectTileView::OnHasPreviewImage)
 					]
 				]
@@ -167,10 +166,9 @@ FSlateColor SArticyObjectTileView::OnGetArticyObjectColor() const
 	return UserInterfaceHelperFunctions::GetColor(CachedArticyObject.Get());
 }
 
-const FSlateBrush* SArticyObjectTileView::GetTypeImage(UserInterfaceHelperFunctions::EImageSize Size) const
+const FSlateBrush* SArticyObjectTileView::GetTypeImage() const
 {
-	const FSlateBrush* Brush = UserInterfaceHelperFunctions::GetArticyTypeImage(CachedArticyObject.Get(), Size);
-	return Brush;
+	return TypeImage;
 }
 
 #undef LOCTEXT_NAMESPACE
