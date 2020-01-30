@@ -17,10 +17,6 @@ struct ARTICYRUNTIME_API FArticyRef
 	GENERATED_BODY()
 
 public:
-	/** The original object corresponding to the Id. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Setup")
-	UArticyPrimitive* Reference = nullptr;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Setup")
 	bool bReferenceBaseObject = true;
 
@@ -28,50 +24,56 @@ public:
 	mutable int32 CloneId;
 
 	void SetId(FArticyId NewId);
-	void SetReference(UArticyPrimitive* Object);
+	void SetReference(UArticyObject* Object);
 
 	const FArticyId& GetId() const;
-	UArticyPrimitive* GetReference();
 
 	/** Get a (single-instance) copy of the referenced asset. */
 	template<typename T = UArticyObject>
 	T* GetObject(const UObject* WorldContext) const;
 
+	// reference: color.h
+	// used in details customization 
+	bool InitFromString(const FString& SourceString) const
+	{
+		Id.High = Id.Low = 0;
+
+		const bool bSuccess = FParse::Value(*SourceString, TEXT("Low="), Id.Low) && FParse::Value(*SourceString, TEXT("High="), Id.High);
+
+		return bSuccess;
+	}
 private:
-	/** The actual reference: we keep track of the Reference's Id. */
-	UPROPERTY(VisibleAnywhere, Category="Setup")
+	/** The actual reference: we keep track of the Reference's Id.
+	 * Set to EditAnywhere here to allow for a hack in manipulating properties
+	 * Set to disabled in the ArticyRefCustomization so that the user can't edit it directly
+	 */
+	UPROPERTY(EditAnywhere, Category="Setup")
 	mutable FArticyId Id = 0;
 
 	/** The single-instance object copy of this ArticyRef. */
-	mutable TWeakObjectPtr<UArticyPrimitive> CachedObject = nullptr;
+	mutable TWeakObjectPtr<UArticyObject> CachedObject = nullptr;
 	mutable FArticyId CachedId = 0;
 	mutable int32 CachedCloneId = 0;
 
-	UArticyPrimitive* GetObjectInternal(const UObject* WorldContext) const;
+	UArticyObject* GetObjectInternal(const UObject* WorldContext) const;
 
 private:
 
-	//the SerializeOrNot method is our friend!
-	template<class CPPSTRUCT>
-	friend typename TEnableIf<TStructOpsTypeTraits<CPPSTRUCT>::WithSerializer, bool>::Type SerializeOrNot(FArchive& Ar, CPPSTRUCT *Data);
+	////the SerializeOrNot method is our friend!
+	//template<class CPPSTRUCT>
+	//friend typename TEnableIf<TStructOpsTypeTraits<CPPSTRUCT>::WithSerializer, bool>::Type SerializeOrNot(FArchive& Ar, CPPSTRUCT *Data);
 
-	bool Serialize(FArchive& Ar);
+	//bool Serialize(FArchive& Ar);
 
-	//the PostSerializeOrNot method is our friend as well!
-	template<class CPPSTRUCT>
-	friend typename TEnableIf<TStructOpsTypeTraits<CPPSTRUCT>::WithPostSerialize>::Type PostSerializeOrNot(const FArchive& Ar, CPPSTRUCT *Data);
+	////the PostSerializeOrNot method is our friend as well!
+	//template<class CPPSTRUCT>
+	//friend typename TEnableIf<TStructOpsTypeTraits<CPPSTRUCT>::WithPostSerialize>::Type PostSerializeOrNot(const FArchive& Ar, CPPSTRUCT *Data);
 
-	void PostSerialize(const FArchive& Ar);
+	//void PostSerialize(const FArchive& Ar);
 };
 
 template<typename T>
 T* FArticyRef::GetObject(const UObject* WorldContext) const
-{
-	return Cast<T>(GetObject<UArticyPrimitive>(WorldContext));
-}
-
-template<>
-inline UArticyPrimitive* FArticyRef::GetObject(const UObject* WorldContext) const
 {
 	if (!CachedObject.IsValid() || CachedId != Id || CloneId != CachedCloneId)
 	{
@@ -80,15 +82,15 @@ inline UArticyPrimitive* FArticyRef::GetObject(const UObject* WorldContext) cons
 		CachedObject = GetObjectInternal(WorldContext);
 	}
 
-	return CachedObject.Get();
+	return Cast<T>(CachedObject.Get());
 }
 
-template<>
-struct TStructOpsTypeTraits<FArticyRef> : public TStructOpsTypeTraitsBase2<FArticyRef>
-{
-	enum
-	{
-		WithSerializer = true,
-		WithPostSerialize = true
-	};
-};
+//template<>
+//struct TStructOpsTypeTraits<FArticyRef> : public TStructOpsTypeTraitsBase2<FArticyRef>
+//{
+//	enum
+//	{
+//		WithSerializer = true,
+//		WithPostSerialize = true
+//	};
+//};

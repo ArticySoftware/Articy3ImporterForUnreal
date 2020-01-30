@@ -2,11 +2,11 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
 
+
+#include "ArticyGlobalVariables.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "ArticyRuntime.h"
-#include "ArticyGlobalVariables.h"
 #include "ArticyPluginSettings.h"
 #include "ArticyFlowPlayer.h"
 
@@ -39,7 +39,7 @@ void FArticyGvName::SetByNamespaceAndVariable(const FName VariableNamespace, con
 	{
 		Namespace = VariableNamespace;
 		Variable = VariableName;
-		FullName = FName(*FString::Printf(TEXT("%s.%s"), *Variable.ToString(), *Namespace.ToString()));
+		FullName = FName(*FString::Printf(TEXT("%s.%s"), *Namespace.ToString(), *Variable.ToString()));
 	}
 }
 
@@ -144,11 +144,59 @@ UArticyBaseVariableSet* UArticyGlobalVariables::GetNamespace(const FName Namespa
 	auto set = GetProp<UArticyBaseVariableSet*>(Namespace);
 	if(!set)
 	{
-		UE_LOG(LogArticyRuntime, Error, TEXT("GV Namespace %s not found!"), *Namespace.ToString());
+		if(bLogVariableAccess)
+		{
+			UE_LOG(LogArticyRuntime, Error, TEXT("GV Namespace %s not found!"), *Namespace.ToString());
+		}
 		return nullptr;
 	}
 
 	return set;
+}
+
+
+void UArticyGlobalVariables::PrintGlobalVariable(FArticyGvName GvName)
+{
+	bool bTmpLogVariableAccess = bLogVariableAccess;
+	bool bPrintSuccessful = false;
+	// turn off variable access logging for this function so that the result only prints once
+	bLogVariableAccess = false;
+	
+	auto set = GetNamespace(GvName.GetNamespace());
+	if(set) 
+	{
+		UArticyVariable** basePtr = set->GetPropPtr<UArticyVariable*>(GvName.GetVariable());
+
+		if (Cast<UArticyBool>(*basePtr))
+		{
+			bool boolSucceeded = false;
+			auto boolValue = GetBoolVariable(GvName, boolSucceeded);
+			UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), boolValue ? *FString("True") : *FString("False"));
+			bPrintSuccessful = true;
+		}
+		else if (Cast<UArticyInt>(*basePtr))
+		{
+			bool intSucceeded = false;
+			auto intValue = GetIntVariable(GvName, intSucceeded);
+			UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %d"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), intValue);
+			bPrintSuccessful = true;
+		}
+		else if (Cast<UArticyString>(*basePtr))
+		{
+			bool stringSucceeded = false;
+			auto stringValue = GetStringVariable(GvName, stringSucceeded);
+			UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), *stringValue);
+			bPrintSuccessful = true;
+		}
+	}
+
+	if(!bPrintSuccessful)
+	{
+		UE_LOG(LogArticyRuntime, Error, TEXT("Unable to find variable: %s::%s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString());
+	}
+
+	// restore prior logging mode
+	bLogVariableAccess = bTmpLogVariableAccess;
 }
 
 const bool& UArticyGlobalVariables::GetBoolVariable(FArticyGvName GvName, bool& bSucceeded)
@@ -181,4 +229,15 @@ void UArticyGlobalVariables::SetStringVariable(FArticyGvName GvName, const FStri
 	SetVariableValue<UArticyString>(GvName.GetNamespace(), GvName.GetVariable(), Value);
 }
 
+void UArticyGlobalVariables::EnableDebugLogging()
+{
+	bLogVariableAccess = true;
+}
+
+void UArticyGlobalVariables::DisableDebugLogging()
+{
+	bLogVariableAccess = false;
+}
+
 TWeakObjectPtr<UArticyGlobalVariables> UArticyGlobalVariables::Clone;
+

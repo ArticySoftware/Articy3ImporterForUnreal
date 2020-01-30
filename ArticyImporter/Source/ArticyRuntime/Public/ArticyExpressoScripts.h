@@ -4,11 +4,9 @@
 //
 #pragma once
 
-#include "Regex.h"
-#include "ArticyRef.h"
+#include "Internationalization/Regex.h"
 #include "ArticyObject.h"
 #include "ArticyDatabase.h"
-//#include "ArticyGlobalVariables.h"
 
 #include "ArticyExpressoScripts.generated.h"
 

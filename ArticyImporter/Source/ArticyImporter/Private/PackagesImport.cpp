@@ -4,13 +4,14 @@
 //
 #pragma once
 
-#include "ArticyImporterPrivatePCH.h"
+
 
 #include "PackagesImport.h"
 #include "ArticyImportData.h"
 #include "CodeGeneration/CodeGenerator.h"
 #include "ArticyObject.h"
 #include <string>
+#include "ArticyImporterHelpers.h"
 
 #define STRINGIFY(x) #x
 
@@ -21,7 +22,7 @@ void FArticyModelDef::ImportFromJson(const TSharedPtr<FJsonObject> JsonModel)
 
 	FString Category;
 	JSON_TRY_STRING(JsonModel, Category);
-	this->Category = GetAssetCategoryFromString(Category);
+	this->AssetCategory = GetAssetCategoryFromString(Category);
 
 	{
 		PropertiesJsonString = "";
@@ -58,24 +59,34 @@ void FArticyModelDef::GatherScripts(UArticyImportData* Data) const
 	Data->GetObjectDefs().GatherScripts(*this, Data);
 }
 
-UArticyObject* FArticyModelDef::GenerateAsset(const UArticyImportData* Data, const FString Package) const
+UArticyObject* FArticyModelDef::GenerateSubAsset(const UArticyImportData* Data, UObject* Outer) const
 {
 	//the class is found by taking the CPP name and removing the first character
 	auto className = Data->GetObjectDefs().GetCppType(Type, Data, false);
 	className.RemoveAt(0);
 
 	//generate the asset
-	auto obj = ArticyHelpers::GenerateAsset<UArticyObject>(*className, FApp::GetProjectName(), GetNameAndId(), Package);
-	if(ensure(obj))
+
+	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *className);
+	auto uclass = ConstructorHelpersInternal::FindOrLoadClass(fullClassName, UArticyObject::StaticClass());
+	if (uclass)
 	{
-		obj->Initialize();
-		Data->GetObjectDefs().InitializeModel(obj, *this, Data);
+		auto obj = ArticyImporterHelpers::GenerateSubAsset<UArticyObject>(*className, FApp::GetProjectName(), GetNameAndId(), Outer);
+		FAssetRegistryModule::AssetCreated(Cast<UObject>(obj));
+		if (ensure(obj))
+		{
+			obj->Initialize();
+			Data->GetObjectDefs().InitializeModel(obj, *this, Data);
 
-		//SAVE!!
-		obj->MarkPackageDirty();
+			//SAVE!!
+
+			//Packing->AddAsset(Package, obj);
+			obj->MarkPackageDirty();
+		}
+
+		return obj;
 	}
-
-	return obj;
+	return nullptr;
 }
 
 TSharedPtr<FJsonObject> FArticyModelDef::GetPropertiesJson() const
@@ -106,14 +117,14 @@ TSharedPtr<FJsonObject> FArticyModelDef::GetTemplatesJson() const
 	return CachedTemplateJson;
 }
 
-EArticyAssetCategory FArticyModelDef::GetAssetCategoryFromString(const FString AssetCategory)
+EArticyAssetCategory FArticyModelDef::GetAssetCategoryFromString(const FString Category)
 {
-	if (AssetCategory == "Image") return EArticyAssetCategory::Image;
-	else if (AssetCategory == "Video") return EArticyAssetCategory::Video;
-	else if (AssetCategory == "Audio") return EArticyAssetCategory::Audio;
-	else if (AssetCategory == "Document") return EArticyAssetCategory::Document;
-	else if (AssetCategory == "Misc") return EArticyAssetCategory::Misc;
-	else if (AssetCategory == "All") return EArticyAssetCategory::All;
+	if (Category == "Image") return EArticyAssetCategory::Image;
+	else if (Category == "Video") return EArticyAssetCategory::Video;
+	else if (Category == "Audio") return EArticyAssetCategory::Audio;
+	else if (Category == "Document") return EArticyAssetCategory::Document;
+	else if (Category == "Misc") return EArticyAssetCategory::Misc;
+	else if (Category == "All") return EArticyAssetCategory::All;
 	else return EArticyAssetCategory::None;
 }
 
@@ -148,29 +159,68 @@ void FArticyPackageDef::GatherScripts(UArticyImportData* Data) const
 		Data->GetObjectDefs().GatherScripts(model, Data);
 }
 
-FArticyPackage FArticyPackageDef::GenerateAssets(UArticyImportData* Data) const
+UArticyPackage* FArticyPackageDef::GeneratePackageAsset(UArticyImportData* Data) const
 {
-	FArticyPackage package;
-	package.Name = Name;
-	package.Description = Description;
-	package.bIsDefaultPackage = IsDefaultPackage;
+	const FString PackageName = GetFolder();
+	const FString PackagePath = ArticyHelpers::ArticyGeneratedFolder / PackageName;
 
-	for(const auto model : Models)
+	auto AssetPackage = CreatePackage(nullptr, *PackagePath);
+	AssetPackage->FullyLoad();
+
+	FString assetName = FPaths::GetBaseFilename(PackageName);
+
+	UArticyPackage* ArticyPackage = ArticyImporterHelpers::GenerateAsset<UArticyPackage>(*UArticyPackage::StaticClass()->GetName(), TEXT("ArticyRuntime"), *assetName, "Packages");
+
+	ArticyPackage->Clear();
+	ArticyPackage->Name = Name;
+	ArticyPackage->Description = Description;
+	ArticyPackage->bIsDefaultPackage = IsDefaultPackage;
+
+	// create all
+	for (const auto model : Models)
 	{
-		auto asset = model.GenerateAsset(Data, GetFolder());
-		if(asset)
+		UArticyObject* asset = model.GenerateSubAsset(Data, ArticyPackage); //MM_CHANGE
+
+		if (asset)
 		{
-			package.Objects.Add(asset);
+			FString id = ArticyHelpers::Uint64ToHex(asset->GetId());
+			ArticyPackage->AddAsset(asset);
 			Data->AddChildToParentCache(model.GetParent(), model.GetId());
 		}
 	}
+	
+	FAssetRegistryModule::AssetCreated(ArticyPackage);
 
-	return package;
+	AssetPackage->MarkPackageDirty();
+
+	return ArticyPackage;	
 }
 
 FString FArticyPackageDef::GetFolder() const
 {
 	return (FString(TEXT("Packages")) / Name).Replace(TEXT(" "), TEXT("_"));
+}
+
+FString FArticyPackageDef::GetFolderName() const
+{
+	int32 pathCutOffIndex = INDEX_NONE;
+	FString folder = this->GetFolder();
+	folder.FindLastChar('/', pathCutOffIndex);
+
+	if (pathCutOffIndex != INDEX_NONE)
+	{
+		return this->GetFolder().RightChop(pathCutOffIndex);
+	}
+	else
+	{
+		UE_LOG(LogArticyImporter, Error, TEXT("Could not retrieve folder name for package %s! Did GetFolder() method change?"), *this->Name);
+		return FString(TEXT("Invalid"));
+	}
+}
+
+const FString FArticyPackageDef::GetName() const
+{
+	return Name;
 }
 
 //---------------------------------------------------------------------------//
@@ -202,18 +252,21 @@ void FArticyPackageDefs::GatherScripts(UArticyImportData* Data) const
 
 void FArticyPackageDefs::GenerateAssets(UArticyImportData* Data) const
 {
-	auto& importedPackages = Data->GetPackages();
-	importedPackages.Reset(Packages.Num());
+	auto& ArticyPackages = Data->GetPackages();
 
-	for(auto pack : Packages)
-		importedPackages.Add(pack.GenerateAssets(Data));
+	ArticyPackages.Reset(Packages.Num());
+	
+	for (auto pack : Packages)
+	{
+		ArticyPackages.Add(pack.GeneratePackageAsset(Data));
+	}
 
 	//store gathered information about who has which children in generated assets
 	auto parentChildrenCache = Data->GetParentChildrenCache();
 	const auto childrenProp = FName{ TEXT("Children") };
-	for (auto pack : importedPackages)
+	for (auto pack : ArticyPackages)
 	{
-		for (auto obj : pack.Objects)
+		for (auto obj : pack->GetAssets())
 		{
 			if (auto articyObj = Cast<UArticyObject>(obj))
 			{
@@ -224,4 +277,15 @@ void FArticyPackageDefs::GenerateAssets(UArticyImportData* Data) const
 			}
 		}
 	}
+}
+
+TSet<FString> FArticyPackageDefs::GetPackageNames() const
+{
+	TSet<FString> outArray;
+	for(FArticyPackageDef def : Packages)
+	{
+		outArray.Add(def.GetName());
+	}
+
+	return outArray;
 }

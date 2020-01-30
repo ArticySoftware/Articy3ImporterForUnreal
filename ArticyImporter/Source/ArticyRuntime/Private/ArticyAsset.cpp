@@ -2,30 +2,8 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
-
 #include "ArticyAsset.h"
 #include "FileMediaSource.h"
-
-UTexture* UArticyAsset::LoadAsTexture() const
-{
-	return Cast<UTexture>(LoadAsset());
-}
-
-UTexture2D* UArticyAsset::LoadAsTexture2D() const
-{
-	return Cast<UTexture2D>(LoadAsset());
-}
-
-USoundWave* UArticyAsset::LoadAsSoundWave() const
-{
-	return Cast<USoundWave>(LoadAsset());
-}
-
-UFileMediaSource* UArticyAsset::LoadAsFileMediaSource() const
-{
-	return Cast<UFileMediaSource>(LoadAsset());
-}
 
 UObject* UArticyAsset::LoadAsset() const
 {
@@ -54,3 +32,25 @@ UObject* UArticyAsset::LoadAsset() const
 
 	return Asset.Get();
 }
+
+UTexture* UArticyAsset::LoadAsTexture() const
+{
+	return Cast<UTexture>(LoadAsset());
+}
+
+UTexture2D* UArticyAsset::LoadAsTexture2D() const
+{
+	return Cast<UTexture2D>(LoadAsset());
+}
+
+USoundWave* UArticyAsset::LoadAsSoundWave() const
+{
+	return Cast<USoundWave>(LoadAsset());
+}
+
+UFileMediaSource* UArticyAsset::LoadAsFileMediaSource() const
+{
+	return Cast<UFileMediaSource>(LoadAsset());
+}
+
+

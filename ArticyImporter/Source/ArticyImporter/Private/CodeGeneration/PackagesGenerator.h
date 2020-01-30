@@ -7,6 +7,7 @@
 /**
  * Generates the package assets.
  */
+
 class PackagesGenerator
 {
 public:
@@ -16,4 +17,5 @@ public:
 private:
 	PackagesGenerator() {}
 	virtual ~PackagesGenerator() {}
+	
 };

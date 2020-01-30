@@ -2,7 +2,6 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyImporterPrivatePCH.h"
 
 #include "InterfacesGenerator.h"
 #include "CodeFileGenerator.h"
@@ -14,7 +13,8 @@ void InterfacesGenerator::GenerateCode(const UArticyImportData* Data)
 	CodeFileGenerator(CodeGenerator::GetGeneratedInterfacesFilename(Data)+".h", true, [&](CodeFileGenerator* header)
 	{
 		header->Line("#include \"CoreUObject.h\"");
-		header->Line("#include \"" + CodeGenerator::GetGeneratedInterfacesFilename(Data) + ".generated.h\"");
+		if(Data->GetObjectDefs().GetFeatures().Num() > 0)
+			header->Line("#include \"" + CodeGenerator::GetGeneratedInterfacesFilename(Data) + ".generated.h\"");
 		header->Line();
 
 		for (auto pair : Data->GetObjectDefs().GetFeatures())

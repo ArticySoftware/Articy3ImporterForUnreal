@@ -7,6 +7,9 @@
 #include "Engine.h"
 #include "AssetRegistryModule.h"
 #include <sstream>
+#include "Dom/JsonValue.h"
+#include "UObject/Package.h"
+#include "Dom/JsonObject.h"
 
 namespace ArticyHelpers
 {
@@ -67,98 +70,59 @@ namespace ArticyHelpers
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
 
-static const FString ArticyFolder = FString(TEXT("/Game/ArticyContent/"));
-static const FString ArticyAssetsFolder = ArticyFolder / TEXT("Resources");
-static const FString ArticyGeneratedFolder = ArticyFolder / TEXT("Generated");
+	static const FString ArticyFolder = FString(TEXT("/Game/ArticyContent/"));
+	static const FString ArticyAssetsFolder = ArticyFolder / TEXT("Resources");
+	static const FString ArticyGeneratedFolder = ArticyFolder / TEXT("Generated");
+	static const FString ArticyGeneratedPackagesFolder = ArticyGeneratedFolder / TEXT("Packages");
+	static const FString ArticyFolderRelativeToContent = FString(TEXT("ArticyContent/"));
+	static const FString ArticyGeneratedFolderRelativeToContent = ArticyFolderRelativeToContent / TEXT("Generated");
+	static const FString ArticyGeneratedPackagesFolderRelativeToContent = ArticyGeneratedFolderRelativeToContent / TEXT("Packages");
 
-inline uint64 HexToUint64(FString str) { return FCString::Strtoui64(*str, nullptr, 16); }
-inline FString Uint64ToHex(uint64 id)
-{
-	std::stringstream stream;
-	stream << "0x" << std::hex << id;
-	return UTF8_TO_TCHAR(stream.str().c_str());
-}
 
-inline FString Uint64ToObjectString(uint64 id)
-{
-	std::ostringstream stream;
-	stream << id << "_0";
-	return UTF8_TO_TCHAR(stream.str().c_str());
-}
-
-inline FVector2D ParseFVector2DFromJson(const TSharedPtr<FJsonValue> Json)
-{
-	if(!Json.IsValid() || !ensure(Json->Type == EJson::Object))
-		return FVector2D{};
-
-	double X = 0, Y = 0;
-
-	auto obj = Json->AsObject();
-	obj->TryGetNumberField("x", X);
-	obj->TryGetNumberField("y", Y);
-
-	return FVector2D{ static_cast<float>(X), static_cast<float>(Y) };
-}
-
-inline FLinearColor ParseColorFromJson(const TSharedPtr<FJsonValue> Json)
-{
-	if(!Json.IsValid() || !ensure(Json->Type == EJson::Object))
-		return FLinearColor{};
-
-	double R, G, B, A = 1.0;
-
-	auto obj = Json->AsObject();
-	obj->TryGetNumberField("r", R);
-	obj->TryGetNumberField("g", G);
-	obj->TryGetNumberField("b", B);
-	obj->TryGetNumberField("a", A);
-
-	return FLinearColor{ static_cast<float>(R), static_cast<float>(G), static_cast<float>(B), static_cast<float>(A) };
-}
-
-//---------------------------------------------------------------------------//
-//---------------------------------------------------------------------------//
-
-inline UPackage* FindOrCreatePackage(const FString Name)
-{
-	FString PackageName = ArticyGeneratedFolder / Name;
-	UPackage* AssetPackage = CreatePackage(nullptr, *PackageName);
-	AssetPackage->FullyLoad();
-
-	return AssetPackage;
-}
-
-template <typename AssetType>
-AssetType* GenerateAsset(const TCHAR* ClassName, const TCHAR* ModuleName, const FString AssetName = "", const FString SubFolder = "")
-{
-	const auto assetName = AssetName.IsEmpty() ? ClassName : AssetName;
-	const auto fileName = (SubFolder.IsEmpty() ? assetName : SubFolder / assetName).Replace(TEXT(" "), TEXT("_"));
-
-	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), ModuleName, ClassName);
-	auto uclass = ConstructorHelpersInternal::FindOrLoadClass(fullClassName, AssetType::StaticClass());
-	if(uclass)
+	inline uint64 HexToUint64(FString str) { return FCString::Strtoui64(*str, nullptr, 16); }
+	inline FString Uint64ToHex(uint64 id)
 	{
-		auto AssetPackage = FindOrCreatePackage(fileName);
-		EObjectFlags Flags = RF_Public | RF_Standalone;
-
-		auto asset = NewObject<AssetType>(AssetPackage, uclass, *assetName, Flags);
-
-		if(asset)
-		{
-			// Notify the asset registry
-			FAssetRegistryModule::AssetCreated(Cast<UObject>(asset));
-
-			// Mark the package dirty...
-			AssetPackage->MarkPackageDirty();
-		}
-
-		return asset;
+		std::stringstream stream;
+		stream << "0x" << std::hex << id;
+		return UTF8_TO_TCHAR(stream.str().c_str());
 	}
 
-	//NOTE: cannot use LogArticyRuntime here, causes linker error
-	UE_LOG(LogTemp, Error, TEXT("ArticyImporter: Could not find class %s!"), ClassName);
+	inline FString Uint64ToObjectString(uint64 id)
+	{
+		std::ostringstream stream;
+		stream << id << "_0";
+		return UTF8_TO_TCHAR(stream.str().c_str());
+	}
 
-	return nullptr;
+	inline FVector2D ParseFVector2DFromJson(const TSharedPtr<FJsonValue> Json)
+	{
+		if(!Json.IsValid() || !ensure(Json->Type == EJson::Object))
+			return FVector2D{};
+
+		double X = 0, Y = 0;
+
+		auto obj = Json->AsObject();
+		obj->TryGetNumberField("x", X);
+		obj->TryGetNumberField("y", Y);
+
+		return FVector2D{ static_cast<float>(X), static_cast<float>(Y) };
+	}
+
+	inline FLinearColor ParseColorFromJson(const TSharedPtr<FJsonValue> Json)
+	{
+		if(!Json.IsValid() || !ensure(Json->Type == EJson::Object))
+			return FLinearColor{};
+
+		double R, G, B, A = 1.0;
+
+		auto obj = Json->AsObject();
+		obj->TryGetNumberField("r", R);
+		obj->TryGetNumberField("g", G);
+		obj->TryGetNumberField("b", B);
+		obj->TryGetNumberField("a", A);
+
+		return FLinearColor{ static_cast<float>(R), static_cast<float>(G), static_cast<float>(B), static_cast<float>(A) };
+	}
 }
 
-};
+

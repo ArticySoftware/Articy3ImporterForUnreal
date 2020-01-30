@@ -2,15 +2,15 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
 
-#include "ArticyRuntime.h"
+
 #include "ArticyFlowPlayer.h"
-#include "ArticyFlowObject.h"
-#include "ArticyObjectWithSpeaker.h"
+#include "ArticyRuntime.h"
+#include "Interfaces/ArticyFlowObject.h"
+#include "Interfaces/ArticyObjectWithSpeaker.h"
 #include "ArticyExpressoScripts.h"
-#include "ArticyInputPinsProvider.h"
-#include "ArticyOutputPinsProvider.h"
+#include "Interfaces/ArticyInputPinsProvider.h"
+#include "Interfaces/ArticyOutputPinsProvider.h"
 
 TScriptInterface<IArticyFlowObject> FArticyBranch::GetTarget() const
 {
@@ -36,12 +36,24 @@ void UArticyFlowPlayer::SetStartNode(FArticyRef StartNodeId)
 void UArticyFlowPlayer::SetStartNodeWithFlowObject(TScriptInterface<IArticyFlowObject> Node)
 {
 	FArticyRef ArticyRef;
-	ArticyRef.SetReference(Cast<UArticyPrimitive>(Node.GetObject()));
+	ArticyRef.SetReference(Cast<UArticyObject>(Node.GetObject()));
 	SetStartNode(ArticyRef);
+}
+
+void UArticyFlowPlayer::SetStartNodeById(FArticyId NewId)
+{
+	StartOn.SetId(NewId);
+	SetCursorToStartNode();
 }
 
 void UArticyFlowPlayer::SetCursorTo(TScriptInterface<IArticyFlowObject> Node)
 {
+	if(!Node.GetObject())
+	{
+		UE_LOG(LogArticyRuntime, Warning, TEXT("Could not set cursor in flow player of actor %s: invalid node"), *this->GetOwner()->GetName());
+		return;
+	}
+	
 	Cursor = Node;
 	UpdateAvailableBranches();
 }
@@ -75,7 +87,7 @@ void UArticyFlowPlayer::FinishCurrentPausedObject(int PinIndex)
 	IArticyOutputPinsProvider* outputPinOwner = Cast<IArticyOutputPinsProvider>(Cursor.GetObject());
 	if (outputPinOwner)
 	{
-		auto outputPins = outputPinOwner->GetOutputPins();
+		auto outputPins = outputPinOwner->GetOutputPinsPtr();
 
 		if (outputPins->Num() > 0)
 		{
@@ -108,6 +120,10 @@ UObject* UArticyFlowPlayer::GetMethodsProvider() const
 {
 	auto expressoInstance = GetDB()->GetExpressoInstance();
 	auto provider = expressoInstance->GetUserMethodsProviderInterface();
+	
+	if (expressoInstance->UserMethodsProvider != nullptr && UserMethodsProvider == nullptr)//MM_CHANGE
+		UserMethodsProvider = expressoInstance->UserMethodsProvider;
+
 	if(ensure(provider))
 	{
 		//check if the set provider implements the required interface
@@ -167,7 +183,7 @@ IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 		auto inputPinsOwner = Cast<IArticyInputPinsProvider>(pinOwner);
 		pins.Append(*inputPinsOwner->GetInputPins());
 		auto outputPinsOwner = Cast<IArticyOutputPinsProvider>(pinOwner);
-		pins.Append(*outputPinsOwner->GetOutputPins());
+		pins.Append(*outputPinsOwner->GetOutputPinsPtr());
 
 		auto targetId = Cast<UArticyPrimitive>(Node)->GetId();
 		for (auto pin : pins)
@@ -185,14 +201,14 @@ IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 
 //---------------------------------------------------------------------------//
 
-TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, uint32 Depth)
+TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth)
 {
 	TArray<FArticyBranch> OutBranches;
 
 	//check stop condition
-	if((Depth > uint32(ExploreDepthLimit) || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))))
+	if((Depth > ExploreDepthLimit || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))))
 	{
-		if(Depth > uint32(ExploreDepthLimit))
+		if(Depth > ExploreDepthLimit)
 			UE_LOG(LogArticyRuntime, Warning, TEXT("ExploreDepthLimit (%d) reached, stopping exploration!"), ExploreDepthLimit);
 		if(!Node)
 			UE_LOG(LogArticyRuntime, Warning, TEXT("Found a nullptr Node when exploring a branch!"));

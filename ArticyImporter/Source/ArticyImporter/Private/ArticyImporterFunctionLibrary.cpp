@@ -1,8 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//  
+// Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.  
+//
 
-#include "ArticyImporterPrivatePCH.h"
-#include "ArticyImporter.h"
+
 #include "ArticyImporterFunctionLibrary.h"
+#include "ArticyImporter.h"
 #include "ArticyJSONFactory.h"
 #include "CodeGeneration/CodeGenerator.h"
 
@@ -12,6 +15,7 @@ void FArticyImporterFunctionLibrary::ForceCompleteReimport(UArticyImportData* Im
 		return;
 
 	ImportData->Settings.ObjectDefinitionsHash.Reset();
+	ImportData->Settings.ScriptFragmentsHash.Reset();
 	ReimportChanges(ImportData);
 }
 
@@ -20,10 +24,10 @@ void FArticyImporterFunctionLibrary::ReimportChanges(UArticyImportData* ImportDa
 	if (!EnsureImportFile(&ImportData))
 		return;
 
-	const auto factory = NewObject<UArticyJSONFactory>();
-	if (factory)
+	const auto Factory = NewObject<UArticyJSONFactory>();
+	if (Factory)
 	{
-		factory->Reimport(ImportData);
+		Factory->Reimport(ImportData);
 		//GC will destroy factory
 	}
 }
@@ -33,7 +37,7 @@ void FArticyImporterFunctionLibrary::RegenerateAssets(UArticyImportData* ImportD
 	if (!EnsureImportFile(&ImportData))
 		return;
 
-	CodeGenerator::Recompile(ImportData);
+	CodeGenerator::GenerateAssets(ImportData);
 }
 
 bool FArticyImporterFunctionLibrary::EnsureImportFile(UArticyImportData** ImportData)
@@ -57,5 +61,5 @@ bool FArticyImporterFunctionLibrary::EnsureImportFile(UArticyImportData** Import
 		}
 	}
 
-	return *ImportData;
+	return *ImportData != nullptr;
 }

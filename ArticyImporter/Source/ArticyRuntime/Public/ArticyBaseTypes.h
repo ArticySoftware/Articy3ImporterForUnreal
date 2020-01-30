@@ -79,25 +79,11 @@ public:
 	{
 		return Id.Low ^ Id.High;
 	}
-};
 
-USTRUCT(BlueprintType)
-struct FArticyPackage
-{
-	GENERATED_BODY()
-
-public:
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Package")
-	FString Name;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Package")
-	FString Description;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Package")
-	bool bIsDefaultPackage = false;
-
-	/** All the objects that belong to this model. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TArray<UArticyPrimitive*> Objects;
+	bool IsNull() const
+	{
+		return High == 0 && Low == 0;
+	}
 };
 
 //---------------------------------------------------------------------------//

@@ -2,7 +2,7 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
+
 
 #include "ArticyFunctionLibrary.h"
 #include "ArticyObject.h"
@@ -13,7 +13,7 @@ UArticyObject* UArticyFunctionLibrary::ArticyRef_GetObject(const FArticyRef& Ref
 	return Ref.GetObject(WorldContext);
 }
 
-void UArticyFunctionLibrary::ArticyRef_SetObject(FArticyRef& Ref, UArticyPrimitive* Object)
+void UArticyFunctionLibrary::ArticyRef_SetObject(FArticyRef& Ref, UArticyObject* Object)
 {
 	Ref.SetReference(Object);
 }

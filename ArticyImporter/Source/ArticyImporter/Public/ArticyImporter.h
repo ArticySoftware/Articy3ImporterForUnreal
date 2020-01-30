@@ -4,11 +4,16 @@
 //
 #pragma once
 
-#include "Engine.h"
-#include "ModuleManager.h"
-#include "CompilationResult.h"
+#include "Modules/ModuleInterface.h"
+#include "Modules/ModuleManager.h"
+#include "Delegates/IDelegateInstance.h"
+#include "ArticyImporterConsoleCommands.h"
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogArticyImporter, Log, All)
+
+DECLARE_MULTICAST_DELEGATE(FOnImportFinished);
+DECLARE_MULTICAST_DELEGATE(FOnCompilationFinished);
 
 class FToolBarBuilder;
 class FMenuBuilder;
@@ -21,7 +26,32 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
+	static inline FArticyImporterModule& Get()
+	{
+		static const FName ModuleName = "ArticyImporter";
+		return FModuleManager::LoadModuleChecked<FArticyImporterModule>(ModuleName);
+	}
+
+
+	void RegisterConsoleCommands();
+	
 	/* Plugin settings menu */
 	void RegisterPluginSettings();
 	void UnregisterPluginSettings();
+
+	void QueueImport();
+	bool IsImportQueued();
+
+	FOnImportFinished OnImportFinished;
+	FOnCompilationFinished OnCompilationFinished;
+
+private:
+
+	void UnqueueImport();
+	void TriggerQueuedImport(bool b);
+private:
+
+	bool bIsImportQueued = false;
+	FDelegateHandle QueuedImportHandle;
+	FArticyImporterConsoleCommands* ConsoleCommands;
 };

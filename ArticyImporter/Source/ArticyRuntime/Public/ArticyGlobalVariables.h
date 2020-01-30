@@ -5,12 +5,12 @@
 #pragma once
 
 #include "ArticyRuntime.h"
-#include "ArticyReflectable.h"
+#include "Interfaces/ArticyReflectable.h"
 #include "AssetRegistryModule.h"
-#include "Private/ShadowStateManager.h"
+#include "ShadowStateManager.h"
 #include "ArticyExpressoScripts.h"
-
 #include "ArticyGlobalVariables.generated.h"
+
 
 //implicit convertion operator (= getter)
 //ReSharper disable once CppNonExplicitConversionOperator
@@ -318,6 +318,8 @@ public:
 		else
 			return Value = NewValue.GetString();
 	}
+	bool operator ==(const char* const text) const { return Value.Equals(text); }
+	bool operator !=(const char* const text) const { return !this->operator==(text); }
 
 protected:
 	/** The current value of this variable (i.e. the value of a shadow state, if any is active). */
@@ -342,6 +344,10 @@ class ARTICYRUNTIME_API UArticyBaseVariableSet : public UObject, public IArticyR
 {
 	GENERATED_BODY()
 
+protected:
+	UPROPERTY()
+	TArray<UArticyVariable*> Variables;
+
 public:
 	/**
 	 * This delegate is broadcast every time a variable inside this namespace changes.
@@ -350,14 +356,45 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Callback")
 	FOnGVChanged OnVariableChanged;
 
-	UFUNCTION(BlueprintCallable, Category = "Variables")
+	UFUNCTION(BlueprintCallable, Category = "ArticyGlobalVariables", meta = (keywords = "global variables"))
 	const TArray<UArticyVariable*> GetVariables() const { return Variables; }
+	
+	UFUNCTION(BlueprintCallable, Category = "ArticyGlobalVariables", meta =(DeterminesOutputType = "Type", keywords = "global variables"))
+	const TArray<UArticyVariable*> GetVariablesOfType(TSubclassOf<UArticyVariable> Type)
+	{
+		TArray<UObject*> subobjects;
+		GetDefaultSubobjects(subobjects);
+		TArray<UArticyVariable*> articyVars;
+		for (int i = 0; i < subobjects.Num(); i++)
+		{
+			const bool bIsA = subobjects[i]->IsA(Type);
+			if (bIsA)
+			{
+				UArticyVariable* Var = Cast<UArticyVariable>(subobjects[i]);
+				articyVars.Add(Var);
+			}
+		}
+		
+		return articyVars;
+	}
 
-protected:
-
-	UPROPERTY()
-	TArray<UArticyVariable*> Variables;
-
+	template<class T>
+	const TArray<T*> GetVariables()
+	{
+		TArray<UObject*> subobjects;
+		GetDefaultSubobjects(subobjects);
+		TArray<T*> articyVars;
+		for (int i = 0; i < subobjects.Num(); i++)
+		{
+			T* isT = Cast<T>(subobjects[i]);
+			if (isT != nullptr)
+			{
+				articyVars.Add(isT);
+			}
+		}
+		return articyVars;
+	}
+	
 private:
 
 	UFUNCTION()
@@ -370,7 +407,7 @@ private:
 /**
  * The base class for the (generated) ArticyGlobalVariables class.
  */
-UCLASS()
+UCLASS(BlueprintType)
 class ARTICYRUNTIME_API UArticyGlobalVariables : public UDataAsset, public IShadowStateManager, public IArticyReflectable
 {
 	GENERATED_BODY()	
@@ -393,7 +430,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Getter")
 	const TArray<UArticyBaseVariableSet*> GetVariableSets() const { return VariableSets; }
 	
-	UFUNCTION(BlueprintCallable, Category = "Getter")
+	/* Exec functions are only supported by a couple singleton classes
+	 * To make this exec compatible, one of those exec classes has to forward the call
+	 * See https://wiki.unrealengine.com/Exec_Functions for reference*/
+	UFUNCTION(BlueprintCallable, Exec)
+	void PrintGlobalVariable(FArticyGvName GvName);
+
+	UFUNCTION(BlueprintCallable, Category="Getter")
 	const bool& GetBoolVariable(FArticyGvName GvName, bool& bSucceeded);
 	UFUNCTION(BlueprintCallable, Category="Getter")
 	const int32& GetIntVariable(FArticyGvName GvName, bool& bSucceeded);
@@ -407,10 +450,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Setter")
 	void SetStringVariable(FArticyGvName GvName, const FString Value);
 
+	UFUNCTION(BlueprintCallable, Category="Debug")
+	void EnableDebugLogging();
+	UFUNCTION(BlueprintCallable, Category="Debug")
+	void DisableDebugLogging();
+
 protected:
 
 	UPROPERTY()
 	TArray<UArticyBaseVariableSet*> VariableSets;
+
+	UPROPERTY()
+	bool bLogVariableAccess = false;
 
 private:
 
@@ -465,12 +516,29 @@ void UArticyGlobalVariables::SetVariableValue(const FName Namespace, const FName
 	auto set = GetNamespace(Namespace);
 	if (set)
 	{
-		auto ptr = set->GetPropPtr<ArticyVariableType *>(Variable);
-		if (ptr)
-		{
-			auto& propValue = (**ptr);
-			propValue = Value;
+		UArticyVariable** basePtr = set->GetPropPtr<UArticyVariable*>(Variable);
+
+		if (basePtr) {
+		
+			ArticyVariableType* typedPtr = dynamic_cast<ArticyVariableType*>(*basePtr);
+			if (typedPtr)
+			{
+				auto& propValue = (*typedPtr);
+				propValue = Value;
+
+				if (bLogVariableAccess)
+				{
+					UE_LOG(LogArticyRuntime, Display, TEXT("Set variable %s::%s : Success"), *Namespace.ToString(), *Variable.ToString());
+				}
+
+				return;
+			}
 		}
+	}
+
+	if (bLogVariableAccess)
+	{
+		UE_LOG(LogArticyRuntime, Error, TEXT("Unable to find variable: %s::%s. Variable does not exist or wrong type assumed."), *Namespace.ToString(), *Variable.ToString());
 	}
 }
 
@@ -480,13 +548,27 @@ const VariablePayloadType& UArticyGlobalVariables::GetVariableValue(const FName 
 	auto set = GetNamespace(Namespace);
 	if (set)
 	{
-		auto ptr = set->GetPropPtr<ArticyVariableType *>(Variable);
-		if (ptr)
+		UArticyVariable** basePtr = set->GetPropPtr<UArticyVariable*>(Variable);
+
+		ArticyVariableType* typedPtr = dynamic_cast<ArticyVariableType*>(*basePtr);
+
+		if (typedPtr)
 		{
-			auto& propValue = (**ptr);
+			auto& propValue = (*typedPtr);
 			bSucceeded = true;
+
+			if (bLogVariableAccess)
+			{
+				UE_LOG(LogArticyRuntime, Display, TEXT("Get variable %s::%s : Success"), *Namespace.ToString(), *Variable.ToString());
+			}
+
 			return propValue.Get();
 		}
+	}
+
+	if(bLogVariableAccess)
+	{
+		UE_LOG(LogArticyRuntime, Error, TEXT("Unable to find variable: %s::%s"), *Namespace.ToString(), *Variable.ToString());
 	}
 
 	bSucceeded = false;

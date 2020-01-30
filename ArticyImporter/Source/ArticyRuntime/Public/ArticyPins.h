@@ -7,9 +7,9 @@
 #include "ArticyObject.h"
 #include "ArticyHelpers.h"
 #include "ArticyBaseTypes.h"
-#include "ArticyFlowObject.h"
-#include "ArticyConditionProvider.h"
-#include "ArticyInstructionProvider.h"
+#include "Interfaces/ArticyFlowObject.h"
+#include "Interfaces/ArticyConditionProvider.h"
+#include "Interfaces/ArticyInstructionProvider.h"
 
 #include "ArticyPins.generated.h"
 
@@ -37,6 +37,7 @@ public:
 
 	void InitFromJson(TSharedPtr<FJsonValue> Json) override;
 
+	UFUNCTION(BlueprintCallable)
 	UArticyObject* GetOwner();
 
 	//---------------------------------------------------------------------------//

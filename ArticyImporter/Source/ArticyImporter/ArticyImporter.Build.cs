@@ -3,35 +3,25 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
 using UnrealBuildTool;
-using System.IO;
 
 public class ArticyImporter : ModuleRules
 {
 	public ArticyImporter(ReadOnlyTargetRules Target) : base(Target)
 	{
-		//OptimizeCode = CodeOptimization.Never;
-		
-#if UE_4_21_OR_LATER
-		PrivatePCHHeaderFile = "Private/ArticyImporterPrivatePCH.h";
-#endif
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		OptimizeCode = CodeOptimization.Never;
 
 		PublicIncludePaths.AddRange(
-			new string[] {
-				Path.Combine(ModuleDirectory, "Public"),
-				Path.Combine(ModuleDirectory, "../ArticyImporter/Public"),
+			new string[] 
+			{
 				// ... add public include paths required here ...
-#if UE_4_20_OR_LATER
-				Path.Combine(EngineDirectory, "Source/Editor/GameProjectGeneration"),
-#else
-				"GameProjectGeneration",
-#endif
 			}
 			);
 
 
 		PrivateIncludePaths.AddRange(
-			new string[] {
-				Path.Combine(ModuleDirectory, "Private"),
+			new string[] 
+			{
 				// ... add other private include paths required here ...
 			}
 			);
@@ -40,6 +30,7 @@ public class ArticyImporter : ModuleRules
 			new string[]
 			{
 				"Core",
+				//"ClassViewer"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -60,6 +51,12 @@ public class ArticyImporter : ModuleRules
                 "ArticyRuntime",
 				"Json",
                 "GameProjectGeneration",
+                "ContentBrowser",
+				"PropertyEditor",
+				"EditorStyle",
+				"EditorWidgets",
+				"SourceControl",
+				//"ClassViewer"
 			}
 			);
 		

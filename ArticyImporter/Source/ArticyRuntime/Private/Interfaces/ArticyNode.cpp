@@ -4,9 +4,9 @@
 //
 #pragma once
 
-#include "ArticyRuntimePrivatePCH.h"
 
-#include "ArticyNode.h"
+
+#include "Interfaces/ArticyNode.h"
 
 void UArticyNode::Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>& OutBranches, const uint32& Depth)
 {

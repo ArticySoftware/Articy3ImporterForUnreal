@@ -2,15 +2,16 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyImporterPrivatePCH.h"
+
 
 #include "ArticyImportData.h"
 #include "EditorFramework/AssetImportData.h"
 #include "CodeGeneration/CodeGenerator.h"
 #include "ArticyJSONFactory.h"
-#include "SharedPointerInternals.h"
+#include "Templates/SharedPointerInternals.h"
 #include "ArticyPluginSettings.h"
-#include "Regex.h"
+#include "Internationalization/Regex.h"
+#include "ArticyImporter.h"
 
 void FADISettings::ImportFromJson(TSharedPtr<FJsonObject> Json)
 {
@@ -22,9 +23,13 @@ void FADISettings::ImportFromJson(TSharedPtr<FJsonObject> Json)
 	JSON_TRY_BOOL(Json, set_UseScriptSupport);
 	JSON_TRY_STRING(Json, ExportVersion);
 
-	auto oldHash = ObjectDefinitionsHash;
+	const auto oldObjectDefsHash = ObjectDefinitionsHash;
+	const auto oldScriptFragmentHash = ScriptFragmentsHash;
 	JSON_TRY_STRING(Json, ObjectDefinitionsHash);
-	bObjectDefsOrGVsChanged = oldHash != ObjectDefinitionsHash;
+	JSON_TRY_STRING(Json, ScriptFragmentsHash);
+	bObjectDefsOrGVsChanged = oldObjectDefsHash != ObjectDefinitionsHash;
+	bScriptFragmentsChanged = oldScriptFragmentHash != ScriptFragmentsHash;
+	
 }
 
 void FArticyProjectDef::ImportFromJson(const TSharedPtr<FJsonObject> Json)
@@ -211,12 +216,12 @@ void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString
 	JSON_TRY_STRING(Json, Name);
 	JSON_TRY_STRING(Json, ReturnType);
 
-	BlueprintName = Name + "_";
-	ParameterList = "";
-	OrigininalParameterTypes = "";
+	BlueprintName = Name + TEXT("_");
+	ParameterList = TEXT("");
+	OrigininalParameterTypes = TEXT("");
 	const TArray<TSharedPtr<FJsonValue>>* items;
 
-	if(Json->TryGetArrayField(L"Parameters", items))
+	if(Json->TryGetArrayField(TEXT("Parameters"), items))
 	{
 		for(const auto item : *items)
 		{
@@ -236,14 +241,14 @@ void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString
 			OrigininalParameterTypes += ", " + Type;
 
 			//string -> const FString& (because UE4 wants a const reference for strings..)
-			if(Type == "string")
-				Type = "const FString&";
-			else if(Type == "ArticyObject")
-				Type = "UArticyObject*";
+			if(Type.Equals(TEXT("string")))
+				Type = TEXT("const FString&");
+			else if(Type.Equals(TEXT("ArticyObject")))
+				Type = TEXT("UArticyObject*");
 
 			//append to parameter list
-			ParameterList += ", " + Type + " " + Param;
-			ArgumentList += ", " + Param;
+			ParameterList += TEXT(", ") + Type + TEXT(" ") + Param;
+			ArgumentList += TEXT(", ") + Param;
 		}
 
 		//remove the leading ", "
@@ -371,6 +376,16 @@ void UArticyImportData::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags)
 }
 #endif
 
+void UArticyImportData::PostImport()
+{
+	// update the internal save state of the package settings (add settings for new packages, remove outdated package settings, restore previous settings for still existing packages)
+	UArticyPluginSettings* settings = GetMutableDefault<UArticyPluginSettings>();
+	settings->UpdatePackageSettings();
+
+	FArticyImporterModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
+	ArticyImporterModule.OnImportFinished.Broadcast();
+}
+
 void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 {
 	//import the main sections
@@ -380,17 +395,44 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	Hierarchy.ImportFromJson(this, RootObject->GetObjectField(JSON_SECTION_HIERARCHY));
 	UserMethods.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_SCRIPTMEETHODS));
 
+	bool bNeedsCodeGeneration = false;
+	
 	//import GVs and ObjectDefs only if needed
 	if(Settings.DidObjectDefsOrGVsChange())
 	{
 		GlobalVariables.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_GLOBALVARS), this);
 		ObjectDefinitions.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_OBJECTDEFS), this);
+		bNeedsCodeGeneration = true;
 	}
 
+	if(Settings.DidScriptFragmentsChange() && this->GetSettings().set_UseScriptSupport)
+	{
+		this->GatherScripts();
+		bNeedsCodeGeneration = true;
+	}
 	//===================================//
 
-	ScriptFragments.Reset();
-	CodeGenerator::GenerateCode(this);
+	// if we are generating code, generate and compile it; after it has finished, generate assets and perform post import logic
+	if(bNeedsCodeGeneration)
+	{
+		const bool bAnyCodeGenerated = CodeGenerator::GenerateCode(this);
+
+		if (bAnyCodeGenerated)
+		{
+			FArticyImporterModule::Get().OnCompilationFinished.AddLambda([this] {
+				CodeGenerator::GenerateAssets(this);
+				UArticyImportData::PostImport();
+			});
+
+			CodeGenerator::Recompile(this);
+		}
+	}
+	// if we are importing but no code needed to be generated, generate assets immediately and perform post import
+	else
+	{
+		CodeGenerator::GenerateAssets(this);
+		UArticyImportData::PostImport();
+	}
 }
 
 void UArticyImportData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -400,7 +442,10 @@ void UArticyImportData::PostEditChangeProperty(FPropertyChangedEvent& PropertyCh
 	if(bForceCompleteReimport || bReimportChanges)
 	{
 		if(bForceCompleteReimport)
+		{
 			Settings.ObjectDefinitionsHash.Reset();
+			Settings.ScriptFragmentsHash.Reset();
+		}
 
 		bForceCompleteReimport = bReimportChanges = bRegenerateAssets = false;
 
@@ -415,12 +460,13 @@ void UArticyImportData::PostEditChangeProperty(FPropertyChangedEvent& PropertyCh
 	{
 		bRegenerateAssets = false;
 
-		CodeGenerator::Recompile(this);
+		CodeGenerator::GenerateAssets(this);
 	}
 }
 
 void UArticyImportData::GatherScripts()
 {
+	ScriptFragments.Empty();
 	PackageDefs.GatherScripts(this);
 }
 
@@ -442,8 +488,8 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 		//split into lines
 		string.ParseIntoArray(lines, TEXT("\n"));
 
-		string = "";
-		FString comments = "";
+		string = TEXT("");
+		FString comments = TEXT("");
 		for(auto line : lines)
 		{
 			//remove comment
@@ -451,7 +497,7 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 			auto doubleSlashPos = line.Find(TEXT("//"));
 			if(doubleSlashPos != INDEX_NONE)
 			{
-				comments += line.Mid(doubleSlashPos) + "\n";
+				comments += line.Mid(doubleSlashPos) + TEXT("\n");
 				line = line.Left(doubleSlashPos);
 			}
 
@@ -505,16 +551,19 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 					for (int i = 0; i < valueStr.Len(); i++)
 					{
 						auto currentChar = valueStr[i];
-						if (currentChar == ' ' || currentChar == '<' || currentChar == '>' || currentChar == '=' || currentChar == '+' || currentChar == '-')
+						if (currentChar == TEXT(' ') || currentChar == TEXT('<') || currentChar == TEXT('>') || currentChar == TEXT('=') || currentChar == TEXT('+') || currentChar == TEXT('-'))
 							continue;
 						else if (currentChar == '\"' && i > 0)
-							valueStr.InsertAt(i, "(FString)");
+						{
+							valueStr.InsertAt(i, TEXT("(FString)"));
+							offset += strlen("(FString)");
+						}
 
 						break;
 					}
 					
 					//get the dereferenced variable
-					line = line.Left(start) + "(*" + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + ")" + valueStr;
+					line = line.Left(start) + TEXT("(*") + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + ")" + valueStr;
 					offset += strlen(".") + strlen(">") + strlen("()");
 				}
 			}
@@ -542,11 +591,8 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 
 void UArticyImportData::AddChildToParentCache(const FArticyId Parent, const FArticyId Child)
 {
-	FArticyIdArray* childrenPtr = ParentChildrenCache.Find(Parent);
-	if (!childrenPtr)
-	{
-		childrenPtr = &ParentChildrenCache.Add(Parent, FArticyIdArray());
-	}
-
-	childrenPtr->Values.AddUnique(Child);
+	// Changed because of the way Map.Find works. In original version there were cases, when first element wasn't added because children was declared out of the scope.
+	// It lead to situation when first element of children array wasn't added and for example Codex Locations weren't properly initialized
+	auto& childrenRef = ParentChildrenCache.FindOrAdd(Parent);
+	childrenRef.Values.AddUnique(Child);
 }

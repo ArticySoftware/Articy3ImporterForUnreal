@@ -2,7 +2,7 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
+
 
 #include "ArticyDatabase.h"
 #include "ArticyBaseTypes.h"
@@ -11,15 +11,21 @@
 #include "ArticyPluginSettings.h"
 #include "ArticyExpressoScripts.h"
 
-FArticyShadowableObject::FArticyShadowableObject(UArticyPrimitive* Object)
+
+UArticyPrimitive* FArticyObjectShadow::GetObject()
 {
-	ShadowCopies.Add(FArticyObjectShadow(0, Object));
+	return Object;
+}
+
+FArticyShadowableObject::FArticyShadowableObject(UArticyPrimitive* Object, int32 CloneId, UObject* Outer)
+{
+	ShadowCopies.Add(FArticyObjectShadow(0, Object, CloneId, Outer));
 }
 
 UArticyPrimitive* FArticyShadowableObject::Get(const IShadowStateManager* ShadowManager, bool bForceUnshadowed) const
 {
 	if (bForceUnshadowed)
-		return ShadowCopies[0].Object;
+		return ShadowCopies[0].GetObject();
 
 	const auto ShadowLvl = ShadowManager->GetShadowLevel();
 	FArticyObjectShadow* info = ShadowCopies.FindByPredicate([&](const FArticyObjectShadow& item)
@@ -28,15 +34,16 @@ UArticyPrimitive* FArticyShadowableObject::Get(const IShadowStateManager* Shadow
 	});
 
 	if(info)
-		return info->Object;
+		return info->GetObject();
 
 	if(!ensureMsgf(ShadowLvl > 0 && ShadowCopies.Num() > 0, TEXT("Cannot get shadow level %d of FArticyShadowableObject!"), ShadowLvl))
 		return nullptr;
 
 	//create a new shadow copy
-	auto mostRecentShadow = ShadowCopies.Last().Object;
-	auto obj = DuplicateObject(mostRecentShadow, mostRecentShadow);
-	ShadowCopies.Add(FArticyObjectShadow(ShadowLvl, obj));
+	auto& mostRecentShadow = ShadowCopies.Last();
+	auto SourceObject = mostRecentShadow.GetObject();
+	auto obj = DuplicateObject(SourceObject, SourceObject);
+	ShadowCopies.Add(FArticyObjectShadow(ShadowLvl, obj, mostRecentShadow.GetCloneId()) );
 	const_cast<IShadowStateManager*>(ShadowManager)->RegisterOnPopState([=]
 	{
 		//when the state is popped, remove the shadow copy again
@@ -49,18 +56,13 @@ UArticyPrimitive* FArticyShadowableObject::Get(const IShadowStateManager* Shadow
 	return obj;
 }
 
-FArticyClonableObject::FArticyClonableObject(UArticyPrimitive* BaseObject)
-{
-	AddClone(BaseObject, 0);
-}
-
-UArticyPrimitive* FArticyClonableObject::Get(const IShadowStateManager* ShadowManager, int32 CloneId, bool bForceUnshadowed) const
+UArticyPrimitive* UArticyCloneableObject::Get(const IShadowStateManager* ShadowManager, int32 CloneId, bool bForceUnshadowed) const
 {
 	auto info = Clones.Find(CloneId);
 	return info ? info->Get(ShadowManager, bForceUnshadowed) : nullptr;
 }
 
-UArticyPrimitive* FArticyClonableObject::Clone(const IShadowStateManager* ShadowManager, int32 CloneId, bool bFailIfExists)
+UArticyPrimitive* UArticyCloneableObject::Clone(const IShadowStateManager* ShadowManager, int32 CloneId, bool bFailIfExists)
 {
 	auto clone = Get(ShadowManager, CloneId);
 
@@ -82,7 +84,7 @@ UArticyPrimitive* FArticyClonableObject::Clone(const IShadowStateManager* Shadow
 	return clone;
 }
 
-void FArticyClonableObject::AddClone(UArticyPrimitive* Clone, int32 CloneId)
+void UArticyCloneableObject::AddClone(UArticyPrimitive* Clone, int32 CloneId)
 {
 	if(!ensure(Clone))
 		return;
@@ -100,8 +102,7 @@ void FArticyClonableObject::AddClone(UArticyPrimitive* Clone, int32 CloneId)
 		}
 	}
 
-	Clone->CloneId = CloneId;
-	Clones.Add(CloneId, FArticyShadowableObject{Clone});
+	Clones.Add(CloneId, FArticyShadowableObject{ Clone, CloneId });
 }
 
 //---------------------------------------------------------------------------//
@@ -187,6 +188,30 @@ UArticyGlobalVariables* UArticyDatabase::GetGVs() const
 	return UArticyGlobalVariables::GetDefault(this);
 }
 
+TArray<FString> UArticyDatabase::GetImportedPackageNames() const
+{
+	TArray<FString> outNames;
+	ImportedPackages.GenerateKeyArray(outNames);
+	return outNames;
+}
+
+bool UArticyDatabase::IsPackageDefaultPackage(FString PackageName)
+{
+	if (ImportedPackages.Contains(PackageName))
+	{
+		const UArticyPackage* Package = ImportedPackages[PackageName];
+		// in case the key exists but has no valid entry
+		if (!Package)
+		{
+			return false;
+		}
+		
+		return Package->bIsDefaultPackage;
+	}
+
+	return false;
+}
+
 UWorld* UArticyDatabase::GetWorld() const
 {
 	return GetOuter() ? GetOuter()->GetWorld() : nullptr;
@@ -197,13 +222,15 @@ void UArticyDatabase::LoadAllObjects()
 	GetOriginal(true);
 }
 
-void UArticyDatabase::SetLoadedPackages(const TArray<FArticyPackage> Packages)
+void UArticyDatabase::SetLoadedPackages(const TArray<UArticyPackage*> Packages)
 {
 	ImportedPackages.Reset();
 	UnloadAllPackages();
 
-	for(auto pkg : Packages)
-		ImportedPackages.Add(pkg.Name, pkg);
+	for (auto pkg : Packages)
+	{
+		ImportedPackages.Add(pkg->Name, pkg);
+	}
 }
 
 //---------------------------------------------------------------------------//
@@ -217,7 +244,7 @@ void UArticyDatabase::LoadAllPackages(bool bDefaultOnly)
 {
 	for(const auto pack : ImportedPackages)
 	{
-		if(!bDefaultOnly || pack.Value.bIsDefaultPackage
+		if(!bDefaultOnly || (pack.Value && pack.Value->bIsDefaultPackage)
 #if WITH_EDITOR
 			//TODO add "or is edit mode"
 #endif
@@ -227,19 +254,20 @@ void UArticyDatabase::LoadAllPackages(bool bDefaultOnly)
 }
 
 void UArticyDatabase::LoadPackage(FString PackageName)
-{
-	if(LoadedPackages.Contains(PackageName))
+{	
+	if (LoadedPackages.Contains(PackageName))
 	{
 		UE_LOG(LogArticyRuntime, Log, TEXT("Package %s already loaded."), *PackageName);
 		return;
 	}
-
-	FArticyPackage* package = ImportedPackages.Find(PackageName);
-	if(!package)
+	
+	if(!ImportedPackages.Contains(PackageName) || ImportedPackages[PackageName] == nullptr)
 	{
 		UE_LOG(LogArticyRuntime, Error, TEXT("Failed to find Package %s in imported packages!"), *PackageName);
 		return;
 	}
+	
+	UArticyPackage* Package = ImportedPackages[PackageName];
 
 	/*auto fileName = PackageName.Replace(TEXT(" "), TEXT("_"));
 	auto pkgFile = Cast<UPackage>(::LoadPackage(nullptr, *fileName, 0));
@@ -249,29 +277,91 @@ void UArticyDatabase::LoadPackage(FString PackageName)
 		return;
 	}
 
-	//load the package, to make sure all the containging objects are available
+	//load the package, to make sure all the contained objects are available
 	pkgFile->FullyLoad();*/
 
-	for(const auto obj : package->Objects)
+	for (auto ArticyObject : Package->GetAssets())// MM_CHANGE
 	{
-		auto primitiveClone = DuplicateObject(Cast<UArticyPrimitive>(obj), this);
-		if(!primitiveClone)
+		auto id = FArticyId(ArticyObject->GetId());
+
+		if (!ensureMsgf(!LoadedObjectsById.Contains(id), TEXT("Object with id [%d,%d] already in list!"), id.High, id.Low))
 			continue;
 
-		auto id = primitiveClone->GetId();
-		ensureMsgf(!LoadedObjectsById.Contains(id), TEXT("Object with id [%d,%d] already in list!"), id.High, id.Low);
+		auto CloneContainer = NewObject<UArticyCloneableObject>(this);
+		UArticyPrimitive* InitialClone = DuplicateObject<UArticyPrimitive>(ArticyObject, this);
+		CloneContainer->Init(InitialClone);
+		
+		LoadedObjectsById.Add(id, CloneContainer);
 
-		auto shared = MakeShared<FArticyClonableObject>(primitiveClone);
-		LoadedObjectsById.Add(id, shared);
-		ArticyObjects.Add(primitiveClone);
-
-		auto objectClone = Cast<UArticyObject>(primitiveClone);
-		if(objectClone)
-			LoadedObjectsByName.FindOrAdd(objectClone->GetTechnicalName()).Objects.Add(shared);
+		if (!ArticyObject->GetTechnicalName().ToString().IsEmpty())
+		{
+			LoadedObjectsByName.FindOrAdd(ArticyObject->GetTechnicalName()).Objects.Add(CloneContainer);
+		}
 	}
 
 	LoadedPackages.Add(PackageName);
 	UE_LOG(LogArticyRuntime, Log, TEXT("Package %s loaded successfully."), *PackageName);
+}
+
+bool UArticyDatabase::UnloadPackage(const FString PackageName, const bool bQuickUnload)
+{
+	if(!LoadedPackages.Contains(PackageName))
+	{
+		UE_LOG(LogArticyRuntime, Log, TEXT("Package %s can't be unloaded due to not being loaded in the first place."), *PackageName);
+		return false;
+	}
+
+	if (!ImportedPackages.Contains(PackageName) || ImportedPackages[PackageName] == nullptr)
+	{
+		UE_LOG(LogArticyRuntime, Error, TEXT("Failed to find Package %s in imported packages!"), *PackageName);
+		return false;
+	}
+
+	UArticyPackage* Package = ImportedPackages[PackageName];	
+
+	for(auto ArticyObject : Package->GetAssets())
+	{
+		FArticyId ArticyId = ArticyObject->GetId();
+		FName TechnicalName = ArticyObject->GetTechnicalName();
+
+		bool bShouldUnload = false;
+		if(bQuickUnload)
+		{
+			bShouldUnload = true;
+		}
+		else
+		{
+			/*
+			 *	An exported object can exist multiple times in different packages
+			 *  In the database, there can only be one object with the same Id, so if we are unloading slowly, check if the object is contained in another package first
+			 *  Only unload if it is not contained in any other package
+			*/
+			bool bIsAssetContained = false;
+			for(FString LoadedPackageName : LoadedPackages)
+			{
+				if (!LoadedPackageName.Equals(Package->Name))
+				{
+					bIsAssetContained = bIsAssetContained || ImportedPackages[LoadedPackageName]->GetAssetsDict().Contains(TechnicalName);
+				}
+			}
+
+			if(!bIsAssetContained)
+			{
+				bShouldUnload = true;
+			}
+		}
+
+		if(bShouldUnload)
+		{
+			LoadedObjectsById.FindAndRemoveChecked(ArticyId);
+			LoadedObjectsByName.FindAndRemoveChecked(TechnicalName);
+		}
+	}
+
+	LoadedPackages.Remove(Package->Name);
+	UE_LOG(LogArticyRuntime, Log, TEXT("Package %s unloaded successfully."), *PackageName);
+
+	return true;
 }
 
 void UArticyDatabase::UnloadAllPackages()
@@ -279,7 +369,6 @@ void UArticyDatabase::UnloadAllPackages()
 	LoadedPackages.Reset();
 	LoadedObjectsById.Reset();
 	LoadedObjectsByName.Reset();
-	ArticyObjects.Reset();
 }
 
 void UArticyDatabase::SetExpressoScriptsClass(TSubclassOf<UArticyExpressoScripts> NewClass)
@@ -313,6 +402,53 @@ const UArticyDatabase* UArticyDatabase::GetOriginal(bool bLoadAllPackages)
 	return Asset.Get();
 }
 
+UArticyDatabase* UArticyDatabase::GetMutableOriginal()
+{
+	static TWeakObjectPtr<UArticyDatabase> Asset = nullptr;
+
+	if (!Asset.IsValid())
+	{
+		//create a clone of the database
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+		TArray<FAssetData> AssetData;
+		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetFName(), AssetData, true);
+
+		if (ensureMsgf(AssetData.Num() != 0, TEXT("Could not find original asset of ArticyDraftDatabase!")))
+		{
+			if (AssetData.Num() > 1)
+				UE_LOG(LogTemp, Warning, TEXT("More than one ArticyDraftDatabase was found, this is not supported! The first one will be selected."));
+
+			Asset = Cast<UArticyDatabase>(AssetData[0].GetAsset());
+		}
+	}
+
+	return Asset.Get();
+}
+
+void UArticyDatabase::ChangePackageDefault(FName PackageName, bool bIsDefaultPackage)
+{
+	if (ImportedPackages.Contains(PackageName.ToString()))
+	{
+		UArticyPackage* Package = ImportedPackages[PackageName.ToString()];
+
+		// additional check; maybe the map entry exists but has no value due to user error or bugs
+		if(!Package)
+		{
+			UE_LOG(LogArticyRuntime, Error, TEXT("Could not change package default setting of package %s: package not found"), *PackageName.ToString());
+			return;
+		}
+
+		// if the setting isn't going to change, return early
+		if (Package->bIsDefaultPackage == bIsDefaultPackage)
+		{
+			return;
+		}
+		
+		Package->bIsDefaultPackage = bIsDefaultPackage;
+		Package->MarkPackageDirty();
+	}
+}
+
 //---------------------------------------------------------------------------//
 
 UArticyPrimitive* UArticyDatabase::GetObject(FArticyId Id, int32 CloneId, TSubclassOf<class UArticyObject> CastTo) const
@@ -327,8 +463,8 @@ UArticyPrimitive* UArticyDatabase::GetObjectUnshadowed(FArticyId Id, int32 Clone
 
 UArticyPrimitive* UArticyDatabase::GetObjectInternal(FArticyId Id, int32 CloneId, bool bForceUnshadowed) const
 {
-	const TSharedPtr<FArticyClonableObject>* info = LoadedObjectsById.Find(Id);
-	return info && info->IsValid() ? info->Get()->Get(this, CloneId, bForceUnshadowed) : nullptr;
+	UArticyCloneableObject* const * info = LoadedObjectsById.Find(Id);
+	return info && (*info) ? (*info)->Get(this, CloneId, bForceUnshadowed) : nullptr;
 }
 
 UArticyObject* UArticyDatabase::GetObjectByName(FName TechnicalName, int32 CloneId, TSubclassOf<class UArticyObject> CastTo) const
@@ -338,7 +474,7 @@ UArticyObject* UArticyDatabase::GetObjectByName(FName TechnicalName, int32 Clone
 		return nullptr;
 
 	auto info = arr->Objects[0];
-	return info.IsValid() ? Cast<UArticyObject>(info.Pin()->Get(this, CloneId)) : nullptr;
+	return info? Cast<UArticyObject>(info->Get(this, CloneId)) : nullptr;
 }
 
 TArray<UArticyObject*> UArticyDatabase::GetObjects(FName TechnicalName, int32 CloneId, TSubclassOf<class UArticyObject> CastTo) const
@@ -349,16 +485,29 @@ TArray<UArticyObject*> UArticyDatabase::GetObjects(FName TechnicalName, int32 Cl
 TArray<UArticyObject*> UArticyDatabase::GetObjectsOfClass(TSubclassOf<class UArticyObject> Type, int32 CloneId) const
 {
 	TArray<UArticyObject*> arr;
-	for (auto obj : ArticyObjects)
-		if (obj->GetCloneId() == CloneId && obj->IsA(Type))
+	TArray<UArticyCloneableObject*> Objects;
+	LoadedObjectsById.GenerateValueArray(Objects);
+	for (auto ClonableObject : Objects)
+	{
+		auto obj = ClonableObject->Get(this, CloneId, /*bForceUnshadowed = */ true);
+		if (obj && (obj->GetCloneId() == CloneId) && obj->IsA(Type))
 			arr.Add(Cast<UArticyObject>(obj));
+	}
 
 	return arr;
 }
 
 TArray<UArticyPrimitive*> UArticyDatabase::GetAllObjects() const
 {
-	return ArticyObjects;
+	TArray<UArticyPrimitive*> arr;
+	TArray<UArticyCloneableObject*> Objects;
+	LoadedObjectsById.GenerateValueArray(Objects);
+	for (auto ClonableObject : Objects)
+	{
+		auto obj = ClonableObject->Get(this, 0, /*bForceUnshadowed = */ true);
+			arr.Add(obj);
+	}
+	return arr;
 }
 
 //---------------------------------------------------------------------------//
@@ -366,7 +515,7 @@ TArray<UArticyPrimitive*> UArticyDatabase::GetAllObjects() const
 UArticyPrimitive* UArticyDatabase::CloneFrom(FArticyId Id, int32 NewCloneId, TSubclassOf<class UArticyObject> CastTo)
 {
 	auto info = LoadedObjectsById.Find(Id);
-	return info && info->IsValid() ? info->Get()->Clone(this, NewCloneId, true) : nullptr;
+	return info? (*info)->Clone(this, NewCloneId, true) : nullptr;
 }
 
 UArticyObject* UArticyDatabase::CloneFromByName(FName TechnicalName, int32 NewCloneId, TSubclassOf<class UArticyObject> CastTo)
@@ -376,7 +525,7 @@ UArticyObject* UArticyDatabase::CloneFromByName(FName TechnicalName, int32 NewCl
 		return nullptr;
 
 	auto info = arr->Objects[0];
-	return info.IsValid() ? Cast<UArticyObject>(info.Pin()->Clone(this, NewCloneId, true)) : nullptr;
+	return info? Cast<UArticyObject>(info->Clone(this, NewCloneId, true)) : nullptr;
 }
 
 //---------------------------------------------------------------------------//
@@ -384,7 +533,7 @@ UArticyObject* UArticyDatabase::CloneFromByName(FName TechnicalName, int32 NewCl
 UArticyPrimitive* UArticyDatabase::GetOrClone(FArticyId Id, int32 NewCloneId)
 {
 	auto info = LoadedObjectsById.Find(Id);
-	return info && info->IsValid() ? info->Get()->Clone(this, NewCloneId, false) : nullptr;
+	return info? (*info)->Clone(this, NewCloneId, false) : nullptr;
 }
 
 UArticyObject* UArticyDatabase::GetOrCloneByName(const FName& TechnicalName, int32 NewCloneId)
@@ -394,7 +543,7 @@ UArticyObject* UArticyDatabase::GetOrCloneByName(const FName& TechnicalName, int
 		return nullptr;
 
 	auto info = arr->Objects[0];
-	return info.IsValid() ? Cast<UArticyObject>(info.Pin()->Clone(this, NewCloneId, false)) : nullptr;
+	return info? Cast<UArticyObject>(info->Clone(this, NewCloneId, false)) : nullptr;
 }
 
 UArticyExpressoScripts* UArticyDatabase::GetExpressoInstance() const
@@ -411,5 +560,18 @@ UArticyExpressoScripts* UArticyDatabase::GetExpressoInstance() const
 	return CachedExpressoScripts;
 }
 
+UArticyDatabase::FAssetId UArticyDatabase::ResolveIDs(const FString& articyAssetFileName)
+{
+	FString fileName = FPaths::GetBaseFilename(articyAssetFileName);
+	FAssetId assetId;
+	FString technicalName;
+	fileName.Split(TEXT("_"), &technicalName, &(assetId.s_uniqueID), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+	assetId.technicalName = FName(*technicalName);
+	auto uniqueIDStart = *(assetId.s_uniqueID) + 2;
+	auto uniqueIDEnd = &(assetId.s_uniqueID[assetId.s_uniqueID.Len() - 1]);
+	assetId.uniqueID = FCString::Strtoui64(uniqueIDStart, &uniqueIDEnd, 16);
+	
+	return assetId;
+}
 TMap<TWeakObjectPtr<UWorld>, TWeakObjectPtr<UArticyDatabase>> UArticyDatabase::Clones;
 TWeakObjectPtr<UArticyDatabase> UArticyDatabase::PersistentClone;

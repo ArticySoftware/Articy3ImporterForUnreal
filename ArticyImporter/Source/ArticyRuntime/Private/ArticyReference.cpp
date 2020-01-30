@@ -2,7 +2,7 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyRuntimePrivatePCH.h"
+
 
 #include "ArticyReference.h"
 
@@ -22,7 +22,7 @@ UArticyPrimitive* UArticyReference::GetObject(const UObject* WorldContext)
 	return Reference.GetObject<UArticyPrimitive>(WorldContext);
 }
 
-void UArticyReference::SetReference(UArticyPrimitive* Object)
+void UArticyReference::SetReference(UArticyObject* Object)
 {
 	Reference.SetReference(Object);
 }

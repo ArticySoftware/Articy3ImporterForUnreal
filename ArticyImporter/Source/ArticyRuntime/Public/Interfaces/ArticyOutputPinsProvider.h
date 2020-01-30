@@ -23,5 +23,10 @@ public:
 
 	void Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>& OutBranches, const uint32& Depth) override;
 
-	const TArray<UArticyOutputPin*>* GetOutputPins() const;
+	const TArray<UArticyOutputPin*>* GetOutputPinsPtr() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	TArray<UArticyOutputPin*> GetOutputPins() const;
+
+	TArray<UArticyOutputPin*> GetOutputPins_Implementation() const;
 };

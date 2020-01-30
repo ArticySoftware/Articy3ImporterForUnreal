@@ -6,16 +6,14 @@
 
 #include "Engine/DataAsset.h"
 #include "ArticyBaseObject.h"
-#include "Private/ShadowStateManager.h"
-#include "AssetRegistryModule.h"
+#include "ShadowStateManager.h"
 #include "ArticyObject.h"
-#include "Serialization/Archive.h"
+#include "ArticyPackage.h"
 
 #include "ArticyDatabase.generated.h"
 
 class UArticyExpressoScripts;
 struct FArticyId;
-struct FArticyPackage;
 class UArticyGlobalVariables;
 
 USTRUCT(BlueprintType)
@@ -24,13 +22,21 @@ struct FArticyObjectShadow
 	GENERATED_BODY()
 	
 	FArticyObjectShadow() {}
-	FArticyObjectShadow(uint32 shadowLevel, UArticyPrimitive* object) : ShadowLevel(shadowLevel), Object(object) {}
+	FArticyObjectShadow(uint32 ShadowLevel, UArticyPrimitive* Object, int32 CloneId, UObject* Outer = nullptr) 
+		: ShadowLevel(ShadowLevel), Object(Object), Outer(Outer), CloneId(CloneId) {}
 
 public:
 	UPROPERTY()
-	uint32 ShadowLevel;
+	uint32 ShadowLevel = 0;
+	UArticyPrimitive* GetObject();
+	int32 GetCloneId() const { return CloneId; }
+private:
 	UPROPERTY()
-	UArticyPrimitive* Object;
+	UArticyPrimitive* Object = nullptr;
+
+	TWeakObjectPtr<UObject> Outer;
+
+	int32 CloneId;
 };
 
 USTRUCT(BlueprintType)
@@ -43,7 +49,7 @@ public:
 	/**
 	 * This constructor writes the Object to Shadows[0].
 	 */
-	explicit FArticyShadowableObject(UArticyPrimitive* Object);
+	explicit FArticyShadowableObject(UArticyPrimitive* Object, int32 CloneId, UObject* Outer = nullptr);
 
 	/**
 	 * Returns the requested shadow.
@@ -64,14 +70,13 @@ private:
 /**
  * Contains a reference to a UArticyObject, and to its clones if any.
  */
-USTRUCT(BlueprintType)
-struct ARTICYRUNTIME_API FArticyClonableObject
+UCLASS(BlueprintType)
+class ARTICYRUNTIME_API UArticyCloneableObject : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	FArticyClonableObject() = default;
-	FArticyClonableObject(UArticyPrimitive* BaseObject);
+	void Init(UArticyPrimitive* InitialClone) { AddClone(InitialClone, 0); }
 
 	//========================================//
 
@@ -109,7 +114,8 @@ struct ARTICYRUNTIME_API FArticyDatabaseObjectArray
 	GENERATED_BODY()
 
 public:
-	TArray<TWeakPtr<FArticyClonableObject>> Objects;
+	UPROPERTY()
+	TArray<UArticyCloneableObject *> Objects;
 };
 
 /**
@@ -126,7 +132,6 @@ public:
 
 	/** Get the static instance of the database. */
 	static UArticyDatabase* Get(const UObject* WorldContext);
-
 	/** Get the current GVs instance. */
 	virtual UArticyGlobalVariables* GetGVs() const;
 
@@ -149,6 +154,12 @@ public:
 	UFUNCTION(BlueprintPure, meta=(DisplayName="Is in shadow state?"), Category = "Script Methods")
 	bool IsInShadowState() const { return GetShadowLevel()  > 0; }
 
+	UFUNCTION(BlueprintPure, meta = (DisplayName="Get imported package names"), Category = "Articy")
+	TArray<FString> GetImportedPackageNames() const;
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName="Is package default package?"), Category = "Articy")
+	bool IsPackageDefaultPackage(FString PackageName);
+
 	UWorld* GetWorld() const override;
 
 	//---------------------------------------------------------------------------//
@@ -159,9 +170,9 @@ public:
 	 */
 	static void LoadAllObjects();
 
-	virtual void SetLoadedPackages(const TArray<FArticyPackage> Packages);
+	virtual void SetLoadedPackages(const TArray<UArticyPackage*> Packages);
 
-	/** Load all packages which have the bIsDefaultPackage flag set to true. */
+	/** Load all packages which have the IsDefaultPackage flag set to true. */
 	virtual void LoadDefaultPackages();
 
 	/** Load all imported packages. */
@@ -170,6 +181,10 @@ public:
 	/** Load a package of a given name. */
 	UFUNCTION(BlueprintCallable, Category = "Packages")
 	virtual void LoadPackage(FString PackageName);
+
+	/** Load a package of a given name. */
+	UFUNCTION(BlueprintCallable, Category = "Packages")
+	virtual bool UnloadPackage(const FString PackageName, const bool bQuickUnload);
 
 	//---------------------------------------------------------------------------//
 
@@ -294,21 +309,24 @@ public:
 	 */
 	UArticyExpressoScripts* GetExpressoInstance() const;
 
+	static UArticyDatabase* GetMutableOriginal();
+
+	void ChangePackageDefault(FName PackageName, bool bIsDefaultPackage);
+
 protected:
 
 	/** A list of all packages that were imported from articy:draft. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TMap<FString, FArticyPackage> ImportedPackages;
+	TMap<FString, UArticyPackage*> ImportedPackages;
 
 	UPROPERTY(VisibleAnywhere, transient)
 	TArray<FString> LoadedPackages;
 
-	TMap<FArticyId, TSharedPtr<FArticyClonableObject>> LoadedObjectsById;
-	TMap<FName, FArticyDatabaseObjectArray> LoadedObjectsByName;
-	/** Holds the references to all cloned articy objects to prevent them from being garbage collected. */
 	UPROPERTY()
-	TArray<UArticyPrimitive *> ArticyObjects;
-
+	TMap<FArticyId, UArticyCloneableObject*> LoadedObjectsById;
+	UPROPERTY()
+	TMap<FName, FArticyDatabaseObjectArray> LoadedObjectsByName;
+	
 	void UnloadAllPackages();
 
 	UFUNCTION(BlueprintCallable, Category="Setup")
@@ -325,11 +343,21 @@ private:
 	/** An instance of this class will be used to execute script fragments. */
 	UPROPERTY(Config, VisibleAnywhere)
 	TSubclassOf<UArticyExpressoScripts> ExpressoScriptsClass;
-
+	
 	UArticyPrimitive* GetObjectInternal(FArticyId Id, int32 CloneId = 0, bool bForceUnshadowed = false) const;
 
 	/** Get the original asset (on disk) of the database. */
 	static const UArticyDatabase* GetOriginal(bool bLoadDefaultPackages = false);
+
+	struct FAssetId
+	{
+		FName technicalName;
+		FString s_uniqueID;
+		uint64 uniqueID;
+	};
+
+	/** Extracts technical name and unique id from the articy asset file name. */
+	static FAssetId ResolveIDs(const FString& articyAssetFileName);
 };
 
 template<typename T>
@@ -347,11 +375,22 @@ template<typename T>
 TArray<T*> UArticyDatabase::GetObjectsOfClass(int32 CloneId) const
 {
 	TArray<T*> arr;
-	for (auto obj : ArticyObjects)
-		if (obj->GetCloneId() == CloneId)
-			if (T* castedObj = Cast<T>(obj))
-				arr.Add(castedObj);
 
+	TArray<UArticyCloneableObject*> ArticyObjects;
+	LoadedObjectsById.GenerateValueArray(ArticyObjects);
+
+	for (auto obj : ArticyObjects)
+	{
+		/*if (obj->GetCloneId() == CloneId && Cast<T>(obj))
+		{
+			arr.Add(obj);
+		}*/
+
+		if(obj->Get(this, CloneId, false) && Cast<T>(obj))
+		{
+			arr.Add(obj);
+		}
+	}
 	return arr;
 }
 
@@ -362,9 +401,9 @@ void UArticyDatabase::GetObjects(TArray<T*>& Array, FName TechnicalName, int32 C
 	auto arr = LoadedObjectsByName.Find(TechnicalName);
 	if(arr)
 	{
-		for(const auto obj : arr->Objects)
+		for(auto obj : arr->Objects)
 		{
-			auto clone = Cast<T>(obj.Pin()->Clone(this, CloneId));
+			auto clone = Cast<T>(obj->Clone(this, CloneId));
 			if(clone)
 				Array.Add(clone);
 		}

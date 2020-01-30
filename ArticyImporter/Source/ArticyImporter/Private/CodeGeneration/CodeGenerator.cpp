@@ -2,7 +2,7 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
-#include "ArticyImporterPrivatePCH.h"
+
 
 #include "CodeGenerator.h"
 #include "ArticyImportData.h"
@@ -16,9 +16,16 @@
 #include "ArticyDatabase.h"
 #include "ExpressoScriptsGenerator.h"
 #include "FileHelpers.h"
+#include "UnrealEdMisc.h"
+#include "GenericPlatform/GenericPlatformMisc.h"
+#include "ArticyImporter.h"
+#include "ArticyPluginSettings.h"
+#include "IContentBrowserSingleton.h"
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
+//---------------------------------------------------------------------------// 
+#define LOCTEXT_NAMESPACE "CodeGenerator"
 
 FString CodeGenerator::GetSourceFolder()
 {
@@ -65,21 +72,23 @@ FString CodeGenerator::GetFeatureInterfaceClassName(const UArticyImportData* Dat
 	return (bOmittPrefix ? "" : "I") + Data->GetProject().TechnicalName + "ObjectWith" + Feature.GetTechnicalName() + "Feature";
 }
 
-bool CodeGenerator::DeleteGeneratedCode(const FString &Filename)
+bool CodeGenerator::DeleteGeneratedCode(const FString& Filename)
 {
-	if(Filename.IsEmpty())
+	if (Filename.IsEmpty())
 		return FPlatformFileManager::Get().GetPlatformFile().DeleteDirectoryRecursively(*GetSourceFolder());
 
 	return FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*(GetSourceFolder() / Filename));
 }
 
-void CodeGenerator::GenerateCode(UArticyImportData* Data)
+bool CodeGenerator::GenerateCode(UArticyImportData* Data)
 {
-	if(!Data)
-		return;
+	if (!Data)
+		return false;
 
-	//generate GVs and ObjectDefinitions only if needed
-	if(Data->GetSettings().DidObjectDefsOrGVsChange())
+	bool bCodeGenerated = false;
+	
+	//generate all files if ObjectDefs or GVs changed
+	if (Data->GetSettings().DidObjectDefsOrGVsChange())
 	{
 		//DeleteGeneratedCode();
 
@@ -87,18 +96,19 @@ void CodeGenerator::GenerateCode(UArticyImportData* Data)
 		DatabaseGenerator::GenerateCode(Data);
 		InterfacesGenerator::GenerateCode(Data);
 		ObjectDefinitionsGenerator::GenerateCode(Data);
+		/* generate scripts as well due to them including the generated global variables
+		 * if we remove a GV set but don't regenerate expresso scripts, the resulting class won't compile */
+		ExpressoScriptsGenerator::GenerateCode(Data);
+		bCodeGenerated = true;
+	}
+	// if object defs of GVs didn't change, but scripts changed, regenerate only expresso scripts
+	else if (Data->GetSettings().DidScriptFragmentsChange())
+	{
+		ExpressoScriptsGenerator::GenerateCode(Data);
+		bCodeGenerated = true;
 	}
 
-	//gather all the scripts in all packages
-	if(Data->GetSettings().set_UseScriptSupport)
-		Data->GatherScripts();
-
-	//generate the expresso class, containing all the c++ script fragments
-	//the class is also generated if script support is disabled, it's just empty in that case
-	ExpressoScriptsGenerator::GenerateCode(Data);
-
-	//trigger compile
-	Compile(Data);
+	return bCodeGenerated;
 }
 
 void CodeGenerator::Recompile(UArticyImportData* Data)
@@ -108,7 +118,24 @@ void CodeGenerator::Recompile(UArticyImportData* Data)
 
 bool CodeGenerator::DeleteGeneratedAssets()
 {
-	return FPlatformFileManager::Get().GetPlatformFile().DeleteDirectoryRecursively(*ArticyHelpers::ArticyGeneratedFolder);
+	FAssetRegistryModule& AssetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	TArray<FAssetData> OutAssets;
+	AssetRegistry.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), OutAssets, true, false);
+
+	TArray<UObject*> ExistingAssets;
+	
+	for(FAssetData data : OutAssets)
+	{
+		ExistingAssets.Add(data.GetAsset());
+	}
+
+	if(ExistingAssets.Num() > 0)
+	{
+		return ObjectTools::ForceDeleteObjects(ExistingAssets, false) > 0;
+	}
+
+	// returns true if there is nothing to delete to not trigger the ensure
+	return true;
 }
 
 void CodeGenerator::Compile(UArticyImportData* Data)
@@ -117,54 +144,33 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 
 	// We can only hot-reload via DoHotReloadFromEditor when we already had code in our project
 	IHotReloadInterface& HotReloadSupport = FModuleManager::LoadModuleChecked<IHotReloadInterface>("HotReload");
-	if(HotReloadSupport.IsCurrentlyCompiling())
+	if (HotReloadSupport.IsCurrentlyCompiling())
 	{
 		bWaitingForOtherCompile = true;
 		UE_LOG(LogArticyImporter, Warning, TEXT("Already compiling, waiting until it's done."));
 	}
 
 	static FDelegateHandle lambdaHandle;
-	if(lambdaHandle.IsValid())
-		IHotReloadModule::Get().OnModuleCompilerFinished().Remove(lambdaHandle);
+	if (lambdaHandle.IsValid())
+		IHotReloadModule::Get().OnHotReload().Remove(lambdaHandle);
 
-	lambdaHandle = IHotReloadModule::Get().OnModuleCompilerFinished().AddLambda([=](FString OutputLog, ECompilationResult::Type Result, bool bShowLog)
+	lambdaHandle = IHotReloadModule::Get().OnHotReload().AddLambda([=](bool bWasTriggeredAutomatically)
 	{
-		OnCompiled(Result, Data, bWaitingForOtherCompile);
+		OnCompiled(Data, bWaitingForOtherCompile);
 	});
-
-	if(!bWaitingForOtherCompile)
+	
+	if (!bWaitingForOtherCompile)
 		HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None /*async*/);
 }
 
-void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImportData* Data, const bool bWaitingForOtherCompile)
+void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 {
-	bool succeeded = Result == ECompilationResult::Succeeded || Result == ECompilationResult::UpToDate;
-	if(!succeeded)
-	{
-		//compile failed
-		UE_LOG(LogArticyImporter, Error, TEXT("Compile failed, cannot continue importing articy:draft data!"));
-		return;
-	}
-
-	if(bWaitingForOtherCompile || Data->GetSettings().DidObjectDefsOrGVsChange())
-	{
-		if(!bWaitingForOtherCompile)
-		{
-			//the object definitions are up to date now
-			Data->GetSettings().SetObjectDefinitionsRebuilt();
-		}
-
-		//another compile is needed
-		Compile(Data);
-		return;
-	}
-	
 	//compiling is done!
 	//check if UArticyBaseGlobalVariables can be found, otherwise something went wrong!
 	auto className = GetGlobalVarsClassname(Data, true);
 	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *className);
-	if(!ensure(ConstructorHelpersInternal::FindOrLoadClass(fullClassName, UArticyGlobalVariables::StaticClass())))
-		UE_LOG(LogArticyImporter, Error, TEXT("Could not find generated global variables class after compile!"));
+	if (!ensure(ConstructorHelpersInternal::FindOrLoadClass(fullClassName, UArticyGlobalVariables::StaticClass())))
+	UE_LOG(LogArticyImporter, Error, TEXT("Could not find generated global variables class after compile!"));
 
 	ensure(DeleteGeneratedAssets());
 
@@ -176,9 +182,48 @@ void CodeGenerator::OnCompiled(const ECompilationResult::Type Result, UArticyImp
 	PackagesGenerator::GenerateAssets(Data);
 
 	//register the newly imported packages in the database
-	if(ensureMsgf(db, TEXT("Could not create ArticyDatabase asset!")))
+	if (ensureMsgf(db, TEXT("Could not create ArticyDatabase asset!")))
+	{
 		db->SetLoadedPackages(Data->GetPackages());
+	}
 
-	//promt the user to save newly generated packages
-	FEditorFileUtils::SaveDirtyPackages(true, false, /*bSaveContentPackages*/ true, false, false, true);
+	//gather all articy assets to save them
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	TArray<FAssetData> GeneratedAssets;
+	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), GeneratedAssets, true);
+
+	TArray<UPackage*> PackagesToSave;
+
+	PackagesToSave.Add(Data->GetOutermost());
+	for (FAssetData AssetData : GeneratedAssets)
+	{
+		PackagesToSave.Add(AssetData.GetAsset()->GetOutermost());
+	}
+
+	// automatically save all articy assets
+	TArray<UPackage*> FailedToSavePackages;
+	FEditorFileUtils::PromptForCheckoutAndSave(PackagesToSave, false, false, &FailedToSavePackages);
+
+	for (auto Package : FailedToSavePackages)
+	{
+		UE_LOG(LogArticyImporter, Error, TEXT("Could not save package %s"), *Package->GetName());
+	}
 }
+
+void CodeGenerator::OnCompiled(UArticyImportData* Data, const bool bWaitingForOtherCompile)
+{
+	if(!bWaitingForOtherCompile)
+	{
+		Data->GetSettings().SetObjectDefinitionsRebuilt();
+		Data->GetSettings().SetScriptFragmentsRebuilt();
+		// broadcast that compilation has finished. ArticyImportData will then generate the assets and perform post import operations
+		FArticyImporterModule::Get().OnCompilationFinished.Broadcast();
+	}
+	else
+	{
+		// if we were waiting for another compile, that means our generated code hasn't been compiled yet. Trigger another compile
+		Compile(Data);
+	}
+}
+
+#undef LOCTEXT_NAMESPACE

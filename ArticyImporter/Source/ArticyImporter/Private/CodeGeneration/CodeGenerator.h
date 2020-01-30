@@ -3,7 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
 #pragma once
+#include "CoreMinimal.h"
 #include "AssetRegistryModule.h"
+#include "ArticyImportData.h"
+#include "Misc/CompilationResult.h"
 
 //#include "CodeGenerator.generated.h"
 
@@ -16,7 +19,8 @@ class UArticyImportData;
 class CodeGenerator
 {
 public:
-	static void GenerateCode(UArticyImportData* Data);
+	static bool GenerateCode(UArticyImportData* Data);
+	static void GenerateAssets(UArticyImportData* Data);
 	static void Recompile(UArticyImportData* Data);
 
 	/** Returns the main source folder for all the generated code. */
@@ -39,7 +43,7 @@ public:
 private:
 
 	static void Compile(UArticyImportData* Data);
-	static void OnCompiled(const ECompilationResult::Type Result, UArticyImportData* Data, const bool bWaitingForOtherCompile);
+	static void OnCompiled(UArticyImportData* Data, const bool bWaitingForOtherCompile);
 
 	//========================================//
 
