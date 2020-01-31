@@ -1,5 +1,5 @@
 <p align="center">
-  <img height="300" src="https://www.articy.com/articy-importer/unity/media/ad_Importer_Large.png">
+  <img height="344" src="https://www.articy.com/articy-importer/unreal/ad_importer_large.png">
 </p>
 
 # ArticyImporter for Unreal Engine 4
