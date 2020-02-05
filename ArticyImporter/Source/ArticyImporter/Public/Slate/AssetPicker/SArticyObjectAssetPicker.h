@@ -26,7 +26,7 @@ namespace FArticyObjectAssetPicketConstants {
 
 }
 
-class SArticyObjectAssetPicker : public SCompoundWidget
+class ARTICYIMPORTER_API SArticyObjectAssetPicker : public SCompoundWidget
 {
 public:
 	SLATE_BEGIN_ARGS(SArticyObjectAssetPicker) {}
