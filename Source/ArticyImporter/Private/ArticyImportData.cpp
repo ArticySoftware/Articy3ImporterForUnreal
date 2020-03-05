@@ -393,13 +393,13 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 {
 	if(CachedData.IsValid())
 	{
-		CachedData->BeginDestroy();
+		CachedData->ConditionalBeginDestroy();
 		CachedData.Reset();
 	}
 	
 	CachedData = DuplicateObject<UArticyImportData>(this, this, FName(TEXT("CachedArticyImportData")));
 	
-	//import the main sections
+	// import the main sections
 	Settings.ImportFromJson(RootObject->GetObjectField(JSON_SECTION_SETTINGS));
 	Project.ImportFromJson(RootObject->GetObjectField(JSON_SECTION_PROJECT));
 	PackageDefs.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_PACKAGES));
@@ -408,7 +408,7 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 
 	bool bNeedsCodeGeneration = false;
 	
-	//import GVs and ObjectDefs only if needed
+	// import GVs and ObjectDefs only if needed
 	if(Settings.DidObjectDefsOrGVsChange())
 	{
 		GlobalVariables.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_GLOBALVARS), this);
@@ -649,7 +649,8 @@ void UArticyImportData::ResolveCachedVersion()
 
 	this->ParentChildrenCache = CachedData->ParentChildrenCache;
 
-	this->CachedData = nullptr;
+	this->CachedData->ConditionalBeginDestroy();
+	this->CachedData.Reset();
 }
 
 TWeakObjectPtr<UArticyImportData> UArticyImportData::CachedData;
