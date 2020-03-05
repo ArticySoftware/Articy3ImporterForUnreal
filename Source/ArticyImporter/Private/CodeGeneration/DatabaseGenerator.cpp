@@ -41,7 +41,7 @@ void DatabaseGenerator::GenerateCode(const UArticyImportData* Data)
 				header->Line();
 				header->Method("static " + className + "*", "Get", "const UObject* WorldContext", [&]
 				{
-					header->Line(FString::Printf(TEXT("returns static_cast<%s*>(Super::Get(WorldContext));"), *className));
+					header->Line(FString::Printf(TEXT("return static_cast<%s*>(Super::Get(WorldContext));"), *className));
 				}, "Get the instace (copy of the asset) of the database.", true,
 					"BlueprintPure, Category = \"articy:draft\", meta=(HidePin=\"WorldContext\", DefaultToSelf=\"WorldContext\", DisplayName=\"GetArticyDB\", keywords=\"database\")");
 
