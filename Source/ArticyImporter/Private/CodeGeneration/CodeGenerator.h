@@ -45,7 +45,10 @@ private:
 
 	static void Compile(UArticyImportData* Data);
 	static void OnCompiled(UArticyImportData* Data);
+	static bool ParseForError(const FString& Log);
 
+	/** Restores the previous import session (ImportData + Code). Returns true if the restoration resulted in functioning code + import data */
+	static bool RestorePreviousImport(UArticyImportData* Data, const bool& bNotifyUser = true);
 	// Cached files, mapped from FileName to FileContent
 	static TMap<FString, FString> CachedFiles;
 
