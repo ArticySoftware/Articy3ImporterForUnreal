@@ -104,7 +104,7 @@ void FArticyImporterModule::UnqueueImport()
 void FArticyImporterModule::TriggerQueuedImport(bool b)
 {
 	UArticyImportData* ArticyImportData = nullptr;
-	FArticyImporterFunctionLibrary::ForceCompleteReimport(ArticyImportData);
+	FArticyImporterFunctionLibrary::ReimportChanges(ArticyImportData);
 	// important to unqueue in the end to reset the state
 	UnqueueImport();
 }

@@ -77,20 +77,20 @@ UObject* UArticyJSONFactory::FactoryCreateFile(UClass* InClass, UObject* InParen
 bool UArticyJSONFactory::CanReimport(UObject* Obj, TArray<FString>& OutFilenames)
 {
 	const auto Asset = Cast<UArticyImportData>(Obj);
-	
+
+	if(!Asset)
+	{
+		return false;
+	}
+
 	const bool bImportQueued = HandleImportDuringPlay(Obj);
 	if(bImportQueued)
 	{
 		return false;
 	}
 
-	if(Asset)
-	{
-		Asset->ImportData->ExtractFilenames(OutFilenames);
-		return true;
-	}
-
-	return false;
+	Asset->ImportData->ExtractFilenames(OutFilenames);
+	return true;
 }
 
 void UArticyJSONFactory::SetReimportPaths(UObject* Obj, const TArray<FString>& NewReimportPaths)
