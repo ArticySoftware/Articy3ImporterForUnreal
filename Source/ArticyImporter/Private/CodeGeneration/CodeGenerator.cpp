@@ -180,7 +180,6 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 	
 	AfterCompileLambda = IHotReloadModule::Get().OnHotReload().AddLambda([=](bool bWasTriggeredAutomatically)
 	{
-		UE_LOG(LogArticyImporter, Warning, TEXT("AfterCompileLamba Called"));
 		OnCompiled(Data);
 	});
 
@@ -194,67 +193,25 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 	}
 	RestoreCachedVersionHandle = IHotReloadModule::Get().OnModuleCompilerFinished().AddLambda([=](const FString& Log, ECompilationResult::Type Type, bool bSuccess)
 	{
-		UE_LOG(LogArticyImporter, Warning, TEXT("Restore Cached Lamba Called"));
-
 		if (Type == ECompilationResult::Succeeded || Type == ECompilationResult::UpToDate)
 		{
-			// do nothing in case the compilation was successful or intentionally cancelled
+			// do nothing in case compilation succeeded without problems
 		}
 		else
-		{				
-			TArray<FString> Lines;
-			// parsing into individual FStrings for each line. Using \n as delimiter, should cover both Mac OSX and Windows
-			Log.ParseIntoArray(Lines, TEXT("\n"));
-
-			// heuristic: error due to articy?
-			bool bErrorInGeneratedCode = false;
-			for (const FString& Line : Lines)
-			{
-				if (Line.Contains(TEXT("error")) && Line.Contains(TEXT("ArticyGenerated")))
-				{
-					bErrorInGeneratedCode = true;
-					break;
-				}
-			}
-
+		{
 			/** if error is due to articy, restore the previous data, consisting of:
 			* ImportData (base truth for generation of assets and code),
 			* Generated code (previous code should have been working, so we'll restore that instead of just generating the code again)
-			* Assets (we can restore the assets by generating them normally, because the ImportData was restored and the code is the same as before)
+			* possibly Assets (we can restore the assets by generating them normally, because the ImportData was restored and the code is the same as before, if available)
 			*/
+			const bool bErrorInGeneratedCode = ParseForError(Log);
+			
 			if (bErrorInGeneratedCode)
 			{
-				// transfer the cached data into the current one
-				Data->ResolveCachedVersion();
-
-				// attempt to restore all generated files
-				const bool bFilesRestored = RestoreCachedFiles();
-
-				// if we succeeded, tell the user and call OnCompiled - which will then create the assets
-				if(bFilesRestored)
+				const bool bCanGenerateAssets = RestorePreviousImport(Data, true);
+				if(bCanGenerateAssets)
 				{
-					const FText CacheRestoredText = LOCTEXT("ImportDataCacheRestoredText", "Error in generated articy code detected. Previous data restored. Proceeding with asset generation with the restored data.");
-					const FText CacheRestoredTitle = LOCTEXT("ImportDataCacheRestoredTitle", "Articy code generation failed - restoration succeeded");
-					OpenMsgDlgInt(EAppMsgType::Ok, CacheRestoredText, CacheRestoredTitle);
-					// although we didn't actually compile, we act as if we did to trigger asset generation and post import
 					OnCompiled(Data);
-				}
-				else
-				{
-					// if there were no previous files or not all files could be restored, delete them instead
-					if(DeleteGeneratedCode())
-					{
-						const FText CacheDeletedText = LOCTEXT("ImportDataCacheDeletedText", "Error in generated articy code detected. Code deleted.");
-						const FText CacheDeletedTitle = LOCTEXT("ImportDataCacheDeletedTitle", "Articy code generation failed - restoration succeeded");
-						OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletedText, CacheDeletedTitle);
-					}
-					// if deletion didn't work for some reason, notify the user
-					else
-					{
-						const FText CacheDeletionFailedText = LOCTEXT("ImportDataCacheDeletionFailedText", "Error in generated articy code detected. Code could not be deleted.");
-						const FText CacheDeletionFailedTitle = LOCTEXT("ImportDataCacheDeletionFailedTitle", "Articy code generation failed - restoration failed");
-						OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletionFailedText, CacheDeletionFailedTitle);
-					}
 				}
 			}
 		}
@@ -322,6 +279,74 @@ void CodeGenerator::OnCompiled(UArticyImportData* Data)
 	Data->GetSettings().SetScriptFragmentsRebuilt();
 	// broadcast that compilation has finished. ArticyImportData will then generate the assets and perform post import operations
 	FArticyImporterModule::Get().OnCompilationFinished.Broadcast(Data);
+}
+
+bool CodeGenerator::ParseForError(const FString& Log)
+{
+	TArray<FString> Lines;
+	// parsing into individual FStrings for each line. Using \n as delimiter, should cover both Mac OSX and Windows
+	Log.ParseIntoArray(Lines, TEXT("\n"));
+
+	// heuristic: error due to articy?
+	bool bErrorInGeneratedCode = false;
+	for (const FString& Line : Lines)
+	{
+		if (Line.Contains(TEXT("error")) && Line.Contains(TEXT("ArticyGenerated")))
+		{
+			bErrorInGeneratedCode = true;
+			break;
+		}
+	}
+
+	return bErrorInGeneratedCode;
+}
+
+bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& bNotifyUser)
+{
+	ensure(Data && Data->HasCachedVersion());
+	
+	// transfer the cached data into the current one
+	Data->ResolveCachedVersion();
+
+	// attempt to restore all generated files
+	const bool bFilesRestored = RestoreCachedFiles();
+
+	// if we succeeded, tell the user and call OnCompiled - which will then create the assets
+	if (bFilesRestored)
+	{
+		if (bNotifyUser)
+		{
+			const FText CacheRestoredText = LOCTEXT("ImportDataCacheRestoredText", "Error in generated articy code detected. Previous data restored. Proceeding with asset generation with the restored data.");
+			const FText CacheRestoredTitle = LOCTEXT("ImportDataCacheRestoredTitle", "Articy code generation failed - restoration succeeded");
+			OpenMsgDlgInt(EAppMsgType::Ok, CacheRestoredText, CacheRestoredTitle);
+			return true;
+		}
+	}
+	else
+	{
+		// if there were no previous files or not all files could be restored, delete them instead
+		if (DeleteGeneratedCode())
+		{
+			if (bNotifyUser)
+			{
+				const FText CacheDeletedText = LOCTEXT("ImportDataCacheDeletedText", "Error in generated articy code detected. Code deleted.");
+				const FText CacheDeletedTitle = LOCTEXT("ImportDataCacheDeletedTitle", "Articy code generation failed - restoration succeeded");
+				OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletedText, CacheDeletedTitle);
+			}
+		}
+		// if deletion didn't work for some reason, notify the user
+		else
+		{
+			if (bNotifyUser)
+			{
+				const FText CacheDeletionFailedText = LOCTEXT("ImportDataCacheDeletionFailedText", "Error in generated articy code detected. Code could not be deleted.");
+				const FText CacheDeletionFailedTitle = LOCTEXT("ImportDataCacheDeletionFailedTitle", "Articy code generation failed - restoration failed");
+				OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletionFailedText, CacheDeletionFailedTitle);
+			}
+		}
+	}
+
+	return false;
 }
 
 bool CodeGenerator::RestoreCachedFiles()

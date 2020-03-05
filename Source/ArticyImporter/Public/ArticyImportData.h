@@ -308,6 +308,7 @@ public:
 	const TMap<FArticyId, FArticyIdArray> GetParentChildrenCache() const { return ParentChildrenCache; }
 
 	void ResolveCachedVersion();
+	bool HasCachedVersion() const { return CachedData.IsValid(); }
 	
 protected:
 
