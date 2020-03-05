@@ -197,22 +197,27 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 		{
 			// do nothing in case compilation succeeded without problems
 		}
-		else
+		else if(Type == ECompilationResult::OtherCompilationError)
 		{
-			/** if error is due to articy, restore the previous data, consisting of:
-			* ImportData (base truth for generation of assets and code),
-			* Generated code (previous code should have been working, so we'll restore that instead of just generating the code again)
-			* possibly Assets (we can restore the assets by generating them normally, because the ImportData was restored and the code is the same as before, if available)
-			*/
+			/** if compile error is due to articy, restore the previous data */
 			const bool bErrorInGeneratedCode = ParseForError(Log);
 			
 			if (bErrorInGeneratedCode)
 			{
-				const bool bCanGenerateAssets = RestorePreviousImport(Data, true);
+				const bool bCanGenerateAssets = RestorePreviousImport(Data, true, Type);
 				if(bCanGenerateAssets)
 				{
 					OnCompiled(Data);
 				}
+			}
+		}
+		// in case the compilation was neither successful nor had compile errors, revert just to be safe
+		else
+		{
+			const bool bCanGenerateAssets = RestorePreviousImport(Data, true, Type);
+			if (bCanGenerateAssets)
+			{
+				OnCompiled(Data);
 			}
 		}
 	});
@@ -301,7 +306,7 @@ bool CodeGenerator::ParseForError(const FString& Log)
 	return bErrorInGeneratedCode;
 }
 
-bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& bNotifyUser)
+bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& bNotifyUser, ECompilationResult::Type Reason)
 {
 	ensure(Data && Data->HasCachedVersion());
 	
@@ -311,14 +316,26 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 	// attempt to restore all generated files
 	const bool bFilesRestored = RestoreCachedFiles();
 
+	FText ReasonForRestoreText = FText::FromString(ECompilationResult::ToString(Reason));
+
+	// Reason is "-1" for cancelled for some reason
+	if(Reason == -1)
+	{
+		ReasonForRestoreText = FText::FromString(TEXT("Compilation cancelled"));
+	}
+	else if(Reason == ECompilationResult::OtherCompilationError)
+	{
+		ReasonForRestoreText = FText::FromString(TEXT("Error in compiled Articy code"));
+	}
+
+	FText ArticyImportErrorText = FText::FromString(TEXT("Articy import error"));
 	// if we succeeded, tell the user and call OnCompiled - which will then create the assets
 	if (bFilesRestored)
 	{
 		if (bNotifyUser)
 		{
-			const FText CacheRestoredText = LOCTEXT("ImportDataCacheRestoredText", "Error in generated articy code detected. Previous data restored. Proceeding with asset generation with the restored data.");
-			const FText CacheRestoredTitle = LOCTEXT("ImportDataCacheRestoredTitle", "Articy code generation failed - restoration succeeded");
-			OpenMsgDlgInt(EAppMsgType::Ok, CacheRestoredText, CacheRestoredTitle);
+			const FText CacheRestoredText = FText::Format(LOCTEXT("ImportDataCacheRestoredText", "Restored previously generated articy code. Reason: {0}. Continuing import with last valid state."), ReasonForRestoreText);
+			OpenMsgDlgInt(EAppMsgType::Ok, CacheRestoredText, ArticyImportErrorText);
 			return true;
 		}
 	}
@@ -329,9 +346,8 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 		{
 			if (bNotifyUser)
 			{
-				const FText CacheDeletedText = LOCTEXT("ImportDataCacheDeletedText", "Error in generated articy code detected. Code deleted.");
-				const FText CacheDeletedTitle = LOCTEXT("ImportDataCacheDeletedTitle", "Articy code generation failed - restoration succeeded");
-				OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletedText, CacheDeletedTitle);
+				const FText CacheDeletedText = FText::Format(LOCTEXT("ImportDataCacheDeletedText", "Deleted generated articy code. Reason: {0}. Aborting import process."), ReasonForRestoreText);
+				OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletedText, ArticyImportErrorText);
 			}
 		}
 		// if deletion didn't work for some reason, notify the user
@@ -339,9 +355,8 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 		{
 			if (bNotifyUser)
 			{
-				const FText CacheDeletionFailedText = LOCTEXT("ImportDataCacheDeletionFailedText", "Error in generated articy code detected. Code could not be deleted.");
-				const FText CacheDeletionFailedTitle = LOCTEXT("ImportDataCacheDeletionFailedTitle", "Articy code generation failed - restoration failed");
-				OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletionFailedText, CacheDeletionFailedTitle);
+				const FText CacheDeletionFailedText = FText::Format(LOCTEXT("ImportDataCacheDeletionFailedText", "Tried to delete generated articy code. Reason: {0}. Failed to delete. Aborting import process."), ReasonForRestoreText);
+				OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletionFailedText, ArticyImportErrorText);
 			}
 		}
 	}
