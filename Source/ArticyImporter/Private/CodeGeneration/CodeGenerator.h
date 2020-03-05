@@ -20,6 +20,7 @@ class CodeGenerator
 {
 public:
 	static bool GenerateCode(UArticyImportData* Data);
+	static bool RestoreCachedFiles();
 	static void GenerateAssets(UArticyImportData* Data);
 	static void Recompile(UArticyImportData* Data);
 
@@ -43,7 +44,10 @@ public:
 private:
 
 	static void Compile(UArticyImportData* Data);
-	static void OnCompiled(UArticyImportData* Data, const bool bWaitingForOtherCompile);
+	static void OnCompiled(UArticyImportData* Data);
+
+	// Cached files, mapped from FileName to FileContent
+	static TMap<FString, FString> CachedFiles;
 
 	//========================================//
 

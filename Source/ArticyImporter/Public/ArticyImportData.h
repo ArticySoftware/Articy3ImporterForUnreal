@@ -293,8 +293,10 @@ public:
 	const FArticyObjectDefinitions& GetObjectDefs() const { return ObjectDefinitions; }
 	const FArticyPackageDefs& GetPackageDefs() const { return PackageDefs; }
 
-	TArray<UArticyPackage*>& GetPackages() { return ImportedPackages; }
-	const TArray<UArticyPackage*>& GetPackages() const { return ImportedPackages; }
+	TArray<TSoftObjectPtr<UArticyPackage>>& GetPackages() { return ImportedPackages; }
+	TArray<UArticyPackage*> GetPackagesDirect();
+
+	const TArray<TSoftObjectPtr<UArticyPackage>>& GetPackages() const { return ImportedPackages; }
 
 	const TArray<FAIDScriptMethod>& GetUserMethods() const { return UserMethods.ScriptMethods; }
 
@@ -305,6 +307,8 @@ public:
 	void AddChildToParentCache(FArticyId Parent, FArticyId Child);
 	const TMap<FArticyId, FArticyIdArray> GetParentChildrenCache() const { return ParentChildrenCache; }
 
+	void ResolveCachedVersion();
+	
 protected:
 
 	/** Performs a complete reimport and asset regeneration. */
@@ -318,6 +322,8 @@ protected:
 	/** Clears and regenerates all assets, but no code. */
 	UPROPERTY(EditAnywhere)
 	bool bRegenerateAssets = false;
+
+	static TWeakObjectPtr<UArticyImportData> CachedData;
 
 private:
 
@@ -342,7 +348,7 @@ private:
 	TSet<FArticyExpressoFragment> ScriptFragments;
 
 	UPROPERTY(VisibleAnywhere, Category = "Imported")
-	TArray<UArticyPackage*> ImportedPackages;
+	TArray<TSoftObjectPtr<UArticyPackage>> ImportedPackages;
 
 	UPROPERTY(VisibleAnywhere, Category="Imported")
 	TMap<FArticyId, FArticyIdArray> ParentChildrenCache;

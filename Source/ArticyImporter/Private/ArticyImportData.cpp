@@ -12,6 +12,9 @@
 #include "ArticyPluginSettings.h"
 #include "Internationalization/Regex.h"
 #include "ArticyImporter.h"
+#include "Dialogs/Dialogs.h"
+
+#define LOCTEXT_NAMESPACE "ArticyImportData"
 
 void FADISettings::ImportFromJson(TSharedPtr<FJsonObject> Json)
 {
@@ -388,6 +391,14 @@ void UArticyImportData::PostImport()
 
 void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 {
+	if(CachedData.IsValid())
+	{
+		CachedData->BeginDestroy();
+		CachedData.Reset();
+	}
+	
+	CachedData = DuplicateObject<UArticyImportData>(this, this, FName(TEXT("CachedArticyImportData")));
+	
 	//import the main sections
 	Settings.ImportFromJson(RootObject->GetObjectField(JSON_SECTION_SETTINGS));
 	Project.ImportFromJson(RootObject->GetObjectField(JSON_SECTION_PROJECT));
@@ -419,8 +430,18 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 
 		if (bAnyCodeGenerated)
 		{
-			FArticyImporterModule::Get().OnCompilationFinished.AddLambda([this] {
-				CodeGenerator::GenerateAssets(this);
+			static FDelegateHandle PostImportHandle;
+
+			if(PostImportHandle.IsValid())
+			{
+				FArticyImporterModule::Get().OnCompilationFinished.Remove(PostImportHandle);
+				PostImportHandle.Reset();
+			}
+			
+			// this will have either the current import data or the cached version
+			PostImportHandle = FArticyImporterModule::Get().OnCompilationFinished.AddLambda([this](UArticyImportData* Data) 
+			{
+				CodeGenerator::GenerateAssets(Data);
 				UArticyImportData::PostImport();
 			});
 
@@ -438,6 +459,8 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 void UArticyImportData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostInitProperties();
+
+	UArticyImportData* UsedImportData = this;
 	
 	if(bForceCompleteReimport || bReimportChanges)
 	{
@@ -462,6 +485,17 @@ void UArticyImportData::PostEditChangeProperty(FPropertyChangedEvent& PropertyCh
 
 		CodeGenerator::GenerateAssets(this);
 	}
+}
+
+TArray<UArticyPackage*> UArticyImportData::GetPackagesDirect()
+{
+	TArray<UArticyPackage*> Packages;
+
+	for (auto& Package : ImportedPackages)
+	{
+		Packages.Add(Package.Get());
+	}
+	return Packages;
 }
 
 void UArticyImportData::GatherScripts()
@@ -596,3 +630,28 @@ void UArticyImportData::AddChildToParentCache(const FArticyId Parent, const FArt
 	auto& childrenRef = ParentChildrenCache.FindOrAdd(Parent);
 	childrenRef.Values.AddUnique(Child);
 }
+
+void UArticyImportData::ResolveCachedVersion()
+{
+	ensure(CachedData.IsValid());
+	
+	this->Settings = CachedData->Settings;
+	this->Project = CachedData->Project;
+	this->GlobalVariables = CachedData->GlobalVariables;
+	this->ObjectDefinitions = CachedData->ObjectDefinitions;
+	this->PackageDefs = CachedData->PackageDefs;
+	this->UserMethods = CachedData->UserMethods;
+	this->Hierarchy = CachedData->Hierarchy;
+	
+	this->ScriptFragments = CachedData->ScriptFragments;
+
+	this->ImportedPackages = CachedData->ImportedPackages;
+
+	this->ParentChildrenCache = CachedData->ParentChildrenCache;
+
+	this->CachedData = nullptr;
+}
+
+TWeakObjectPtr<UArticyImportData> UArticyImportData::CachedData;
+
+#undef LOCTEXT_NAMESPACE

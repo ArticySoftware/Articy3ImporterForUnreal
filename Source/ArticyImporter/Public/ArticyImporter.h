@@ -13,7 +13,7 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogArticyImporter, Log, All)
 
 DECLARE_MULTICAST_DELEGATE(FOnImportFinished);
-DECLARE_MULTICAST_DELEGATE(FOnCompilationFinished);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCompilationFinished, UArticyImportData*);
 
 class FToolBarBuilder;
 class FMenuBuilder;

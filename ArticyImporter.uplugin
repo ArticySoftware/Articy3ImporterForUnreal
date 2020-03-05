@@ -18,7 +18,7 @@
 		{
 			"Name": "ArticyRuntime",
 			"Type": "Runtime",
-			"LoadingPhase": "Default",
+			"LoadingPhase": "PreDefault",
 			"WhitelistPlatforms": [
 				"Win32",
 				"Win64",
@@ -40,6 +40,11 @@
 				"IOS",
 				"Android"
 			]
+		},
+		{
+			"Name": "ArticyGenerated",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
 		}
 	]
 }

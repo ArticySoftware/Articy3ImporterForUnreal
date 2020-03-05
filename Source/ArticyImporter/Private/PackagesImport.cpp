@@ -67,11 +67,11 @@ UArticyObject* FArticyModelDef::GenerateSubAsset(const UArticyImportData* Data, 
 
 	//generate the asset
 
-	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *className);
+	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated"), *className);
 	auto uclass = ConstructorHelpersInternal::FindOrLoadClass(fullClassName, UArticyObject::StaticClass());
 	if (uclass)
 	{
-		auto obj = ArticyImporterHelpers::GenerateSubAsset<UArticyObject>(*className, FApp::GetProjectName(), GetNameAndId(), Outer);
+		auto obj = ArticyImporterHelpers::GenerateSubAsset<UArticyObject>(*className, TEXT("ArticyGenerated"), GetNameAndId(), Outer);
 		FAssetRegistryModule::AssetCreated(Cast<UObject>(obj));
 		if (ensure(obj))
 		{
@@ -167,16 +167,16 @@ UArticyPackage* FArticyPackageDef::GeneratePackageAsset(UArticyImportData* Data)
 	auto AssetPackage = CreatePackage(nullptr, *PackagePath);
 	AssetPackage->FullyLoad();
 
-	FString assetName = FPaths::GetBaseFilename(PackageName);
+	const FString AssetName = FPaths::GetBaseFilename(PackageName);
 
-	UArticyPackage* ArticyPackage = ArticyImporterHelpers::GenerateAsset<UArticyPackage>(*UArticyPackage::StaticClass()->GetName(), TEXT("ArticyRuntime"), *assetName, "Packages");
+	UArticyPackage* ArticyPackage = ArticyImporterHelpers::GenerateAsset<UArticyPackage>(*UArticyPackage::StaticClass()->GetName(), TEXT("ArticyRuntime"), *AssetName, "Packages");
 
 	ArticyPackage->Clear();
 	ArticyPackage->Name = Name;
 	ArticyPackage->Description = Description;
 	ArticyPackage->bIsDefaultPackage = IsDefaultPackage;
 
-	// create all
+	// create all contained subassets and register them in the package
 	for (const auto model : Models)
 	{
 		UArticyObject* asset = model.GenerateSubAsset(Data, ArticyPackage); //MM_CHANGE
