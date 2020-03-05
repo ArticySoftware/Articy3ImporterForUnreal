@@ -108,7 +108,6 @@ bool CodeGenerator::GenerateCode(UArticyImportData* Data)
 		CachedFiles.Add(FileNames[i], FileContents[i]);
 	}
 
-
 	//generate all files if ObjectDefs or GVs changed
 	if (Data->GetSettings().DidObjectDefsOrGVsChange())
 	{
@@ -197,7 +196,7 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 	{
 		UE_LOG(LogArticyImporter, Warning, TEXT("Restore Cached Lamba Called"));
 
-		if (Type == ECompilationResult::Succeeded || Type == ECompilationResult::Canceled || Type == ECompilationResult::UpToDate)
+		if (Type == ECompilationResult::Succeeded || Type == ECompilationResult::UpToDate)
 		{
 			// do nothing in case the compilation was successful or intentionally cancelled
 		}
