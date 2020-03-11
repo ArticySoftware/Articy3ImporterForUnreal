@@ -40,11 +40,6 @@
 				"IOS",
 				"Android"
 			]
-		},
-		{
-			"Name": "ArticyGenerated",
-			"Type": "Runtime",
-			"LoadingPhase": "PostDefault"
 		}
 	]
 }

@@ -20,6 +20,8 @@ class CodeGenerator
 {
 public:
 	static bool GenerateCode(UArticyImportData* Data);
+	static void CacheCodeFiles();
+	static bool DoCodeFilesExist();
 	static bool RestoreCachedFiles();
 	static void GenerateAssets(UArticyImportData* Data);
 	static void Recompile(UArticyImportData* Data);

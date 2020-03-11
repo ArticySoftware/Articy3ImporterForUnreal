@@ -33,8 +33,7 @@ TMap<FString, FString> CodeGenerator::CachedFiles;
 
 FString CodeGenerator::GetSourceFolder()
 {
-	FString GeneratedFilesSourceFolder = IPluginManager::Get().FindPlugin(TEXT("ArticyImporter"))->GetBaseDir() / TEXT("Source") / TEXT("ArticyGenerated") / TEXT("ArticyGenerated");
-	return GeneratedFilesSourceFolder;
+	return FPaths::GameSourceDir() / FApp::GetProjectName() / TEXT("ArticyGenerated");;
 }
 
 FString CodeGenerator::GetGeneratedInterfacesFilename(const UArticyImportData* Data)
@@ -85,13 +84,8 @@ bool CodeGenerator::DeleteGeneratedCode(const FString& Filename)
 	return FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*(GetSourceFolder() / Filename));
 }
 
-bool CodeGenerator::GenerateCode(UArticyImportData* Data)
+void CodeGenerator::CacheCodeFiles()
 {
-	if (!Data)
-		return false;
-
-	bool bCodeGenerated = false;
-
 	TArray<FString> FileNames;
 	IFileManager::Get().FindFiles(FileNames, *GetSourceFolder());
 	TArray<FString> FileContents;
@@ -107,6 +101,16 @@ bool CodeGenerator::GenerateCode(UArticyImportData* Data)
 		FFileHelper::LoadFileToString(FileContents[i], *FileNames[i]);
 		CachedFiles.Add(FileNames[i], FileContents[i]);
 	}
+}
+
+bool CodeGenerator::GenerateCode(UArticyImportData* Data)
+{
+	if (!Data)
+		return false;
+
+	bool bCodeGenerated = false;
+
+	CacheCodeFiles();
 
 	//generate all files if ObjectDefs or GVs changed
 	if (Data->GetSettings().DidObjectDefsOrGVsChange())
@@ -132,6 +136,11 @@ bool CodeGenerator::GenerateCode(UArticyImportData* Data)
 	return bCodeGenerated;
 }
 
+bool CodeGenerator::DoCodeFilesExist()
+{
+	return true;
+}
+
 void CodeGenerator::Recompile(UArticyImportData* Data)
 {
 	Compile(Data);
@@ -144,15 +153,32 @@ bool CodeGenerator::DeleteGeneratedAssets()
 	AssetRegistry.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), OutAssets, true, false);
 
 	TArray<UObject*> ExistingAssets;
-	
+	TArray<FAssetData> InvalidAssets;
 	for(FAssetData data : OutAssets)
 	{
-		ExistingAssets.Add(data.GetAsset());
+		if (data.IsValid())
+		{
+			UObject* Asset = data.GetAsset();
+			// if the class is missing (generated code deleted for example), the asset data will be valid but return a nullptr
+			if(!Asset)
+			{
+				InvalidAssets.Add(data);
+				continue;
+			}
+			
+			ExistingAssets.Add(Asset);
+		}
 	}
 
+	bool bInvalidDeletionSuccess = true;
+	if(InvalidAssets.Num() > 0)
+	{
+		bInvalidDeletionSuccess = InvalidAssets.Num() == ObjectTools::DeleteAssets(InvalidAssets, false);
+	}
+	
 	if(ExistingAssets.Num() > 0)
 	{
-		return ObjectTools::ForceDeleteObjects(ExistingAssets, false) > 0;
+		return ObjectTools::ForceDeleteObjects(ExistingAssets, false) > 0 && bInvalidDeletionSuccess;
 	}
 
 	// returns true if there is nothing to delete to not trigger the ensure
@@ -225,7 +251,6 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 	if (!bWaitingForOtherCompile)
 	{
 		HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None /*async*/);
-		//IHotReloadModule::Get().RecompileModule(FName(TEXT("ArticyGenerated")), )
 	}
 }
 
@@ -236,23 +261,24 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	//compiling is done!
 	//check if UArticyBaseGlobalVariables can be found, otherwise something went wrong!
 	const auto ClassName = GetGlobalVarsClassname(Data, true);
-	auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated"), *ClassName);
-	if (!ensure(ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyGlobalVariables::StaticClass())))
-	UE_LOG(LogArticyImporter, Error, TEXT("Could not find generated global variables class after compile!"));
-
+	auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *ClassName);
+	if (!ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyGlobalVariables::StaticClass()))
+	{
+		if (!ensure(ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyGlobalVariables::StaticClass())))
+		UE_LOG(LogArticyImporter, Error, TEXT("Could not find generated global variables class after compile!"));
+	}
 	ensure(DeleteGeneratedAssets());
 
 	//generate the global variables asset
 	GlobalVarsGenerator::GenerateAsset(Data);
 	//generate the database asset
-	auto db = DatabaseGenerator::GenerateAsset(Data);
+	UArticyDatabase* ArticyDatabase = DatabaseGenerator::GenerateAsset(Data);
 	//generate assets for all the imported objects
 	PackagesGenerator::GenerateAssets(Data);
 
-	//register the newly imported packages in the database
-	if (ensureMsgf(db, TEXT("Could not create ArticyDatabase asset!")))
+	if (ensureMsgf(ArticyDatabase != nullptr, TEXT("Could not create ArticyDatabase asset!")))
 	{
-		db->SetLoadedPackages(Data->GetPackagesDirect());
+		ArticyDatabase->SetLoadedPackages(Data->GetPackagesDirect());
 	}
 
 	//gather all articy assets to save them

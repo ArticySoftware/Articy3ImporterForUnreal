@@ -17,6 +17,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnCompilationFinished, UArticyImportData*);
 
 class FToolBarBuilder;
 class FMenuBuilder;
+enum ECompleteImportRequiredReason;
 
 class FArticyImporterModule : public IModuleInterface
 {
@@ -32,7 +33,7 @@ public:
 		return FModuleManager::LoadModuleChecked<FArticyImporterModule>(ModuleName);
 	}
 
-
+	void RegisterDirectoryWatcher();
 	void RegisterConsoleCommands();
 	
 	/* Plugin settings menu */
@@ -42,16 +43,30 @@ public:
 	void QueueImport();
 	bool IsImportQueued();
 
+	void SetCompleteReimportRequired();
+
 	FOnImportFinished OnImportFinished;
 	FOnCompilationFinished OnCompilationFinished;
 
 private:
+	ECompleteImportRequiredReason CheckIsCompleteReimportRequired() const;
+	void OnGeneratedCodeChanged(const TArray<struct FFileChangeData>& FileChanges);
 
 	void UnqueueImport();
 	void TriggerQueuedImport(bool b);
 private:
 
+	bool bIsCompleteReimportRequired = false;
 	bool bIsImportQueued = false;
 	FDelegateHandle QueuedImportHandle;
-	FArticyImporterConsoleCommands* ConsoleCommands;
+	FDelegateHandle GeneratedCodeWatcherHandle;
+	FArticyImporterConsoleCommands* ConsoleCommands = nullptr;
+};
+
+enum ECompleteImportRequiredReason
+{
+	NotRequired,
+	ImportantAssetMissing,
+	FileMissing,
+	ImportDataAssetMissing
 };

@@ -118,5 +118,5 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 void GlobalVarsGenerator::GenerateAsset(const UArticyImportData* Data)
 {
 	const auto className = CodeGenerator::GetGlobalVarsClassname(Data, true);
-	ArticyImporterHelpers::GenerateAsset<UArticyGlobalVariables>(*className, TEXT("ArticyGenerated"), TEXT(""), TEXT(""), RF_ArchetypeObject);
+	ArticyImporterHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName(), TEXT(""), TEXT(""), RF_ArchetypeObject);
 }
