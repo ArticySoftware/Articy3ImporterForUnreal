@@ -29,8 +29,7 @@ public:
 
 	static inline FArticyEditorModule& Get()
 	{
-		static const FName ModuleName = "ArticyImporter";
-		return FModuleManager::LoadModuleChecked<FArticyEditorModule>(ModuleName);
+		return FModuleManager::LoadModuleChecked<FArticyEditorModule>(TEXT("ArticyEditor"));
 	}
 
 	void RegisterDirectoryWatcher();
