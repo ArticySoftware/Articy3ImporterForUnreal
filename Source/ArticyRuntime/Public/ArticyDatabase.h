@@ -316,7 +316,7 @@ public:
 protected:
 
 	/** A list of all packages that were imported from articy:draft. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere)
 	TMap<FString, UArticyPackage*> ImportedPackages;
 
 	UPROPERTY(VisibleAnywhere, transient)
