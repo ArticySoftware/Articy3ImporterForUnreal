@@ -12,6 +12,8 @@ class FArticyPluginSettingsCustomization : public IDetailCustomization
 public:
 	FArticyPluginSettingsCustomization();
 
+	~FArticyPluginSettingsCustomization();
+	
 	static TSharedRef<IDetailCustomization> MakeInstance();
 
 	virtual void CustomizeDetails(IDetailLayoutBuilder& DetailLayout) override;
@@ -20,5 +22,5 @@ public:
 	void RefreshSettingsUI();
 	FDelegateHandle RefreshHandle;
 	
-	IDetailLayoutBuilder* LayoutBuilder;
+	IDetailLayoutBuilder* LayoutBuilder = nullptr;
 };

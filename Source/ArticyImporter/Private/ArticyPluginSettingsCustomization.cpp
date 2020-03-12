@@ -21,6 +21,13 @@ FArticyPluginSettingsCustomization::FArticyPluginSettingsCustomization()
 
 }
 
+FArticyPluginSettingsCustomization::~FArticyPluginSettingsCustomization()
+{
+	// closing the settings window means we no longer want to refresh the UI
+	FArticyImporterModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyImporterModule>("ArticyImporter");
+	ArticyImporterModule.OnImportFinished.Remove(RefreshHandle);
+}
+
 TSharedRef<IDetailCustomization> FArticyPluginSettingsCustomization::MakeInstance()
 {
 	return MakeShareable(new FArticyPluginSettingsCustomization);
