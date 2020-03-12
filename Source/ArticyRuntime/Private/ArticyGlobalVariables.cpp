@@ -6,7 +6,7 @@
 
 #include "ArticyGlobalVariables.h"
 #include "Kismet/KismetStringLibrary.h"
-#include "ArticyRuntime.h"
+#include "ArticyRuntimeModule.h"
 #include "ArticyPluginSettings.h"
 #include "ArticyFlowPlayer.h"
 
