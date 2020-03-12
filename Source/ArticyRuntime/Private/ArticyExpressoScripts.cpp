@@ -5,7 +5,7 @@
 
 
 #include "ArticyExpressoScripts.h"
-#include "ArticyRuntime.h"
+#include "ArticyRuntimeModule.h"
 #include "ArticyFlowPlayer.h"
 
 TMap<FName, ExpressoType::Definition> ExpressoType::Definitions;

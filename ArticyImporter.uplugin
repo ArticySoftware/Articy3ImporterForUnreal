@@ -29,7 +29,7 @@
 			]
 		},
 		{
-			"Name": "ArticyImporter",
+			"Name": "ArticyEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [

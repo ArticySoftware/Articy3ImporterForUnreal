@@ -5,7 +5,7 @@
 
 
 #include "ArticyFlowPlayer.h"
-#include "ArticyRuntime.h"
+#include "ArticyRuntimeModule.h"
 #include "Interfaces/ArticyFlowObject.h"
 #include "Interfaces/ArticyObjectWithSpeaker.h"
 #include "ArticyExpressoScripts.h"
