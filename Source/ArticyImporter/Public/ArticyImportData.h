@@ -308,7 +308,7 @@ public:
 	const TMap<FArticyId, FArticyIdArray> GetParentChildrenCache() const { return ParentChildrenCache; }
 
 	void ResolveCachedVersion();
-	bool HasCachedVersion() const { return CachedData.IsValid(); }
+	bool HasCachedVersion() const { return CachedData != nullptr; }
 	
 protected:
 
@@ -324,7 +324,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	bool bRegenerateAssets = false;
 
-	static TWeakObjectPtr<UArticyImportData> CachedData;
+	/** A pointer to the cached version of 'this'. Used to restore the current import data in case the import process fails. */
+	UPROPERTY(Transient)
+	UArticyImportData* CachedData = nullptr;
 
 private:
 

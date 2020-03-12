@@ -33,7 +33,7 @@ TMap<FString, FString> CodeGenerator::CachedFiles;
 
 FString CodeGenerator::GetSourceFolder()
 {
-	return FPaths::GameSourceDir() / FApp::GetProjectName() / TEXT("ArticyGenerated");;
+	return FPaths::GameSourceDir() / FApp::GetProjectName() / TEXT("ArticyGenerated");
 }
 
 FString CodeGenerator::GetGeneratedInterfacesFilename(const UArticyImportData* Data)
@@ -134,11 +134,6 @@ bool CodeGenerator::GenerateCode(UArticyImportData* Data)
 	}
 
 	return bCodeGenerated;
-}
-
-bool CodeGenerator::DoCodeFilesExist()
-{
-	return true;
 }
 
 void CodeGenerator::Recompile(UArticyImportData* Data)
@@ -351,7 +346,7 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 	}
 	else if(Reason == ECompilationResult::OtherCompilationError)
 	{
-		ReasonForRestoreText = FText::FromString(TEXT("Error in compiled Articy code"));
+		ReasonForRestoreText = FText::FromString(TEXT("Error in compiled articy code"));
 	}
 
 	FText ArticyImportErrorText = FText::FromString(TEXT("Articy import error"));

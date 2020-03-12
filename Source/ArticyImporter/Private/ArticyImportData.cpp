@@ -391,10 +391,9 @@ void UArticyImportData::PostImport()
 
 void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 {
-	if(CachedData.IsValid())
+	if(CachedData)
 	{
 		CachedData->ConditionalBeginDestroy();
-		CachedData.Reset();
 	}
 	
 	CachedData = DuplicateObject<UArticyImportData>(this, this, FName(TEXT("CachedArticyImportData")));
@@ -633,7 +632,7 @@ void UArticyImportData::AddChildToParentCache(const FArticyId Parent, const FArt
 
 void UArticyImportData::ResolveCachedVersion()
 {
-	ensure(CachedData.IsValid());
+	ensure(CachedData != nullptr);
 	
 	this->Settings = CachedData->Settings;
 	this->Project = CachedData->Project;
@@ -650,9 +649,6 @@ void UArticyImportData::ResolveCachedVersion()
 	this->ParentChildrenCache = CachedData->ParentChildrenCache;
 
 	this->CachedData->ConditionalBeginDestroy();
-	this->CachedData.Reset();
 }
-
-TWeakObjectPtr<UArticyImportData> UArticyImportData::CachedData;
 
 #undef LOCTEXT_NAMESPACE
