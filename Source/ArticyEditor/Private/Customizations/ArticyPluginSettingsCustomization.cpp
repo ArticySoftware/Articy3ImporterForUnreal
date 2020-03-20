@@ -40,48 +40,6 @@ void FArticyPluginSettingsCustomization::CustomizeDetails(IDetailLayoutBuilder& 
 	// after importing, refresh the custom UI
 	FArticyEditorModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyEditorModule>("ArticyEditor");
 	RefreshHandle = ArticyImporterModule.OnImportFinished.AddRaw(this, &FArticyPluginSettingsCustomization::RefreshSettingsUI);
-	
-	IDetailCategoryBuilder& ImportActionsCategory = DetailLayout.EditCategory("ImportActions");
-	
-	ImportActionsCategory.AddCustomRow(LOCTEXT("ForceCompleteReimport_Row", ""))
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			[
-				SNew(SButton)
-				.Text(LOCTEXT("ForceCompleteReimport", "Force complete reimport"))
-				.ToolTipText(LOCTEXT("ForceCompleteReimport_Tooltip", "Performs a complete reimport and asset regeneration."))
-				.OnClicked_Lambda([]()->FReply { FArticyEditorFunctionLibrary::ForceCompleteReimport(); return FReply::Handled(); })
-			]
-		];
-
-	ImportActionsCategory.AddCustomRow(LOCTEXT("ReimportChanges_Row", ""))
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			[
-				SNew(SButton)
-				.Text(LOCTEXT("ReimportChanges", "Reimport changes"))
-			.ToolTipText(LOCTEXT("ReimportChanges_Tooltip", "Reimports data from the json file and regenerates assets. Does not reimport GVs and ObjectDefinitions if the hash is still the same."))
-			.OnClicked_Lambda([]()->FReply { FArticyEditorFunctionLibrary::ReimportChanges(); return FReply::Handled(); })
-			]
-		];
-
-	ImportActionsCategory.AddCustomRow(LOCTEXT("RegenerateAssets_Row", ""))
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			[
-				SNew(SButton)
-				.Text(LOCTEXT("RegenerateAssets", "Regenerate Assets"))
-				.ToolTipText(LOCTEXT("RegenerateAssets_Tooltip", "Clears and regenerates all assets, but no code."))
-				.OnClicked_Lambda([]()->FReply { FArticyEditorFunctionLibrary::RegenerateAssets(); return FReply::Handled(); })
-			]
-		];
-
 
 	const UArticyDatabase* OriginalDatabase = UArticyDatabase::GetMutableOriginal();
 	

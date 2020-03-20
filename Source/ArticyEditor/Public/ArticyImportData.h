@@ -279,9 +279,6 @@ public:
 	void GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const override;
 	
 	static void PostImport();
-#if WITH_EDITORONLY_DATA
-	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif
 
 	void ImportFromJson(const TSharedPtr<FJsonObject> RootObject);
 
@@ -311,19 +308,7 @@ public:
 	bool HasCachedVersion() const { return CachedData != nullptr; }
 	
 protected:
-
-	/** Performs a complete reimport and asset regeneration. */
-	UPROPERTY(EditAnywhere)
-	bool bForceCompleteReimport = false;
-
-	/** Reimports data from the json file and regenerates assets. Does not reimport GVs and ObjectDefinitions if the hash is still the same. */
-	UPROPERTY(EditAnywhere)
-	bool bReimportChanges = false;
-
-	/** Clears and regenerates all assets, but no code. */
-	UPROPERTY(EditAnywhere)
-	bool bRegenerateAssets = false;
-
+	
 	/** A pointer to the cached version of 'this'. Used to restore the current import data in case the import process fails. */
 	UPROPERTY(Transient)
 	UArticyImportData* CachedData = nullptr;

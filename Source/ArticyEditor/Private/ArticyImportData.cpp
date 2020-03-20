@@ -453,37 +453,6 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	}
 }
 
-void UArticyImportData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostInitProperties();
-
-	UArticyImportData* UsedImportData = this;
-	
-	if(bForceCompleteReimport || bReimportChanges)
-	{
-		if(bForceCompleteReimport)
-		{
-			Settings.ObjectDefinitionsHash.Reset();
-			Settings.ScriptFragmentsHash.Reset();
-		}
-
-		bForceCompleteReimport = bReimportChanges = bRegenerateAssets = false;
-
-		const auto factory = NewObject<UArticyJSONFactory>();
-		if(factory)
-		{
-			factory->Reimport(this);
-			//GC will destroy factory
-		}
-	}
-	if(bRegenerateAssets)
-	{
-		bRegenerateAssets = false;
-
-		CodeGenerator::GenerateAssets(this);
-	}
-}
-
 TArray<UArticyPackage*> UArticyImportData::GetPackagesDirect()
 {
 	TArray<UArticyPackage*> Packages;
