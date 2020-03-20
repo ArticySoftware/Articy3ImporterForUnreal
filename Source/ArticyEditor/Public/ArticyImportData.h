@@ -310,8 +310,8 @@ public:
 protected:
 	
 	/** A pointer to the cached version of 'this'. Used to restore the current import data in case the import process fails. */
-	UPROPERTY(Transient)
-	UArticyImportData* CachedData = nullptr;
+	UPROPERTY(VisibleAnywhere, Transient)
+	TWeakObjectPtr<UArticyImportData> CachedData = nullptr;
 
 private:
 

@@ -389,7 +389,7 @@ void UArticyImportData::PostImport()
 
 void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 {
-	if(CachedData)
+	if(CachedData.IsValid())
 	{
 		CachedData->ConditionalBeginDestroy();
 	}
