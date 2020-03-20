@@ -35,7 +35,7 @@ namespace ArticyImporterHelpers
 		
 		if (UClass)
 		{
-			auto AssetPackage = FindOrCreatePackage(FileName);
+			auto AssetPackage = ArticyImporterHelpers::FindOrCreatePackage(FileName);
 			EObjectFlags Flags = RF_Public | RF_Standalone;
 
 			// primarily added so we can add RF_ArchetypeObject to the database and GV asset creation.

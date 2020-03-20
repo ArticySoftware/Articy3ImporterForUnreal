@@ -9,7 +9,7 @@
 
 void FArticyEditorCommands::RegisterCommands()
 {
-	UI_COMMAND(OpenPluginWindow, "ArticyImporter", "Bring up ArticyImporter window", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(OpenPluginWindow, "Articy Importer", "Bring up ArticyImporter window", EUserInterfaceActionType::Button, FInputChord());
 }
 
 #undef LOCTEXT_NAMESPACE
