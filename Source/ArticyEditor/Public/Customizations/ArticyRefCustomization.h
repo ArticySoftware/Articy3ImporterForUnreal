@@ -8,7 +8,7 @@
 #include "CoreMinimal.h"
 #include <IPropertyTypeCustomization.h>
 #include "ArticyRef.h"
-#include "SArticyRefProperty.h"
+#include "Slate/SArticyRefProperty.h"
 #include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
 #include "ArticyObject.h"

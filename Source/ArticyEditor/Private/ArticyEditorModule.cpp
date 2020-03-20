@@ -6,7 +6,7 @@
 
 #include "ArticyEditorModule.h"
 #include "ArticyPluginSettings.h"
-#include "ArticyPluginSettingsCustomization.h"
+#include "Customizations/ArticyPluginSettingsCustomization.h"
 #include "Developer/Settings/Public/ISettingsModule.h"
 #include "Developer/Settings/Public/ISettingsSection.h"
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
@@ -14,7 +14,7 @@
 #include <Widgets/SWindow.h>
 #include "ArticyEditorFunctionLibrary.h"
 #include "Editor.h"
-#include "Slate/ArticyRefCustomization.h"
+#include "Customizations/ArticyRefCustomization.h"
 #include "ArticyEditorStyle.h"
 #include "CodeGeneration/CodeGenerator.h"
 #include "DirectoryWatcherModule.h"

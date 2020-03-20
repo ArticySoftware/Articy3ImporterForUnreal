@@ -4,7 +4,7 @@
 //
 
 
-#include "ArticyPluginSettingsCustomization.h"
+#include "Customizations/ArticyPluginSettingsCustomization.h"
 
 #include "ArticyEditorFunctionLibrary.h"
 #include "DetailLayoutBuilder.h"

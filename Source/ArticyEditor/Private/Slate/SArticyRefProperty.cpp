@@ -19,7 +19,7 @@
 #include "Editor.h"
 #include "Widgets/Input/SButton.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
-#include "Slate/ArticyRefCustomization.h"
+#include "Customizations/ArticyRefCustomization.h"
 
 #define LOCTEXT_NAMESPACE "ArticyRefProperty"
 

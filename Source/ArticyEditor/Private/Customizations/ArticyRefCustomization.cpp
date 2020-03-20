@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
 
-#include "Slate/ArticyRefCustomization.h"
+#include "Customizations/ArticyRefCustomization.h"
 #include "IDetailChildrenBuilder.h"
 #include "DetailWidgetRow.h"
 #include "Widgets/SWidget.h"
