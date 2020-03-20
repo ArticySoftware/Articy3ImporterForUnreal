@@ -22,7 +22,7 @@ const FSlateBrush* UserInterfaceHelperFunctions::GetArticyTypeImage(const UArtic
 {
 	if(!ArticyObject)
 	{
-		return FArticyEditorStyle::Get().GetBrush(FName(*FString("ArticyImporter.ArticyApplication.64")));
+		return FArticyEditorStyle::Get().GetBrush(FName(TEXT("ArticyImporter.ArticyImporter.64")));
 	}
 
 	FString SizeString = "";
@@ -120,7 +120,7 @@ const FSlateBrush* UserInterfaceHelperFunctions::GetArticyTypeImage(const UArtic
 		return FArticyEditorStyle::Get().GetBrush(FName(*FString("ArticyImporter.Type.Spot.").Append(SizeString)));
 	}
 
-	return FArticyEditorStyle::Get().GetBrush(FName(*FString("ArticyImporter.ArticyApplication.64")));
+	return FArticyEditorStyle::Get().GetBrush(FName(*FString("ArticyImporter.ArticyImporter.64")));
 }
 
 UTexture2D* UserInterfaceHelperFunctions::GetDisplayImage(const UArticyObject* ArticyObject)
