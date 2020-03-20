@@ -68,9 +68,32 @@ TSharedRef< FSlateStyleSet > FArticyEditorStyle::Create()
 	Style->Set("ArticyImporter.ArticyImporter.40", new IMAGE_BRUSH(TEXT("ArticyImporter40"), Icon40x40));
 	Style->Set("ArticyImporter.ArticyImporter.64", new IMAGE_BRUSH(TEXT("ArticyImporter64"), Icon64x64));
 
-	Style->Set("ArticyImporter.AssetPicker.TileBackground.96", new IMAGE_BRUSH(TEXT("128/content_tile_fill"), Icon96x96));
-	Style->Set("ArticyImporter.AssetPicker.TileBorder.16", new BOX_BRUSH(TEXT("Border"), 4.f/16.f));
+	Style->Set("ArticyImporter.Window.ImporterLogo", new IMAGE_BRUSH(TEXT("ArticyWindow/Logo_ArticyDraftImporter_TopMiddle"), FVector2D(404, 125)));
+	Style->Set("ArticyImporter.Window.ArticyLogo", new IMAGE_BRUSH(TEXT("ArticyWindow/Logo_Articy_BottomRightCropped"), FVector2D(170, 57)));
 
+
+	FButtonStyle FullReimportButtonStyle = FButtonStyle()
+		.SetNormal(IMAGE_BRUSH("ArticyWindow/Button_FullReimport", FVector2D(333, 101)))
+		.SetHovered(IMAGE_BRUSH("ArticyWindow/Button_FullReimport_Hover", FVector2D(333, 101)))
+		.SetPressed(IMAGE_BRUSH("ArticyWindow/Button_FullReimport_Press", FVector2D(333, 101)));
+
+	FButtonStyle ImportChangesButtonStyle = FButtonStyle()
+		.SetNormal(IMAGE_BRUSH("ArticyWindow/Button_ImportChanges", FVector2D(333, 101)))
+		.SetHovered(IMAGE_BRUSH("ArticyWindow/Button_ImportChanges_Hover", FVector2D(333, 101)))
+		.SetPressed(IMAGE_BRUSH("ArticyWindow/Button_ImportChanges_Press", FVector2D(333, 101)));
+
+	FButtonStyle RegenerateAssetsButtonStyle = FButtonStyle()
+		.SetNormal(IMAGE_BRUSH("ArticyWindow/Button_RegenerateAssets", FVector2D(333, 101)))
+		.SetHovered(IMAGE_BRUSH("ArticyWindow/Button_RegenerateAssets_Hover", FVector2D(333, 101)))
+		.SetPressed(IMAGE_BRUSH("ArticyWindow/Button_RegenerateAssets_Press", FVector2D(333, 101)));
+	
+	Style->Set("ArticyImporter.Button.FullReimport", FullReimportButtonStyle);
+	Style->Set("ArticyImporter.Button.ImportChanges", ImportChangesButtonStyle);
+	Style->Set("ArticyImporter.Button.RegenerateAssets", RegenerateAssetsButtonStyle);
+
+	Style->Set("ArticyImporter.AssetPicker.TileBackground.96", new IMAGE_BRUSH(TEXT("128/content_tile_fill"), Icon96x96));
+	Style->Set("ArticyImporter.AssetPicker.TileBorder.16", new BOX_BRUSH(TEXT("Border"), 4.f / 16.f));
+	
 	Style->Set("ArticyImporter.Type.DialogueFragment.16", new IMAGE_BRUSH(TEXT("128/dialoguefragment"), Icon16x16));
 	Style->Set("ArticyImporter.Type.Dialogue.16", new IMAGE_BRUSH(TEXT("128/dialogue2"), Icon16x16));
 	Style->Set("ArticyImporter.Type.Entity.16", new IMAGE_BRUSH(TEXT("128/entity"), Icon16x16));

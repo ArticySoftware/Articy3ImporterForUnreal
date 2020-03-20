@@ -240,70 +240,87 @@ void FArticyEditorModule::AddToolbarExtension(FToolBarBuilder& Builder)
 
 TSharedRef<SDockTab> FArticyEditorModule::OnSpawnArticyTab(const FSpawnTabArgs& SpawnTabArgs) const
 {
+	float ButtonWidth = 333.f / 1.3f;
+	float ButtonHeight = 101.f / 1.3f;
 	return SNew(SDockTab)
 	.TabRole(ETabRole::NomadTab)
 	[
 		SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.VAlign(VAlign_Fill)
-			.HAlign(HAlign_Fill)
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.VAlign(VAlign_Bottom)
+			.HAlign(HAlign_Center)
+			.Padding(10.f)
 			[
-				SNew(SBox)
-				.VAlign(VAlign_Center)
+				SNew(SImage)
+				.Image(FArticyEditorStyle::Get().GetBrush("ArticyImporter.Window.ImporterLogo"))
+			]
+			+ SVerticalBox::Slot()
+			.VAlign(VAlign_Top)
+			.HAlign(HAlign_Center)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
 				.HAlign(HAlign_Center)
+				.VAlign(VAlign_Center)
 				[
-					SNew(SVerticalBox)
-					+ SVerticalBox::Slot()
-					//.AutoHeight()
-					.HAlign(HAlign_Center)
-					.VAlign(VAlign_Center)
+					SNew(SBox)
+					.WidthOverride(ButtonWidth)
+					.HeightOverride(ButtonHeight)
 					[
 						SNew(SButton)
-						.Text(LOCTEXT("ForceCompleteReimport", "Complete reimport"))
+						.ButtonStyle(FArticyEditorStyle::Get(), "ArticyImporter.Button.FullReimport")
 						.ToolTipText(LOCTEXT("ForceCompleteReimportTooltip", "Forces a complete reimport of articy draft data including code and asset generation."))
 						.OnClicked_Lambda([]() -> FReply { FArticyEditorFunctionLibrary::ForceCompleteReimport(); return FReply::Handled(); })
 					]
-					+ SVerticalBox::Slot()
-					//.AutoHeight()
-					.HAlign(HAlign_Center)
-					.VAlign(VAlign_Center)
+				]
+				+ SHorizontalBox::Slot()
+				.HAlign(HAlign_Center)
+				.VAlign(VAlign_Center)
+				[
+					SNew(SBox)
+					.WidthOverride(ButtonWidth)
+					.HeightOverride(ButtonHeight)
 					[
 						SNew(SButton)
-						.Text(LOCTEXT("ImportChanges", "Import Changes"))
+						.ButtonStyle(FArticyEditorStyle::Get(), "ArticyImporter.Button.ImportChanges")
 						.ToolTipText(LOCTEXT("ImportChangesTooltip", "Imports only the changes from last import. This is usually quicker than a complete reimport."))
 						.OnClicked_Lambda([]() -> FReply { FArticyEditorFunctionLibrary::ReimportChanges(); return FReply::Handled(); })
 					]
-					+ SVerticalBox::Slot()
-					//.AutoHeight()
-					.HAlign(HAlign_Center)
-					.VAlign(VAlign_Center)
+				]
+				+ SHorizontalBox::Slot()
+				.HAlign(HAlign_Center)
+				.VAlign(VAlign_Center)
+				[
+					SNew(SBox)
+					.WidthOverride(ButtonWidth)
+					.HeightOverride(ButtonHeight)
 					[
 						SNew(SButton)
-						.Text(LOCTEXT("RegenerateAssets", "Regenerate assets"))
+						.ButtonStyle(FArticyEditorStyle::Get(), "ArticyImporter.Button.RegenerateAssets")
 						.ToolTipText(LOCTEXT("RegenerateAssetsTooltip", "Regenerates all articy assets based on the currently generated code and the import data asset."))
 						.OnClicked_Lambda([]() -> FReply { FArticyEditorFunctionLibrary::RegenerateAssets(); return FReply::Handled(); })
 					]
 				]
 			]
 		]
-		+ SOverlay::Slot()
+		/*+ SOverlay::Slot()
 		.VAlign(VAlign_Bottom)
 		.HAlign(HAlign_Left)
 		.Padding(5.f)
 		[
 			SNew(SImage)
 			.Image(FArticyEditorStyle::Get().GetBrush("ArticyImporter.ArticySoftware.64"))
-		]
+		]*/
 		+ SOverlay::Slot()
 		.VAlign(VAlign_Bottom)
 		.HAlign(HAlign_Right)
 		.Padding(5.f)
 		[
 			SNew(SImage)
-			.Image(FArticyEditorStyle::Get().GetBrush("ArticyImporter.ArticyDraftLogoText"))
+			.Image(FArticyEditorStyle::Get().GetBrush("ArticyImporter.Window.ArticyLogo"))
 		]
 		// #TODO Additional widgets/controls go here
 		/*+ SHorizontalBox::Slot()
