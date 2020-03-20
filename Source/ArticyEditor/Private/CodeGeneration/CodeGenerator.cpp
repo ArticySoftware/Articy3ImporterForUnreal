@@ -145,19 +145,20 @@ bool CodeGenerator::DeleteGeneratedAssets()
 {
 	FAssetRegistryModule& AssetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> OutAssets;
-	AssetRegistry.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), OutAssets, true, false);
-
+	//AssetRegistry.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), OutAssets, true, false);
+	AssetRegistry.Get().GetAssetsByClass(UArticyObject::StaticClass()->GetFName(), OutAssets, true);
+	
 	TArray<UObject*> ExistingAssets;
 	TArray<FAssetData> InvalidAssets;
-	for(FAssetData data : OutAssets)
+	for(FAssetData Data : OutAssets)
 	{
-		if (data.IsValid())
+		if (Data.IsValid())
 		{
-			UObject* Asset = data.GetAsset();
+			UObject* Asset = Data.GetAsset();
 			// if the class is missing (generated code deleted for example), the asset data will be valid but return a nullptr
 			if(!Asset)
 			{
-				InvalidAssets.Add(data);
+				InvalidAssets.Add(Data);
 				continue;
 			}
 			
