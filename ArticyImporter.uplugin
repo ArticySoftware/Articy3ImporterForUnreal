@@ -18,7 +18,7 @@
 		{
 			"Name": "ArticyRuntime",
 			"Type": "Runtime",
-			"LoadingPhase": "PreDefault",
+			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
 				"Win32",
 				"Win64",
