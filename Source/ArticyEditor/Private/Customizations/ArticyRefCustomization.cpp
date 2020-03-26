@@ -140,7 +140,7 @@ void FArticyRefCustomization::OnClassPicked(UClass* InChosenClass)
 	ClassRestrictionButton->SetIsOpen(false, false);
 }
 
-TSharedRef<SWidget> FArticyRefCustomization::CreateClassPicker() const
+TSharedRef<SWidget> FArticyRefCustomization::CreateClassPicker()
 {
 	FClassViewerInitializationOptions ClassViewerConfig;
 	ClassViewerConfig.DisplayMode = EClassViewerDisplayMode::TreeView;
