@@ -46,8 +46,6 @@ public:
 	void QueueImport();
 	bool IsImportQueued();
 
-	void SetCompleteReimportRequired();
-
 	FOnImportFinished OnImportFinished;
 	FOnCompilationFinished OnCompilationFinished;
 
@@ -61,13 +59,12 @@ private:
 	
 	void AddToolbarExtension(FToolBarBuilder& Builder);
 	TSharedRef<class SDockTab> OnSpawnArticyTab(const class FSpawnTabArgs& SpawnTabArgs) const;
+	
 private:
-	bool bIsCompleteReimportRequired = false;
 	bool bIsImportQueued = false;
 	FDelegateHandle QueuedImportHandle;
 	FDelegateHandle GeneratedCodeWatcherHandle;
 	FArticyEditorConsoleCommands* ConsoleCommands = nullptr;
-
 	TSharedPtr<FUICommandList> PluginCommands;
 };
 

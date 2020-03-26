@@ -66,11 +66,6 @@ void FArticyEditorModule::RegisterDirectoryWatcher()
 	DirectoryWatcherModule.Get()->RegisterDirectoryChangedCallback_Handle(CodeGenerator::GetSourceFolder(), IDirectoryWatcher::FDirectoryChanged::CreateRaw(this, &FArticyEditorModule::OnGeneratedCodeChanged), GeneratedCodeWatcherHandle);
 }
 
-void FArticyEditorModule::SetCompleteReimportRequired()
-{
-	bIsCompleteReimportRequired = true;
-}
-
 void FArticyEditorModule::RegisterConsoleCommands()
 {
 	ConsoleCommands = new FArticyEditorConsoleCommands(*this);
