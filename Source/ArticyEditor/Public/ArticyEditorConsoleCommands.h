@@ -35,7 +35,7 @@ public:
 	void Reimport()
 	{
 		UArticyImportData* ImportData = nullptr;
-		FArticyEditorFunctionLibrary::EnsureImportFile(&ImportData);
+		FArticyEditorFunctionLibrary::EnsureImportDataAsset(&ImportData);
 		
 		if(ImportData)
 		{

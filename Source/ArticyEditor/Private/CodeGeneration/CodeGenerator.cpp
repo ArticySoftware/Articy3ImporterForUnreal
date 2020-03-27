@@ -226,8 +226,8 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 			
 			if (bErrorInGeneratedCode)
 			{
-				const bool bCanGenerateAssets = RestorePreviousImport(Data, true, Type);
-				if(bCanGenerateAssets)
+				const bool bCanContinue = RestorePreviousImport(Data, true, Type);
+				if(bCanContinue)
 				{
 					OnCompiled(Data);
 				}
@@ -236,8 +236,8 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 		// in case the compilation was neither successful nor had compile errors, revert just to be safe
 		else
 		{
-			const bool bCanGenerateAssets = RestorePreviousImport(Data, true, Type);
-			if (bCanGenerateAssets)
+			const bool bCanContinue = RestorePreviousImport(Data, true, Type);
+			if (bCanContinue)
 			{
 				OnCompiled(Data);
 			}
@@ -330,7 +330,19 @@ bool CodeGenerator::ParseForError(const FString& Log)
 
 bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& bNotifyUser, ECompilationResult::Type Reason)
 {
-	ensure(Data && Data->HasCachedVersion());
+	ensure(Data);
+
+	const FText ArticyImportErrorText = FText::FromString(TEXT("Articy import error"));
+	FText ReasonForRestoreText = FText::FromString(ECompilationResult::ToString(Reason));
+
+	if(!Data->HasCachedVersion())
+	{
+		const FText CacheNotAvailableText = FText::Format(LOCTEXT("NoCacheAvailable", "Aborting import process. Reason: {0}. No cache available to restore."), ReasonForRestoreText);
+		OpenMsgDlgInt(EAppMsgType::Ok, CacheNotAvailableText, ArticyImportErrorText);
+		ObjectTools::DeleteAssets({ Data }, false);
+		
+		return false;
+	}
 	
 	// transfer the cached data into the current one
 	Data->ResolveCachedVersion();
@@ -338,7 +350,6 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 	// attempt to restore all generated files
 	const bool bFilesRestored = RestoreCachedFiles();
 
-	FText ReasonForRestoreText = FText::FromString(ECompilationResult::ToString(Reason));
 
 	// Reason is "-1" for cancelled for some reason
 	if(Reason == -1)
@@ -350,7 +361,6 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 		ReasonForRestoreText = FText::FromString(TEXT("Error in compiled articy code"));
 	}
 
-	FText ArticyImportErrorText = FText::FromString(TEXT("Articy import error"));
 	// if we succeeded, tell the user and call OnCompiled - which will then create the assets
 	if (bFilesRestored)
 	{

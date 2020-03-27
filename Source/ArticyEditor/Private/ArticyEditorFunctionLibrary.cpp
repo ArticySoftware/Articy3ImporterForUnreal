@@ -8,11 +8,17 @@
 #include "ArticyEditorModule.h"
 #include "ArticyJSONFactory.h"
 #include "CodeGeneration/CodeGenerator.h"
+#include "ObjectTools.h"
+#include "FileHelpers.h"
 
 void FArticyEditorFunctionLibrary::ForceCompleteReimport(UArticyImportData* ImportData)
 {
-	if (!EnsureImportFile(&ImportData))
+	const EImportDataEnsureResult Result = EnsureImportDataAsset(&ImportData);
+	// if we generated the import data asset we will cause a full reimport, so stop here
+	if (Result == EImportDataEnsureResult::Generation || Result == EImportDataEnsureResult::Failure)
+	{
 		return;
+	}
 
 	ImportData->Settings.ObjectDefinitionsHash.Reset();
 	ImportData->Settings.ScriptFragmentsHash.Reset();
@@ -21,8 +27,12 @@ void FArticyEditorFunctionLibrary::ForceCompleteReimport(UArticyImportData* Impo
 
 void FArticyEditorFunctionLibrary::ReimportChanges(UArticyImportData* ImportData)
 {
-	if (!EnsureImportFile(&ImportData))
+	const EImportDataEnsureResult Result = EnsureImportDataAsset(&ImportData);
+	// if we generated the import data asset we will cause a full reimport, so stop here
+	if (Result == EImportDataEnsureResult::Generation || Result == EImportDataEnsureResult::Failure)
+	{
 		return;
+	}
 
 	const auto Factory = NewObject<UArticyJSONFactory>();
 	if (Factory)
@@ -34,15 +44,25 @@ void FArticyEditorFunctionLibrary::ReimportChanges(UArticyImportData* ImportData
 
 void FArticyEditorFunctionLibrary::RegenerateAssets(UArticyImportData* ImportData)
 {
-	if (!EnsureImportFile(&ImportData))
+	const EImportDataEnsureResult Result = EnsureImportDataAsset(&ImportData);
+	// if we generated the import data asset we will cause a full reimport, so stop here
+	if (Result == EImportDataEnsureResult::Generation || Result == EImportDataEnsureResult::Failure)
+	{
 		return;
+	}
 
 	CodeGenerator::GenerateAssets(ImportData);
 }
 
-bool FArticyEditorFunctionLibrary::EnsureImportFile(UArticyImportData** ImportData)
+EImportDataEnsureResult FArticyEditorFunctionLibrary::EnsureImportDataAsset(UArticyImportData** ImportData)
 {
-	if (!*ImportData)
+	EImportDataEnsureResult Result;
+
+	if(*ImportData)
+	{
+		Result = Success;
+	}
+	else
 	{
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 		TArray<FAssetData> AssetData;
@@ -50,16 +70,64 @@ bool FArticyEditorFunctionLibrary::EnsureImportFile(UArticyImportData** ImportDa
 
 		if (!AssetData.Num())
 		{
-			UE_LOG(LogArticyEditor, Error, TEXT("Could not found an import file."));
+			UE_LOG(LogArticyEditor, Warning, TEXT("Could not find articy import data asset. Attempting to create from .articyue4 export file"));
+			*ImportData = GenerateImportDataAsset();
+			*ImportData ? Result = Generation : Result = Failure;
 		}
 		else
 		{
 			*ImportData = Cast<UArticyImportData>(AssetData[0].GetAsset());
-
+			Result = AssetRegistry;
+			
 			if (AssetData.Num() > 1)
 				UE_LOG(LogArticyEditor, Error, TEXT("Found more than one import file. This is not supported by the plugin. Using the first found file for now: %s"), *AssetData[0].ObjectPath.ToString());
 		}
 	}
 
-	return *ImportData != nullptr;
+	return Result;
+}
+
+UArticyImportData* FArticyEditorFunctionLibrary::GenerateImportDataAsset()
+{
+	UArticyImportData* ImportData = nullptr;
+	
+	UArticyJSONFactory* Factory = NewObject<UArticyJSONFactory>();
+
+	TArray<FString> ArticyImportFiles;
+	IFileManager::Get().FindFiles(ArticyImportFiles, *FPaths::ProjectContentDir(), TEXT("articyue4"));
+
+	if (ArticyImportFiles.Num() == 0)
+	{
+		UE_LOG(LogArticyEditor, Error, TEXT("Failed creation of import data asset. No .articyue4 file found in the project's content folder. Aborting process."));
+		return nullptr;
+	}
+	
+	const FString FileName = FPaths::GetBaseFilename(ArticyImportFiles[0], false);
+
+	const FString PackagePath = TEXT("/Game/") + FileName;
+	UPackage* Outer = CreatePackage(nullptr, *PackagePath);
+	Outer->FullyLoad();
+
+	const FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir(), ArticyImportFiles[0]);
+	bool bRequired = false;
+	UObject* ImportDataAsset = Factory->ImportObject(UArticyImportData::StaticClass(), Outer, FName(*FileName), EObjectFlags::RF_Standalone | EObjectFlags::RF_Public, FullPath, nullptr, bRequired);
+
+	if (ImportDataAsset)
+	{
+		ImportData = Cast<UArticyImportData>(ImportDataAsset);
+
+		// automatically save the import data asset
+		TArray<UPackage*> FailedToSavePackages;
+		FEditorFileUtils::PromptForCheckoutAndSave({ Outer }, false, false, &FailedToSavePackages);
+
+		UE_LOG(LogArticyEditor, Warning, TEXT("Successfully created import data asset. Continuing process."));
+	}
+	else
+	{
+		// delete the package if we couldn't create the import asset
+		ObjectTools::ForceDeleteObjects({ Outer });
+		UE_LOG(LogArticyEditor, Error, TEXT("Failed creation import data asset. Aborting process."));
+	}
+	
+	return ImportData;
 }

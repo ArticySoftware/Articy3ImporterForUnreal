@@ -262,6 +262,35 @@ inline uint32 GetTypeHash(const FArticyExpressoFragment& A)
 	return GetTypeHash(A.OriginalFragment) ^ GetTypeHash(A.bIsInstruction);
 }
 
+USTRUCT()
+struct ARTICYEDITOR_API FArticyImportDataStruct
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(VisibleAnywhere, Category = "ImportData")
+		FADISettings Settings;
+	UPROPERTY(VisibleAnywhere, Category = "ImportData")
+		FArticyProjectDef Project;
+	UPROPERTY(VisibleAnywhere, Category = "ImportData")
+		FArticyGVInfo GlobalVariables;
+	UPROPERTY(VisibleAnywhere, Category = "ImportData")
+		FArticyObjectDefinitions ObjectDefinitions;
+	UPROPERTY(VisibleAnywhere, Category = "ImportData")
+		FArticyPackageDefs PackageDefs;
+	UPROPERTY(VisibleAnywhere, Category = "ImportData")
+		FAIDUserMethods UserMethods;
+	UPROPERTY(VisibleAnywhere, Category = "ImportData")
+		FADIHierarchy Hierarchy;
+
+	UPROPERTY(VisibleAnywhere, Category = "ImportData")
+		TSet<FArticyExpressoFragment> ScriptFragments;
+
+	UPROPERTY(VisibleAnywhere, Category = "Imported")
+		TArray<TSoftObjectPtr<UArticyPackage>> ImportedPackages;
+
+	UPROPERTY(VisibleAnywhere, Category = "Imported")
+		TMap<FArticyId, FArticyIdArray> ParentChildrenCache;
+};
 /**
  * 
  */
@@ -278,7 +307,7 @@ public:
 
 	void GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const override;
 	
-	static void PostImport();
+	void PostImport();
 
 	void ImportFromJson(const TSharedPtr<FJsonObject> RootObject);
 
@@ -292,7 +321,6 @@ public:
 
 	TArray<TSoftObjectPtr<UArticyPackage>>& GetPackages() { return ImportedPackages; }
 	TArray<UArticyPackage*> GetPackagesDirect();
-
 	const TArray<TSoftObjectPtr<UArticyPackage>>& GetPackages() const { return ImportedPackages; }
 
 	const TArray<FAIDScriptMethod>& GetUserMethods() const { return UserMethods.ScriptMethods; }
@@ -304,14 +332,20 @@ public:
 	void AddChildToParentCache(FArticyId Parent, FArticyId Child);
 	const TMap<FArticyId, FArticyIdArray> GetParentChildrenCache() const { return ParentChildrenCache; }
 
+	void BuildCachedVersion();
 	void ResolveCachedVersion();
-	bool HasCachedVersion() const { return CachedData != nullptr; }
+	bool HasCachedVersion() const { return bHasCachedVersion; }
+
+	void SetInitialImportComplete() { bHasCachedVersion = true; }
 	
 protected:
-	
-	/** A pointer to the cached version of 'this'. Used to restore the current import data in case the import process fails. */
-	UPROPERTY(VisibleAnywhere, Transient)
-	TWeakObjectPtr<UArticyImportData> CachedData = nullptr;
+
+	UPROPERTY(VisibleAnywhere)
+	FArticyImportDataStruct CachedData;
+
+	// indicates whether we've had at least one working import. Used to determine if we want to re
+	UPROPERTY()
+	bool bHasCachedVersion = false;
 
 private:
 

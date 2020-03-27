@@ -155,7 +155,7 @@ void FArticyEditorModule::OpenArticyWindow()
 EImportStatusValidity FArticyEditorModule::CheckImportStatusValidity() const
 {
 	UArticyImportData* ImportData = nullptr;
-	FArticyEditorFunctionLibrary::EnsureImportFile(&ImportData);
+	FArticyEditorFunctionLibrary::EnsureImportDataAsset(&ImportData);
 
 	if (!ImportData)
 	{

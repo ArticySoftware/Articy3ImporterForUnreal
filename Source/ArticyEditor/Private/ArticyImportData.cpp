@@ -388,14 +388,7 @@ void UArticyImportData::PostImport()
 }
 
 void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
-{
-	if(CachedData.IsValid())
-	{
-		CachedData->ConditionalBeginDestroy();
-	}
-	
-	CachedData = DuplicateObject<UArticyImportData>(this, this, FName(TEXT("CachedArticyImportData")));
-	
+{	
 	// import the main sections
 	Settings.ImportFromJson(RootObject->GetObjectField(JSON_SECTION_SETTINGS));
 	Project.ImportFromJson(RootObject->GetObjectField(JSON_SECTION_PROJECT));
@@ -439,6 +432,7 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 			PostImportHandle = FArticyEditorModule::Get().OnCompilationFinished.AddLambda([this](UArticyImportData* Data)
 			{
 				CodeGenerator::GenerateAssets(Data);
+				BuildCachedVersion();
 				UArticyImportData::PostImport();
 			});
 
@@ -449,6 +443,7 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	else
 	{
 		CodeGenerator::GenerateAssets(this);
+		BuildCachedVersion();
 		UArticyImportData::PostImport();
 	}
 }
@@ -597,25 +592,36 @@ void UArticyImportData::AddChildToParentCache(const FArticyId Parent, const FArt
 	childrenRef.Values.AddUnique(Child);
 }
 
+void UArticyImportData::BuildCachedVersion()
+{
+	CachedData.Settings = this->Settings;
+	CachedData.Project = this->Project;
+	CachedData.GlobalVariables = this->GlobalVariables;
+	CachedData.ObjectDefinitions = this->ObjectDefinitions;
+	CachedData.PackageDefs = this->PackageDefs;
+	CachedData.UserMethods = this->UserMethods;
+	CachedData.Hierarchy = this->Hierarchy;
+	CachedData.ScriptFragments = this->ScriptFragments;
+	CachedData.ImportedPackages = this->ImportedPackages;
+	CachedData.ParentChildrenCache = this->ParentChildrenCache;
+}
+
 void UArticyImportData::ResolveCachedVersion()
 {
-	ensure(CachedData != nullptr);
+	ensure(HasCachedVersion());
 	
-	this->Settings = CachedData->Settings;
-	this->Project = CachedData->Project;
-	this->GlobalVariables = CachedData->GlobalVariables;
-	this->ObjectDefinitions = CachedData->ObjectDefinitions;
-	this->PackageDefs = CachedData->PackageDefs;
-	this->UserMethods = CachedData->UserMethods;
-	this->Hierarchy = CachedData->Hierarchy;
-	
-	this->ScriptFragments = CachedData->ScriptFragments;
-
-	this->ImportedPackages = CachedData->ImportedPackages;
-
-	this->ParentChildrenCache = CachedData->ParentChildrenCache;
-
-	this->CachedData->ConditionalBeginDestroy();
+	this->Settings = CachedData.Settings;
+	this->Project = CachedData.Project;
+	this->GlobalVariables = CachedData.GlobalVariables;
+	this->ObjectDefinitions = CachedData.ObjectDefinitions;
+	this->PackageDefs = CachedData.PackageDefs;
+	this->UserMethods = CachedData.UserMethods;
+	this->Hierarchy = CachedData.Hierarchy;
+	this->ScriptFragments = CachedData.ScriptFragments;
+	this->ImportedPackages = CachedData.ImportedPackages;
+	this->ParentChildrenCache = CachedData.ParentChildrenCache;
+	this->CachedData = FArticyImportDataStruct();
+	this->bHasCachedVersion = false;
 }
 
 #undef LOCTEXT_NAMESPACE
