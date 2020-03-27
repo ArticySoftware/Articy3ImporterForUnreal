@@ -34,7 +34,8 @@ void FArticyEditorModule::StartupModule()
 	RegisterPluginSettings();
 	RegisterPluginCommands();
 	RegisterConsoleCommands();
-	RegisterDirectoryWatcher();
+	// directory watcher has to be changed or removed as the results aren't quite deterministic
+	//RegisterDirectoryWatcher();
 	RegisterArticyWindowTab();
 	RegisterArticyToolbar();
 
