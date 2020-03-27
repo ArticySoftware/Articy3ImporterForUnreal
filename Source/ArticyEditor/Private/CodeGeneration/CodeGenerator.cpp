@@ -145,8 +145,7 @@ bool CodeGenerator::DeleteGeneratedAssets()
 {
 	FAssetRegistryModule& AssetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> OutAssets;
-	//AssetRegistry.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), OutAssets, true, false);
-	AssetRegistry.Get().GetAssetsByClass(UArticyObject::StaticClass()->GetFName(), OutAssets, true);
+	AssetRegistry.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), OutAssets, true, false);
 	
 	TArray<UObject*> ExistingAssets;
 	TArray<FAssetData> InvalidAssets;
