@@ -336,7 +336,7 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 
 	if(!Data->HasCachedVersion())
 	{
-		const FText CacheNotAvailableText = FText::Format(LOCTEXT("NoCacheAvailable", "Aborting import process. Reason: {0}. No cache available to restore."), ReasonForRestoreText);
+		const FText CacheNotAvailableText = FText::Format(LOCTEXT("NoCacheAvailable", "Aborting import process. No cache available to restore. Deleting import asset but leaving generated code intact. Please delete manually in Source/ArticyGenerated if necessary and rebuild. Reason: {0}."), ReasonForRestoreText);
 		OpenMsgDlgInt(EAppMsgType::Ok, CacheNotAvailableText, ArticyImportErrorText);
 		ObjectTools::DeleteAssets({ Data }, false);
 		
