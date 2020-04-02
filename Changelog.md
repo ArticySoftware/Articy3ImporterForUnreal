@@ -1,3 +1,31 @@
+## Unreal Importer 1.0.0 Changelog
+
+- Disclaimer: Please perform a 'full reimport' after upgrading to this version of the importer by opening up the new Articy Importer window in the level toolbar and clicking 'Force complete reimport'
+In case error messages pop up, please close Unreal, recompile the project inside Visual Studio and start up the engine again.
+
+- Articy Importer window added
+    - This window hosts the main controls of the importer. The button to open the window can be found in the level toolbar. The window will be expanded in the future with more options and functionality. As a consequence, the import options inside the plugin settings and the import data assets have been removed. Currently it enables the user to perform three import actions:
+        - Force complete reimport
+        - Reimport changes
+        - Regenerate assets
+
+- Import Cache & Restoration added
+    - The importer will now cache the last valid import state and will try to restore that state when a new import fails to compile.
+
+- Blueprint:
+    - Changed: ImportedPackages map of the Import Data Asset is no longer blueprint readable
+
+- C++:
+    - Changed: ArticyImporter module renamed to ArticyEditor
+    - Changed: The Articy Asset Picker is now exported to other modules, meaning that it can be accessed for custom purposes without modifying plugin code
+
+- General:
+    - Stability improved
+    - Added: Editor resources to better represent articy:draft related functionality
+    - Changed: PIE import queue now uses 'Reimport changes' instead of 'Complete reimport'
+    - Changed: Folder structure of the plugin. Code depending on paths, such as includes, may need to adapt to the new structure.
+    - Fix: Importing after closing the plugin settings no longer crashes the engine
+
 ## Unreal Importer 0.0.5 Changelog
 
 - Disclaimer: Please perform a 'full reimport' after upgrading to this version of the importer by going into the plugin settings and clicking 'Force complete reimport'
