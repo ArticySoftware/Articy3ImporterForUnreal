@@ -131,6 +131,9 @@ public:
 
 	/** Returns true if Node is one of the PauseOn types. */
 	bool ShouldPauseOn(IArticyFlowObject* Node) const;
+
+	UFUNCTION(BlueprintCallable)
+	bool ShouldPauseOn(TScriptInterface<IArticyFlowObject> Node) const;
 	
 	/**
 	 * Get the GV instance used for expresso script execution.

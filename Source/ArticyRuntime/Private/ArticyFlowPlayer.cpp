@@ -106,6 +106,11 @@ bool UArticyFlowPlayer::ShouldPauseOn(IArticyFlowObject* Node) const
 	return Node && (1 << static_cast<uint8>(Node->GetType()) & PauseOn);
 }
 
+bool UArticyFlowPlayer::ShouldPauseOn(TScriptInterface<IArticyFlowObject> Node) const
+{
+	return ShouldPauseOn(Cast<IArticyFlowObject>(Node.GetObject()));
+}
+
 UArticyDatabase* UArticyFlowPlayer::GetDB() const
 {
 	return UArticyDatabase::Get(this);
