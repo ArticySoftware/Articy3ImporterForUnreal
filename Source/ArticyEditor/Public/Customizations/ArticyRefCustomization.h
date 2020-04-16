@@ -54,4 +54,6 @@ private:
 
 private:
 	TSharedPtr<class SComboButton> ClassRestrictionButton;
+	UClass* GetClassRestrictionMetaData() const;
+	bool HasClassRestrictionMetaData() const;
 };

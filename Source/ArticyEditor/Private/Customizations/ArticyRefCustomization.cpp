@@ -28,8 +28,12 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	FArticyRef* ArticyRef = RetrieveArticyRef(ArticyRefPropertyHandle.Get());
 
 	UArticyObject* SelectedObject = UArticyObject::FindAsset(ArticyRef->GetId());
-	// set the selected class to the currently selected object because the class selection widget has no actual property as a basis to serialize and keep its state
-	if (SelectedObject)
+
+	// attempt to set the class restriction via meta data (cpp means that the programmer has mandated a specific type)
+	ClassRestriction = GetClassRestrictionMetaData();
+	
+	// if there is no meta data class restriction, 
+	if (ClassRestriction == nullptr && SelectedObject)
 	{
 		ClassRestriction = SelectedObject->UObject::GetClass();
 	}
@@ -38,6 +42,7 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	{
 		ClassRestriction = UArticyObject::StaticClass();
 	}
+	
 	ArticyRefProperty = SNew(SArticyRefProperty, ArticyRefPropertyHandle.Get())
 		.ClassRestriction(this, &FArticyRefCustomization::GetClassRestriction);
 
@@ -57,6 +62,10 @@ void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Prop
 	ClassRestrictionButton =
 		SNew(SComboButton)
 		.OnGetMenuContent(this, &FArticyRefCustomization::CreateClassPicker)
+		.IsEnabled_Lambda([this]() -> bool
+	{
+		return !HasClassRestrictionMetaData();
+	})
 		.ContentPadding(2.f)
 		.ButtonContent()
 		[
@@ -147,6 +156,33 @@ TSharedRef<SWidget> FArticyRefCustomization::CreateClassPicker()
 	ClassViewerConfig.bAllowViewOptions = true;
 	ClassViewerConfig.ClassFilter = MakeShareable(new FArticyRefClassFilter);
 	return FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(ClassViewerConfig, FOnClassPicked::CreateRaw(this, &FArticyRefCustomization::OnClassPicked));
+}
+
+UClass* FArticyRefCustomization::GetClassRestrictionMetaData() const
+{
+	UClass* Restriction = nullptr;
+
+	if(HasClassRestrictionMetaData())
+	{
+		const FString ArticyClassRestriction = ArticyRefPropertyHandle->GetProperty()->GetMetaData(TEXT("ArticyClassRestriction"));
+
+		auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyRuntime"), *ArticyClassRestriction);
+		Restriction = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyObject::StaticClass());
+
+		// the class name can be in the ArticyRuntime module or in the project module. If it wasn't found in ArticyRuntime, check the project module
+		if(Restriction == nullptr)
+		{
+			FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *ArticyClassRestriction);
+			Restriction = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyObject::StaticClass());
+		}
+	}
+
+	return Restriction;
+}
+
+bool FArticyRefCustomization::HasClassRestrictionMetaData() const
+{
+	return ArticyRefPropertyHandle->GetProperty()->HasMetaData(TEXT("ArticyClassRestriction"));
 }
 
 FArticyId FArticyRefCustomization::GetIdFromValueString(FString SourceString)
