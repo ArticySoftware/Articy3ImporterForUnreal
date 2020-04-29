@@ -245,14 +245,13 @@ private:
 
 		if(ArticyObjectWithSpeaker)
 		{
-			UArticyObject* SpeakerObject = UArticyObject::FindAsset(ArticyObjectWithSpeaker->GetSpeakerId());
+			IArticyObjectWithDisplayName* SpeakerDisplayName = Cast<IArticyObjectWithDisplayName>(UArticyObject::FindAsset(ArticyObjectWithSpeaker->GetSpeakerId()));
 
-			if(!SpeakerObject)
+			if(!SpeakerDisplayName)
 			{
 				UE_LOG(LogArticyEditor, Error, TEXT("Articy filter: Speaker object does not exist"));
 				return false;
 			}
-			IArticyObjectWithDisplayName* SpeakerDisplayName = Cast<IArticyObjectWithDisplayName>(SpeakerObject);
 
 			FText& SpeakerName = SpeakerDisplayName->GetDisplayName();
 			const FTextFilterString TextToCompare(SpeakerName.ToString());
