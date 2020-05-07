@@ -36,14 +36,14 @@ public:
 	/**
 	 * The list of nodes this branch contains.
 	 */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	TArray<TScriptInterface<IArticyFlowObject>> Path;
 
 	/** This is true if all conditions along the path evaluate to true. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	bool bIsValid = true;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	int32 Index = -1;
 
 	/** Retrieve the last object in the path. */

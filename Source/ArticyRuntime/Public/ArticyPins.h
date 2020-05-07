@@ -24,20 +24,20 @@ class ARTICYRUNTIME_API UArticyFlowPin : public UArticyPrimitive, public IArticy
 
 public:
 	/** The script fragment. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	FString Text = "";
 
 	/** The Id of the object owning this pin. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	FArticyId Owner;
 
 	/** All outgoing connections. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	TArray<UArticyOutgoingConnection*> Connections;
 
 	void InitFromJson(TSharedPtr<FJsonValue> Json) override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Articy")
 	UArticyObject* GetOwner();
 
 	//---------------------------------------------------------------------------//

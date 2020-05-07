@@ -60,6 +60,6 @@ public:
 	EArticyAssetCategory Category;
 
 private:
-	UPROPERTY(Transient, VisibleAnywhere)
+	UPROPERTY(Transient, VisibleAnywhere, Category = "Articy")
 	mutable TWeakObjectPtr<UObject> Asset = nullptr;
 };

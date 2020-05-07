@@ -340,7 +340,7 @@ public:
 	
 protected:
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Articy")
 	FArticyImportDataStruct CachedData;
 
 	// indicates whether we've had at least one working import. Used to determine if we want to re

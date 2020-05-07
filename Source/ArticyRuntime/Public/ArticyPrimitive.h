@@ -24,14 +24,14 @@ public:
 	uint32 GetCloneId() const { return CloneId; }
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	FArticyId Id;
 
 	// TODO k2 - changed to UArticyCloneableObject
 	//friend struct FArticyClonableObject;
 	friend struct FArticyObjectShadow;
 	/** The ID of this instance (0 is the original object). */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	int32 CloneId = 0;
 
 

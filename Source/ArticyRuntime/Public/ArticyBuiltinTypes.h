@@ -16,13 +16,13 @@ class ARTICYRUNTIME_API UArticyPreviewImage : public UArticyBaseObject
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
 	FArticyRect ViewBox;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
 	EArticyPreviewImageViewBoxModes Mode;
 
 	/** The ID of the asset. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Articy")
 	FArticyId Asset;
 
 private:
@@ -40,9 +40,9 @@ class ARTICYRUNTIME_API UArticyConnection : public UArticyObject
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="Label"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy", meta=(DisplayName="Label"))
 	FString Label;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="Color"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy", meta=(DisplayName="Color"))
 	FLinearColor Color;
 
 	void InitFromJson(TSharedPtr<FJsonValue> Json) override;
@@ -62,15 +62,15 @@ public:
 	FArticyId GetTargetPinID() const { return TargetPin;  }
 	
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(DisplayName="TargetPin"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Articy", meta=(DisplayName="TargetPin"))
 	FArticyId TargetPin;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(DisplayName="Target"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Articy", meta=(DisplayName="Target"))
 	FArticyId Target;
 
 private:
-	UPROPERTY(VisibleAnywhere, Transient)
+	UPROPERTY(VisibleAnywhere, Transient, Category = "Articy")
 	mutable UArticyFlowPin* TargetPinObj;
-	UPROPERTY(VisibleAnywhere, Transient)
+	UPROPERTY(VisibleAnywhere, Transient, Category = "Articy")
 	mutable UArticyPrimitive* TargetObj;
 
 	template<typename Type, typename PropType>
@@ -91,15 +91,15 @@ public:
 	UArticyOutputPin* GetSourcePin() const;
 	
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="SourcePin"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy", meta=(DisplayName="SourcePin"))
 	FArticyId SourcePin;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="Source"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy", meta=(DisplayName="Source"))
 	FArticyId Source;
 
 private:
-	UPROPERTY(VisibleAnywhere, Transient)
+	UPROPERTY(VisibleAnywhere, Transient, Category = "Articy")
 	mutable UArticyOutputPin* SourcePinObj;
-	UPROPERTY(VisibleAnywhere, Transient)
+	UPROPERTY(VisibleAnywhere, Transient, Category = "Articy")
 	mutable UArticyPrimitive* SourceObj;
 
 	template<typename Type, typename PropType>
@@ -119,13 +119,13 @@ public:
 	FArticyLocationAnchor() = default;
 	FArticyLocationAnchor(TSharedPtr<FJsonValue> Json);
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="AnchorPositionX"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy", meta=(DisplayName="AnchorPositionX"))
 	float AnchorPositionX;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="AnchorPositionY"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy", meta=(DisplayName="AnchorPositionY"))
 	float AnchorPositionY;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="AnchorColor"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy", meta=(DisplayName="AnchorColor"))
 	FLinearColor AnchorColor;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="AnchorSize"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy", meta=(DisplayName="AnchorSize"))
 	EArticyLocationAnchorSize AnchorSize;
 };
 
@@ -136,12 +136,12 @@ class ARTICYRUNTIME_API UArticyTransformation : public UArticyBaseObject
 	
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
 	FVector2D Pivot;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
 	float Rotation;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
 	FVector2D Translation;
 
 private:
