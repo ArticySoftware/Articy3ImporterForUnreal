@@ -50,7 +50,7 @@ public:
 	}
 
 	/** Returns the pointer to a property of a given name. */
-	UProperty* GetProperty(FName Property) const
+	FProperty* GetProperty(FName Property) const
 	{
 		//look up the (hopefully already cached) property pointers
 		auto propPointers = GetPropertyPointers();
@@ -75,20 +75,20 @@ private:
 	 * They are cached because they can only be found by iterating over
 	 * them, using the TFieldIterator.
 	 */
-	TMap<FName, UProperty*>& GetPropertyPointers() const
+	TMap<FName, FProperty*>& GetPropertyPointers() const
 	{
 		return GetPropertyPointers(GetClass());
 	}
 
-	static TMap<FName, UProperty*>& GetPropertyPointers(const UClass* Class)
+	static TMap<FName, FProperty*>& GetPropertyPointers(const UClass* Class)
 	{
-		static TMap<const UClass*, TMap<FName, UProperty*>> PropertyPointers;
+		static TMap<const UClass*, TMap<FName, FProperty*>> PropertyPointers;
 
 		auto& pp = PropertyPointers.FindOrAdd(Class);
 		if(pp.Num() == 0)
 		{
 			//cache property pointers
-			for(TFieldIterator<UProperty> It(Class); It; ++It)
+			for(TFieldIterator<FProperty> It(Class); It; ++It)
 				pp.Add(*It->GetNameCPP(), *It);
 		}
 

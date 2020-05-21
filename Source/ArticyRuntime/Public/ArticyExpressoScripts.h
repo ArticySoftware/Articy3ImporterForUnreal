@@ -125,9 +125,9 @@ struct ARTICYRUNTIME_API ExpressoType
 	struct Definition
 	{
 		//function to create an ArticyExpressoType from a uproperty
-		TFunction<ExpressoType(UArticyBaseObject*, UProperty*)> Factory;
+		TFunction<ExpressoType(UArticyBaseObject*, FProperty*)> Factory;
 		//function to set a uproperty from an ArticyExpressoType value
-		TFunction<void(UArticyBaseObject*, UProperty*, const ExpressoType&)> Setter;
+		TFunction<void(UArticyBaseObject*, FProperty*, const ExpressoType&)> Setter;
 	};
 	
 	/**
@@ -144,7 +144,7 @@ struct ARTICYRUNTIME_API ExpressoType
 	{
 		Definition def;
 
-		def.Factory = [](UArticyBaseObject* Object, UProperty* Property)
+		def.Factory = [](UArticyBaseObject* Object, FProperty* Property)
 		{
 			if(Object && Property)
 			{
@@ -156,7 +156,7 @@ struct ARTICYRUNTIME_API ExpressoType
 			return ExpressoType{};
 		};
 
-		def.Setter = [](UArticyBaseObject* Object, UProperty* Property, const ExpressoType& Value)
+		def.Setter = [](UArticyBaseObject* Object, FProperty* Property, const ExpressoType& Value)
 		{
 			if(!Object || !Property)
 				return;
