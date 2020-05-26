@@ -646,7 +646,7 @@ const FName& FArticyObjectDefinitions::GetProviderInterface(const FArticyPropert
 	static TMap<FName, FName> ProviderInterfaces;
 	if(ProviderInterfaces.Num() == 0)
 	{
-		#define OBJECT_WITH_X(x) TEXT(x), TEXT("IArticyObjectWith"x)
+		#define OBJECT_WITH_X(x) TEXT(x), TEXT("IArticyObjectWith" x)
 
 		ProviderInterfaces.Add(OBJECT_WITH_X("Attachments"));
 		ProviderInterfaces.Add(OBJECT_WITH_X("Color"));
