@@ -82,15 +82,15 @@ public:
 
 protected:
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(DisplayName="TargetPin"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Articy", meta=(DisplayName="TargetPin"))
 	FArticyId TargetPin;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(DisplayName="Target"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Articy", meta=(DisplayName="Target"))
 	FArticyId Target;
 
 private:
 
-	UPROPERTY(VisibleAnywhere, Transient)
+	UPROPERTY(VisibleAnywhere, Transient, Category = "Articy")
 	mutable UArticyFlowPin* TargetPinObj;
-	UPROPERTY(VisibleAnywhere, Transient)
+	UPROPERTY(VisibleAnywhere, Transient, Category = "Articy")
 	mutable UArticyPrimitive* TargetObj;
 };

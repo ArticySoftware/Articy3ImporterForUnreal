@@ -23,7 +23,7 @@ class ARTICYRUNTIME_API UArticyObject : public UArticyPrimitive
 public:
 	FName GetTechnicalName() const;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Articy")
 	UArticyObject* GetParent() const;
 	TArray<TWeakObjectPtr<UArticyObject>> GetChildren() const;
 	
@@ -39,11 +39,11 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	FArticyId Parent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	TArray<FArticyId> Children;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	FString TechnicalName;
 
 	/** Used internally by ArticyImporter. */

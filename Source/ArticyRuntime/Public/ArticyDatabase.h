@@ -63,7 +63,7 @@ private:
 	 * Shadows are guaranteed to be stored in ascending order, but
 	 * the array index is not the shadow level (except for 0)!
 	 */
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Articy")
 	mutable TArray<FArticyObjectShadow> ShadowCopies;
 };
 
@@ -98,7 +98,7 @@ private:
 	 * The copied instances of the same object.
 	 * Clones[0] is the one that is created at startup from the object assets.
 	 */
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Articy")
 	TMap<int32, FArticyShadowableObject> Clones;
 
 	/** Adds a clone to the Clones map. */
@@ -136,7 +136,7 @@ public:
 	virtual UArticyGlobalVariables* GetGVs() const;
 
 	/** Unloads the database, which causes that all changes get removed.*/
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Articy")
 	void UnloadDatabase();
 
 	/** 
@@ -179,11 +179,11 @@ public:
 	virtual void LoadAllPackages(bool bDefaultOnly = false);
 
 	/** Load a package of a given name. */
-	UFUNCTION(BlueprintCallable, Category = "Packages")
+	UFUNCTION(BlueprintCallable, Category = "Articy")
 	virtual void LoadPackage(FString PackageName);
 
 	/** Load a package of a given name. */
-	UFUNCTION(BlueprintCallable, Category = "Packages")
+	UFUNCTION(BlueprintCallable, Category = "Articy")
 	virtual bool UnloadPackage(const FString PackageName, const bool bQuickUnload);
 
 	//---------------------------------------------------------------------------//
@@ -193,7 +193,7 @@ public:
 	 * If a CloneId other than 0 is provided, a copy of the object with this index must exist.
 	 * Otherwise a null-pointer is returned.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType="CastTo", AdvancedDisplay="CloneId"))
+	UFUNCTION(BlueprintCallable, Category = "Articy", meta=(DeterminesOutputType="CastTo", AdvancedDisplay="CloneId"))
 	UArticyPrimitive* GetObject(FArticyId Id, int32 CloneId = 0, TSubclassOf<class UArticyObject> CastTo = NULL) const;
 	template<typename T>
 	T* GetObject(FArticyId Id, int32 CloneId = 0) const { return Cast<T>(GetObject(Id, CloneId)); }
@@ -211,7 +211,7 @@ public:
 	 * otherwise a null-pointer is returned.
 	 * Note that the TechnicalName is not unique! This will take the first matching object.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType="CastTo", AdvancedDisplay="CloneId"))
+	UFUNCTION(BlueprintCallable, Category = "Articy", meta=(DeterminesOutputType="CastTo", AdvancedDisplay="CloneId"))
 	UArticyObject* GetObjectByName(FName TechnicalName, int32 CloneId = 0, TSubclassOf<class UArticyObject> CastTo = NULL) const;
 	template<typename T>
 	T* GetObjectByName(FName TechnicalName, int32 CloneId = 0) const { return Cast<T>(GetObjectByName(TechnicalName, CloneId)); }
@@ -230,7 +230,7 @@ public:
 	 * If a CloneId other than 0 is provided, copies of the objects with this index must exist,
 	 * otherwise null-pointers are returned instead.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects", meta = (DeterminesOutputType = "CastTo", AdvancedDisplay = "CloneId"))
+	UFUNCTION(BlueprintCallable, Category = "Articy", meta = (DeterminesOutputType = "CastTo", AdvancedDisplay = "CloneId"))
 	TArray<UArticyObject*> GetObjects(FName TechnicalName, int32 CloneId = 0, TSubclassOf<class UArticyObject> CastTo = NULL) const;
 
 	/**
@@ -246,13 +246,13 @@ public:
 	* If a CloneId other than 0 is provided, copies of the objects with this index must exist,
 	* otherwise they will be not added to the result.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType = "Class", AdvancedDisplay="CloneId"))
+	UFUNCTION(BlueprintCallable, Category = "Articy", meta=(DeterminesOutputType = "Class", AdvancedDisplay="CloneId"))
 	TArray<UArticyObject*> GetObjectsOfClass(TSubclassOf<class UArticyObject> Class, int32 CloneId = 0) const;
 
 	/**
 	* Get all objects.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "Objects")
+	UFUNCTION(BlueprintCallable, Category = "Articy")
 	TArray<UArticyPrimitive*> GetAllObjects() const;
 
 	/**
@@ -270,7 +270,7 @@ public:
 	 * If the clone already exists, nullptr is returned!
 	 * If NewCloneId is -1, the next free clone Id will be used.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType = "CastTo"))
+	UFUNCTION(BlueprintCallable, Category = "Articy", meta=(DeterminesOutputType = "CastTo"))
 	UArticyPrimitive* CloneFrom(FArticyId Id, int32 NewCloneId = -1, TSubclassOf<class UArticyObject> CastTo = NULL);
 	template<typename T>
 	T* CloneFrom(FArticyId Id, int32 NewCloneId = -1) { return Cast<T>(CloneFrom(Id, NewCloneId)); }
@@ -280,7 +280,7 @@ public:
 	 * If the clone already exists, nullptr is returned!
 	 * If NewCloneId is -1, the next free clone Id will be used.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType = "CastTo"))
+	UFUNCTION(BlueprintCallable, Category = "Articy", meta=(DeterminesOutputType = "CastTo"))
 	UArticyObject* CloneFromByName(FName TechnicalName, int32 NewCloneId = -1, TSubclassOf<class UArticyObject> CastTo = NULL);
 	template<typename T>
 	T* CloneFrom(FName TechnicalName, int32 NewCloneId = -1) { return Cast<T>(CloneFromByName(TechnicalName, NewCloneId)); }
@@ -288,7 +288,7 @@ public:
 	/**
 	 * Clone an existing object, and assign the NewCloneId to it.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType = "CastTo"))
+	UFUNCTION(BlueprintCallable, Category = "Articy", meta=(DeterminesOutputType = "CastTo"))
 	UArticyPrimitive* GetOrClone(FArticyId Id, int32 NewCloneId);
 	template<typename T>
 	T* GetOrClone(FArticyId Id, int32 NewCloneId) { return Cast<T>(GetOrClone(Id, NewCloneId)); }
@@ -296,7 +296,7 @@ public:
 	/**
 	 * Clone an existing object, and assign the NewCloneId to it.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Objects", meta=(DeterminesOutputType = "CastTo"))
+	UFUNCTION(BlueprintCallable, Category = "Articy", meta=(DeterminesOutputType = "CastTo"))
 	UArticyObject* GetOrCloneByName(const FName& TechnicalName, int32 NewCloneId);
 	template<typename T>
 	T* GetOrClone(const FName& TechnicalName, int32 NewCloneId) { return Cast<T>(GetOrCloneByName(TechnicalName, NewCloneId)); }
@@ -316,10 +316,10 @@ public:
 protected:
 
 	/** A list of all packages that were imported from articy:draft. */
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Articy")
 	TMap<FString, UArticyPackage*> ImportedPackages;
 
-	UPROPERTY(VisibleAnywhere, transient)
+	UPROPERTY(VisibleAnywhere, transient, Category = "Articy")
 	TArray<FString> LoadedPackages;
 
 	UPROPERTY()
@@ -329,7 +329,7 @@ protected:
 	
 	void UnloadAllPackages();
 
-	UFUNCTION(BlueprintCallable, Category="Setup")
+	UFUNCTION(BlueprintCallable, Category="Articy")
 	void SetExpressoScriptsClass(TSubclassOf<UArticyExpressoScripts> NewClass);
 
 private:
@@ -341,7 +341,7 @@ private:
 	mutable UArticyExpressoScripts* CachedExpressoScripts;
 
 	/** An instance of this class will be used to execute script fragments. */
-	UPROPERTY(Config, VisibleAnywhere)
+	UPROPERTY(Config, VisibleAnywhere, Category = "Articy")
 	TSubclassOf<UArticyExpressoScripts> ExpressoScriptsClass;
 	
 	UArticyPrimitive* GetObjectInternal(FArticyId Id, int32 CloneId = 0, bool bForceUnshadowed = false) const;

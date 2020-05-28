@@ -105,12 +105,14 @@ UArticyImportData* FArticyEditorFunctionLibrary::GenerateImportDataAsset()
 	const FString FileName = FPaths::GetBaseFilename(ArticyImportFiles[0], false);
 
 	const FString PackagePath = TEXT("/Game/") + FileName;
-	UPackage* Outer = CreatePackage(nullptr, *PackagePath);
+
+	const FString CleanedPackagePath = PackagePath.Replace(TEXT(" "), TEXT("_")).Replace(TEXT("."), TEXT("_"));
+	UPackage* Outer = CreatePackage(nullptr, *CleanedPackagePath);
 	Outer->FullyLoad();
 
 	const FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir(), ArticyImportFiles[0]);
 	bool bRequired = false;
-	UObject* ImportDataAsset = Factory->ImportObject(UArticyImportData::StaticClass(), Outer, FName(*FileName), EObjectFlags::RF_Standalone | EObjectFlags::RF_Public, FullPath, nullptr, bRequired);
+	UObject* ImportDataAsset = Factory->ImportObject(UArticyImportData::StaticClass(), Outer, FName(*FPaths::GetBaseFilename(CleanedPackagePath)), EObjectFlags::RF_Standalone | EObjectFlags::RF_Public, FullPath, nullptr, bRequired);
 
 	if (ImportDataAsset)
 	{

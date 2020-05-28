@@ -25,7 +25,7 @@ public:
 
 	const TArray<UArticyOutputPin*>* GetOutputPinsPtr() const;
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Articy")
 	TArray<UArticyOutputPin*> GetOutputPins() const;
 
 	TArray<UArticyOutputPin*> GetOutputPins_Implementation() const;

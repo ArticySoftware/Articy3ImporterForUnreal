@@ -387,15 +387,21 @@ const UArticyDatabase* UArticyDatabase::GetOriginal(bool bLoadAllPackages)
 		TArray<FAssetData> AssetData;
 		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetFName(), AssetData, true);
 
-		if(ensureMsgf(AssetData.Num() != 0, TEXT("Could not find original asset of ArticyDraftDatabase!")))
+		if(AssetData.Num() != 0)
 		{
 			if(AssetData.Num() > 1)
-			UE_LOG(LogTemp, Warning, TEXT("More than one ArticyDraftDatabase was found, this is not supported! The first one will be selected."));
+			{
+				UE_LOG(LogArticyRuntime, Warning, TEXT("More than one ArticyDraftDatabase was found, this is not supported! The first one will be selected."));
+			}
 
 			Asset = Cast<UArticyDatabase>(AssetData[0].GetAsset());
 
 			if(bLoadAllPackages && Asset.IsValid())
 				Asset.Get()->LoadAllPackages();
+		}
+		else
+		{
+			UE_LOG(LogArticyRuntime, Warning, TEXT("No ArticyDraftDatabase was found."));
 		}
 	}
 
@@ -413,12 +419,18 @@ UArticyDatabase* UArticyDatabase::GetMutableOriginal()
 		TArray<FAssetData> AssetData;
 		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetFName(), AssetData, true);
 
-		if (ensureMsgf(AssetData.Num() != 0, TEXT("Could not find original asset of ArticyDraftDatabase!")))
+		if (AssetData.Num() != 0)
 		{
 			if (AssetData.Num() > 1)
-				UE_LOG(LogTemp, Warning, TEXT("More than one ArticyDraftDatabase was found, this is not supported! The first one will be selected."));
+			{
+				UE_LOG(LogArticyRuntime, Warning, TEXT("More than one ArticyDraftDatabase was found, this is not supported! The first one will be selected."));
+			}
 
 			Asset = Cast<UArticyDatabase>(AssetData[0].GetAsset());
+		}
+		else
+		{
+			UE_LOG(LogArticyRuntime, Warning, TEXT("No ArticyDraftDatabase was found."));
 		}
 	}
 

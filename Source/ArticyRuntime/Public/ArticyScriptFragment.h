@@ -20,7 +20,7 @@ class ARTICYRUNTIME_API UArticyScriptFragment : public UArticyPrimitive
 
 protected:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	FString Expression = "";
 
 	//returns a cached hash of the expression

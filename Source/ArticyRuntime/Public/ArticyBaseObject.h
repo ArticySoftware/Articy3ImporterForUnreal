@@ -42,12 +42,12 @@ protected:
 	void AddSubobject(UArticyPrimitive* Obj);
 
 	/** Objects that are dynamically created for this object during import (like Pins, Connections ecc.) */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	TMap<FArticyId, UArticyPrimitive*> Subobjects;
 
 private:
 	/** Initialized with false, changed to true by InitFromJson (and later by deserialization). */
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Articy")
 	bool bWasDeserialized = false;
 };
 
