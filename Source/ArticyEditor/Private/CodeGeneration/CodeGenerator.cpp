@@ -252,6 +252,8 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 
 void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 {
+	TGuardValue<bool> GuardIsInitialLoad(GIsInitialLoad, false);
+
 	ensure(Data);
 	
 	//compiling is done!
