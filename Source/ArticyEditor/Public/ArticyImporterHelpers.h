@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Engine.h"
+#include "ArticyEditorModule.h"
 #include "AssetRegistryModule.h"
 #include "UObject/Package.h"
 #include "ObjectTools.h"

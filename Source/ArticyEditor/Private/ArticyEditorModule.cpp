@@ -205,7 +205,11 @@ void FArticyEditorModule::OnGeneratedCodeChanged(const TArray<FFileChangeData>& 
 	{
 		FText Message = FText::FromString(TEXT("It appears a generated code file is missing. Perform full reimport now?"));
 		FText Title = FText::FromString(TEXT("Articy detected an error"));
+#if ENGINE_MINOR_VERSION <= 24
 		EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::YesNo, Message, Title);
+#else
+		EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::YesNo, Message, &Title);
+#endif
 
 		if(ReturnType == EAppReturnType::Yes)
 		{
