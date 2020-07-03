@@ -136,7 +136,7 @@ public:
 	/** Returns true if Node is one of the PauseOn types. */
 	bool ShouldPauseOn(IArticyFlowObject* Node) const;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Flow")
 	bool ShouldPauseOn(TScriptInterface<IArticyFlowObject> Node) const;
 	
 	/**

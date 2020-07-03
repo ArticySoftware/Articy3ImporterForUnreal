@@ -21,7 +21,7 @@ class ARTICYRUNTIME_API UArticyNode : public UArticyObject, public IArticyInputP
 
 public:
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Flow")
 	EArticyPausableType GetType() override { ensure(false); return static_cast<EArticyPausableType>(0); }
 
 	void Explore(UArticyFlowPlayer* Player, TArray<FArticyBranch>& OutBranches, const uint32& Depth) override;
