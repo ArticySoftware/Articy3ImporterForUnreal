@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Runtime/CoreUObject/Public/UObject/Interface.h"
+#include "Launch/Resources/Version.h"
 #include "ArticyReflectable.generated.h"
 
 // #TODO Remove this and restore at the bottom in the future
