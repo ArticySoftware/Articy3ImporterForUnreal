@@ -426,18 +426,19 @@ void UArticyFlowPlayer::PlayBranch(const FArticyBranch& Branch)
 	UpdateAvailableBranches();
 }
 
-AArticyFlowDebugger::AArticyFlowDebugger()
-{
-	FlowPlayer = CreateDefaultSubobject<UArticyFlowPlayer>(TEXT("Articy Flow Player"));
-	ArticyImporterIcon = CreateDefaultSubobject<UBillboardComponent>(TEXT("Icon"));
-
-	auto ImporterIconFinder = ConstructorHelpers::FObjectFinder<UTexture2D>(TEXT("Texture2D'/ArticyImporter/Res/ArticyImporter64.ArticyImporter64'"));
-	ArticyImporterIcon->SetSprite(ImporterIconFinder.Object);
-}
-
-void AArticyFlowDebugger::OnConstruction(const FTransform& Transform)
-{
-	ensure(FlowPlayer);
-	
-	FlowPlayer->SetIgnoreInvalidBranches(bIgnoreInvalidBranchesOverride);
-}
+// @ TODO ArticyFlowDebugger
+//AArticyFlowDebugger::AArticyFlowDebugger()
+//{
+//	FlowPlayer = CreateDefaultSubobject<UArticyFlowPlayer>(TEXT("Articy Flow Player"));
+//	ArticyImporterIcon = CreateDefaultSubobject<UBillboardComponent>(TEXT("Icon"));
+//
+//	auto ImporterIconFinder = ConstructorHelpers::FObjectFinder<UTexture2D>(TEXT("Texture2D'/ArticyImporter/Res/ArticyImporter64.ArticyImporter64'"));
+//	ArticyImporterIcon->SetSprite(ImporterIconFinder.Object);
+//}
+//
+//void AArticyFlowDebugger::OnConstruction(const FTransform& Transform)
+//{
+//	ensure(FlowPlayer);
+//	
+//	FlowPlayer->SetIgnoreInvalidBranches(bIgnoreInvalidBranchesOverride);
+//}
