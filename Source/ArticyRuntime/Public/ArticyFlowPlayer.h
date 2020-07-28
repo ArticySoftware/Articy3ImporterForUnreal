@@ -322,26 +322,26 @@ void UArticyFlowPlayer::ShadowedOperation(Lambda Operation) const
 // @TODO ArticyFlowDebugger. BP inheriting has an engine version, and current BP has version 4.25, which makes it incompatible with < 25. Would need to recreate in 4.20
 // due to forward compatibility, or find a way that works without uassets
 
-//UCLASS(BlueprintType, HideCategories=(Replication, Physics, Rendering, Input, Collision, Actor, LOD, Cooking))
-//class AArticyFlowDebugger : public AActor
-//{
-//	GENERATED_BODY()
-//	
-//public:
-//	AArticyFlowDebugger();
-//
-//	virtual void OnConstruction(const FTransform& Transform) override;
-//
-//public:
-//	UPROPERTY(BlueprintReadOnly, Category = "Articy")
-//	UArticyFlowPlayer* FlowPlayer = nullptr;
-//
-//	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Articy", meta = (ArticyClassRestriction = "ArticyNode"))
-//	FArticyRef StartOnOverride;
-//private:
-//	UPROPERTY(EditAnywhere, Category="Articy")
-//	bool bIgnoreInvalidBranchesOverride = false;
-//
-//	UPROPERTY()
-//	UBillboardComponent* ArticyImporterIcon = nullptr;
-//};
+UCLASS(BlueprintType, HideCategories=(Replication, Physics, Rendering, Input, Collision, Actor, LOD, Cooking))
+class AArticyFlowDebugger : public AActor
+{
+	GENERATED_BODY()
+	
+public:
+	AArticyFlowDebugger();
+
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+public:
+	UPROPERTY(BlueprintReadOnly, Category = "Articy")
+	UArticyFlowPlayer* FlowPlayer = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Articy", meta = (ArticyClassRestriction = "ArticyNode"))
+	FArticyRef StartOnOverride;
+private:
+	UPROPERTY(EditAnywhere, Category="Articy")
+	bool bIgnoreInvalidBranchesOverride = false;
+
+	UPROPERTY()
+	UBillboardComponent* ArticyImporterIcon = nullptr;
+};
