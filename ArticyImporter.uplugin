@@ -11,7 +11,7 @@
 	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/8036f2f5e1f54dbd80342349b8cd186f",
 	"SupportURL": "https://www.articy.com/en/support/",
 	"EnabledByDefault": false,
-	"CanContainContent": false,
+	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"Installed": true,
 	"Modules": [
