@@ -17,7 +17,14 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnCompilationFinished, UArticyImportData*);
 
 class FToolBarBuilder;
 class FMenuBuilder;
-enum EImportStatusValidity;
+
+enum EImportStatusValidity
+{
+	Valid,
+	ImportantAssetMissing,
+	FileMissing,
+	ImportDataAssetMissing
+};
 
 class FArticyEditorModule : public IModuleInterface
 {
@@ -66,12 +73,4 @@ private:
 	FDelegateHandle GeneratedCodeWatcherHandle;
 	FArticyEditorConsoleCommands* ConsoleCommands = nullptr;
 	TSharedPtr<FUICommandList> PluginCommands;
-};
-
-enum EImportStatusValidity
-{
-	Valid,
-	ImportantAssetMissing,
-	FileMissing,
-	ImportDataAssetMissing
 };
