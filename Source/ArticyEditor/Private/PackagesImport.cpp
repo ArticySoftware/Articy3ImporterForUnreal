@@ -1,17 +1,23 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
 
-
+#include "ArticyEditorModule.h"
+#include "ArticyImporterHelpers.h"
 #include "PackagesImport.h"
 #include "ArticyImportData.h"
 #include "CodeGeneration/CodeGenerator.h"
 #include "ArticyObject.h"
+#include "Policies/CondensedJsonPrintPolicy.h"
+#include "Serialization/JsonSerializer.h"
+#include "Serialization/JsonWriter.h"
+#include "Misc/Paths.h"
+#include "Misc/App.h"
+#include "UObject/ConstructorHelpers.h"
 #include <string>
-#include "ArticyImporterHelpers.h"
 
 #define STRINGIFY(x) #x
 

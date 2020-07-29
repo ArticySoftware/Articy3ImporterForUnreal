@@ -1,9 +1,9 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #include "ObjectDefinitionsImport.h"
+#include "Misc/App.h"
 #include "ArticyEditorModule.h"
 #include "ArticyImportData.h"
 #include "CodeGeneration/CodeFileGenerator.h"
@@ -12,6 +12,7 @@
 #include "ArticyFlowClasses.h"
 #include "ArticyScriptFragment.h"
 #include "ArticyEntity.h"
+#include "UObject/ConstructorHelpers.h"
 
 //---------------------------------------------------------------------------//
 

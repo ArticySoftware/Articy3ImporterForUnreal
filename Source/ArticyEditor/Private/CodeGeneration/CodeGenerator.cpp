@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
@@ -19,11 +18,13 @@
 #include "GenericPlatform/GenericPlatformMisc.h"
 #include "ArticyEditorModule.h"
 #include "ArticyPluginSettings.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Misc/FileHelper.h"
 #include "Dialogs/Dialogs.h"
 #include "IContentBrowserSingleton.h"
-#include "Interfaces/IPluginManager.h"
 #include "ObjectTools.h"
-#include "PackageTools.h"
+#include "HAL/PlatformFilemanager.h"
+#include "Misc/App.h"
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//

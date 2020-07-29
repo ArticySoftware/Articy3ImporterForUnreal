@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #include "Slate/AssetPicker/SArticyObjectAssetPicker.h"
@@ -13,7 +12,10 @@
 #include "ArticyGlobalVariables.h"
 #include <ContentBrowserModule.h>
 #include "Types/WidgetActiveTimerDelegate.h"
-
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Widgets/Views/STileView.h"
+#include "Layout/WidgetPath.h"
+#include "Framework/Application/SlateApplication.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectAssetPicker"
 

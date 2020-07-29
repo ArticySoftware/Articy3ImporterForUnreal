@@ -9,7 +9,9 @@
 #include "Widgets/Input/SComboButton.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Slate/AssetPicker/SArticyObjectTileView.h"
-#include "IPropertyTypeCustomization.h"
+#include "PropertyHandle.h"
+#include "SBox.h"
+#include "SButton.h"
 
 namespace ArticyRefPropertyConstants {
 	const FVector2D ThumbnailSize(64, 64);

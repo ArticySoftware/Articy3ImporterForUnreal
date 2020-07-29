@@ -1,13 +1,14 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
-
 #include "CodeFileGenerator.h"
+#include "Misc/App.h"
 #include "ArticyEditorModule.h"
+#include "Misc/FileHelper.h"
 #include "ISourceControlModule.h"
 #include "ISourceControlProvider.h"
+#include "HAL/PlatformFilemanager.h"
 #include "SourceControlHelpers.h"
 
 void CodeFileGenerator::Line(const FString& Line, const bool bSemicolon, const bool bIndent, const int IndentOffset)

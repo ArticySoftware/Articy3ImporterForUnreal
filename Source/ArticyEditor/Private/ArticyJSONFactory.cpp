@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.  
 //
 
 
@@ -10,7 +9,11 @@
 #include "ArticyEditorModule.h"
 #include "ArticyImporterHelpers.h"
 #include "CoreMinimal.h"
+#include "FileHelper.h"
+#include "JsonReader.h"
+#include "JsonSerializer.h"
 #include "Runtime/Launch/Resources/Version.h"
+#include "EditorFramework/AssetImportData.h"
 
 #define LOCTEXT_NAMESPACE "ArticyJSONFactory"
 

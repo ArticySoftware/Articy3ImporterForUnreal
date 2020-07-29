@@ -1,11 +1,11 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
 #include "ArticyEditorStyle.h"
-#include "SlateBasics.h"
+#include "Commands.h"
 
 class FArticyEditorCommands : public TCommands<FArticyEditorCommands>
 {
