@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
@@ -17,6 +16,7 @@
 #include "ArticyFlowClasses.h"
 #include "ArticyEntity.h"
 #include "Interfaces/ArticyObjectWithColor.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // #TODO Remove this and restore at the bottom in the future
 #if ENGINE_MINOR_VERSION == 25

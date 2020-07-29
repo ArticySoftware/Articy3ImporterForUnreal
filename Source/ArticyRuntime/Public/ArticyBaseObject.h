@@ -4,7 +4,6 @@
 //
 #pragma once
 
-//#include "Engine.h"
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "ArticyBaseTypes.h"

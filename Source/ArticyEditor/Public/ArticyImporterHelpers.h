@@ -1,16 +1,12 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #pragma once
 
-#include "Engine.h"
-#include "ArticyEditorModule.h"
 #include "AssetRegistryModule.h"
 #include "UObject/Package.h"
 #include "ObjectTools.h"
-#include "AssetToolsModule.h"
 #include "ArticyHelpers.h"
 
 
