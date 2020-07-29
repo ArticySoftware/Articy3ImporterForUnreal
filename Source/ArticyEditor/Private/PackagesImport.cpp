@@ -4,10 +4,9 @@
 
 #pragma once
 
-
+#include "PackagesImport.h"
 #include "ArticyEditorModule.h"
 #include "ArticyImporterHelpers.h"
-#include "PackagesImport.h"
 #include "ArticyImportData.h"
 #include "CodeGeneration/CodeGenerator.h"
 #include "ArticyObject.h"

@@ -2,16 +2,15 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 //
 
-
 #include "ArticyJSONFactory.h"
+#include "CoreMinimal.h"
 #include "ArticyImportData.h"
 #include "Editor.h"
 #include "ArticyEditorModule.h"
 #include "ArticyImporterHelpers.h"
-#include "CoreMinimal.h"
-#include "FileHelper.h"
-#include "JsonReader.h"
-#include "JsonSerializer.h"
+#include "Misc/FileHelper.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 #include "Runtime/Launch/Resources/Version.h"
 #include "EditorFramework/AssetImportData.h"
 

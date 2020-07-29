@@ -1,15 +1,13 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
-
 
 #include "ArticyDatabase.h"
 #include "ArticyBaseTypes.h"
-#include "ArticyHelpers.h"
 #include "ArticyGlobalVariables.h"
 #include "ArticyPluginSettings.h"
 #include "ArticyExpressoScripts.h"
+#include "Misc/Paths.h"
 
 
 UArticyPrimitive* FArticyObjectShadow::GetObject()

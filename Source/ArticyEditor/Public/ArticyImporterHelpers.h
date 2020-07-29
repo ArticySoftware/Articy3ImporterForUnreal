@@ -4,11 +4,11 @@
 
 #pragma once
 
+
 #include "AssetRegistryModule.h"
 #include "UObject/Package.h"
 #include "ObjectTools.h"
-#include "ArticyHelpers.h"
-
+#include "UObject/ConstructorHelpers.h"
 
 namespace ArticyImporterHelpers
 {

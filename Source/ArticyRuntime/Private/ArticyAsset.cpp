@@ -1,9 +1,10 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #include "ArticyAsset.h"
-#include "FileMediaSource.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Misc/Paths.h"
 
 UObject* UArticyAsset::LoadAsset() const
 {

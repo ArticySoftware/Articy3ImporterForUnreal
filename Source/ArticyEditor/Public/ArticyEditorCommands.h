@@ -5,7 +5,7 @@
 #pragma once
 
 #include "ArticyEditorStyle.h"
-#include "Commands.h"
+#include "Framework/Commands/Commands.h"
 
 class FArticyEditorCommands : public TCommands<FArticyEditorCommands>
 {

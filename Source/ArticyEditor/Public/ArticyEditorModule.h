@@ -8,6 +8,7 @@
 #include "Modules/ModuleManager.h"
 #include "Delegates/IDelegateInstance.h"
 #include "ArticyEditorConsoleCommands.h"
+#include "Framework/Commands/UICommandList.h"
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogArticyEditor, Log, All)

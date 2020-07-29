@@ -13,7 +13,6 @@
 #include "Dialogs/Dialogs.h"
 #include <Widgets/SWindow.h>
 #include "Widgets/Docking/SDockTab.h"
-
 #include "ArticyEditorCommands.h"
 #include "ArticyEditorFunctionLibrary.h"
 #include "Editor.h"
@@ -21,7 +20,10 @@
 #include "ArticyEditorStyle.h"
 #include "CodeGeneration/CodeGenerator.h"
 #include "DirectoryWatcherModule.h"
+#include "HAL/FileManager.h"
+#include "Widgets/Images/SImage.h"
 #include "IDirectoryWatcher.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "LevelEditor.h"
 
 DEFINE_LOG_CATEGORY(LogArticyEditor)

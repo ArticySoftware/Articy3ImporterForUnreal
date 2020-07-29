@@ -1,8 +1,9 @@
 #pragma once
 
+#include "CoreMinimal.h"
 #include "ArticyObject.h"
+#include "UObject/UObjectHash.h"
 #include "ArticyPackage.generated.h"
-
 
 
 UCLASS(BlueprintType)

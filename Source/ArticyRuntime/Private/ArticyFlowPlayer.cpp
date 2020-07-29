@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
@@ -9,8 +8,11 @@
 #include "Interfaces/ArticyFlowObject.h"
 #include "Interfaces/ArticyObjectWithSpeaker.h"
 #include "ArticyExpressoScripts.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Interfaces/ArticyInputPinsProvider.h"
 #include "Interfaces/ArticyOutputPinsProvider.h"
+#include "Engine/Texture2D.h"
+
 
 TScriptInterface<IArticyFlowObject> FArticyBranch::GetTarget() const
 {

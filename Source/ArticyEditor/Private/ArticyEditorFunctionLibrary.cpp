@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
@@ -10,6 +9,8 @@
 #include "CodeGeneration/CodeGenerator.h"
 #include "ObjectTools.h"
 #include "FileHelpers.h"
+#include "HAL/FileManager.h"
+#include "Misc/Paths.h"
 
 void FArticyEditorFunctionLibrary::ForceCompleteReimport(UArticyImportData* ImportData)
 {

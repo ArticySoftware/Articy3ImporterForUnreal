@@ -1,13 +1,15 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #include "Slate/SPackageSettings.h"
 #include "ArticyDatabase.h"
 #include "ArticyPluginSettings.h"
+#include "EditorStyleSet.h"
+#include "Widgets/SBoxPanel.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Text/STextBlock.h"
 #include "Widgets/Layout/SSplitter.h"
-#include "EditorStyle.h"
 
 
 void SPackageSettings::Construct(const FArguments& InArgs)
