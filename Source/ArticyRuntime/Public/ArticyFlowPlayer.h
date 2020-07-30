@@ -7,7 +7,7 @@
 #include "ArticyRuntimeModule.h"
 #include "ArticyDatabase.h"
 #include "ArticyGlobalVariables.h"
-
+#include "Components/BillboardComponent.h"
 #include "ArticyFlowPlayer.generated.h"
 
 class IArticyNode;
@@ -96,6 +96,10 @@ public:
 	/** Gets the last set StartOn node */
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Start Node"), Category = "Setup")
 	FArticyRef GetStartNode() { return StartOn; }
+
+	/** Gets the last set StartOn node */
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Ignore Invalid Branches"), Category = "Setup")
+	void SetIgnoreInvalidBranches(bool bNewIgnoreInvalidBranches) { bIgnoreInvalidBranches = bNewIgnoreInvalidBranches; }
 		
 	/** Set the Cursor (current node) to this Node and updates the available branches. */
 	UFUNCTION(BlueprintCallable, Category = "Flow")
@@ -131,6 +135,9 @@ public:
 
 	/** Returns true if Node is one of the PauseOn types. */
 	bool ShouldPauseOn(IArticyFlowObject* Node) const;
+
+	UFUNCTION(BlueprintCallable, Category="Flow")
+	bool ShouldPauseOn(TScriptInterface<IArticyFlowObject> Node) const;
 	
 	/**
 	 * Get the GV instance used for expresso script execution.
@@ -216,7 +223,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
 	bool bIgnoreInvalidBranches = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup", meta=(ArticyClassRestriction="ArticyNode"))
 	FArticyRef StartOn;
 
 	/** All the branches available at the current flow position. */
@@ -310,3 +317,19 @@ void UArticyFlowPlayer::ShadowedOperation(Lambda Operation) const
 	if(ensure(ShadowLevel > 0))
 		--ShadowLevel;
 }
+
+UCLASS(BlueprintType, HideCategories=(Replication, Physics, Rendering, Input, Collision, Actor, LOD, Cooking))
+class AArticyFlowDebugger : public AActor
+{
+	GENERATED_BODY()
+	
+public:
+	AArticyFlowDebugger();
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
+	UArticyFlowPlayer* FlowPlayer = nullptr;
+private:
+
+	UPROPERTY()
+	UBillboardComponent* ArticyImporterIcon = nullptr;
+};

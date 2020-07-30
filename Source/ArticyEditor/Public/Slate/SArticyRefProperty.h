@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #pragma once
@@ -9,7 +8,9 @@
 #include "Widgets/Input/SComboButton.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Slate/AssetPicker/SArticyObjectTileView.h"
-#include "IPropertyTypeCustomization.h"
+#include "PropertyHandle.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/Input/SButton.h"
 
 namespace ArticyRefPropertyConstants {
 	const FVector2D ThumbnailSize(64, 64);

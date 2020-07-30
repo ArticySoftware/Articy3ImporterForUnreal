@@ -13,7 +13,6 @@
 #include "Dialogs/Dialogs.h"
 #include <Widgets/SWindow.h>
 #include "Widgets/Docking/SDockTab.h"
-
 #include "ArticyEditorCommands.h"
 #include "ArticyEditorFunctionLibrary.h"
 #include "Editor.h"
@@ -21,7 +20,10 @@
 #include "ArticyEditorStyle.h"
 #include "CodeGeneration/CodeGenerator.h"
 #include "DirectoryWatcherModule.h"
+#include "HAL/FileManager.h"
+#include "Widgets/Images/SImage.h"
 #include "IDirectoryWatcher.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "LevelEditor.h"
 
 DEFINE_LOG_CATEGORY(LogArticyEditor)
@@ -205,7 +207,11 @@ void FArticyEditorModule::OnGeneratedCodeChanged(const TArray<FFileChangeData>& 
 	{
 		FText Message = FText::FromString(TEXT("It appears a generated code file is missing. Perform full reimport now?"));
 		FText Title = FText::FromString(TEXT("Articy detected an error"));
+#if ENGINE_MINOR_VERSION <= 24
 		EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::YesNo, Message, Title);
+#else
+		EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::YesNo, Message, &Title);
+#endif
 
 		if(ReturnType == EAppReturnType::Yes)
 		{

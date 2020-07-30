@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
@@ -9,8 +8,11 @@
 #include "Interfaces/ArticyFlowObject.h"
 #include "Interfaces/ArticyObjectWithSpeaker.h"
 #include "ArticyExpressoScripts.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Interfaces/ArticyInputPinsProvider.h"
 #include "Interfaces/ArticyOutputPinsProvider.h"
+#include "Engine/Texture2D.h"
+
 
 TScriptInterface<IArticyFlowObject> FArticyBranch::GetTarget() const
 {
@@ -104,6 +106,11 @@ void UArticyFlowPlayer::FinishCurrentPausedObject(int PinIndex)
 bool UArticyFlowPlayer::ShouldPauseOn(IArticyFlowObject* Node) const
 {
 	return Node && (1 << static_cast<uint8>(Node->GetType()) & PauseOn);
+}
+
+bool UArticyFlowPlayer::ShouldPauseOn(TScriptInterface<IArticyFlowObject> Node) const
+{
+	return ShouldPauseOn(Cast<IArticyFlowObject>(Node.GetObject()));
 }
 
 UArticyDatabase* UArticyFlowPlayer::GetDB() const
@@ -419,4 +426,14 @@ void UArticyFlowPlayer::PlayBranch(const FArticyBranch& Branch)
 
 	Cursor = Branch.Path.Last();
 	UpdateAvailableBranches();
+}
+
+AArticyFlowDebugger::AArticyFlowDebugger()
+{
+	FlowPlayer = CreateDefaultSubobject<UArticyFlowPlayer>(TEXT("Articy Flow Player"));
+	ArticyImporterIcon = CreateDefaultSubobject<UBillboardComponent>(TEXT("Icon"));
+
+	auto ImporterIconFinder = ConstructorHelpers::FObjectFinder<UTexture2D>(TEXT("Texture2D'/ArticyImporter/Res/ArticyImporter64.ArticyImporter64'"));
+	ArticyImporterIcon->SetSprite(ImporterIconFinder.Object);
+	FlowPlayer->SetIgnoreInvalidBranches(false);
 }

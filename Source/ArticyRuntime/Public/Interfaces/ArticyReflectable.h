@@ -5,7 +5,16 @@
 #pragma once
 
 #include "Runtime/CoreUObject/Public/UObject/Interface.h"
+#include "Launch/Resources/Version.h"
 #include "ArticyReflectable.generated.h"
+
+// #TODO Remove this and restore at the bottom in the future
+#if ENGINE_MINOR_VERSION == 25
+#ifdef UProperty
+	#undef UProperty
+	#define UProperty FProperty
+#endif
+#endif
 
 UINTERFACE()
 class UArticyReflectable : public UInterface { GENERATED_BODY() };
@@ -121,3 +130,8 @@ TValue& IArticyReflectable::GetProp(FName Property, int32 ArrayIndex)
 	static TValue Empty;
 	return Empty;
 }
+
+#if ENGINE_MINOR_VERSION == 25
+#undef UProperty
+#define UProperty DEPRECATED_MACRO(4.25, "UProperty has been renamed to FProperty") FProperty
+#endif

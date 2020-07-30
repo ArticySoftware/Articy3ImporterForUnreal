@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
@@ -19,10 +18,13 @@
 #include "GenericPlatform/GenericPlatformMisc.h"
 #include "ArticyEditorModule.h"
 #include "ArticyPluginSettings.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Misc/FileHelper.h"
 #include "Dialogs/Dialogs.h"
 #include "IContentBrowserSingleton.h"
-#include "Interfaces/IPluginManager.h"
 #include "ObjectTools.h"
+#include "HAL/PlatformFilemanager.h"
+#include "Misc/App.h"
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
@@ -251,6 +253,8 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 
 void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 {
+	TGuardValue<bool> GuardIsInitialLoad(GIsInitialLoad, false);
+
 	ensure(Data);
 	
 	//compiling is done!
@@ -337,7 +341,11 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 	if(!Data->HasCachedVersion())
 	{
 		const FText CacheNotAvailableText = FText::Format(LOCTEXT("NoCacheAvailable", "Aborting import process. No cache available to restore. Deleting import asset but leaving generated code intact. Please delete manually in Source/ArticyGenerated if necessary and rebuild. Reason: {0}."), ReasonForRestoreText);
-		OpenMsgDlgInt(EAppMsgType::Ok, CacheNotAvailableText, ArticyImportErrorText);
+#if ENGINE_MINOR_VERSION <= 24
+		EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, CacheNotAvailableText, ArticyImportErrorText);
+#else
+		EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheNotAvailableText, &ArticyImportErrorText);
+#endif
 		ObjectTools::DeleteAssets({ Data }, false);
 		
 		return false;
@@ -366,7 +374,11 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 		if (bNotifyUser)
 		{
 			const FText CacheRestoredText = FText::Format(LOCTEXT("ImportDataCacheRestoredText", "Restored previously generated articy code. Reason: {0}. Continuing import with last valid state."), ReasonForRestoreText);
-			OpenMsgDlgInt(EAppMsgType::Ok, CacheRestoredText, ArticyImportErrorText);
+#if ENGINE_MINOR_VERSION <= 24
+			EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, CacheRestoredText, ArticyImportErrorText);
+#else
+			EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheRestoredText, &ArticyImportErrorText);
+#endif
 			return true;
 		}
 	}
@@ -378,7 +390,11 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 			if (bNotifyUser)
 			{
 				const FText CacheDeletedText = FText::Format(LOCTEXT("ImportDataCacheDeletedText", "Deleted generated articy code. Reason: {0}. Aborting import process."), ReasonForRestoreText);
-				OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletedText, ArticyImportErrorText);
+#if ENGINE_MINOR_VERSION <= 24
+				EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletedText, ArticyImportErrorText);
+#else
+				EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheDeletedText, &ArticyImportErrorText);
+#endif
 			}
 		}
 		// if deletion didn't work for some reason, notify the user
@@ -387,7 +403,11 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 			if (bNotifyUser)
 			{
 				const FText CacheDeletionFailedText = FText::Format(LOCTEXT("ImportDataCacheDeletionFailedText", "Tried to delete generated articy code. Reason: {0}. Failed to delete. Aborting import process."), ReasonForRestoreText);
-				OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletionFailedText, ArticyImportErrorText);
+#if ENGINE_MINOR_VERSION <= 24
+				EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletionFailedText, ArticyImportErrorText);
+#else
+				EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheDeletionFailedText, &ArticyImportErrorText);
+#endif
 			}
 		}
 	}

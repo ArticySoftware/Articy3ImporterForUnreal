@@ -102,6 +102,9 @@ private:
 	template <typename TNameValuePair>
 	void AddEnumEntry(TNameValuePair Pair);
 
+	/** Returns the export macro of the current module */
+	static FString GetExportMacro();
+	
 	/** Write the content to file. */
 	void WriteToFile() const;
 };

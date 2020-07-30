@@ -31,7 +31,8 @@ public class ArticyRuntime : ModuleRules
 			{
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
-                "MediaAssets"
+                "MediaAssets",
+				"Json"
 			}
 			);
 			
@@ -46,7 +47,6 @@ public class ArticyRuntime : ModuleRules
 				"Slate",
 				"SlateCore",
 				// ... add private dependencies that you statically link with here ...	
-				"Json"
 			}
 			);
 		

@@ -1,11 +1,13 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #include "ArticyEditorStyle.h"
+#include "Styling/SlateTypes.h"
+#include "Styling/SlateStyleRegistry.h"
 #include "Slate/SlateGameResources.h"
 #include "Interfaces/IPluginManager.h"
+#include "Framework/Application/SlateApplication.h"
 
 TSharedPtr< FSlateStyleSet > FArticyEditorStyle::StyleInstance = NULL;
 

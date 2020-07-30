@@ -1,13 +1,14 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
-
 #include "CodeFileGenerator.h"
+#include "Misc/App.h"
 #include "ArticyEditorModule.h"
+#include "Misc/FileHelper.h"
 #include "ISourceControlModule.h"
 #include "ISourceControlProvider.h"
+#include "HAL/PlatformFilemanager.h"
 #include "SourceControlHelpers.h"
 
 void CodeFileGenerator::Line(const FString& Line, const bool bSemicolon, const bool bIndent, const int IndentOffset)
@@ -86,11 +87,13 @@ void CodeFileGenerator::EndBlock(const bool bUnindent, const bool bSemicolon)
 
 void CodeFileGenerator::StartClass(const FString& Classname, const FString& Comment, const bool bUClass, const FString& UClassSpecifiers)
 {
+	const FString ExportMacro = bUClass ? GetExportMacro() : FString();
+	
 	if(!Comment.IsEmpty())
 		this->Comment(Comment);
 	if(bUClass)
 		Line(TEXT("UCLASS(") + UClassSpecifiers + TEXT(")"));
-	Line(TEXT("class ") + Classname);
+	Line(TEXT("class ") + ExportMacro + Classname);
 
 	StartBlock(true);
 	if(bUClass)
@@ -102,11 +105,13 @@ void CodeFileGenerator::StartClass(const FString& Classname, const FString& Comm
 
 void CodeFileGenerator::StartStruct(const FString& Structname, const FString& Comment, const bool bUStruct)
 {
+	const FString ExportMacro = bUStruct ? GetExportMacro() : FString();
+	
 	if(!Comment.IsEmpty())
 		this->Comment(Comment);
 	if(bUStruct)
 		Line(TEXT("USTRUCT(BlueprintType)"));
-	Line(TEXT("struct ") + Structname);
+	Line(TEXT("struct ") + ExportMacro + Structname);
 
 	StartBlock(true);
 	if(bUStruct)
@@ -121,6 +126,12 @@ void CodeFileGenerator::EndStruct(const FString& InlineDeclaration)
 	EndBlock(true, InlineDeclaration.IsEmpty());
 	if(!InlineDeclaration.IsEmpty())
 		Line(InlineDeclaration, true);
+}
+
+FString CodeFileGenerator::GetExportMacro()
+{
+	// added space
+	return FString(FApp::GetProjectName()).ToUpper() + FString(TEXT("_API "));
 }
 
 void CodeFileGenerator::WriteToFile() const

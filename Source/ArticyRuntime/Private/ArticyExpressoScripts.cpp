@@ -155,9 +155,25 @@ bool ExpressoType::operator==(const ExpressoType& Other) const
 	case Bool:
 		return GetBool() == Other.GetBool();
 	case Int:
-		return GetInt() == Other.GetInt();
+		switch (Other.Type)
+		{
+		case Int:
+			return GetInt() == Other.GetInt();
+		case Float:
+			return GetInt() == Other.GetFloat();
+		default:
+			ensureMsgf(false, TEXT("Uncomparable expresso types!"));
+		}
 	case Float:
-		return GetFloat() == Other.GetFloat();
+		switch (Other.Type)
+		{
+		case Float:
+			return GetFloat() == Other.GetFloat();
+		case Int:
+			return GetFloat() == Other.GetInt();
+		default:
+			ensureMsgf(false, TEXT("Uncomparable expresso types!"));
+		}
 	case String:
 		return GetString() == Other.GetString();
 
@@ -183,9 +199,25 @@ bool ExpressoType::operator<(const ExpressoType& Other) const
 	case Bool:
 		return GetBool() < Other.GetBool();
 	case Int:
-		return GetInt() < Other.GetInt();
+		switch (Other.Type)
+		{
+		case Int:
+			return GetInt() < Other.GetInt();
+		case Float:
+			return GetInt() < Other.GetFloat();
+		default:
+			ensureMsgf(false, TEXT("Uncomparable expresso types!"));
+		}
 	case Float:
-		return GetFloat() < Other.GetFloat();
+		switch(Other.Type)
+		{
+		case Float:
+			return GetFloat() < Other.GetFloat();
+		case Int:
+			return GetFloat() < Other.GetInt();
+		default:
+			ensureMsgf(false, TEXT("Uncomparable expresso types!"));
+		}
 	case String:
 		return GetString() < Other.GetString();
 
@@ -200,18 +232,34 @@ bool ExpressoType::operator>(const ExpressoType& Other) const
 {
 	switch (Type)
 	{
+	case Undefined:
+		break;
+		
 	case Bool:
 		return GetBool() > Other.GetBool();
 	case Int:
-		return GetInt() > Other.GetInt();
+		switch (Other.Type)
+		{
+		case Int:
+			return GetInt() > Other.GetInt();
+		case Float:
+			return GetInt() > Other.GetFloat();
+		default:
+			ensureMsgf(false, TEXT("Uncomparable expresso types!"));
+		}
 	case Float:
-		return GetFloat() > Other.GetFloat();
+		switch (Other.Type)
+		{
+		case Float:
+			return GetFloat() > Other.GetFloat();
+		case Int:
+			return GetFloat() > Other.GetInt();
+		default:
+			ensureMsgf(false, TEXT("Uncomparable expresso types!"));
+		}
 	case String:
 		return GetString() > Other.GetString();
-
-	case Undefined:
-		break;
-
+		
 	default:
 		ensureMsgf(false, TEXT("Unknown ArticyExpressoType!"));
 	}

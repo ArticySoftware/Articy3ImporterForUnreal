@@ -8,6 +8,7 @@
 #include "Modules/ModuleManager.h"
 #include "Delegates/IDelegateInstance.h"
 #include "ArticyEditorConsoleCommands.h"
+#include "Framework/Commands/UICommandList.h"
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogArticyEditor, Log, All)
@@ -17,7 +18,14 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnCompilationFinished, UArticyImportData*);
 
 class FToolBarBuilder;
 class FMenuBuilder;
-enum EImportStatusValidity;
+
+enum EImportStatusValidity
+{
+	Valid,
+	ImportantAssetMissing,
+	FileMissing,
+	ImportDataAssetMissing
+};
 
 class FArticyEditorModule : public IModuleInterface
 {
@@ -66,12 +74,4 @@ private:
 	FDelegateHandle GeneratedCodeWatcherHandle;
 	FArticyEditorConsoleCommands* ConsoleCommands = nullptr;
 	TSharedPtr<FUICommandList> PluginCommands;
-};
-
-enum EImportStatusValidity
-{
-	Valid,
-	ImportantAssetMissing,
-	FileMissing,
-	ImportDataAssetMissing
 };

@@ -15,6 +15,13 @@ class UArticyInt;
 class UArticyBool;
 class UArticyExpressoScripts;
 
+// #TODO Remove this and restore at the bottom in the future
+#if ENGINE_MINOR_VERSION == 25
+#ifdef UProperty
+	#undef UProperty
+	#define UProperty FProperty
+#endif
+#endif
 struct ARTICYRUNTIME_API ExpressoType
 {
 	union
@@ -348,3 +355,8 @@ void UArticyExpressoScripts::print(const FString& Msg, ArgTypes... Args)
 
 	PrintInternal(msg);
 }
+
+#if ENGINE_MINOR_VERSION == 25
+#undef UProperty
+#define UProperty DEPRECATED_MACRO(4.25, "UProperty has been renamed to FProperty") FProperty
+#endif

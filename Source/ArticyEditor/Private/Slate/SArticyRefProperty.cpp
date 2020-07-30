@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #include "Slate/SArticyRefProperty.h"
@@ -11,7 +10,7 @@
 #include <IContentBrowserSingleton.h>
 #include <ContentBrowserModule.h>
 #include <Widgets/Input/SComboButton.h>
-#include <IPropertyTypeCustomization.h>
+#include "Widgets/Images/SImage.h"
 #include "ArticyObject.h"
 #include "ArticyEditorModule.h"
 #include "Slate/AssetPicker/SArticyObjectAssetPicker.h"

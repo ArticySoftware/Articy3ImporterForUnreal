@@ -1,18 +1,17 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interfaces/ArticyObjectWithPreviewImage.h"
 #include "Styling/SlateBrush.h"
 #include "Widgets/SCompoundWidget.h"
 #include "ArticyObject.h"
 #include "Widgets/Layout/SBorder.h"
 #include "ArticyBaseTypes.h"
-#include "Slate/UserInterfaceHelperFunctions.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Text/STextBlock.h"
 
 
 /**

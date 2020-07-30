@@ -1,9 +1,9 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #include "ObjectDefinitionsImport.h"
+#include "Misc/App.h"
 #include "ArticyEditorModule.h"
 #include "ArticyImportData.h"
 #include "CodeGeneration/CodeFileGenerator.h"
@@ -12,6 +12,7 @@
 #include "ArticyFlowClasses.h"
 #include "ArticyScriptFragment.h"
 #include "ArticyEntity.h"
+#include "UObject/ConstructorHelpers.h"
 
 //---------------------------------------------------------------------------//
 
@@ -646,7 +647,7 @@ const FName& FArticyObjectDefinitions::GetProviderInterface(const FArticyPropert
 	static TMap<FName, FName> ProviderInterfaces;
 	if(ProviderInterfaces.Num() == 0)
 	{
-		#define OBJECT_WITH_X(x) TEXT(x), TEXT("IArticyObjectWith"x)
+		#define OBJECT_WITH_X(x) TEXT(x), TEXT("IArticyObjectWith" x)
 
 		ProviderInterfaces.Add(OBJECT_WITH_X("Attachments"));
 		ProviderInterfaces.Add(OBJECT_WITH_X("Color"));
