@@ -163,7 +163,7 @@ UClass* FArticyRefCustomization::GetClassRestrictionMetaData() const
 
 	if(HasClassRestrictionMetaData())
 	{
-		const FString ArticyClassRestriction = ArticyRefPropertyHandle->GetProperty()->GetMetaData(TEXT("ArticyClassRestriction"));
+		const FString ArticyClassRestriction = ArticyRefPropertyHandle->GetMetaData(TEXT("ArticyClassRestriction"));
 
 		auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyRuntime"), *ArticyClassRestriction);
 		Restriction = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyObject::StaticClass());
@@ -181,7 +181,7 @@ UClass* FArticyRefCustomization::GetClassRestrictionMetaData() const
 
 bool FArticyRefCustomization::HasClassRestrictionMetaData() const
 {
-	return ArticyRefPropertyHandle->GetProperty()->HasMetaData(TEXT("ArticyClassRestriction"));
+	return ArticyRefPropertyHandle->HasMetaData(TEXT("ArticyClassRestriction"));
 }
 
 FArticyId FArticyRefCustomization::GetIdFromValueString(FString SourceString)
