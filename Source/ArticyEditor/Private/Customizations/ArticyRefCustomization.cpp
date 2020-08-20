@@ -1,8 +1,9 @@
-//  
+//		
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 //
 
 #include "Customizations/ArticyRefCustomization.h"
+#include "ArticyEditorStyle.h"
 #include "IDetailChildrenBuilder.h"
 #include "DetailWidgetRow.h"
 #include "Widgets/SWidget.h"
@@ -12,7 +13,9 @@
 #include "ArticyObject.h"
 #include "ArticyRef.h"
 #include "ClassViewerModule.h"
+#include "Interfaces/ArticyObjectWithText.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Slate/UserInterfaceHelperFunctions.h"
 
 TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 {
