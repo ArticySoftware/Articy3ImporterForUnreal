@@ -54,6 +54,7 @@ void FArticyEditorModule::ShutdownModule()
 {
 	if (UObjectInitialized())
 	{
+		UnregisterDefaultArticyRefWidgetExtensions();
 		UnregisterPluginSettings();
 		
 		if(ConsoleCommands != nullptr)
@@ -78,9 +79,9 @@ void FArticyEditorModule::RegisterConsoleCommands()
 void FArticyEditorModule::RegisterDefaultArticyRefWidgetExtensions() const
 {
 	// this registers the articy button extension for all UArticyObjects.
-	GetCustomizationManager()->RegisterInstancedArticyRefWidgetCustomization(UArticyObject::StaticClass(), FOnGetArticyRefWidgetCustomizationInstance::CreateLambda([]()
+	GetCustomizationManager()->RegisterArticyRefWidgetCustomizationFactory(FOnCreateArticyRefWidgetCustomizationFactory::CreateLambda([]()
 	{
-		return MakeShared<FArticyButtonCustomization>();
+		return MakeShared<FArticyButtonCustomizationFactory>();
 	}));
 }
 
@@ -141,6 +142,14 @@ void FArticyEditorModule::RegisterPluginSettings() const
 
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	PropertyModule.RegisterCustomClassLayout("ArticyPluginSettings", FOnGetDetailCustomizationInstance::CreateStatic(&FArticyPluginSettingsCustomization::MakeInstance));
+}
+
+void FArticyEditorModule::UnregisterDefaultArticyRefWidgetExtensions() const
+{
+	for(const IArticyRefWidgetCustomizationFactory* DefaultFactory : DefaultArticyRefWidgetCustomizationFactories)
+	{
+		GetCustomizationManager()->UnregisterArticyRefWidgetCustomizationFactory(DefaultFactory);
+	}
 }
 
 void FArticyEditorModule::UnregisterPluginSettings() const

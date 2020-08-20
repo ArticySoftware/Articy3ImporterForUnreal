@@ -9,50 +9,29 @@ FArticyEditorCustomizationManager::FArticyEditorCustomizationManager()
 {
 }
 
-int32 FArticyEditorCustomizationManager::RegisterInstancedArticyRefWidgetCustomization(TSubclassOf<UArticyObject> SupportedClass,
-                                                                                       FOnGetArticyRefWidgetCustomizationInstance GetCustomizationDelegate)
+IArticyRefWidgetCustomizationFactory* FArticyEditorCustomizationManager::RegisterArticyRefWidgetCustomizationFactory(FOnCreateArticyRefWidgetCustomizationFactory GetCustomizationDelegate)
 {
-	if(!ensure(IsValid(SupportedClass)))
-	{
-		return -1;
-	}
-	
-	FArticyRefWidgetCustomizationRegistryEntry Entry;
-	Entry.SupportedClass = SupportedClass;
-	Entry.Factory = GetCustomizationDelegate;
-
-	return ArticyRefWidgetCustomizationEntries.Add(Entry);
+	ArticyRefWidgetCustomizationFactories.Add(GetCustomizationDelegate.Execute());
+	return ArticyRefWidgetCustomizationFactories.Last().Get();
 }
 
-void FArticyEditorCustomizationManager::UnregisterInstancedArticyRefWidgetCustomization(int32 Index)
+void FArticyEditorCustomizationManager::UnregisterArticyRefWidgetCustomizationFactory(const IArticyRefWidgetCustomizationFactory* Factory)
 {
-	if(!ensure(ArticyRefWidgetCustomizationEntries.IsValidIndex(Index)))
+	const int32 RemovedElements = ArticyRefWidgetCustomizationFactories.RemoveAll([=](const TSharedPtr<IArticyRefWidgetCustomizationFactory> FactoryPtr)
 	{
-		return;
-	}
-
-	ArticyRefWidgetCustomizationEntries.RemoveAt(Index);
-}
-
-void FArticyEditorCustomizationManager::GetArticyRefWidgetCustomizations(FArticyRef& ArticyRef, TArray<TSharedPtr<IArticyRefWidgetCustomization>>& OutCustomizations)
-{
-	UArticyObject* Object = UArticyObject::FindAsset(ArticyRef.GetId());
-
-	if(Object == nullptr)
-	{
-		return;
-	}
-
-	TSubclassOf<UArticyObject> SupportedClass = Object->UObject::GetClass();
-	
-	TArray<FArticyRefWidgetCustomizationRegistryEntry> FilteredCustomizations = ArticyRefWidgetCustomizationEntries.FilterByPredicate([=](const FArticyRefWidgetCustomizationRegistryEntry& Entry)
-	{
-		return SupportedClass.Get()->IsChildOf(Entry.SupportedClass);
+		return Factory == FactoryPtr.Get();
 	});
 
-	for (const FArticyRefWidgetCustomizationRegistryEntry& Entry : FilteredCustomizations)
+	ensureMsgf(RemovedElements != 0, TEXT("Failed removing factory. It was either not registered or removed already."));
+}
+
+void FArticyEditorCustomizationManager::CreateArticyRefWidgetCustomizations(FArticyRef& ArticyRef, TArray<TSharedPtr<IArticyRefWidgetCustomization>>& OutCustomizations)
+{
+	for (const TSharedPtr<IArticyRefWidgetCustomizationFactory>& Entry : ArticyRefWidgetCustomizationFactories)
 	{
-		TSharedRef<IArticyRefWidgetCustomization> Instance(Entry.Factory.Execute());
-		OutCustomizations.Add(Instance);
+		if(Entry->SupportsType(ArticyRef))
+		{
+			OutCustomizations.Add(Entry->CreateCustomization());
+		}
 	}
 }

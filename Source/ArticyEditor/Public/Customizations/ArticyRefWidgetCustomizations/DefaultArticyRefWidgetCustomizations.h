@@ -18,5 +18,12 @@ public:
 	FReply OnArticyButtonClicked();
 
 private:
-	FArticyRef* Ref;
+	FArticyRef* Ref = nullptr;
+};
+
+class FArticyButtonCustomizationFactory : public IArticyRefWidgetCustomizationFactory
+{
+public:
+	virtual TSharedPtr<IArticyRefWidgetCustomization> CreateCustomization() override;
+	virtual bool SupportsType(const FArticyRef& Ref) override;
 };

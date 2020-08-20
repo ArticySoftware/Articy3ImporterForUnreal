@@ -54,6 +54,7 @@ public:
 	void RegisterDetailsCustomizations() const;
 	void RegisterPluginSettings() const;
 
+	void UnregisterDefaultArticyRefWidgetExtensions() const;
 	void UnregisterPluginSettings() const;
 	
 	/* Plugin settings menu */
@@ -81,5 +82,9 @@ private:
 	FDelegateHandle GeneratedCodeWatcherHandle;
 	FArticyEditorConsoleCommands* ConsoleCommands = nullptr;
 	TSharedPtr<FUICommandList> PluginCommands;
+	/** The CustomizationManager registers and owns all customization factories */
 	TSharedPtr<FArticyEditorCustomizationManager> CustomizationManager = nullptr;
+
+	/** The CustomizationManager has ownership of the factories. These here are cached for removal at shutdown */
+	TArray<const IArticyRefWidgetCustomizationFactory*> DefaultArticyRefWidgetCustomizationFactories;
 };

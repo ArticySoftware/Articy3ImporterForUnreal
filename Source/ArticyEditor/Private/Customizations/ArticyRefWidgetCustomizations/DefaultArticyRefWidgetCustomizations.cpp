@@ -6,6 +6,7 @@
 #include "Customizations/ArticyRefWidgetCustomizations/DefaultArticyRefWidgetCustomizations.h"
 #include "ArticyEditorStyle.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
+#include "ArticyObject.h"
 
 void FArticyButtonCustomization::RegisterArticyRefWidgetCustomization(FArticyRefWidgetCustomizationBuilder& Builder)
 {
@@ -44,6 +45,23 @@ FReply FArticyButtonCustomization::OnArticyButtonClicked()
 {
 	UserInterfaceHelperFunctions::ShowObjectInArticy(Ref->GetId());
 	return FReply::Handled();
+}
+
+TSharedPtr<IArticyRefWidgetCustomization> FArticyButtonCustomizationFactory::CreateCustomization()
+{
+	return MakeShareable(new FArticyButtonCustomization);
+}
+
+bool FArticyButtonCustomizationFactory::SupportsType(const FArticyRef& Ref)
+{
+	UArticyObject* Object = UArticyObject::FindAsset(Ref.GetId());
+	if(!Object)
+	{
+		return false;
+	}
+
+	// supports all articy objects, hence return true. Modify this in your own override for more advanced customization
+	return true;
 }
 
 

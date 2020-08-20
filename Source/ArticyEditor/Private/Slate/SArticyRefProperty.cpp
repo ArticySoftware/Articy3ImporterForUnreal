@@ -113,7 +113,7 @@ void SArticyRefProperty::UpdateWidget()
 	FArticyRef* Ref = FArticyRefCustomization::RetrieveArticyRef(ArticyRefPropertyHandle);
 
 	ActiveCustomizations.Reset();
-	FArticyEditorModule::Get().GetCustomizationManager()->GetArticyRefWidgetCustomizations(*Ref, ActiveCustomizations);
+	FArticyEditorModule::Get().GetCustomizationManager()->CreateArticyRefWidgetCustomizations(*Ref, ActiveCustomizations);
 
 	FArticyRefWidgetCustomizationBuilder Builder(*Ref);
 	for(TSharedPtr<IArticyRefWidgetCustomization>& Customization : ActiveCustomizations)

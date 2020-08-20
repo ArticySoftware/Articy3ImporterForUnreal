@@ -37,7 +37,15 @@ public:
 	virtual void UnregisterArticyRefWidgetCustomization() = 0;
 };
 
-DECLARE_DELEGATE_RetVal(TSharedRef<IArticyRefWidgetCustomization>, FOnGetArticyRefWidgetCustomizationFactory);
+class ARTICYEDITOR_API IArticyRefWidgetCustomizationFactory
+{
+public:
+	virtual ~IArticyRefWidgetCustomizationFactory() {}
+	virtual TSharedPtr<IArticyRefWidgetCustomization> CreateCustomization() = 0;
+	virtual bool SupportsType(const FArticyRef& Ref) = 0;
+};
+
+DECLARE_DELEGATE_RetVal(TSharedRef<IArticyRefWidgetCustomizationFactory>, FOnCreateArticyRefWidgetCustomizationFactory);
 
 /** Singleton-style class for managing articy editor customizations. */
 class ARTICYEDITOR_API FArticyEditorCustomizationManager
@@ -45,24 +53,19 @@ class ARTICYEDITOR_API FArticyEditorCustomizationManager
 public:
 	FArticyEditorCustomizationManager();
 
-	/** Registers an ArticyRefWidget customization factory for a specific type of class */
-	int32 RegisterInstancedArticyRefWidgetCustomization(TSubclassOf<UArticyObject> SupportedClass, FOnGetArticyRefWidgetCustomizationFactory GetCustomizationDelegate);
-	/** Unregisters an ArticyRefWidget customization for a specific type of class */
-	void UnregisterInstancedArticyRefWidgetCustomization(int32 Index);
-	/** Gets the ArticyRefWidget customizations for an ArticyRef */
-	void GetArticyRefWidgetCustomizations(FArticyRef& ArticyRef, TArray<TSharedPtr<IArticyRefWidgetCustomization>>& OutCustomizations);
+	/** Registers an ArticyRefWidget customization factory and returns the index */
+	IArticyRefWidgetCustomizationFactory* RegisterArticyRefWidgetCustomizationFactory(FOnCreateArticyRefWidgetCustomizationFactory GetCustomizationDelegate);
+	/** Unregisters an ArticyRefWidget customization */
+	void UnregisterArticyRefWidgetCustomizationFactory(const IArticyRefWidgetCustomizationFactory*);
+	/** Creates the ArticyRefWidget customizations for an ArticyRef */
+	void CreateArticyRefWidgetCustomizations(FArticyRef& ArticyRef, TArray<TSharedPtr<IArticyRefWidgetCustomization>>& OutCustomizations);
 
 private:
 	/** Since we only want one customization manager, delete other constructors */
 	FArticyEditorCustomizationManager(const FArticyEditorCustomizationManager&) = delete;
 	FArticyEditorCustomizationManager& operator=(const FArticyEditorCustomizationManager&) = delete;
 
-	struct FArticyRefWidgetCustomizationRegistryEntry
-	{
-		const UClass* SupportedClass;
-		FOnGetArticyRefWidgetCustomizationFactory Factory;
-	};
 
-	TArray<FArticyRefWidgetCustomizationRegistryEntry> ArticyRefWidgetCustomizationEntries;
+	TArray<TSharedPtr<IArticyRefWidgetCustomizationFactory>> ArticyRefWidgetCustomizationFactories;
 };
 
