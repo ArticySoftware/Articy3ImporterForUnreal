@@ -8,7 +8,9 @@
 #include "Modules/ModuleManager.h"
 #include "Delegates/IDelegateInstance.h"
 #include "ArticyEditorConsoleCommands.h"
+#include "Customizations/ArticyEditorCustomizationManager.h"
 #include "Framework/Commands/UICommandList.h"
+#include "Slate/SArticyRefProperty.h"
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogArticyEditor, Log, All)
@@ -40,16 +42,21 @@ public:
 		return FModuleManager::LoadModuleChecked<FArticyEditorModule>(TEXT("ArticyEditor"));
 	}
 
+	TSharedPtr<FArticyEditorCustomizationManager> GetCustomizationManager() const { return CustomizationManager; }
+	
 	void RegisterDirectoryWatcher();
 	void RegisterConsoleCommands();
+	/** Registers all default widget extensions. As of this point, the articy button */
+	void RegisterDefaultArticyRefWidgetExtensions() const;
 	void RegisterPluginCommands();
 	void RegisterArticyWindowTab();
 	void RegisterArticyToolbar();
-
-
-	/* Plugin settings menu */
+	void RegisterDetailsCustomizations() const;
 	void RegisterPluginSettings() const;
+
 	void UnregisterPluginSettings() const;
+	
+	/* Plugin settings menu */
 
 	void QueueImport();
 	bool IsImportQueued();
@@ -74,4 +81,5 @@ private:
 	FDelegateHandle GeneratedCodeWatcherHandle;
 	FArticyEditorConsoleCommands* ConsoleCommands = nullptr;
 	TSharedPtr<FUICommandList> PluginCommands;
+	TSharedPtr<FArticyEditorCustomizationManager> CustomizationManager = nullptr;
 };

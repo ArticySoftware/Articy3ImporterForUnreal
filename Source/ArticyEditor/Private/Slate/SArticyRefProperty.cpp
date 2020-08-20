@@ -10,13 +10,10 @@
 #include <IContentBrowserSingleton.h>
 #include <ContentBrowserModule.h>
 #include <Widgets/Input/SComboButton.h>
-#include "Widgets/Images/SImage.h"
 #include "ArticyObject.h"
 #include "ArticyEditorModule.h"
 #include "Slate/AssetPicker/SArticyObjectAssetPicker.h"
-#include "ArticyEditorStyle.h"
 #include "Editor.h"
-#include "Widgets/Input/SButton.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
 #include "Customizations/ArticyRefCustomization.h"
 
@@ -34,7 +31,7 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* In
 	CachedArticyObject = UArticyObject::FindAsset(CurrentObjectID);
 	
 	Cursor = EMouseCursor::Hand;
-	
+
 	if(!this->ClassRestriction.IsBound()) 
 	{
 		UE_LOG(LogArticyEditor, Warning, TEXT("Tried constructing articy ref property without valid class restriction. Using ArticyObject instead"));
@@ -53,17 +50,10 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* In
 		.ObjectToDisplay(this, &SArticyRefProperty::GetCurrentObjectID)
 		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize.X)
 		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding.X);
-	
-	const FSlateBrush* ArticyDraftLogo = FArticyEditorStyle::Get().GetBrush("ArticyImporter.ArticyDraft.16");
-	
-	ArticyButton = SNew(SButton)
-		.OnClicked(this, &SArticyRefProperty::OnArticyButtonClicked)
-		.ToolTipText(FText::FromString("Show selected object in articy:draft"))
-		.Content()
-		[
-			SNew(SImage)
-			.Image(ArticyDraftLogo)
-		];
+
+	ExtraButtons = SNew(SHorizontalBox);
+
+	UpdateWidget();
 	
 	this->ChildSlot
 	[
@@ -100,15 +90,7 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* In
 			.HAlign(HAlign_Left)
 			.Padding(3, 0, 3, 2)
 			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot()
-				[
-#if PLATFORM_WINDOWS
-					ArticyButton.ToSharedRef()
-#else
-					SNullWidget::NullWidget
-#endif
-				]
+				ExtraButtons.ToSharedRef()
 			]
 		]
 	];
@@ -121,6 +103,56 @@ void SArticyRefProperty::UpdateWidget()
 	// the actual update. This will be forwarded into the tile view and will cause an update
 	CurrentObjectID = FArticyRefCustomization::GetIdFromValueString(RefString);
 	CachedArticyObject = UArticyObject::FindAsset(CurrentObjectID);
+
+	// update the customizations
+	for (TSharedPtr<IArticyRefWidgetCustomization>& Customization : ActiveCustomizations)
+	{
+		Customization->UnregisterArticyRefWidgetCustomization();
+	}
+	
+	FArticyRef* Ref = FArticyRefCustomization::RetrieveArticyRef(ArticyRefPropertyHandle);
+
+	ActiveCustomizations.Reset();
+	FArticyEditorModule::Get().GetCustomizationManager()->GetArticyRefWidgetCustomizations(*Ref, ActiveCustomizations);
+
+	FArticyRefWidgetCustomizationBuilder Builder(*Ref);
+	for(TSharedPtr<IArticyRefWidgetCustomization>& Customization : ActiveCustomizations)
+	{
+		Customization->RegisterArticyRefWidgetCustomization(Builder);
+	}
+	
+	ApplyArticyRefCustomizations(Builder.GetCustomizations());
+}
+
+void SArticyRefProperty::ApplyArticyRefCustomization(const FArticyRefWidgetCustomizationInfo& Customization)
+{
+	if(Customization.ExtraButtonExtender != nullptr)
+	{
+		ExtraButtonExtenders.Add(Customization.ExtraButtonExtender);
+	}
+}
+
+void SArticyRefProperty::ApplyArticyRefCustomizations(const TArray<FArticyRefWidgetCustomizationInfo>& Customizations)
+{
+	ExtraButtonExtenders.Empty();
+	ExtraButtons->ClearChildren();
+
+	for(const FArticyRefWidgetCustomizationInfo& Info : Customizations)
+	{
+		ApplyArticyRefCustomization(Info);
+	}
+
+	TSharedPtr<FExtender> ExtraButtonExtender = FExtender::Combine(ExtraButtonExtenders);
+	FToolBarBuilder Builder(nullptr, FMultiBoxCustomization(TEXT("ExtraButtons")), ExtraButtonExtender);
+
+	// we need to begin a section so the extenders know where to apply themselves
+	Builder.BeginSection(TEXT("Base"));
+	Builder.EndSection();
+
+	ExtraButtons->AddSlot()
+	[
+		Builder.MakeWidget()
+	];
 }
 
 void SArticyRefProperty::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)

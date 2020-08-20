@@ -34,5 +34,7 @@ namespace UserInterfaceHelperFunctions
 	const FString GetDisplayName(const UArticyObject* ArticyObject);
 	const FLinearColor GetColor(const UArticyObject* ArticyObject);
 	const bool ShowObjectInArticy(const UArticyObject* ArticyObject);
+	const bool ShowObjectInArticy(const FArticyId ArticyId);
+
 	
 };
