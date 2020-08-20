@@ -18,6 +18,7 @@
 #include "Editor.h"
 #include "Customizations/ArticyRefCustomization.h"
 #include "ArticyEditorStyle.h"
+#include "ArticyFlowClasses.h"
 #include "CodeGeneration/CodeGenerator.h"
 #include "DirectoryWatcherModule.h"
 #include "HAL/FileManager.h"
@@ -25,6 +26,7 @@
 #include "IDirectoryWatcher.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "LevelEditor.h"
+#include "Customizations/ArticyRefWidgetCustomizations/DefaultArticyRefWidgetCustomizations.h"
 
 DEFINE_LOG_CATEGORY(LogArticyEditor)
 
@@ -33,18 +35,17 @@ static const FName ArticyWindowTabID("ArticyTab");
 
 void FArticyEditorModule::StartupModule()
 {
+	CustomizationManager = MakeShareable(new FArticyEditorCustomizationManager);
+	
 	RegisterPluginSettings();
 	RegisterPluginCommands();
 	RegisterConsoleCommands();
+	RegisterDefaultArticyRefWidgetExtensions();
 	// directory watcher has to be changed or removed as the results aren't quite deterministic
 	//RegisterDirectoryWatcher();
+	RegisterDetailsCustomizations();
 	RegisterArticyWindowTab();
 	RegisterArticyToolbar();
-
-	// register custom details for ArticyRef struct
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	PropertyModule.RegisterCustomPropertyTypeLayout("ArticyRef", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArticyRefCustomization::MakeInstance));
-	PropertyModule.NotifyCustomizationModuleChanged();
 
 	FArticyEditorStyle::Initialize();
 }
@@ -53,6 +54,7 @@ void FArticyEditorModule::ShutdownModule()
 {
 	if (UObjectInitialized())
 	{
+		UnregisterDefaultArticyRefWidgetExtensions();
 		UnregisterPluginSettings();
 		
 		if(ConsoleCommands != nullptr)
@@ -74,6 +76,15 @@ void FArticyEditorModule::RegisterConsoleCommands()
 	ConsoleCommands = new FArticyEditorConsoleCommands(*this);
 }
 
+void FArticyEditorModule::RegisterDefaultArticyRefWidgetExtensions() const
+{
+	// this registers the articy button extension for all UArticyObjects.
+	GetCustomizationManager()->RegisterArticyRefWidgetCustomizationFactory(FOnCreateArticyRefWidgetCustomizationFactory::CreateLambda([]()
+	{
+		return MakeShared<FArticyButtonCustomizationFactory>();
+	}));
+}
+
 void FArticyEditorModule::RegisterArticyToolbar()
 {
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
@@ -87,6 +98,14 @@ void FArticyEditorModule::RegisterArticyToolbar()
 		ToolbarExtender->AddToolBarExtension("Settings", EExtensionHook::After, PluginCommands, FToolBarExtensionDelegate::CreateRaw(this, &FArticyEditorModule::AddToolbarExtension));
 		LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
 	}
+}
+
+void FArticyEditorModule::RegisterDetailsCustomizations() const
+{
+	// register custom details for ArticyRef struct
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	PropertyModule.RegisterCustomPropertyTypeLayout("ArticyRef", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArticyRefCustomization::MakeInstance));
+	PropertyModule.NotifyCustomizationModuleChanged();
 }
 
 void FArticyEditorModule::RegisterPluginCommands()
@@ -123,6 +142,14 @@ void FArticyEditorModule::RegisterPluginSettings() const
 
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	PropertyModule.RegisterCustomClassLayout("ArticyPluginSettings", FOnGetDetailCustomizationInstance::CreateStatic(&FArticyPluginSettingsCustomization::MakeInstance));
+}
+
+void FArticyEditorModule::UnregisterDefaultArticyRefWidgetExtensions() const
+{
+	for(const IArticyRefWidgetCustomizationFactory* DefaultFactory : DefaultArticyRefWidgetCustomizationFactories)
+	{
+		GetCustomizationManager()->UnregisterArticyRefWidgetCustomizationFactory(DefaultFactory);
+	}
 }
 
 void FArticyEditorModule::UnregisterPluginSettings() const

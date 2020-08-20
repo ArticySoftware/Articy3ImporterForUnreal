@@ -9,6 +9,7 @@
 #include "Widgets/Layout/SBorder.h"
 #include "Slate/AssetPicker/SArticyObjectTileView.h"
 #include "PropertyHandle.h"
+#include "Customizations/ArticyEditorCustomizationManager.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Input/SButton.h"
 
@@ -17,6 +18,7 @@ namespace ArticyRefPropertyConstants {
 	const FVector2D ThumbnailPadding(2, 2);
 
 }
+
 /**
  *  REFERENCE: SPropertyEditorAsset, which is the normal asset selection widget
  */
@@ -26,9 +28,7 @@ public:
 	SLATE_BEGIN_ARGS(SArticyRefProperty) 
 		: _ClassRestriction(nullptr)
 	{}
-
-	SLATE_ATTRIBUTE(UClass*, ClassRestriction)
-
+		SLATE_ATTRIBUTE(UClass*, ClassRestriction)
 	SLATE_END_ARGS()
 /**
  * Construct this widget
@@ -39,7 +39,6 @@ public:
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 private:
-
 	mutable FArticyId CurrentObjectID;
 	// the articy object this widget currently represents
 	TWeakObjectPtr<UArticyObject> CachedArticyObject = nullptr;
@@ -51,10 +50,16 @@ private:
 	TSharedPtr<SBorder> ThumbnailBorder;
 	TSharedPtr<FSlateBrush> ImageBrush;
 	TSharedPtr<SComboButton> ComboButton;
-	TSharedPtr<SButton> ArticyButton;
+	TSharedPtr<SHorizontalBox> ExtraButtons;
 	TAttribute<UClass*> ClassRestriction;
 private:
+	/** Updates the widget including customizations. Called when the selected object changes */
 	void UpdateWidget();
+	/** Applies a single customization */
+	void ApplyArticyRefCustomization(const FArticyRefWidgetCustomizationInfo& Customization);
+	/** Applies the given customizations, such as the ExtraButton extensions */
+	void ApplyArticyRefCustomizations(const TArray<FArticyRefWidgetCustomizationInfo>& Customizations);
+
 	TSharedRef<SWidget> CreateArticyObjectAssetPicker();
 	FReply OnArticyButtonClicked() const;
 	/** Updates the underlying ArticyRef to reference the new articy object. Can be null */
@@ -62,5 +67,11 @@ private:
 	FReply OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const;
 	FText OnGetArticyObjectDisplayName() const;
 	FArticyId GetCurrentObjectID() const;
-	
+
+private:
+	/** The current customizations are cached in here to achieve ownership */
+	TArray<TSharedPtr<IArticyRefWidgetCustomization>> ActiveCustomizations;
+
+	/** The ExtraButton extenders of the currently active customizations */
+	TArray<TSharedPtr<FExtender>> ExtraButtonExtenders;
 };
