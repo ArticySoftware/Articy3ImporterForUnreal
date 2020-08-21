@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "ArticyRef.h"
+#include "Framework/MultiBox/MultiBoxExtender.h"
 
 /** Architecture Ref: SequenceCustomizationManager */
 

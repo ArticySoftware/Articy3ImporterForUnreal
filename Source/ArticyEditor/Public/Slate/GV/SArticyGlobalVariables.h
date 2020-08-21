@@ -62,9 +62,7 @@ template <typename T, typename T2>
 void SArticyVariableSet::OnValueChanged(T Value, T2* Var)
 {
 	if(bSliderMoving)
-	{
-		bSliderMoving = true;
-		
+	{		
 		if(Var->Get() == Value)
 		{
 			return;

@@ -32,21 +32,3 @@ private:
 	float OnGetRightColumnWidth() const { return ColumnWidth; }
 	void OnSetColumnWidth(float InWidth) { ColumnWidth = InWidth; }
 };
-
-class FArticyGVCustomization2 : public IDetailCustomization
-{
-public:
-	static TSharedRef<IDetailCustomization> MakeInstance();
-
-	void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override;
-private:
-	FGlobalVariablesSizeData SizeData;
-	// ref: SDetailsView
-	float ColumnWidth = 0.65f;
-private:
-	float OnGetLeftColumnWidth() const { return 1.0f - ColumnWidth; }
-	float OnGetRightColumnWidth() const { return ColumnWidth; }
-	void OnSetColumnWidth(float InWidth) { ColumnWidth = InWidth; }
-};
-
-

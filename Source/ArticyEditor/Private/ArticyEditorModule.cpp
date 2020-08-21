@@ -164,6 +164,7 @@ void FArticyEditorModule::UnregisterDefaultArticyRefWidgetExtensions() const
 	}
 }
 
+
 void FArticyEditorModule::UnregisterPluginSettings() const
 {
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))

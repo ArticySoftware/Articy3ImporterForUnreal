@@ -9,6 +9,8 @@
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 
+#define LOCTEXT_NAMESPACE "ArticyGlobalVariables"
+
 void SArticyVariableSet::Construct(const FArguments& Args, TWeakObjectPtr<UArticyBaseVariableSet> InVariableSet)
 {
 	VariableSet = InVariableSet;
@@ -119,11 +121,10 @@ void SArticyVariableSet::BuildVariableWidgets()
 					{
 						return;
 					}
-					
-					GEditor->BeginTransaction(FText::FromString(TEXT("ModifyArticyGlobalVariable")));
+
+					const FScopedTransaction Transaction(LOCTEXT("ModifyGV", "Modified GV"));
 					StringVar->Modify();
 					*StringVar = Text.ToString();
-					GEditor->EndTransaction();
 				})
 			];
 		}
@@ -137,24 +138,34 @@ void SArticyVariableSet::BuildVariableWidgets()
 				.MaxSliderValue(TOptional<int32>())
 				.MinSliderValue(TOptional<int32>())
 				.MinDesiredValueWidth(80.f)
-				.OnBeginSliderMovement_Lambda([=]() { bSliderMoving = true; GEditor->BeginTransaction(FText::FromString(TEXT("Modify Global Var by Slider"))); })
-				.OnEndSliderMovement_Lambda([=](int32 Value) { bSliderMoving = false; IntVar->Modify();  *IntVar = Value; GEditor->EndTransaction(); })
+				.OnBeginSliderMovement_Lambda([=]()
+				{
+					bSliderMoving = true;
+					GEditor->BeginTransaction(TEXT("Articy GV"), FText::FromString(TEXT("Modify Articy GV by Slider")), IntVar);
+				})
+				.OnEndSliderMovement_Lambda([=](int32 Value)
+				{
+					bSliderMoving = false;
+					IntVar->Modify();
+					*IntVar = Value;
+					GEditor->EndTransaction();
+				})
 				.Value_Lambda([IntVar]()
 				{
 					return IntVar->Get();
 				})
+				// on value changed is only used for slider value updates
 				.OnValueChanged(this, &SArticyVariableSet::OnValueChanged, IntVar)
 				.OnValueCommitted_Lambda([=](int32 Value, ETextCommit::Type Type)
 				{
-					if (Value == IntVar->Get())
+					if (bSliderMoving || Value == IntVar->Get())
 					{
 						return;
 					}
 
-					GEditor->BeginTransaction(FText::FromString(TEXT("ModifyArticyGlobalVariable")));
+					const FScopedTransaction Transaction(LOCTEXT("ModifyGV", "Modified GV"));
 					IntVar->Modify();
 					*IntVar = Value;
-					GEditor->EndTransaction();
 				})
 			];
 		}
@@ -170,10 +181,14 @@ void SArticyVariableSet::BuildVariableWidgets()
 				})
 				.OnCheckStateChanged_Lambda([BoolVar](const ECheckBoxState& State)
 				{
-					GEditor->BeginTransaction(FText::FromString(TEXT("ModifyArticyGlobalVariable")));
+					if(*BoolVar == (State == ECheckBoxState::Checked))
+					{
+						return;
+					}
+					
+					const FScopedTransaction Transaction(LOCTEXT("ModifyGV", "Modified GV"));
 					BoolVar->Modify();
-					*BoolVar = State == ECheckBoxState::Checked ? true : false;
-					GEditor->EndTransaction();
+					*BoolVar = State == ECheckBoxState::Checked;
 				})
 			];
 		}
@@ -181,11 +196,11 @@ void SArticyVariableSet::BuildVariableWidgets()
 		VariableWidgetMapping.Add(Var, LocalSplitter);
 
 		VariableContainer->AddSlot()
-			.AutoHeight()
-			.Padding(25.f, 5.f, 5.f, 5.f)
-			[
-				LocalSplitter
-			];
+		.AutoHeight()
+		.Padding(25.f, 5.f, 5.f, 5.f)
+		[
+			LocalSplitter
+		];
 	}
 
 	bVariableWidgetsBuilt = true;
@@ -386,3 +401,5 @@ void SArticyGlobalVariables::RestoreExpansionStates()
 		It.Key()->SetExpanded(It.Value());
 	}
 }
+
+#undef LOCTEXT_NAMESPACE
