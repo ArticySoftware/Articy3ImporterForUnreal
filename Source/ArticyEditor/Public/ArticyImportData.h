@@ -247,8 +247,11 @@ struct FArticyExpressoFragment
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(VisibleAnywhere)
 	FString OriginalFragment = "";
+	UPROPERTY(VisibleAnywhere)
 	FString ParsedFragment = "";
+	UPROPERTY(VisibleAnywhere)
 	bool bIsInstruction = false;
 
 	bool operator==(const FArticyExpressoFragment& Other) const

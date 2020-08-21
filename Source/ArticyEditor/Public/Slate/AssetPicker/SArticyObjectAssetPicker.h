@@ -1,7 +1,7 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -15,7 +15,7 @@
 #include <SAssetSearchBox.h>
 #include <Types/SlateEnums.h>
 #include <Misc/TextFilterExpressionEvaluator.h>
-#include "ArticyObjectFilterHelpers.h"
+#include "Slate/ArticyFilterHelpers.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectAssetPicker"
 

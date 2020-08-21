@@ -20,5 +20,6 @@ public:
 	virtual void RegisterCommands() override;
 
 public:
-	TSharedPtr<FUICommandInfo> OpenPluginWindow;
+	TSharedPtr<FUICommandInfo> OpenArticyImporter;
+	TSharedPtr<FUICommandInfo> OpenArticyGVDebugger;
 };

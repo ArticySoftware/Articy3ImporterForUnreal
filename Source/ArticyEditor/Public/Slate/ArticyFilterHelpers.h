@@ -5,11 +5,15 @@
 
 #pragma once
 
+#include "ArticyGlobalVariables.h"
 #include "FrontendFilterBase.h"
 #include "Misc/TextFilterExpressionEvaluator.h"
 #include "ArticyObject.h"
 
-#define LOCTEXT_NAMESPACE "ArticyObjectSearchBoxHelpers"
+#define LOCTEXT_NAMESPACE "ArticyFilterHelpers"
+
+typedef const UArticyVariable*& FArticyVariableFilterType;
+typedef TFilterCollection<const UArticyVariable*&> FArticyVariableFilterCollectionType;
 
 /** A filter for testing articy objects for various traits such as display name, speaker name, text etc. */
 class FFrontendFilter_ArticyObject : public FFrontendFilter
@@ -64,4 +68,43 @@ public:
 
 	FChangedEvent ChangedEvent;
 };
+
+class FFrontendFilter_ArticyVariable : public IFilter<FArticyVariableFilterType>
+{
+public:
+	FFrontendFilter_ArticyVariable();
+	~FFrontendFilter_ArticyVariable();
+
+	// FFrontendFilter implementation
+	virtual FString GetName() const { return TEXT("ArticyVariableFilter"); }
+	virtual FText GetDisplayName() const { return LOCTEXT("FrontendFilter_ArticyVariable", "Articy Variable Filter"); }
+	virtual FText GetToolTipText() const { return LOCTEXT("FrontendFilter_ArticyVariableTooltip", "Show only articy variables that match the criteria"); }
+
+	// IFilter implementation
+	virtual bool PassesFilter(FArticyVariableFilterType InItem) const override;
+
+public:
+	/** Returns the unsanitized and unsplit filter terms */
+	FText GetRawFilterText() const;
+
+	/** Set the Text to be used as the Filter's restrictions */
+	void SetRawFilterText(const FText& InFilterText);
+
+	/** Get the last error returned from lexing or compiling the current filter text */
+	FText GetFilterErrorText() const;
+
+private:
+	/** We only need one expression context for all comparisons, so reuse it */
+	TSharedRef<class FFrontendFilter_ArticyGVFilterExpressionContext> TextFilterExpressionContext;
+	/** Expression evaluator to test against text expressions */
+	FTextFilterExpressionEvaluator TextFilterExpressionEvaluator;
+
+	DECLARE_DERIVED_EVENT(FFrontendFilter, IFilter<FArticyVariableFilterType>::FChangedEvent, FChangedEvent);
+	virtual FChangedEvent& OnChanged() override { return ChangedEvent; }
+
+private:
+	FChangedEvent ChangedEvent;
+
+};
+
 #undef LOCTEXT_NAMESPACE

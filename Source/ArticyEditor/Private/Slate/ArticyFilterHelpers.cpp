@@ -1,10 +1,9 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
-#include "Slate/AssetPicker/ArticyObjectFilterHelpers.h"
+#include "Slate/ArticyFilterHelpers.h"
 #include "ArticyObject.h"
 #include "Interfaces/ArticyObjectWithDisplayName.h"
 #include "Interfaces/ArticyObjectWithText.h"
@@ -327,6 +326,96 @@ FArticyClassRestrictionFilter::FArticyClassRestrictionFilter()
 bool FArticyClassRestrictionFilter::PassesFilter(FAssetFilterType InItem) const
 {
 	return InItem.GetAsset()->IsA(AllowedClass.Get());
+}
+
+
+class FFrontendFilter_ArticyGVFilterExpressionContext : public ITextFilterExpressionContext
+{
+public:
+	typedef TRemoveReference<FArticyVariableFilterType>::Type FArticyVariableFilterTypePtr;
+
+	FFrontendFilter_ArticyGVFilterExpressionContext()
+		: VariablePtr(nullptr)
+	{}
+
+	void SetVariable(FArticyVariableFilterTypePtr InVariable)
+	{
+		VariablePtr = InVariable;
+	}
+	void ClearVariable()
+	{
+		VariablePtr = nullptr;
+	}
+
+	virtual bool TestBasicStringExpression(const FTextFilterString& InValue, const ETextFilterTextComparisonMode InTextComparisonMode) const override;
+	virtual bool TestComplexExpression(const FName& InKey, const FTextFilterString& InValue,
+		const ETextFilterComparisonOperation InComparisonOperation, const ETextFilterTextComparisonMode InTextComparisonMode) const override;
+private:
+
+	FArticyVariableFilterTypePtr VariablePtr;
+};
+
+bool FFrontendFilter_ArticyGVFilterExpressionContext::TestBasicStringExpression(const FTextFilterString& InValue, const ETextFilterTextComparisonMode InTextComparisonMode) const
+{
+	const UArticyVariable* Variable = VariablePtr;
+	
+	const FTextFilterString VarNameToCompare(Variable->GetName());
+	if(VarNameToCompare.CompareText(InValue, InTextComparisonMode))
+	{
+		return true;
+	}
+
+	const FTextFilterString VarSetNameToCompare = Variable->GetOuter()->GetName();
+	if(VarSetNameToCompare.CompareText(InValue, InTextComparisonMode))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool FFrontendFilter_ArticyGVFilterExpressionContext::TestComplexExpression(const FName& InKey, const FTextFilterString& InValue,
+	const ETextFilterComparisonOperation InComparisonOperation, const ETextFilterTextComparisonMode InTextComparisonMode) const
+{
+	// dont use this filter
+	return false;
+}
+
+FFrontendFilter_ArticyVariable::FFrontendFilter_ArticyVariable() :
+	TextFilterExpressionContext(MakeShareable(new FFrontendFilter_ArticyGVFilterExpressionContext())),
+	TextFilterExpressionEvaluator(ETextFilterExpressionEvaluatorMode::BasicString)
+{
+}
+
+FFrontendFilter_ArticyVariable::~FFrontendFilter_ArticyVariable()
+{
+}
+
+bool FFrontendFilter_ArticyVariable::PassesFilter(FArticyVariableFilterType InItem) const
+{
+	TextFilterExpressionContext->SetVariable(InItem);
+	const bool bMatched = TextFilterExpressionEvaluator.TestTextFilter(*TextFilterExpressionContext);
+	TextFilterExpressionContext->ClearVariable();
+	return bMatched;
+}
+
+FText FFrontendFilter_ArticyVariable::GetRawFilterText() const
+{
+	return TextFilterExpressionEvaluator.GetFilterText();
+}
+
+void FFrontendFilter_ArticyVariable::SetRawFilterText(const FText& InFilterText)
+{
+	if (TextFilterExpressionEvaluator.SetFilterText(InFilterText))
+	{
+		// Will trigger a re-filter with the new text
+		ChangedEvent.Broadcast();
+	}
+}
+
+FText FFrontendFilter_ArticyVariable::GetFilterErrorText() const
+{
+	return TextFilterExpressionEvaluator.GetFilterErrorText();
 }
 
 #undef LOCTEXT_NAMESPACE

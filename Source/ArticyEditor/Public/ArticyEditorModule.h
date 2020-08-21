@@ -44,29 +44,31 @@ public:
 
 	TSharedPtr<FArticyEditorCustomizationManager> GetCustomizationManager() const { return CustomizationManager; }
 	
-	void RegisterDirectoryWatcher();
+	void RegisterArticyToolbar();
 	void RegisterConsoleCommands();
 	/** Registers all default widget extensions. As of this point, the articy button */
 	void RegisterDefaultArticyRefWidgetExtensions() const;
+	void RegisterDetailCustomizations() const;
+	void RegisterDirectoryWatcher();
 	void RegisterPluginCommands();
-	void RegisterArticyWindowTab();
-	void RegisterArticyToolbar();
-	void RegisterDetailsCustomizations() const;
 	void RegisterPluginSettings() const;
+	void RegisterToolTabs();
 
-	void UnregisterDefaultArticyRefWidgetExtensions() const;
 	void UnregisterPluginSettings() const;
+	void UnregisterDefaultArticyRefWidgetExtensions() const;
 	
-	/* Plugin settings menu */
 
 	void QueueImport();
 	bool IsImportQueued();
 
+	/** Delegate to bind custom logic you want to perform after the import has successfully finished */
 	FOnImportFinished OnImportFinished;
 	FOnCompilationFinished OnCompilationFinished;
 
 private:
 	void OpenArticyWindow();
+	void OpenArticyGVDebugger();
+
 	EImportStatusValidity CheckImportStatusValidity() const;
 	void OnGeneratedCodeChanged(const TArray<struct FFileChangeData>& FileChanges) const;
 
@@ -74,7 +76,9 @@ private:
 	void TriggerQueuedImport(bool b);
 	
 	void AddToolbarExtension(FToolBarBuilder& Builder);
-	TSharedRef<class SDockTab> OnSpawnArticyTab(const class FSpawnTabArgs& SpawnTabArgs) const;
+	TSharedRef<SWidget> OnGenerateArticyToolsMenu() const;
+	TSharedRef<class SDockTab> OnSpawnArticyMenuTab(const class FSpawnTabArgs& SpawnTabArgs) const;
+	TSharedRef<class SDockTab> OnSpawnArticyGVDebuggerTab(const class FSpawnTabArgs& SpawnTabArgs) const;
 	
 private:
 	bool bIsImportQueued = false;

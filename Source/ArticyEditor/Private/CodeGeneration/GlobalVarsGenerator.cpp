@@ -23,6 +23,11 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 		header->Line("#include \"ArticyRuntime/Public/ArticyGlobalVariables.h\"");
 		header->Line("#include \"" + filename + ".generated.h\"");
 
+		// disable "optimization cannot be applied due to function size" compile error. This error is caused by the huge constructor when all expresso
+		// scripts are added to the collection and this pragma disables the optimizations.
+		header->Line("#pragma warning(push)");
+		header->Line("#pragma warning(disable: 4883) //<disable \"optimization cannot be applied due to function size\" compile error.");
+		
 		//generate all the namespaces (with comment)
 		for(const auto ns : Data->GetGlobalVars().Namespaces)
 		{
@@ -34,7 +39,7 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 
 				for(const FArticyGVar var : ns.Variables)
 					header->Variable(var.GetCPPTypeString() + "*", var.Variable, "nullptr", var.Description, true,
-									FString::Printf(TEXT("VisibleAnywhere, BlueprintReadOnly, Instanced, Category=\"%s\""), *ns.Namespace));
+									FString::Printf(TEXT("VisibleAnywhere, BlueprintReadOnly, Category=\"%s\""), *ns.Namespace));
 
 				header->Line();
 
@@ -74,7 +79,7 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 			for(const auto ns : Data->GetGlobalVars().Namespaces)
 			{
 				header->Variable(ns.CppTypename + TEXT("*"), ns.Namespace, TEXT("nullptr"), ns.Description, true,
-								FString::Printf(TEXT("VisibleAnywhere, BlueprintReadOnly, Instanced, Category=\"%s\""), *ns.Namespace));
+								FString::Printf(TEXT("VisibleAnywhere, BlueprintReadOnly, Category=\"%s\""), *ns.Namespace));
 			}
 
 			//---------------------------------------------------------------------------//
@@ -112,6 +117,8 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 			}, TEXT("Get the default GlobalVariables (a copy of the asset)."), true,
 				TEXT("BlueprintPure, Category=\"ArticyGlobalVariables\", meta=(HidePin=\"WorldContext\", DefaultToSelf=\"WorldContext\", DisplayName=\"GetArticyGV\", keywords=\"global variables\")"));
 		});
+
+		header->Line("#pragma warning(pop)");
 	});
 }
 
