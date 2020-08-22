@@ -7,6 +7,8 @@
 #include "ArticyPluginSettings.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SScrollBox.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Editor.h"
 
 #define LOCTEXT_NAMESPACE "ArticyGlobalVarSelection"
 

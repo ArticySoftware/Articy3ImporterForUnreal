@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
@@ -8,6 +7,8 @@
 #include "ArticyHelpers.h"
 #include "ArticyDatabase.h"
 #include "ArticyBaseTypes.h"
+#include "AssetRegistryModule.h"
+
 #include <ArticyPackage.h>
 
 void UArticyObject::InitFromJson(TSharedPtr<FJsonValue> Json)

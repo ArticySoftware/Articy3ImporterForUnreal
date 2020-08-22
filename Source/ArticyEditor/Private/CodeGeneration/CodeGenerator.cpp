@@ -25,6 +25,7 @@
 #include "ObjectTools.h"
 #include "HAL/PlatformFilemanager.h"
 #include "Misc/App.h"
+#include "Misc/MessageDialog.h"
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//

@@ -1,10 +1,11 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
 #include "ArticyBaseTypes.h"
+#include "ArticyPrimitive.h"
 #include "ArticyObjectWith_Base.h"
 #include "ArticyObjectWithAttachments.generated.h"
 

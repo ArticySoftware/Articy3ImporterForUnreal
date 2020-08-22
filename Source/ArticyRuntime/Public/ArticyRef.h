@@ -5,7 +5,7 @@
 #pragma once
 
 #include "ArticyBaseTypes.h"
-
+#include "ArticyObject.h"
 #include "ArticyRef.generated.h"
 
 /**

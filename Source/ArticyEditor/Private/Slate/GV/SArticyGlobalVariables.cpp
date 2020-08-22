@@ -7,7 +7,10 @@
 #include "ArticyPluginSettings.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Input/SSearchBox.h"
+#include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Layout/SScrollBox.h"
+#include "Editor.h"
+#include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "ArticyGlobalVariables"
 

@@ -1,6 +1,5 @@
 //  
-// Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
+// Copyright (c) articy Software GmbH & Co. KG. All rights reserved.
 //
 
 #include "Slate/AssetPicker/SArticyObjectToolTip.h"
@@ -16,6 +15,7 @@
 #include "Slate/UserInterfaceHelperFunctions.h"
 #include "Interfaces/ArticyObjectWithSpeaker.h"
 #include "Widgets/Layout/SScaleBox.h"
+#include "ArticyEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectToolTip"
 

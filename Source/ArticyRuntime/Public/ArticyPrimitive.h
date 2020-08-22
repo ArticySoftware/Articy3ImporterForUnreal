@@ -1,11 +1,9 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
-#include <sstream>
-#include "ArticyRef.h"
 #include "ArticyBaseObject.h"
 #include "ArticyBaseTypes.h"
 

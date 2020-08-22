@@ -7,6 +7,7 @@
 #include "ArticyRuntimeModule.h"
 #include "ArticyDatabase.h"
 #include "ArticyGlobalVariables.h"
+#include "ArticyRef.h"
 #include "Components/BillboardComponent.h"
 #include "ArticyFlowPlayer.generated.h"
 

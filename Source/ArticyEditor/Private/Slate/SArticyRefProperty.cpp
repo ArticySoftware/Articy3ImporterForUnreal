@@ -16,6 +16,8 @@
 #include "Editor.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
 #include "Customizations/ArticyRefCustomization.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Framework/MultiBox/MultiBoxDefs.h"
 
 #define LOCTEXT_NAMESPACE "ArticyRefProperty"
 

@@ -8,6 +8,7 @@
 #include "Interfaces/ArticyObjectWithDisplayName.h"
 #include "Interfaces/ArticyObjectWithText.h"
 #include "Interfaces/ArticyObjectWithSpeaker.h"
+#include "ArticyEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectSearchBoxHelpers"
 

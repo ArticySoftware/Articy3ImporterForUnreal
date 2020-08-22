@@ -7,6 +7,9 @@
 #include "ArticyEditorStyle.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
 #include "ArticyObject.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Input/SButton.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 
 void FArticyButtonCustomization::RegisterArticyRefWidgetCustomization(FArticyRefWidgetCustomizationBuilder& Builder)
 {

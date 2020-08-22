@@ -13,6 +13,7 @@
 #include "ArticyDatabase.h"
 #include "Slate/SPackageSettings.h"
 #include "ArticyEditorModule.h"
+#include "AssetRegistryModule.h"
 
 #define LOCTEXT_NAMESPACE "ArticyPluginSettings"
 
