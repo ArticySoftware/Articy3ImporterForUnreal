@@ -8,7 +8,7 @@
 #include "Styling/ISlateStyle.h"
 
 /**  */
-class FArticyEditorStyle
+class ARTICYEDITOR_API FArticyEditorStyle
 {
 public:
 
