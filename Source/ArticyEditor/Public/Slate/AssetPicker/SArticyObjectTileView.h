@@ -21,14 +21,16 @@ class ARTICYEDITOR_API SArticyObjectTileView : public SCompoundWidget
 {
 public:
 	SLATE_BEGIN_ARGS(SArticyObjectTileView) 
-		: _ThumbnailSize(48.f)	
-		, _ThumbnailPadding(4.f)
+		: _LabelVisibility(EVisibility::Visible)
+		, _OnMouseDoubleClick()
+		, _ThumbnailSize(48.f)	
+		, _ThumbnailPadding(2.f)
 	{}
-
 		SLATE_ATTRIBUTE(FArticyId, ObjectToDisplay)
-		SLATE_ARGUMENT(int32, ThumbnailSize)
-		SLATE_ARGUMENT(int32, ThumbnailPadding)
-
+		SLATE_ATTRIBUTE(EVisibility, LabelVisibility)
+	        SLATE_EVENT(FPointerEventHandler, OnMouseDoubleClick)
+		SLATE_ARGUMENT(FVector2D, ThumbnailSize)
+		SLATE_ARGUMENT(FMargin, ThumbnailPadding)
 	SLATE_END_ARGS()
 
 /**
@@ -51,9 +53,9 @@ private:
 	mutable FSlateBrush PreviewBrush;
 	const FSlateBrush* TypeImage = nullptr;
 	TSharedPtr<FTextBlockStyle> EntityNameTextStyle;
-	int32 ThumbnailSize;
-	int32 ThumbnailPadding;
-
+	FVector2D ThumbnailSize;
+	FMargin ThumbnailPadding;
+	TAttribute<EVisibility> LabelVisibility;
 	bool bHasPreviewImage = false;
 	
 private:

@@ -32,7 +32,6 @@ void SArticyObjectTileView::UpdateDisplayedArticyObject()
 	}
 
 	TypeImage = UserInterfaceHelperFunctions::GetArticyTypeImage(CachedArticyObject.Get(), UserInterfaceHelperFunctions::Medium);
-
 }
 
 void SArticyObjectTileView::Construct(const FArguments& InArgs)
@@ -40,13 +39,14 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 	ArticyIdAttribute = InArgs._ObjectToDisplay;
 	ThumbnailSize = InArgs._ThumbnailSize;
 	ThumbnailPadding = InArgs._ThumbnailPadding;
+	LabelVisibility = InArgs._LabelVisibility;
 
-	TAttribute<FOptionalSize> WidthScaleAttribute = ThumbnailSize / 3.f;
-	TAttribute<FOptionalSize> HeightScaleAttribute = ThumbnailSize / 3.f;
+	TAttribute<FOptionalSize> WidthScaleAttribute = ThumbnailSize.X / 3.f;
+	TAttribute<FOptionalSize> HeightScaleAttribute = ThumbnailSize.Y / 3.f;
 
 	Cursor = EMouseCursor::Hand;
 
-	PreviewBrush.ImageSize = FVector2D(ThumbnailSize, ThumbnailSize);
+	PreviewBrush.ImageSize = ThumbnailSize;
 	
 	PreviewImage = SNew(SImage)
 		.Image(this, &SArticyObjectTileView::OnGetEntityImage);
@@ -62,16 +62,20 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 
 	SetToolTip(SNew(SArticyObjectToolTip).ObjectToDisplay(ArticyIdAttribute));
 
+	this->SetOnMouseDoubleClick(InArgs._OnMouseDoubleClick);
+
 	this->ChildSlot
 	[
 		SAssignNew(WidgetContainerBorder, SBorder)
 		.ToolTip(GetToolTip())
 		.BorderBackgroundColor(this, &SArticyObjectTileView::OnGetArticyObjectColor)
 		.BorderImage(FArticyEditorStyle::Get().GetBrush("ArticyImporter.AssetPicker.TileBorder.16"))
+		.HAlign(HAlign_Center)
+		.VAlign(VAlign_Center)
 		[
 			SNew(SBox)
-			.WidthOverride(ThumbnailSize)
-			.HeightOverride(ThumbnailSize)
+			.WidthOverride(ThumbnailSize.X)
+			.HeightOverride(ThumbnailSize.Y)
 			[
 				SNew(SOverlay)
 				+ SOverlay::Slot()
@@ -83,8 +87,8 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 					.FillHeight(0.8)
 					[
 						SNew(SBox)
-						.WidthOverride(ThumbnailSize)
-						.HeightOverride(ThumbnailSize)
+						.WidthOverride(ThumbnailSize.X)
+						.HeightOverride(ThumbnailSize.Y)
 						.Padding(ThumbnailPadding)
 						.HAlign(HAlign_Center)
 						.VAlign(VAlign_Center)
@@ -100,10 +104,11 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 					.HAlign(HAlign_Center)
 					.VAlign(VAlign_Bottom)
 					.AutoHeight()
-					.Padding(2, 0, 2, 3)
+					//.Padding(2, 0, 2, 3)
 					[
 						SNew(SScaleBox)
 						.Stretch(EStretch::ScaleToFit)
+						.Visibility(LabelVisibility)
 						[
 							DisplayNameTextBlock.ToSharedRef()
 						]
@@ -113,7 +118,7 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 				+ SOverlay::Slot()
 				.HAlign(HAlign_Left)
 				.VAlign(VAlign_Top)
-				.Padding(3.f)
+				.Padding(0.f, 3.f)
 				[
 					SNew(SBox)
 					.WidthOverride(WidthScaleAttribute)

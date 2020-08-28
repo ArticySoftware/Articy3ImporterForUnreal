@@ -15,7 +15,7 @@
 
 namespace ArticyRefPropertyConstants {
 	const FVector2D ThumbnailSize(64, 64);
-	const FVector2D ThumbnailPadding(2, 2);
+	const FMargin ThumbnailPadding(2, 2);
 
 }
 

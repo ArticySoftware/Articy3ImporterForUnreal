@@ -50,8 +50,9 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* In
 
 	TileView = SNew(SArticyObjectTileView)
 		.ObjectToDisplay(this, &SArticyRefProperty::GetCurrentObjectID)
-		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize.X)
-		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding.X);
+		.OnMouseDoubleClick(this, &SArticyRefProperty::OnAssetThumbnailDoubleClick)
+		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize)
+		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding);
 
 	ExtraButtons = SNew(SHorizontalBox);
 
@@ -67,7 +68,6 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* In
 		[
 			SAssignNew(ThumbnailBorder, SBorder)
 			.Padding(5.0f)
-			.OnMouseDoubleClick(this, &SArticyRefProperty::OnAssetThumbnailDoubleClick)
 			[
 				SAssignNew(TileContainer, SBox)
 				[

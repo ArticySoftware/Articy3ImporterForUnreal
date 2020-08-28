@@ -155,7 +155,7 @@ TSharedRef<class ITableRow> SArticyObjectAssetPicker::MakeTileViewWidget(TWeakOb
 	TSharedRef<SArticyObjectTileView> Item =
 		SNew(SArticyObjectTileView)
 		.ObjectToDisplay(Entity->GetId())
-		.ThumbnailSize(FArticyObjectAssetPicketConstants::TileSize.X)
+		.ThumbnailSize(FArticyObjectAssetPicketConstants::TileSize)
 		.ThumbnailPadding(FArticyObjectAssetPicketConstants::ThumbnailPadding);
 
 	TableRowWidget->SetContent(Item);
