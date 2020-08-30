@@ -18,6 +18,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Articy")
 	TMap<FName, TSoftObjectPtr<UArticyObject>> AssetsByTechnicalName;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Articy")
+	TMap<FArticyId, TSoftObjectPtr<UArticyObject>> AssetsById;
 public: 
 
 	void AddAsset(UArticyObject* ArticyObject);
@@ -35,7 +38,11 @@ public:
 	const TMap<FName, TSoftObjectPtr<UArticyObject>> GetAssetsDict();
 
 	UFUNCTION()
-	const bool IsAssetContained(const UArticyObject* ArticyObject) const;
+	UArticyObject* GetAssetById(const FArticyId& Id) const;
+
+	const bool IsAssetContained(FName TechnicalName) const;
+
+	const bool IsAssetContained(const FArticyId& Id) const;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Package")
 	FString Name;
@@ -70,14 +77,24 @@ inline const TMap<FName, TSoftObjectPtr<UArticyObject>> UArticyPackage::GetAsset
 	return AssetsByTechnicalName;
 }
 
-inline const bool UArticyPackage::IsAssetContained(const UArticyObject* ArticyObject) const
+inline const bool UArticyPackage::IsAssetContained(FName TechnicalName) const
+{	
+	return AssetsByTechnicalName.Contains(TechnicalName);
+}
+
+inline const bool UArticyPackage::IsAssetContained(const FArticyId &Id) const
 {
-	if(!ArticyObject)
+	return AssetsById.Contains(Id);
+}
+
+inline UArticyObject* UArticyPackage::GetAssetById(const FArticyId& Id) const
+{
+	if(AssetsById.Contains(Id))
 	{
-		return false;
+		return AssetsById[Id].Get();
 	}
-	
-	return AssetsByTechnicalName.Contains(ArticyObject->GetTechnicalName());
+
+	return nullptr;
 }
 
 inline TArray<UObject*> UArticyPackage::GetInnerObjects() const
@@ -90,11 +107,12 @@ inline TArray<UObject*> UArticyPackage::GetInnerObjects() const
 
 inline void UArticyPackage::AddAsset(UArticyObject* ArticyObject)
 {
-	const FName technicalName = ArticyObject->GetTechnicalName();
+	const FArticyId& ArticyId = ArticyObject->GetId();
 
-	if (!AssetsByTechnicalName.Contains(technicalName))
+	if (!IsAssetContained(ArticyId))
 	{
-		AssetsByTechnicalName.Add(technicalName, ArticyObject);
 		Assets.Add(ArticyObject);
+		AssetsByTechnicalName.Add(ArticyObject->GetTechnicalName(), ArticyObject);
+		AssetsById.Add(ArticyId, ArticyObject);
 	}
 }

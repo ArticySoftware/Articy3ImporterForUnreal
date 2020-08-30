@@ -94,11 +94,10 @@ UArticyObject* UArticyObject::FindAsset(const FArticyId& Id)
 
 		if (Package != nullptr)
 		{
-			for (const auto asset : Package->GetAssets())
+			UArticyObject* ArticyObject = Package->GetAssetById(Id);
+			if(ArticyObject && ArticyObject->WasLoaded())
 			{
-				const auto obj = Cast<UArticyObject>(asset);
-				if (obj && obj->WasLoaded() && obj->GetId() == Id)
-					return obj;
+				return ArticyObject;
 			}
 		}
 	}
