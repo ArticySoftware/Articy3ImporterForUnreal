@@ -344,7 +344,7 @@ class ARTICYRUNTIME_API UArticyBaseVariableSet : public UObject, public IArticyR
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "ArticyGlobalVariables")
 	TArray<UArticyVariable*> Variables;
 
 public:
