@@ -17,6 +17,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogArticyEditor, Log, All)
 
 DECLARE_MULTICAST_DELEGATE(FOnImportFinished);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCompilationFinished, UArticyImportData*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAssetsGenerated, TArray<UArticyPackage*>)
 
 class FToolBarBuilder;
 class FMenuBuilder;
@@ -43,6 +44,7 @@ public:
 	}
 
 	TSharedPtr<FArticyEditorCustomizationManager> GetCustomizationManager() const { return CustomizationManager; }
+	TArray<UArticyPackage*> ARTICYEDITOR_API GetPackagesSlow();
 	
 	void RegisterArticyToolbar();
 	void RegisterConsoleCommands();
@@ -56,13 +58,14 @@ public:
 
 	void UnregisterPluginSettings() const;
 	void UnregisterDefaultArticyRefWidgetExtensions() const;
-	
+
 	void QueueImport();
 	bool IsImportQueued();
 
 	/** Delegate to bind custom logic you want to perform after the import has successfully finished */
-	FOnImportFinished OnImportFinished;
 	FOnCompilationFinished OnCompilationFinished;
+	FOnAssetsGenerated OnAssetsGenerated;
+	FOnImportFinished OnImportFinished;
 
 private:
 	void OpenArticyWindow();

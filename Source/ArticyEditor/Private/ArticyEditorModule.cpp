@@ -100,6 +100,21 @@ void FArticyEditorModule::RegisterDetailCustomizations() const
 	PropertyModule.NotifyCustomizationModuleChanged();
 }
 
+TArray<UArticyPackage*> FArticyEditorModule::GetPackagesSlow()
+{
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	TArray<FAssetData> PackageData;
+	AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), PackageData);
+
+	TArray<UArticyPackage*> Packages;
+	for(FAssetData& Data : PackageData)
+	{
+		Packages.Add(Cast<UArticyPackage>(Data.GetAsset()));
+	}
+
+	return Packages;
+}
+
 void FArticyEditorModule::RegisterArticyToolbar()
 {
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
