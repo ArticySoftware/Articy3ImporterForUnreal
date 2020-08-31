@@ -302,6 +302,7 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	{
 		UE_LOG(LogArticyEditor, Error, TEXT("Could not save package %s"), *Package->GetName());
 	}
+	Data->PostImport();
 }
 
 void CodeGenerator::OnCompiled(UArticyImportData* Data)

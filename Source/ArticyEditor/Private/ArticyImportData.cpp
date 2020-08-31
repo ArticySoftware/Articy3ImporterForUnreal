@@ -380,8 +380,8 @@ void UArticyImportData::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags)
 void UArticyImportData::PostImport()
 {
 	// update the internal save state of the package settings (add settings for new packages, remove outdated package settings, restore previous settings for still existing packages)
-	UArticyPluginSettings* settings = GetMutableDefault<UArticyPluginSettings>();
-	settings->UpdatePackageSettings();
+	UArticyPluginSettings* ArticyPluginSettings = GetMutableDefault<UArticyPluginSettings>();
+	ArticyPluginSettings->UpdatePackageSettings();
 
 	FArticyEditorModule& ArticyEditorModule = FModuleManager::Get().GetModuleChecked<FArticyEditorModule>("ArticyEditor");
 	ArticyEditorModule.OnImportFinished.Broadcast();
@@ -431,9 +431,8 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 			// this will have either the current import data or the cached version
 			PostImportHandle = FArticyEditorModule::Get().OnCompilationFinished.AddLambda([this](UArticyImportData* Data)
 			{
-				CodeGenerator::GenerateAssets(Data);
 				BuildCachedVersion();
-				UArticyImportData::PostImport();
+				CodeGenerator::GenerateAssets(Data);
 			});
 
 			CodeGenerator::Recompile(this);
@@ -442,9 +441,8 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	// if we are importing but no code needed to be generated, generate assets immediately and perform post import
 	else
 	{
-		CodeGenerator::GenerateAssets(this);
 		BuildCachedVersion();
-		UArticyImportData::PostImport();
+		CodeGenerator::GenerateAssets(this);
 	}
 }
 
