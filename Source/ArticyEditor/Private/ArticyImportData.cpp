@@ -379,10 +379,6 @@ void UArticyImportData::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags)
 
 void UArticyImportData::PostImport()
 {
-	// update the internal save state of the package settings (add settings for new packages, remove outdated package settings, restore previous settings for still existing packages)
-	UArticyPluginSettings* ArticyPluginSettings = GetMutableDefault<UArticyPluginSettings>();
-	ArticyPluginSettings->UpdatePackageSettings();
-
 	FArticyEditorModule& ArticyEditorModule = FModuleManager::Get().GetModuleChecked<FArticyEditorModule>("ArticyEditor");
 	ArticyEditorModule.OnImportFinished.Broadcast();
 }
@@ -433,6 +429,7 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 			{
 				BuildCachedVersion();
 				CodeGenerator::GenerateAssets(Data);
+				PostImport();
 			});
 
 			CodeGenerator::Recompile(this);
@@ -443,6 +440,7 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	{
 		BuildCachedVersion();
 		CodeGenerator::GenerateAssets(this);
+		PostImport();
 	}
 }
 

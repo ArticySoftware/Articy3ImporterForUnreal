@@ -305,7 +305,9 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 
 	FArticyEditorModule::Get().OnAssetsGenerated.Broadcast(Data->GetPackagesDirect());
 
-	Data->PostImport();
+	// update the internal save state of the package settings (add settings for new packages, remove outdated package settings, restore previous settings for still existing packages)
+	UArticyPluginSettings* ArticyPluginSettings = GetMutableDefault<UArticyPluginSettings>();
+	ArticyPluginSettings->UpdatePackageSettings();
 }
 
 void CodeGenerator::OnCompiled(UArticyImportData* Data)
