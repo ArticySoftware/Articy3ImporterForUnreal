@@ -64,6 +64,7 @@ inline const int UArticyPackage::AssetNum()const
 inline void UArticyPackage::Clear()
 {
 	Assets.Empty();
+	AssetsById.Empty();
 	AssetsByTechnicalName.Empty();
 }
 
