@@ -23,8 +23,8 @@ public:
 	SLATE_BEGIN_ARGS(SArticyObjectTileView) 
 		: _LabelVisibility(EVisibility::Visible)
 		, _OnMouseDoubleClick()
-		, _ThumbnailSize(48.f)	
-		, _ThumbnailPadding(2.f)
+		, _ThumbnailSize(FVector2D(48.f, 48.f))	
+		, _ThumbnailPadding(FMargin(2.f))
 	{}
 		SLATE_ATTRIBUTE(FArticyId, ObjectToDisplay)
 		SLATE_ATTRIBUTE(EVisibility, LabelVisibility)

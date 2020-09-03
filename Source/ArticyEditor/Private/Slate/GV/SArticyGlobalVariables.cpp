@@ -189,8 +189,8 @@ void SArticyVariableSet::BuildVariableWidgets()
 						return;
 					}
 					
-					const FScopedTransaction Transaction(LOCTEXT("ModifyGV", "Modified GV"));
-					BoolVar->Modify();
+					const FScopedTransaction Transaction(TEXT("ArticyGV"),LOCTEXT("ModifyGV", "Modified GV"), BoolVar);
+					bool bSavedInTranactionBuffer = BoolVar->Modify();
 					*BoolVar = State == ECheckBoxState::Checked;
 				})
 			];

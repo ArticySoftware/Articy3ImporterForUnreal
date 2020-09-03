@@ -128,7 +128,7 @@ void SArticyRefProperty::UpdateWidget()
 
 void SArticyRefProperty::ApplyArticyRefCustomization(const FArticyRefWidgetCustomizationInfo& Customization)
 {
-	if(Customization.ExtraButtonExtender != nullptr)
+	if(Customization.ExtraButtonExtender.IsValid())
 	{
 		ExtraButtonExtenders.Add(Customization.ExtraButtonExtender);
 	}

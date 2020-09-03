@@ -8,7 +8,9 @@
 #include "DetailWidgetRow.h"
 #include "Delegates/Delegate.h"
 #include "ArticyEditorModule.h"
+#include "Widgets/Layout/SSplitter.h"
 #include "Slate/GV/SArticyGlobalVariablesDebugger.h"
+#include "Launch/Resources/Version.h"
 
 void FArticyGVCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {
@@ -29,7 +31,11 @@ void FArticyGVCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilde
 
 	TMap<FString, TSharedRef<IPropertyHandle>> Properties;
 	TArray<FName> CategoryNames;
+	// @TODO GetCategoryNames was introduces in 4.22.
+	// Since the details panel should generally never be seen, it's okay that other categories are not hidden in < 4.22
+#if ENGINE_MINOR_VERSION >= 22
 	DetailBuilder.GetCategoryNames(CategoryNames);
+#endif
 
 	IDetailCategoryBuilder& CategoryBuilder = DetailBuilder.EditCategory(TEXT("Default"));
 

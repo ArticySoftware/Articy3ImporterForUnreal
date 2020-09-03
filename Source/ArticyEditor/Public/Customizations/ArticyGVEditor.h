@@ -12,6 +12,7 @@
 class FArticyGVEditor : public FAssetEditorToolkit, FEditorUndoClient, FNotifyHook, FGCObject
 {
 public:
+	virtual ~FArticyGVEditor();
 	void InitArticyGVEditor(const EToolkitMode::Type Mode, const TSharedPtr<IToolkitHost>& InitToolkitHost, UArticyGlobalVariables* ObjectToEdit);
 
 	/** FGCObject Interface */

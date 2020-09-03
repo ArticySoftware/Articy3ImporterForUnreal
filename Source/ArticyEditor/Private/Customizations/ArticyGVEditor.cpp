@@ -7,6 +7,11 @@
 
 const FName FArticyGVEditor::ArticyGVTab(TEXT("ArticyGVTab"));
 
+FArticyGVEditor::~FArticyGVEditor()
+{
+	GEditor->UnregisterForUndo(this);
+}
+
 void FArticyGVEditor::InitArticyGVEditor(const EToolkitMode::Type Mode, const TSharedPtr<IToolkitHost>& InitToolkitHost, UArticyGlobalVariables* ObjectToEdit)
 {
 	check(ObjectToEdit)
@@ -14,7 +19,15 @@ void FArticyGVEditor::InitArticyGVEditor(const EToolkitMode::Type Mode, const TS
 	GlobalVariables = ObjectToEdit;
 	
 	GlobalVariables->SetFlags(RF_Transactional);
-
+	for(UArticyBaseVariableSet* VarSet : GlobalVariables->GetVariableSets())
+	{
+		VarSet->SetFlags(RF_Transactional);
+		for(UArticyVariable* Var : VarSet->GetVariables())
+		{
+			Var->SetFlags(RF_Transactional);
+		}
+	}
+	
 	GEditor->RegisterForUndo(this);
 
 	const bool bCreateDefaultStandaloneMenu = true;
