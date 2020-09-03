@@ -1,28 +1,20 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include <IPropertyTypeCustomization.h>
-#include "ArticyRef.h"
-#include "Slate/SArticyRefProperty.h"
-#include "ClassViewerFilter.h"
-#include "ClassViewerModule.h"
-#include "ArticyObject.h"
 #include "IDetailCustomization.h"
-#include "DetailLayoutBuilder.h"
 #include "Slate/GV/SArticyGlobalVariablesDebugger.h"
-
+#include "DetailLayoutBuilder.h"
 
 class FArticyGVCustomization : public IDetailCustomization
 {
 public:
 	static TSharedRef<IDetailCustomization> MakeInstance();
 
-	void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override;
+	virtual void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override;
 private:
 	FGlobalVariablesSizeData SizeData;
 	// ref: SDetailsView

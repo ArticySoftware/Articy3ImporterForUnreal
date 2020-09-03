@@ -15,7 +15,7 @@
 #include "Slate/AssetPicker/SArticyObjectAssetPicker.h"
 #include "Editor.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
-#include "Customizations/ArticyRefCustomization.h"
+#include "Customizations/Details/ArticyRefCustomization.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Framework/MultiBox/MultiBoxDefs.h"
 

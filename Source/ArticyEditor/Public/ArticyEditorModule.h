@@ -47,6 +47,7 @@ public:
 	TArray<UArticyPackage*> ARTICYEDITOR_API GetPackagesSlow();
 	
 	void RegisterArticyToolbar();
+	void RegisterAssetTypeActions();
 	void RegisterConsoleCommands();
 	/** Registers all default widget extensions. As of this point, the articy button */
 	void RegisterDefaultArticyRefWidgetExtensions() const;

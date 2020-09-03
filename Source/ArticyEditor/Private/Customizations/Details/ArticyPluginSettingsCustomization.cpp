@@ -1,11 +1,9 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
-#include "Customizations/ArticyPluginSettingsCustomization.h"
-
+#include "Customizations/Details/ArticyPluginSettingsCustomization.h"
 #include "ArticyEditorFunctionLibrary.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"

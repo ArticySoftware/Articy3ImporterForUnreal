@@ -11,9 +11,6 @@
 #include "ArticyEditorStyle.h"
 #include "ArticyFlowClasses.h"
 #include "CodeGeneration/CodeGenerator.h"
-#include "Customizations/ArticyPluginSettingsCustomization.h"
-#include "Customizations/ArticyRefCustomization.h"
-#include "Customizations/ArticyGVCustomization.h"
 #include "Customizations/ArticyRefWidgetCustomizations/DefaultArticyRefWidgetCustomizations.h"
 #include "Developer/Settings/Public/ISettingsModule.h"
 #include "Developer/Settings/Public/ISettingsSection.h"
@@ -21,6 +18,7 @@
 #include "Misc/MessageDialog.h"
 #include "Dialogs/Dialogs.h"
 #include <Widgets/SWindow.h>
+#include "AssetToolsModule.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Editor.h"
 #include "DirectoryWatcherModule.h"
@@ -29,6 +27,10 @@
 #include "IDirectoryWatcher.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "LevelEditor.h"
+#include "Customizations/AssetActions/AssetTypeActions_ArticyGV.h"
+#include "Customizations/Details/ArticyGVCustomization.h"
+#include "Customizations/Details/ArticyPluginSettingsCustomization.h"
+#include "Customizations/Details/ArticyRefCustomization.h"
 
 DEFINE_LOG_CATEGORY(LogArticyEditor)
 
@@ -41,6 +43,7 @@ void FArticyEditorModule::StartupModule()
 	CustomizationManager = MakeShareable(new FArticyEditorCustomizationManager);
 	
 	RegisterArticyToolbar();
+	RegisterAssetTypeActions();
 	RegisterConsoleCommands();
 	RegisterDefaultArticyRefWidgetExtensions();
 	RegisterDetailCustomizations();
@@ -128,6 +131,12 @@ void FArticyEditorModule::RegisterArticyToolbar()
 		ToolbarExtender->AddToolBarExtension("Settings", EExtensionHook::After, PluginCommands, FToolBarExtensionDelegate::CreateRaw(this, &FArticyEditorModule::AddToolbarExtension));
 		LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
 	}
+}
+
+void FArticyEditorModule::RegisterAssetTypeActions()
+{
+	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	AssetTools.RegisterAssetTypeActions(MakeShareable(new FAssetTypeActions_ArticyGV()));
 }
 
 void FArticyEditorModule::RegisterPluginCommands()

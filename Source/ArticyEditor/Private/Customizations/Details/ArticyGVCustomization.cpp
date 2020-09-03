@@ -2,20 +2,11 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 //
 
-#include "Customizations/ArticyGVCustomization.h"
-
+#include "Customizations/Details/ArticyGVCustomization.h"
 #include "ArticyGlobalVariables.h"
-#include "IDetailChildrenBuilder.h"
 #include "DetailCategoryBuilder.h"
 #include "DetailWidgetRow.h"
-#include "Widgets/SWidget.h"
-#include "Modules/ModuleManager.h"
-#include "IDetailPropertyRow.h"
 #include "Delegates/Delegate.h"
-#include "ArticyObject.h"
-#include "ArticyRef.h"
-#include "ClassViewerModule.h"
-#include "UObject/ConstructorHelpers.h"
 #include "ArticyEditorModule.h"
 #include "Slate/GV/SArticyGlobalVariablesDebugger.h"
 

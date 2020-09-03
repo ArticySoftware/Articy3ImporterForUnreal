@@ -2,7 +2,7 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 //
 
-#include "Customizations/ArticyRefCustomization.h"
+#include "Customizations/Details/ArticyRefCustomization.h"
 #include "ArticyEditorStyle.h"
 #include "IDetailChildrenBuilder.h"
 #include "DetailWidgetRow.h"
