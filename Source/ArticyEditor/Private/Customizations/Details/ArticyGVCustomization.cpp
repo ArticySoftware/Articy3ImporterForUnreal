@@ -24,10 +24,6 @@ void FArticyGVCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilde
 
 	UObject* Object = Objects[0];
 	UArticyGlobalVariables* GV = Cast<UArticyGlobalVariables>(Object);
-	
-	SizeData.RightColumnWidth = TAttribute<float>(this, &FArticyGVCustomization::OnGetRightColumnWidth);
-	SizeData.LeftColumnWidth = TAttribute<float>(this, &FArticyGVCustomization::OnGetLeftColumnWidth);
-	SizeData.OnWidthChanged = SSplitter::FOnSlotResized::CreateSP(this, &FArticyGVCustomization::OnSetColumnWidth);
 
 	TMap<FString, TSharedRef<IPropertyHandle>> Properties;
 	TArray<FName> CategoryNames;
