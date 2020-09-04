@@ -318,7 +318,7 @@ public:
 	FADISettings& GetSettings() { return Settings; }
 	const FArticyProjectDef& GetProject() const { return Project; }
 	const FArticyGVInfo& GetGlobalVars() const { return GlobalVariables; }
-
+	const FADIHierarchy& GetHierarchy() const { return Hierarchy; }
 	const FArticyObjectDefinitions& GetObjectDefs() const { return ObjectDefinitions; }
 	const FArticyPackageDefs& GetPackageDefs() const { return PackageDefs; }
 

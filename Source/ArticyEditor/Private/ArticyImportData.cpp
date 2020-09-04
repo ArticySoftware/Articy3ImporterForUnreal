@@ -326,7 +326,7 @@ UADIHierarchyObject* UADIHierarchyObject::CreateFromJson(UObject* Outer, const T
 
 	//fill in children
 	const TArray<TSharedPtr<FJsonValue>>* jsonChildren;
-	if(!JsonObject->TryGetArrayField(TEXT("Children"), jsonChildren) && jsonChildren)
+	if(JsonObject->TryGetArrayField(TEXT("Children"), jsonChildren) && jsonChildren)
 	{
 		obj->Children.Reset(jsonChildren->Num());
 		for(auto jsonChild : *jsonChildren)
