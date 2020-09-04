@@ -45,15 +45,14 @@ private:
 	TSharedPtr<IPropertyHandle> ArticyRefPropertyHandle;
 	TSharedPtr<SArticyRefProperty> ArticyRefProperty;
 	UClass* ClassRestriction = nullptr;
-	
+	TSharedPtr<class SComboButton> ClassRestrictionButton;
+	/** Used when there are multiple objects to edit */
+	bool bIsEditable = true;
+private:
 	UClass* GetClassRestriction() const;
 	FText GetChosenClassName() const;
-	void OnClassPicked(UClass* InChosenClass);
-	TSharedRef<SWidget> CreateClassPicker();
-
-
-private:
-	TSharedPtr<class SComboButton> ClassRestrictionButton;
 	UClass* GetClassRestrictionMetaData() const;
 	bool HasClassRestrictionMetaData() const;
+	void OnClassPicked(UClass* InChosenClass);
+	TSharedRef<SWidget> CreateClassPicker();
 };

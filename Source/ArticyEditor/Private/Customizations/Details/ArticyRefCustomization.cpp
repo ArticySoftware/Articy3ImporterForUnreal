@@ -26,27 +26,38 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 {
 	ArticyRefPropertyHandle = PropertyHandle;
 
-	// update the reference upon selecting the ref; this only serves cosmetic purposes. The underlying Id will not be changed
-	FArticyRef* ArticyRef = RetrieveArticyRef(ArticyRefPropertyHandle.Get());
-
-	UArticyObject* SelectedObject = UArticyObject::FindAsset(ArticyRef->GetId());
-
-	// attempt to set the class restriction via meta data (cpp means that the programmer has mandated a specific type)
-	ClassRestriction = GetClassRestrictionMetaData();
-	
-	// if there is no meta data class restriction, 
-	if (ClassRestriction == nullptr && SelectedObject)
+	if (PropertyHandle->GetNumPerObjectValues() > 1)
 	{
-		ClassRestriction = SelectedObject->UObject::GetClass();
+		bIsEditable = false;
 	}
 
-	if (ClassRestriction == nullptr)
-	{
-		ClassRestriction = UArticyObject::StaticClass();
-	}
-	
 	ArticyRefProperty = SNew(SArticyRefProperty, ArticyRefPropertyHandle.Get())
-		.ClassRestriction(this, &FArticyRefCustomization::GetClassRestriction);
+		.ClassRestriction(this, &FArticyRefCustomization::GetClassRestriction)
+		.IsEnabled(bIsEditable);
+
+	// only try to enable
+	if(bIsEditable)
+	{
+		// update the reference upon selecting the ref; this only serves cosmetic purposes. The underlying Id will not be changed
+		FArticyRef* ArticyRef = RetrieveArticyRef(ArticyRefPropertyHandle.Get());
+
+		UArticyObject* SelectedObject = UArticyObject::FindAsset(ArticyRef->GetId());
+
+		// attempt to set the class restriction via meta data (cpp means that the programmer has mandated a specific type)
+		ClassRestriction = GetClassRestrictionMetaData();
+		
+		// if there is no meta data class restriction, use the current class instead
+		if (ClassRestriction == nullptr && SelectedObject)
+		{
+			ClassRestriction = SelectedObject->UObject::GetClass();
+		}
+
+		// if we didn't have a current class, just use ArticyObject
+		if (ClassRestriction == nullptr)
+		{
+			ClassRestriction = UArticyObject::StaticClass();
+		}
+	}
 
 	HeaderRow.NameContent()
 	[
@@ -110,7 +121,7 @@ void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Prop
 
 		// disable the Id property here so that the user can't manipulate the ArticyID directly
 		// UProperty is not set to ReadOnly due to needing to be editable to access "SetValue" functions from the IPropertyHandle system
-		if(ChildHandle->GetPropertyDisplayName().EqualTo(FText::FromString(TEXT("Id"))))
+		if(!bIsEditable || ChildHandle->GetPropertyDisplayName().EqualTo(FText::FromString(TEXT("Id"))))
 		{
 			Row.IsEnabled(false);
 		}
