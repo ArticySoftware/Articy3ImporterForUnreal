@@ -320,12 +320,17 @@ void FFrontendFilter_ArticyObject::SetIncludeClassName(const bool InIncludeClass
 	}
 }
 
-FArticyClassRestrictionFilter::FArticyClassRestrictionFilter()
+FArticyClassRestrictionFilter::FArticyClassRestrictionFilter(TSubclassOf<UArticyObject> InAllowedClass, bool bInExactClass) : AllowedClass(InAllowedClass), bExactClass(bInExactClass)
 {
 }
 
 bool FArticyClassRestrictionFilter::PassesFilter(FAssetFilterType InItem) const
 {
+	if(bExactClass)
+	{
+		return InItem.GetClass() == AllowedClass;
+	}
+	
 	return InItem.GetAsset()->IsA(AllowedClass.Get());
 }
 

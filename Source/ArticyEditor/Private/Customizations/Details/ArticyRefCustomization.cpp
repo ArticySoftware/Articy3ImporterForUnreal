@@ -17,6 +17,10 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
 
+FArticyRefClassFilter::FArticyRefClassFilter(UClass* InGivenClass, bool bInRequiresExactClass) : GivenClass(InGivenClass), bRequiresExactClass(bInRequiresExactClass)
+{
+}
+
 TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 {
 	return MakeShareable(new FArticyRefCustomization());
@@ -33,9 +37,9 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 
 	ArticyRefProperty = SNew(SArticyRefProperty, ArticyRefPropertyHandle.Get())
 		.ClassRestriction(this, &FArticyRefCustomization::GetClassRestriction)
+		.bExactClass(IsExactClass())
 		.IsEnabled(bIsEditable);
 
-	// only try to enable
 	if(bIsEditable)
 	{
 		// update the reference upon selecting the ref; this only serves cosmetic purposes. The underlying Id will not be changed
@@ -46,19 +50,21 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 		// attempt to set the class restriction via meta data (cpp means that the programmer has mandated a specific type)
 		ClassRestriction = GetClassRestrictionMetaData();
 		
-		// if there is no meta data class restriction, use the current class instead
-		if (ClassRestriction == nullptr && SelectedObject)
+		// if the class of the current object is within 
+		if (SelectedObject)
 		{
-			ClassRestriction = SelectedObject->UObject::GetClass();
-		}
-
-		// if we didn't have a current class, just use ArticyObject
-		if (ClassRestriction == nullptr)
-		{
-			ClassRestriction = UArticyObject::StaticClass();
+			UClass* CurrentClass = SelectedObject->UObject::GetClass();
+			if (CurrentClass->IsChildOf(ClassRestriction))
+			{
+				ClassRestriction = CurrentClass;
+			}
 		}
 	}
 
+	TAttribute<bool> EnableAttribute;
+	EnableAttribute.Bind(this, &FArticyRefCustomization::IsEditable);
+	HeaderRow.IsEnabled(EnableAttribute);
+	
 	HeaderRow.NameContent()
 	[
 		ArticyRefPropertyHandle->CreatePropertyNameWidget()
@@ -72,43 +78,42 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 
 void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	ClassRestrictionButton =
-		SNew(SComboButton)
-		.OnGetMenuContent(this, &FArticyRefCustomization::CreateClassPicker)
-		.IsEnabled_Lambda([this]() -> bool
+	ClassRestrictionButton = SNew(SComboButton)
+	.OnGetMenuContent(this, &FArticyRefCustomization::CreateClassPicker)
+	.IsEnabled_Lambda([this]() -> bool
 	{
-		return !HasClassRestrictionMetaData();
+		return !IsExactClass();
 	})
-		.ContentPadding(2.f)
-		.ButtonContent()
-		[
-			SNew(STextBlock)
-			.Text(this, &FArticyRefCustomization::GetChosenClassName)
-		];
+	.ContentPadding(2.f)
+	.ButtonContent()
+	[
+		SNew(STextBlock)
+		.Text(this, &FArticyRefCustomization::GetChosenClassName)
+	];
 
 	ChildBuilder.AddCustomRow(FText::FromString("Class Restriction"))
-		.NameContent()
+	.NameContent()
+	[
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		.Padding(FMargin(0, 1, 0, 1))
+		.FillWidth(1)
 		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.Padding(FMargin(0, 1, 0, 1))
-			.FillWidth(1)
+			SNew(SBorder)
+			.Padding(FMargin(0.0f, 2.0f))
+			.VAlign(VAlign_Center)
 			[
-				SNew(SBorder)
-				.Padding(FMargin(0.0f, 2.0f))
-				.VAlign(VAlign_Center)
-				[
-					SNew(STextBlock)
-					.Text(FText::FromString("Class Restriction"))
-				]
+				SNew(STextBlock)
+				.Text(FText::FromString("Class Restriction"))
 			]
 		]
-		.ValueContent()
-		.MinDesiredWidth(150.f)
-		.MaxDesiredWidth(250.f)
-		[
-			ClassRestrictionButton.ToSharedRef()
-		];
+	]
+	.ValueContent()
+	.MinDesiredWidth(150.f)
+	.MaxDesiredWidth(250.f)
+	[
+		ClassRestrictionButton.ToSharedRef()
+	];
 	
 	uint32 NumChildren;
 	ArticyRefPropertyHandle->GetNumChildren(NumChildren);
@@ -165,15 +170,16 @@ void FArticyRefCustomization::OnClassPicked(UClass* InChosenClass)
 TSharedRef<SWidget> FArticyRefCustomization::CreateClassPicker()
 {
 	FClassViewerInitializationOptions ClassViewerConfig;
-	ClassViewerConfig.DisplayMode = EClassViewerDisplayMode::TreeView;
+	ClassViewerConfig.DisplayMode = EClassViewerDisplayMode::ListView;
 	ClassViewerConfig.bAllowViewOptions = true;
-	ClassViewerConfig.ClassFilter = MakeShareable(new FArticyRefClassFilter);
+	ClassViewerConfig.ClassFilter = MakeShareable(new FArticyRefClassFilter(GetClassRestrictionMetaData(), IsExactClass()));
+
 	return FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(ClassViewerConfig, FOnClassPicked::CreateRaw(this, &FArticyRefCustomization::OnClassPicked));
 }
 
 UClass* FArticyRefCustomization::GetClassRestrictionMetaData() const
 {
-	UClass* Restriction = nullptr;
+	UClass* Restriction = UArticyObject::StaticClass();
 
 	if(HasClassRestrictionMetaData())
 	{
@@ -196,6 +202,21 @@ UClass* FArticyRefCustomization::GetClassRestrictionMetaData() const
 bool FArticyRefCustomization::HasClassRestrictionMetaData() const
 {
 	return ArticyRefPropertyHandle->HasMetaData(TEXT("ArticyClassRestriction"));
+}
+
+bool FArticyRefCustomization::IsExactClass() const
+{
+	if(HasExactClassMetaData())
+	{
+		return ArticyRefPropertyHandle->GetBoolMetaData(TEXT("ArticyExactClass"));
+	}
+
+	return false;
+}
+
+bool FArticyRefCustomization::HasExactClassMetaData() const
+{
+	return ArticyRefPropertyHandle->HasMetaData(TEXT("ArticyExactClass"));
 }
 
 FArticyId FArticyRefCustomization::GetIdFromValueString(FString SourceString)

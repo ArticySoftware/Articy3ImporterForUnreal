@@ -29,11 +29,10 @@ namespace FArticyObjectAssetPicketConstants {
 class ARTICYEDITOR_API SArticyObjectAssetPicker : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SArticyObjectAssetPicker) {}
-
-	/** A struct containing details about how the asset picker should behave */
-	SLATE_ARGUMENT(FAssetPickerConfig, AssetPickerConfig)
-
+	SLATE_BEGIN_ARGS(SArticyObjectAssetPicker) : _bExactClass(false) {}
+		/** A struct containing details about how the asset picker should behave */
+		SLATE_ARGUMENT(FAssetPickerConfig, AssetPickerConfig)
+		SLATE_ARGUMENT(bool, bExactClass)
 	SLATE_END_ARGS()
 
 	~SArticyObjectAssetPicker();
@@ -62,6 +61,7 @@ private:
 private:
 	
 	FAssetPickerConfig AssetPickerConfig;
+	bool bExactClass = false;
 	TArray<FAssetData> ArticyPackageDataAssets;
 	TArray<TWeakObjectPtr<UArticyObject>> FilteredObjects;
 	bool bSlowFullListRefreshRequested = false;

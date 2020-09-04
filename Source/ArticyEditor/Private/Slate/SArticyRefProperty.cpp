@@ -24,7 +24,8 @@
 void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* InArticyRefPropHandle)
 {
 	this->ClassRestriction = InArgs._ClassRestriction;
-
+	this->bExactClass = InArgs._bExactClass;
+	
 	ArticyRefPropertyHandle = InArticyRefPropHandle;
 
 	FString CurrentRefValue;
@@ -41,18 +42,18 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* In
 	}
 
 	ComboButton = SNew(SComboButton)
-		.OnGetMenuContent(this, &SArticyRefProperty::CreateArticyObjectAssetPicker)
-		.ButtonContent()
-		[
-			SNew(STextBlock)
-			.Text(this, &SArticyRefProperty::OnGetArticyObjectDisplayName)
-		];
+	.OnGetMenuContent(this, &SArticyRefProperty::CreateArticyObjectAssetPicker)
+	.ButtonContent()
+	[
+		SNew(STextBlock)
+		.Text(this, &SArticyRefProperty::OnGetArticyObjectDisplayName)
+	];
 
 	TileView = SNew(SArticyObjectTileView)
-		.ObjectToDisplay(this, &SArticyRefProperty::GetCurrentObjectID)
-		.OnMouseDoubleClick(this, &SArticyRefProperty::OnAssetThumbnailDoubleClick)
-		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize)
-		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding);
+	.ObjectToDisplay(this, &SArticyRefProperty::GetCurrentObjectID)
+	.OnMouseDoubleClick(this, &SArticyRefProperty::OnAssetThumbnailDoubleClick)
+	.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize)
+	.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding);
 
 	ExtraButtons = SNew(SHorizontalBox);
 
@@ -100,21 +101,28 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* In
 
 void SArticyRefProperty::UpdateWidget()
 {
-	FString RefString;
-	const FPropertyAccess::Result Result = ArticyRefPropertyHandle->GetValueAsFormattedString(RefString);
-	// the actual update. This will be forwarded into the tile view and will cause an update
-	CurrentObjectID = FArticyRefCustomization::GetIdFromValueString(RefString);
-	CachedArticyObject = UArticyObject::FindAsset(CurrentObjectID);
-
 	// update the customizations
 	for (TSharedPtr<IArticyRefWidgetCustomization>& Customization : ActiveCustomizations)
 	{
 		Customization->UnregisterArticyRefWidgetCustomization();
 	}
+
+	ActiveCustomizations.Reset();
+
+	FString RefString;
+	const FPropertyAccess::Result Result = ArticyRefPropertyHandle->GetValueAsFormattedString(RefString);
+	
+	if(Result!=FPropertyAccess::Result::Success)
+	{
+		return;
+	}
+	
+	// the actual update. This will be forwarded into the tile view and will cause an update
+	CurrentObjectID = FArticyRefCustomization::GetIdFromValueString(RefString);
+	CachedArticyObject = UArticyObject::FindAsset(CurrentObjectID);
 	
 	FArticyRef* Ref = FArticyRefCustomization::RetrieveArticyRef(ArticyRefPropertyHandle);
 
-	ActiveCustomizations.Reset();
 	FArticyEditorModule::Get().GetCustomizationManager()->CreateArticyRefWidgetCustomizations(*Ref, ActiveCustomizations);
 
 	FArticyRefWidgetCustomizationBuilder Builder(*Ref);
@@ -178,8 +186,7 @@ TSharedRef<SWidget> SArticyRefProperty::CreateArticyObjectAssetPicker()
 	AssetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateRaw(this, &SArticyRefProperty::SetAsset);
 	AssetPickerConfig.bFocusSearchBoxWhenOpened = true;
 	AssetPickerConfig.Filter.ClassNames.Add(FName(*ClassRestriction.Get()->GetName()));
-
-	return SNew(SArticyObjectAssetPicker).AssetPickerConfig(AssetPickerConfig);
+	return SNew(SArticyObjectAssetPicker).AssetPickerConfig(AssetPickerConfig).bExactClass(bExactClass);
 }
 
 FReply SArticyRefProperty::OnArticyButtonClicked() const

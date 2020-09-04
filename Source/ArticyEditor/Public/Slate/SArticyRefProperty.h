@@ -26,9 +26,10 @@ class ARTICYEDITOR_API SArticyRefProperty : public SCompoundWidget
 {
 public:
 	SLATE_BEGIN_ARGS(SArticyRefProperty) 
-		: _ClassRestriction(nullptr)
+		: _ClassRestriction(nullptr), _bExactClass(false)
 	{}
 		SLATE_ATTRIBUTE(UClass*, ClassRestriction)
+		SLATE_ARGUMENT(bool, bExactClass)
 	SLATE_END_ARGS()
 /**
  * Construct this widget
@@ -51,7 +52,9 @@ private:
 	TSharedPtr<FSlateBrush> ImageBrush;
 	TSharedPtr<SComboButton> ComboButton;
 	TSharedPtr<SHorizontalBox> ExtraButtons;
+	
 	TAttribute<UClass*> ClassRestriction;
+	bool bExactClass = false;
 private:
 	/** Updates the widget including customizations. Called when the selected object changes */
 	void UpdateWidget();

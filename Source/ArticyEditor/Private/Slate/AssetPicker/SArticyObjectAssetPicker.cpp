@@ -27,7 +27,8 @@ SArticyObjectAssetPicker::~SArticyObjectAssetPicker()
 void SArticyObjectAssetPicker::Construct(const FArguments& InArgs)
 {
 	AssetPickerConfig = InArgs._AssetPickerConfig;
-
+	bExactClass = InArgs._bExactClass;
+	
 	OnAssetSelected = InArgs._AssetPickerConfig.OnAssetSelected;
 	Cursor = EMouseCursor::Hand;
 
@@ -38,10 +39,9 @@ void SArticyObjectAssetPicker::Construct(const FArguments& InArgs)
 	FrontendFilters->OnChanged().AddSP(this, &SArticyObjectAssetPicker::OnFrontendFiltersChanged);
 	ArticyObjectFilter = MakeShareable(new FFrontendFilter_ArticyObject());
 
-	ClassFilter = MakeShareable(new FArticyClassRestrictionFilter());
-	// kind of a hack: AssetPickerConfig gets used ONLY to filter with ClassNames[0]
 	UClass* Class = FindObjectFast<UClass>(nullptr, AssetPickerConfig.Filter.ClassNames[0], false, true, RF_NoFlags);
-	ClassFilter->AllowedClass = Class;
+	ClassFilter = MakeShareable(new FArticyClassRestrictionFilter(Class, bExactClass));
+	// kind of a hack: AssetPickerConfig gets used ONLY to filter with ClassNames[0]
 	
 	FMenuBuilder MenuBuilder(bInShouldCloseWindowAfterMenuSelection, nullptr, nullptr, bCloseSelfOnly);
 

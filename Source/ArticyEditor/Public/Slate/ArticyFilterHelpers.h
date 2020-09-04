@@ -55,18 +55,20 @@ private:
 class FArticyClassRestrictionFilter : public IFilter<FAssetFilterType>
 {
 public:
-	FArticyClassRestrictionFilter();
+	FArticyClassRestrictionFilter(TSubclassOf<UArticyObject> AllowedClass, bool bExactClass);
 
 	// IFilter implementation
 	virtual bool PassesFilter(FAssetFilterType InItem) const override;
 
-	TSubclassOf<UArticyObject> AllowedClass;
 
 	// IFilter implementation
 	DECLARE_DERIVED_EVENT(FArticyClassRestrictionFilter, IFilter<FAssetFilterType>::FChangedEvent, FChangedEvent);
 	virtual FChangedEvent& OnChanged() override { return ChangedEvent; }
 
 	FChangedEvent ChangedEvent;
+private:
+	TSubclassOf<UArticyObject> AllowedClass = UArticyObject::StaticClass();
+	bool bExactClass = false;
 };
 
 class FFrontendFilter_ArticyVariable : public IFilter<FArticyVariableFilterType>
