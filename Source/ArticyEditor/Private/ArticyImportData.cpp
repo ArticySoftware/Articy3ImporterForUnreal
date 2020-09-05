@@ -444,6 +444,26 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	}
 }
 
+const TWeakObjectPtr<UArticyImportData> UArticyImportData::GetImportData()
+{
+	static TWeakObjectPtr<UArticyImportData> ImportData = nullptr;
+
+	if(!ImportData.IsValid())
+	{
+		TArray<FAssetData> ImportDataAssets;
+		FAssetRegistryModule::GetRegistry().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), ImportDataAssets);
+
+		if (!ensureMsgf(ImportDataAssets.Num() == 1, TEXT("Zero or more than one import data assets found! Using first if available.")))
+		{
+			return nullptr;
+		}
+
+		ImportData = Cast<UArticyImportData>(ImportDataAssets[0].GetAsset());
+	}
+	
+	return ImportData;	
+}
+
 TArray<UArticyPackage*> UArticyImportData::GetPackagesDirect()
 {
 	TArray<UArticyPackage*> Packages;

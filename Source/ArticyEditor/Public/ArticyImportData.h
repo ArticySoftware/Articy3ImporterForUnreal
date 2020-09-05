@@ -314,6 +314,7 @@ public:
 
 	void ImportFromJson(const TSharedPtr<FJsonObject> RootObject);
 
+	const static TWeakObjectPtr<UArticyImportData> GetImportData();
 	const FADISettings& GetSettings() const { return Settings; }
 	FADISettings& GetSettings() { return Settings; }
 	const FArticyProjectDef& GetProject() const { return Project; }
