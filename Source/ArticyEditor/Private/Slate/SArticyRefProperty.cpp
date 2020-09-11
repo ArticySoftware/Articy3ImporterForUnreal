@@ -121,16 +121,15 @@ void SArticyRefProperty::UpdateWidget()
 	CurrentObjectID = FArticyRefCustomization::GetIdFromValueString(RefString);
 	CachedArticyObject = UArticyObject::FindAsset(CurrentObjectID);
 	
-	FArticyRef* Ref = FArticyRefCustomization::RetrieveArticyRef(ArticyRefPropertyHandle);
+	FArticyEditorModule::Get().GetCustomizationManager()->CreateArticyRefWidgetCustomizations(CachedArticyObject.Get(), ActiveCustomizations);
 
-	FArticyEditorModule::Get().GetCustomizationManager()->CreateArticyRefWidgetCustomizations(*Ref, ActiveCustomizations);
-
-	FArticyRefWidgetCustomizationBuilder Builder(*Ref);
+	FArticyRefWidgetCustomizationBuilder Builder(CachedArticyObject.Get());
 	for(TSharedPtr<IArticyRefWidgetCustomization>& Customization : ActiveCustomizations)
 	{
 		Customization->RegisterArticyRefWidgetCustomization(Builder);
 	}
-	
+
+	// this empties the extra buttons box and refills it based on the registered customizations
 	ApplyArticyRefCustomizations(Builder.GetCustomizations());
 }
 

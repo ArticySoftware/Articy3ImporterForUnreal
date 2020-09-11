@@ -18,12 +18,12 @@ public:
 	FReply OnArticyButtonClicked();
 
 private:
-	FArticyRef* Ref = nullptr;
+	TWeakObjectPtr<const UArticyObject> ArticyObject = nullptr;
 };
 
 class FArticyButtonCustomizationFactory : public IArticyRefWidgetCustomizationFactory
 {
 public:
 	virtual TSharedPtr<IArticyRefWidgetCustomization> CreateCustomization() override;
-	virtual bool SupportsType(const FArticyRef& Ref) override;
+	virtual bool SupportsType(const UArticyObject* ArticyObject) override;
 };

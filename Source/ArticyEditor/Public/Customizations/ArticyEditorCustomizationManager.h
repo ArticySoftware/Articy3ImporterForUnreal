@@ -18,14 +18,14 @@ struct FArticyRefWidgetCustomizationInfo
 class FArticyRefWidgetCustomizationBuilder
 {
 public:
-	FArticyRefWidgetCustomizationBuilder(FArticyRef& InRef) : Ref(InRef)
+	FArticyRefWidgetCustomizationBuilder(const UArticyObject* InObject) : ArticyObject(InObject)
 	{}
 	void AddCustomization(const FArticyRefWidgetCustomizationInfo& Customization) { Customizations.Add(Customization); }
 	const TArray<FArticyRefWidgetCustomizationInfo>& GetCustomizations() const { return Customizations; }
 
-	FArticyRef& GetArticyRef() { return Ref; }
+	const UArticyObject* GetArticyObject() const { return ArticyObject; }
 private:
-	FArticyRef& Ref;
+	const UArticyObject* ArticyObject;
 	TArray<FArticyRefWidgetCustomizationInfo> Customizations;
 };
 
@@ -43,7 +43,7 @@ class ARTICYEDITOR_API IArticyRefWidgetCustomizationFactory
 public:
 	virtual ~IArticyRefWidgetCustomizationFactory() {}
 	virtual TSharedPtr<IArticyRefWidgetCustomization> CreateCustomization() = 0;
-	virtual bool SupportsType(const FArticyRef& Ref) = 0;
+	virtual bool SupportsType(const UArticyObject* InObject) = 0;
 };
 
 DECLARE_DELEGATE_RetVal(TSharedRef<IArticyRefWidgetCustomizationFactory>, FOnCreateArticyRefWidgetCustomizationFactory);
@@ -59,7 +59,7 @@ public:
 	/** Unregisters an ArticyRefWidget customization */
 	void UnregisterArticyRefWidgetCustomizationFactory(const IArticyRefWidgetCustomizationFactory*);
 	/** Creates the ArticyRefWidget customizations for an ArticyRef */
-	void CreateArticyRefWidgetCustomizations(FArticyRef& ArticyRef, TArray<TSharedPtr<IArticyRefWidgetCustomization>>& OutCustomizations);
+	void CreateArticyRefWidgetCustomizations(const UArticyObject* ArticyObject, TArray<TSharedPtr<IArticyRefWidgetCustomization>>& OutCustomizations);
 
 private:
 	/** Since we only want one customization manager, delete other constructors */

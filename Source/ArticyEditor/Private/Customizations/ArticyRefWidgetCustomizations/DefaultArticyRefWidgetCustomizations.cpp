@@ -2,7 +2,6 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.
 //
 
-
 #include "Customizations/ArticyRefWidgetCustomizations/DefaultArticyRefWidgetCustomizations.h"
 #include "ArticyEditorStyle.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
@@ -13,7 +12,7 @@
 
 void FArticyButtonCustomization::RegisterArticyRefWidgetCustomization(FArticyRefWidgetCustomizationBuilder& Builder)
 {
-	Ref = &Builder.GetArticyRef();
+	ArticyObject = Builder.GetArticyObject();
 
 	FArticyRefWidgetCustomizationInfo Info;
 	Info.ExtraButtonExtender = MakeShared<FExtender>();
@@ -25,7 +24,7 @@ void FArticyButtonCustomization::RegisterArticyRefWidgetCustomization(FArticyRef
 
 void FArticyButtonCustomization::UnregisterArticyRefWidgetCustomization()
 {
-	Ref = nullptr;
+	ArticyObject = nullptr;
 }
 
 void FArticyButtonCustomization::CreateArticyButton(FToolBarBuilder& Builder)
@@ -46,7 +45,7 @@ void FArticyButtonCustomization::CreateArticyButton(FToolBarBuilder& Builder)
 
 FReply FArticyButtonCustomization::OnArticyButtonClicked()
 {
-	UserInterfaceHelperFunctions::ShowObjectInArticy(Ref->GetId());
+	UserInterfaceHelperFunctions::ShowObjectInArticy(ArticyObject->GetId());
 	return FReply::Handled();
 }
 
@@ -55,10 +54,9 @@ TSharedPtr<IArticyRefWidgetCustomization> FArticyButtonCustomizationFactory::Cre
 	return MakeShareable(new FArticyButtonCustomization);
 }
 
-bool FArticyButtonCustomizationFactory::SupportsType(const FArticyRef& Ref)
+bool FArticyButtonCustomizationFactory::SupportsType(const UArticyObject* ArticyObject)
 {
-	UArticyObject* Object = UArticyObject::FindAsset(Ref.GetId());
-	if(!Object)
+	if(!ArticyObject)
 	{
 		return false;
 	}

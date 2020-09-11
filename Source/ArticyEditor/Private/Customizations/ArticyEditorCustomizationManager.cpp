@@ -25,11 +25,16 @@ void FArticyEditorCustomizationManager::UnregisterArticyRefWidgetCustomizationFa
 	ensureMsgf(RemovedElements != 0, TEXT("Failed removing factory. It was either not registered or removed already."));
 }
 
-void FArticyEditorCustomizationManager::CreateArticyRefWidgetCustomizations(FArticyRef& ArticyRef, TArray<TSharedPtr<IArticyRefWidgetCustomization>>& OutCustomizations)
+void FArticyEditorCustomizationManager::CreateArticyRefWidgetCustomizations(const UArticyObject* ArticyObject, TArray<TSharedPtr<IArticyRefWidgetCustomization>>& OutCustomizations)
 {
+	if(ArticyObject == nullptr)
+	{
+		return;
+	}
+	
 	for (const TSharedPtr<IArticyRefWidgetCustomizationFactory>& Entry : ArticyRefWidgetCustomizationFactories)
 	{
-		if(Entry->SupportsType(ArticyRef))
+		if(Entry->SupportsType(ArticyObject))
 		{
 			OutCustomizations.Add(Entry->CreateCustomization());
 		}
