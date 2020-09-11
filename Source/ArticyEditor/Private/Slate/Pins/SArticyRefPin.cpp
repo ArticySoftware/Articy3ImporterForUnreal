@@ -6,8 +6,9 @@
 #include "ArticyRef.h"
 #include "EdGraph/EdGraphSchema.h"
 #include "EdGraph/EdGraphNode.h"
-#include "Slate/SArticyRefProperty.h"
+#include "Slate/SArticyIdProperty.h"
 #include "ScopedTransaction.h"
+#include "ArticyEditorModule.h"
 
 void SArticyRefPin::Construct(const FArguments& InArgs, UEdGraphPin* GraphPin)
 {
@@ -17,7 +18,7 @@ void SArticyRefPin::Construct(const FArguments& InArgs, UEdGraphPin* GraphPin)
 
 TSharedRef<SWidget> SArticyRefPin::GetDefaultValueWidget()
 {
-	return SAssignNew(DefaultValueWidget, SArticyRefProperty)
+	return SAssignNew(DefaultValueWidget, SArticyIdProperty)
 	.Visibility(this, &SArticyRefPin::GetDefaultValueVisibility)
 	.ShownObject(this, &SArticyRefPin::GetArticyId)
 	.OnArticyObjectSelected(this, &SArticyRefPin::OnArticyObjectSelected);

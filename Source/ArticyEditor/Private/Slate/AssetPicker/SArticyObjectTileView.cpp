@@ -1,8 +1,6 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
-
 
 #include "Slate/AssetPicker/SArticyObjectTileView.h"
 #include <GenericPlatform/ICursor.h>
@@ -15,6 +13,7 @@
 #include "Slate/AssetPicker/SArticyObjectToolTip.h"
 #include "ArticyEditorStyle.h"
 #include "Editor.h"
+#include "ArticyEditorModule.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectTileView"
@@ -142,7 +141,6 @@ void SArticyObjectTileView::Tick(const FGeometry& AllottedGeometry, const double
 		UpdateDisplayedArticyObject();
 	}
 }
-
 
 FText SArticyObjectTileView::OnGetEntityName() const
 {

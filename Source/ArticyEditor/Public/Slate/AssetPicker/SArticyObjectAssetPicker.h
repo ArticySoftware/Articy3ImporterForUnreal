@@ -1,3 +1,4 @@
+
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 //
@@ -15,6 +16,8 @@
 #include <SAssetSearchBox.h>
 #include <Types/SlateEnums.h>
 #include <Misc/TextFilterExpressionEvaluator.h>
+#include "Widgets/Input/SComboButton.h"
+#include "SArticyObjectTileView.h"
 #include "Slate/ArticyFilterHelpers.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectAssetPicker"
@@ -29,23 +32,34 @@ namespace FArticyObjectAssetPicketConstants {
 class ARTICYEDITOR_API SArticyObjectAssetPicker : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SArticyObjectAssetPicker) : _bExactClass(false) {}
-		/** A struct containing details about how the asset picker should behave */
-		SLATE_ARGUMENT(FAssetPickerConfig, AssetPickerConfig)
-		SLATE_ARGUMENT(bool, bExactClass)
+	SLATE_BEGIN_ARGS(SArticyObjectAssetPicker) :
+	_CurrentClassRestriction(UArticyObject::StaticClass()),
+	_TopLevelClassRestriction(UArticyObject::StaticClass()),
+	_bExactClass(false),
+	_bExactClassEditable(true),
+	_bClassFilterEditable(true)
+	{}
+		SLATE_EVENT(FOnAssetSelected, OnArticyObjectSelected)
+		SLATE_ARGUMENT(UClass*, CurrentClassRestriction)
+		SLATE_ATTRIBUTE(UClass*, TopLevelClassRestriction)
+		SLATE_ATTRIBUTE(bool, bExactClass)
+		SLATE_ATTRIBUTE(bool, bExactClassEditable)
+		SLATE_ATTRIBUTE(bool, bClassFilterEditable)
 	SLATE_END_ARGS()
 
 	~SArticyObjectAssetPicker();
 
 	void Construct(const FArguments& InArgs);
-
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
-
 	void RequestSlowFullListRefresh();
-
 	void SelectAsset(TWeakObjectPtr<UArticyObject> AssetItem, ESelectInfo::Type SelectInfo) const;
 private:
-	
+	void CreateInternalWidgets();
+	TSharedRef<SWidget> CreateClassPicker();
+	FReply CreateClassPicker(const FGeometry& Geometry, const FPointerEvent& Event);
+	void OnExactClassCheckBoxChanged(ECheckBoxState NewState);
+	void OnClassPicked(UClass* InChosenClass);
+	FText GetChosenClassName() const;
 	TSharedRef<class ITableRow> MakeTileViewWidget(TWeakObjectPtr<UArticyObject> Entity, const TSharedRef<STableViewBase>& OwnerTable) const;
 	float GetTileViewHeight() const;
 	float GetTileViewWidth() const;
@@ -58,23 +72,30 @@ private:
 	bool TestAgainstFrontendFilters(const FAssetData& Item) const;
 	/** parameters unused but required by the delegate */
 	EActiveTimerReturnType FocusSearchField(double InCurrentTime, float InDeltaTime) const;
-private:
 	
-	FAssetPickerConfig AssetPickerConfig;
-	bool bExactClass = false;
-	TArray<FAssetData> ArticyPackageDataAssets;
-	TArray<TWeakObjectPtr<UArticyObject>> FilteredObjects;
-	bool bSlowFullListRefreshRequested = false;
-private:
-
+private: // Slate Attributes
 	FOnAssetSelected OnAssetSelected;
-private:
+	TAttribute<UClass*> TopLevelClassRestriction;
+	UClass* CurrentClassRestriction = nullptr;
+	TAttribute<bool> bExactClass;
+	TAttribute<bool> bExactClassEditable;
+	TAttribute<bool> bClassFilterEditable;
 	
+private:// Widgets
 	TSharedPtr<SAssetSearchBox> SearchField;
+	TSharedPtr<SWidget> AssetViewContainer;
+	TSharedPtr<SListView<TWeakObjectPtr<UArticyObject>>> AssetView;
+	TSharedPtr<SHorizontalBox> FilterBox;
+	TSharedPtr<SComboButton> ClassFilterButton;
+	
+private: // Internal Data
 	TSharedPtr<FAssetFilterCollectionType> FrontendFilters;
 	TSharedPtr<FArticyClassRestrictionFilter> ClassFilter;
 	TSharedPtr<FFrontendFilter_ArticyObject> ArticyObjectFilter;
-	TSharedPtr<SListView<TWeakObjectPtr<UArticyObject>>> AssetView;
+	
+	TArray<FAssetData> ArticyPackageDataAssets;
+	TArray<TWeakObjectPtr<UArticyObject>> FilteredObjects;
+	bool bSlowFullListRefreshRequested = false;
 };
 
 #undef LOCTEXT_NAMESPACE

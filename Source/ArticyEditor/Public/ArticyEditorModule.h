@@ -10,7 +10,7 @@
 #include "ArticyEditorConsoleCommands.h"
 #include "Customizations/ArticyEditorCustomizationManager.h"
 #include "Framework/Commands/UICommandList.h"
-#include "Slate/SArticyRefProperty.h"
+#include "Slate/SArticyIdProperty.h"
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogArticyEditor, Log, All)

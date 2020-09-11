@@ -28,7 +28,7 @@ public:
 	{}
 		SLATE_ATTRIBUTE(FArticyId, ObjectToDisplay)
 		SLATE_ATTRIBUTE(EVisibility, LabelVisibility)
-	        SLATE_EVENT(FPointerEventHandler, OnMouseDoubleClick)
+	    SLATE_EVENT(FPointerEventHandler, OnMouseDoubleClick)
 		SLATE_ARGUMENT(FVector2D, ThumbnailSize)
 		SLATE_ARGUMENT(FMargin, ThumbnailPadding)
 	SLATE_END_ARGS()

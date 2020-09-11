@@ -57,10 +57,11 @@ class FArticyClassRestrictionFilter : public IFilter<FAssetFilterType>
 public:
 	FArticyClassRestrictionFilter(TSubclassOf<UArticyObject> AllowedClass, bool bExactClass);
 
+	void UpdateFilteredClass(TSubclassOf<UArticyObject> NewAllowedClass) {	AllowedClass = NewAllowedClass;	OnChanged().Broadcast(); }
+	void UpdateExactClass(bool bNewExactClass) { bExactClass = bNewExactClass; OnChanged().Broadcast(); }
 	// IFilter implementation
 	virtual bool PassesFilter(FAssetFilterType InItem) const override;
-
-
+	
 	// IFilter implementation
 	DECLARE_DERIVED_EVENT(FArticyClassRestrictionFilter, IFilter<FAssetFilterType>::FChangedEvent, FChangedEvent);
 	virtual FChangedEvent& OnChanged() override { return ChangedEvent; }

@@ -29,6 +29,7 @@
 #include "Customizations/AssetActions/AssetTypeActions_ArticyGV.h"
 #include "Customizations/Details/ArticyGVCustomization.h"
 #include "Customizations/Details/ArticyPluginSettingsCustomization.h"
+#include "Customizations/Details/ArticyIdCustomization.h"
 #include "Customizations/Details/ArticyRefCustomization.h"
 
 DEFINE_LOG_CATEGORY(LogArticyEditor)
@@ -102,6 +103,7 @@ void FArticyEditorModule::RegisterDetailCustomizations() const
 	// register custom details for ArticyRef struct
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
+	PropertyModule.RegisterCustomPropertyTypeLayout("ArticyId", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArticyIdCustomization::MakeInstance));
 	PropertyModule.RegisterCustomPropertyTypeLayout("ArticyRef", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArticyRefCustomization::MakeInstance));
 	PropertyModule.RegisterCustomClassLayout("ArticyPluginSettings", FOnGetDetailCustomizationInstance::CreateStatic(&FArticyPluginSettingsCustomization::MakeInstance));
 	PropertyModule.RegisterCustomClassLayout("ArticyGlobalVariables", FOnGetDetailCustomizationInstance::CreateStatic(&FArticyGVCustomization::MakeInstance));

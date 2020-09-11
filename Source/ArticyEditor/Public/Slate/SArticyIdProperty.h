@@ -13,26 +13,39 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Input/SButton.h"
 #include "ContentBrowserDelegates.h"
+#include "AssetPicker/SArticyObjectAssetPicker.h"
 
-namespace ArticyRefPropertyConstants {
+namespace ArticyRefPropertyConstants
+{
 	const FVector2D ThumbnailSize(64, 64);
 	const FMargin ThumbnailPadding(2, 2);
-
 }
 
+
+/** This combo button is 1:1 the same as the normal SComboButton except that its Tick function does not try to Resize the menu.
+ * Instead, it only moves the Window. This fixes a problem where the menu would continuously be resized with 1 pixel difference which causes flickering
+ * in some edge cases (zoom level -1 and a menu that wasn't fixed size 300x300 like the default asset picker (300x350 would also flicker)
+ */
+class SFixedSizeMenuComboButton : public SComboButton
+{
+protected:
+	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+};
 /**
  *  REFERENCE: SPropertyEditorAsset, which is the normal asset selection widget
  */
-class ARTICYEDITOR_API SArticyRefProperty : public SCompoundWidget
+class ARTICYEDITOR_API SArticyIdProperty : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SArticyRefProperty) 
-		: _ClassRestriction(nullptr), _bExactClass(false)
+	SLATE_BEGIN_ARGS(SArticyIdProperty) 
+		: _TopLevelClassRestriction(UArticyObject::StaticClass()), _bExactClass(false), _bExactClassEditable(true), _bClassFilterEditable(true)
 	{}
 		SLATE_ATTRIBUTE(FArticyId, ShownObject)
 		SLATE_EVENT(FOnAssetSelected, OnArticyObjectSelected)
-		SLATE_ATTRIBUTE(UClass*, ClassRestriction)
-		SLATE_ARGUMENT(bool, bExactClass)
+		SLATE_ATTRIBUTE(UClass*, TopLevelClassRestriction)
+		SLATE_ATTRIBUTE(bool, bExactClass)
+		SLATE_ATTRIBUTE(bool, bExactClassEditable)
+		SLATE_ATTRIBUTE(bool, bClassFilterEditable)
 	SLATE_END_ARGS()
 /**
  * Construct this widget
@@ -51,11 +64,13 @@ private:
 	TSharedPtr<SBox> TileContainer;
 	TSharedPtr<SBorder> ThumbnailBorder;
 	TSharedPtr<FSlateBrush> ImageBrush;
-	TSharedPtr<SComboButton> ComboButton;
+	TSharedPtr<SWidget> ComboButton;
 	TSharedPtr<SHorizontalBox> ExtraButtons;
 	
-	TAttribute<UClass*> ClassRestriction;
-	bool bExactClass = false;
+	TAttribute<UClass*> TopLevelClassRestriction;
+	TAttribute<bool> bExactClass = false;
+	TAttribute<bool> bExactClassEditable = true;
+	TAttribute<bool> bClassFilterEditable = true;
 private:
 	/** Updates the widget including customizations. Called when the selected object changes */
 	void UpdateWidget();
@@ -66,11 +81,11 @@ private:
 
 	TSharedRef<SWidget> CreateArticyObjectAssetPicker();
 	FReply OnArticyButtonClicked() const;
-	/** Updates the underlying ArticyRef to reference the new articy object. Can be null */
-	void SetAsset(const FAssetData& AssetData) const;
 	FReply OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const;
 	FText OnGetArticyObjectDisplayName() const;
 	FArticyId GetCurrentObjectID() const;
+
+	//FGeometry ComputeNewWindowMenuPlacement(const FGeometry& AllottedGeometry, const FVector2D& PopupDesiredSize, EMenuPlacement PlacementMode) const;
 
 private:
 	/** The current customizations are cached in here to achieve ownership */
