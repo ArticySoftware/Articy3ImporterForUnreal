@@ -1,8 +1,6 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
-
 
 #include "ArticyEditorModule.h"
 #include "ArticyPluginSettings.h"
@@ -27,6 +25,7 @@
 #include "IDirectoryWatcher.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "LevelEditor.h"
+#include "Customizations/ArticyPinFactory.h"
 #include "Customizations/AssetActions/AssetTypeActions_ArticyGV.h"
 #include "Customizations/Details/ArticyGVCustomization.h"
 #include "Customizations/Details/ArticyPluginSettingsCustomization.h"
@@ -47,6 +46,7 @@ void FArticyEditorModule::StartupModule()
 	RegisterConsoleCommands();
 	RegisterDefaultArticyRefWidgetExtensions();
 	RegisterDetailCustomizations();
+	RegisterGraphPinFactory();
 	RegisterPluginSettings();
 	RegisterPluginCommands();
 	// directory watcher has to be changed or removed as the results aren't quite deterministic
@@ -75,6 +75,12 @@ void FArticyEditorModule::RegisterDirectoryWatcher()
 {
 	FDirectoryWatcherModule& DirectoryWatcherModule = FModuleManager::LoadModuleChecked<FDirectoryWatcherModule>("DirectoryWatcher");
 	DirectoryWatcherModule.Get()->RegisterDirectoryChangedCallback_Handle(CodeGenerator::GetSourceFolder(), IDirectoryWatcher::FDirectoryChanged::CreateRaw(this, &FArticyEditorModule::OnGeneratedCodeChanged), GeneratedCodeWatcherHandle);
+}
+
+void FArticyEditorModule::RegisterGraphPinFactory() const
+{
+	TSharedPtr<FArticyRefPinFactory> ArticyRefPinFactory = MakeShareable(new FArticyRefPinFactory);
+	FEdGraphUtilities::RegisterVisualPinFactory(ArticyRefPinFactory);
 }
 
 void FArticyEditorModule::RegisterConsoleCommands()

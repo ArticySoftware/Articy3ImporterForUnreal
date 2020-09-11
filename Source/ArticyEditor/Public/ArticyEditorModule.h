@@ -53,6 +53,7 @@ public:
 	void RegisterDefaultArticyRefWidgetExtensions() const;
 	void RegisterDetailCustomizations() const;
 	void RegisterDirectoryWatcher();
+	void RegisterGraphPinFactory() const;
 	void RegisterPluginCommands();
 	void RegisterPluginSettings() const;
 	void RegisterToolTabs();
