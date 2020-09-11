@@ -6,6 +6,15 @@
 #include "ArticyHelpers.h"
 #include "ArticyDatabase.h"
 
+bool FArticyId::InitFromString(const FString InSourceString)
+{
+	Low = High = 0;
+
+	const bool bSuccessful = FParse::Value(*InSourceString, TEXT("Low="), Low) && FParse::Value(*InSourceString, TEXT("High="), High);
+
+	return bSuccessful;
+}
+
 UArticyPrimitive* FArticyId::GetObject(const UObject* WorldContext) const
 {
 	auto db = UArticyDatabase::Get(WorldContext);

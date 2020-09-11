@@ -28,11 +28,16 @@ public:
 	// ReSharper disable once CppNonExplicitConvertingConstructor
 	/** Implicit conversion from FString. */
 	FArticyId(const FString &Value) { *this = Value; }
-
 	/** Json deserializer. */
 	FArticyId(const TSharedPtr<FJsonValue> Json) { *this = (Json->Type == EJson::String ? ArticyHelpers::HexToUint64(Json->AsString()) : -1); }
 	
 	//========================================//
+
+	/** This function expects the String to contain Low= and High=.
+	 * Used in custom UI elements like pins where direct access is often not possible
+	 * Ref: Color InitFromString
+	 */
+	bool InitFromString(const FString InSourceString);
 
 	/** The lower 32 bit of the id. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
