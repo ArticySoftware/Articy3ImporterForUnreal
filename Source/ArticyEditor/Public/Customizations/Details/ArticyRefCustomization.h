@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #pragma once
@@ -57,7 +56,7 @@ private:
 	UClass* ClassRestriction = nullptr;
 	TSharedPtr<class SComboButton> ClassRestrictionButton;
 	/** Used when there are multiple objects to edit */
-	bool bIsEditable = true;
+	bool bIsEditable = false;
 private:
 	UClass* GetClassRestriction() const;
 	FText GetChosenClassName() const;
@@ -69,4 +68,7 @@ private:
 
 	void OnClassPicked(UClass* InChosenClass);
 	TSharedRef<SWidget> CreateClassPicker();
+
+	FArticyId GetArticyId() const;
+	void SetAsset(const FAssetData& AssetData) const;
 };

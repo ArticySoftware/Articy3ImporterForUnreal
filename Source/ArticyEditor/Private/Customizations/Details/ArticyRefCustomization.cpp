@@ -3,7 +3,7 @@
 //
 
 #include "Customizations/Details/ArticyRefCustomization.h"
-#include "ArticyEditorStyle.h"
+#include "ArticyFunctionLibrary.h"
 #include "IDetailChildrenBuilder.h"
 #include "DetailWidgetRow.h"
 #include "Widgets/SWidget.h"
@@ -13,9 +13,9 @@
 #include "ArticyObject.h"
 #include "ArticyRef.h"
 #include "ClassViewerModule.h"
-#include "Interfaces/ArticyObjectWithText.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
+#include "EditorCategoryUtils.h"
 
 FArticyRefClassFilter::FArticyRefClassFilter(UClass* InGivenClass, bool bInRequiresExactClass) : GivenClass(InGivenClass), bRequiresExactClass(bInRequiresExactClass)
 {
@@ -29,13 +29,12 @@ TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	ArticyRefPropertyHandle = PropertyHandle;
+	
+	bIsEditable = PropertyHandle->GetNumPerObjectValues() == 1;
 
-	if (PropertyHandle->GetNumPerObjectValues() > 1)
-	{
-		bIsEditable = false;
-	}
-
-	ArticyRefProperty = SNew(SArticyRefProperty, ArticyRefPropertyHandle.Get())
+	ArticyRefProperty = SNew(SArticyRefProperty)
+		.ShownObject(this, &FArticyRefCustomization::GetArticyId)
+		.OnArticyObjectSelected(this, &FArticyRefCustomization::SetAsset)
 		.ClassRestriction(this, &FArticyRefCustomization::GetClassRestriction)
 		.bExactClass(IsExactClass())
 		.IsEnabled(bIsEditable);
@@ -175,6 +174,41 @@ TSharedRef<SWidget> FArticyRefCustomization::CreateClassPicker()
 	ClassViewerConfig.ClassFilter = MakeShareable(new FArticyRefClassFilter(GetClassRestrictionMetaData(), IsExactClass()));
 
 	return FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(ClassViewerConfig, FOnClassPicked::CreateRaw(this, &FArticyRefCustomization::OnClassPicked));
+}
+
+FArticyId FArticyRefCustomization::GetArticyId() const
+{
+	FArticyRef* Ref = RetrieveArticyRef(ArticyRefPropertyHandle.Get());
+	return Ref ? Ref->GetId() : FArticyId();
+}
+
+void FArticyRefCustomization::SetAsset(const FAssetData& AssetData) const
+{
+	// retrieve the newly selected articy object
+	const UArticyObject* NewSelection = Cast<UArticyObject>(AssetData.GetAsset());
+
+	// if the new selection is not valid we cleared the selection
+	const FArticyId NewId = NewSelection ? NewSelection->GetId() : FArticyId();
+
+	// get the current articy ref struct as formatted string
+	FString FormattedValueString;
+	ArticyRefPropertyHandle->GetValueAsFormattedString(FormattedValueString);
+
+	// remove the old ID string
+	const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Low=")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+	const int32 EndOfIdIndex = FormattedValueString.Find(FString(TEXT(")")), ESearchCase::IgnoreCase, ESearchDir::FromStart, IdIndex);
+	FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
+
+	// reconstruct the value string with the new ID
+	const FString NewIdString = FString::Format(TEXT("Low={0}, High={1}"), { NewId.Low, NewId.High, });
+	FormattedValueString.InsertAt(IdIndex, *NewIdString);
+
+	// update the articy ref with the new ID:
+	// done via Set functions instead of accessing the ref object directly because using "Set" handles various Unreal logic, such as:
+	// - CDO default change forwarding to instances
+	// - marking dirty
+	// - transaction buffer (Undo, Redo)
+	ArticyRefPropertyHandle->SetValueFromFormattedString(FormattedValueString);
 }
 
 UClass* FArticyRefCustomization::GetClassRestrictionMetaData() const

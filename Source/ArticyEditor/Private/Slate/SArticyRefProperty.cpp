@@ -21,18 +21,14 @@
 
 #define LOCTEXT_NAMESPACE "ArticyRefProperty"
 
-void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* InArticyRefPropHandle)
+void SArticyRefProperty::Construct(const FArguments& InArgs)
 {
+	this->ShownObject = InArgs._ShownObject;
+	this->OnAssetSelected = InArgs._OnArticyObjectSelected;
 	this->ClassRestriction = InArgs._ClassRestriction;
 	this->bExactClass = InArgs._bExactClass;
-	
-	ArticyRefPropertyHandle = InArticyRefPropHandle;
 
-	FString CurrentRefValue;
-	InArticyRefPropHandle->GetValueAsFormattedString(CurrentRefValue);
-	CurrentObjectID = FArticyRefCustomization::GetIdFromValueString(CurrentRefValue);
-	CachedArticyObject = UArticyObject::FindAsset(CurrentObjectID);
-	
+	ensure(ShownObject.IsBound() || ShownObject.IsSet());
 	Cursor = EMouseCursor::Hand;
 
 	if(!this->ClassRestriction.IsBound()) 
@@ -101,25 +97,15 @@ void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* In
 
 void SArticyRefProperty::UpdateWidget()
 {
-	// update the customizations
 	for (TSharedPtr<IArticyRefWidgetCustomization>& Customization : ActiveCustomizations)
 	{
 		Customization->UnregisterArticyRefWidgetCustomization();
 	}
-
 	ActiveCustomizations.Reset();
-
-	FString RefString;
-	const FPropertyAccess::Result Result = ArticyRefPropertyHandle->GetValueAsFormattedString(RefString);
-	
-	if(Result!=FPropertyAccess::Result::Success)
-	{
-		return;
-	}
 	
 	// the actual update. This will be forwarded into the tile view and will cause an update
-	CurrentObjectID = FArticyRefCustomization::GetIdFromValueString(RefString);
-	CachedArticyObject = UArticyObject::FindAsset(CurrentObjectID);
+	CurrentArticyId = ShownObject.Get() ? ShownObject.Get() : FArticyId();
+	CachedArticyObject = !CurrentArticyId.IsNull() ? UArticyObject::FindAsset(CurrentArticyId) : nullptr;
 	
 	FArticyEditorModule::Get().GetCustomizationManager()->CreateArticyRefWidgetCustomizations(CachedArticyObject.Get(), ActiveCustomizations);
 
@@ -166,23 +152,17 @@ void SArticyRefProperty::ApplyArticyRefCustomizations(const TArray<FArticyRefWid
 
 void SArticyRefProperty::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
-	FString RefString;
-	const FPropertyAccess::Result Result = ArticyRefPropertyHandle->GetValueAsFormattedString(RefString);
-
-	if(Result == FPropertyAccess::Success)
+	const FArticyId CurrentRefId = ShownObject.Get() ? ShownObject.Get(): FArticyId();
+	if (CurrentRefId != CurrentArticyId || (!CurrentRefId.IsNull() && !CachedArticyObject.IsValid()))
 	{
-		const FArticyId CurrentRefId = FArticyRefCustomization::GetIdFromValueString(RefString);
-		if (CurrentRefId != CurrentObjectID || !CachedArticyObject.IsValid())
-		{
-			UpdateWidget();
-		}
+		UpdateWidget();
 	}	
 }
 
 TSharedRef<SWidget> SArticyRefProperty::CreateArticyObjectAssetPicker()
 {	
 	FAssetPickerConfig AssetPickerConfig;
-	AssetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateRaw(this, &SArticyRefProperty::SetAsset);
+	AssetPickerConfig.OnAssetSelected = OnAssetSelected;
 	AssetPickerConfig.bFocusSearchBoxWhenOpened = true;
 	AssetPickerConfig.Filter.ClassNames.Add(FName(*ClassRestriction.Get()->GetName()));
 	return SNew(SArticyObjectAssetPicker).AssetPickerConfig(AssetPickerConfig).bExactClass(bExactClass);
@@ -190,38 +170,8 @@ TSharedRef<SWidget> SArticyRefProperty::CreateArticyObjectAssetPicker()
 
 FReply SArticyRefProperty::OnArticyButtonClicked() const
 {
-	UserInterfaceHelperFunctions::ShowObjectInArticy(UArticyObject::FindAsset(CurrentObjectID));
+	UserInterfaceHelperFunctions::ShowObjectInArticy(UArticyObject::FindAsset(CurrentArticyId));
 	return FReply::Handled();
-}
-
-void SArticyRefProperty::SetAsset(const FAssetData& AssetData) const
-{
-	// retrieve the newly selected articy object
-	ComboButton->SetIsOpen(false);
-	const UArticyObject* NewSelection  = Cast<UArticyObject>(AssetData.GetAsset());
-
-	// if the new selection is not valid we cleared the selection
-	const FArticyId NewId = NewSelection ? NewSelection->GetId() : FArticyId();
-	
-	// get the current articy ref struct as formatted string
-	FString FormattedValueString;
-	ArticyRefPropertyHandle->GetValueAsFormattedString(FormattedValueString);
-
-	// remove the old ID string
-	const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Low=")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
-	const int32 EndOfIdIndex = FormattedValueString.Find(FString(TEXT(")")), ESearchCase::IgnoreCase, ESearchDir::FromStart, IdIndex);	
-	FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
-
-	// reconstruct the value string with the new ID
-	const FString NewIdString = FString::Format(TEXT("Low={0}, High={1}"), { NewId.Low, NewId.High, });
-	FormattedValueString.InsertAt(IdIndex, *NewIdString);
-
-	// update the articy ref with the new ID:
-	// done via Set functions instead of accessing the ref object directly because using "Set" handles various Unreal logic, such as:
-	// - CDO default change forwarding to instances
-	// - marking dirty
-	// - transaction buffer (Undo, Redo)
-	ArticyRefPropertyHandle->SetValueFromFormattedString(FormattedValueString);	
 }
 
 FReply SArticyRefProperty::OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const
@@ -242,7 +192,7 @@ FText SArticyRefProperty::OnGetArticyObjectDisplayName() const
 
 FArticyId SArticyRefProperty::GetCurrentObjectID() const
 {
-	return CurrentObjectID;
+	return CurrentArticyId;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -267,6 +267,7 @@ void SArticyObjectAssetPicker::SelectAsset(TWeakObjectPtr<UArticyObject> AssetIt
 {
 	const FAssetData NewAsset(AssetItem.Get());
 	OnAssetSelected.ExecuteIfBound(NewAsset);
+	FSlateApplication::Get().DismissAllMenus();
 }
 
 void SArticyObjectAssetPicker::OnSearchBoxChanged(const FText& InSearchText) const

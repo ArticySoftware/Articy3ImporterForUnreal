@@ -12,6 +12,7 @@
 #include "Customizations/ArticyEditorCustomizationManager.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Input/SButton.h"
+#include "ContentBrowserDelegates.h"
 
 namespace ArticyRefPropertyConstants {
 	const FVector2D ThumbnailSize(64, 64);
@@ -28,6 +29,8 @@ public:
 	SLATE_BEGIN_ARGS(SArticyRefProperty) 
 		: _ClassRestriction(nullptr), _bExactClass(false)
 	{}
+		SLATE_ATTRIBUTE(FArticyId, ShownObject)
+		SLATE_EVENT(FOnAssetSelected, OnArticyObjectSelected)
 		SLATE_ATTRIBUTE(UClass*, ClassRestriction)
 		SLATE_ARGUMENT(bool, bExactClass)
 	SLATE_END_ARGS()
@@ -36,15 +39,13 @@ public:
  *
  * @param	InArgs	The declaration data for this widget
  */
-	void Construct(const FArguments& InArgs, IPropertyHandle* InArticyRefPropHandle);
+	void Construct(const FArguments& InArgs);
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 private:
-	mutable FArticyId CurrentObjectID;
 	// the articy object this widget currently represents
 	TWeakObjectPtr<UArticyObject> CachedArticyObject = nullptr;
-	// the property handle for the articy ref that will be manipulated
-	IPropertyHandle* ArticyRefPropertyHandle = nullptr;
+	mutable FArticyId CurrentArticyId = FArticyId();
 	
 	TSharedPtr<SArticyObjectTileView> TileView;
 	TSharedPtr<SBox> TileContainer;
@@ -77,4 +78,7 @@ private:
 
 	/** The ExtraButton extenders of the currently active customizations */
 	TArray<TSharedPtr<FExtender>> ExtraButtonExtenders;
+
+	TAttribute<FArticyId> ShownObject;
+	FOnAssetSelected OnAssetSelected;
 };
