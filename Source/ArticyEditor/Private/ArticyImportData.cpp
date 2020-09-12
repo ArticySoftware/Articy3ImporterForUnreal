@@ -450,15 +450,23 @@ const TWeakObjectPtr<UArticyImportData> UArticyImportData::GetImportData()
 
 	if(!ImportData.IsValid())
 	{
-		TArray<FAssetData> ImportDataAssets;
-		FAssetRegistryModule::GetRegistry().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), ImportDataAssets);
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+		TArray<FAssetData> AssetData;
+		AssetRegistryModule.Get().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), AssetData);
 
-		if (!ensureMsgf(ImportDataAssets.Num() == 1, TEXT("Zero or more than one import data assets found! Using first if available.")))
+		if (!AssetData.Num())
 		{
-			return nullptr;
+			UE_LOG(LogArticyEditor, Warning, TEXT("Could not find articy import data asset."));
 		}
+		else
+		{
+			ImportData = Cast<UArticyImportData>(AssetData[0].GetAsset());
 
-		ImportData = Cast<UArticyImportData>(ImportDataAssets[0].GetAsset());
+			if (AssetData.Num() > 1)
+			{
+				UE_LOG(LogArticyEditor, Error, TEXT("Found more than one import file. This is not supported by the plugin. Using the first found file for now: %s"), *AssetData[0].ObjectPath.ToString());
+			}
+		}
 	}
 	
 	return ImportData;	
