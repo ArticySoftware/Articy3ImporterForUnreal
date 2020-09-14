@@ -393,6 +393,8 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	UserMethods.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_SCRIPTMEETHODS));
 
 	bool bNeedsCodeGeneration = false;
+
+	ParentChildrenCache.Empty();
 	
 	// import GVs and ObjectDefs only if needed
 	if(Settings.DidObjectDefsOrGVsChange())
