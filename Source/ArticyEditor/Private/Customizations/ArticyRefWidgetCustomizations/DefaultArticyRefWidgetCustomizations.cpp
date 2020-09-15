@@ -46,7 +46,7 @@ void FArticyButtonCustomization::CreateArticyButton(FToolBarBuilder& Builder)
 
 FReply FArticyButtonCustomization::OnArticyButtonClicked()
 {
-	UserInterfaceHelperFunctions::ShowObjectInArticy(Ref->GetId());
+	UserInterfaceHelperFunctions::ShowObjectInArticy(UArticyObject::FindAsset(Ref->GetId()));
 	return FReply::Handled();
 }
 

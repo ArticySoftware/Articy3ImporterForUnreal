@@ -64,7 +64,6 @@ private:
 	void ApplyArticyRefCustomizations(const TArray<FArticyRefWidgetCustomizationInfo>& Customizations);
 
 	TSharedRef<SWidget> CreateArticyObjectAssetPicker();
-	FReply OnArticyButtonClicked() const;
 	/** Updates the underlying ArticyRef to reference the new articy object. Can be null */
 	void SetAsset(const FAssetData& AssetData) const;
 	FReply OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const;

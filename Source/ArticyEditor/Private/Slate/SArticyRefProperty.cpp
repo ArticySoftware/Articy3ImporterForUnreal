@@ -189,12 +189,6 @@ TSharedRef<SWidget> SArticyRefProperty::CreateArticyObjectAssetPicker()
 	return SNew(SArticyObjectAssetPicker).AssetPickerConfig(AssetPickerConfig).bExactClass(bExactClass);
 }
 
-FReply SArticyRefProperty::OnArticyButtonClicked() const
-{
-	UserInterfaceHelperFunctions::ShowObjectInArticy(UArticyObject::FindAsset(CurrentObjectID));
-	return FReply::Handled();
-}
-
 void SArticyRefProperty::SetAsset(const FAssetData& AssetData) const
 {
 	// retrieve the newly selected articy object

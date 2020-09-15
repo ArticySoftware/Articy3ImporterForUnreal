@@ -307,41 +307,28 @@ const bool UserInterfaceHelperFunctions::ShowObjectInArticy(const UArticyObject*
 	if(ArticyObject== nullptr)
 	{
 		return false;
-	}
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	}	
 
-	TArray<FAssetData> OutAssetData;
-	AssetRegistryModule.Get().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), OutAssetData, false);
-
-	if(OutAssetData.Num() == 1)
+	bool bNewTab = false;
+    if(ArticyObject->IsA(UArticyNode::StaticClass())) 
 	{
-		UArticyImportData* ImportData = Cast<UArticyImportData>(OutAssetData[0].GetAsset());
-		FString ProjectGuid = ImportData->GetProject().Guid;
-
-		FArticyId ArticyId = ArticyObject->GetId();
-
-		// restore the original Id in decimal
-		const int32 High = ArticyId.High;
-		const int32 Low = ArticyId.Low;
-		const uint64 HighOriginal = (uint64) High <<  32;
-		const uint64 LowOriginal = Low;
-		const uint64 OriginalId = HighOriginal + LowOriginal;
-		
-		FString ArticyObjectId = FString::Printf(TEXT("%llu"), OriginalId);
-		FString ArticyURL = FString::Printf(TEXT("articy://localhost/view/%s/%s?pane=selected&tab=current"), *ProjectGuid, *ArticyObjectId);
-		UKismetSystemLibrary::LaunchURL(ArticyURL);
+        bNewTab = false;
+    }
+	else 
+	{
+		bNewTab = true;
 	}
 	
-	return true;
+	return ShowObjectInArticy(ArticyObject->GetId(), bNewTab);
 }
 
-const bool UserInterfaceHelperFunctions::ShowObjectInArticy(const FArticyId ArticyId)
+const bool UserInterfaceHelperFunctions::ShowObjectInArticy(const FArticyId ArticyId, bool bNewTab)
 {
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 
 	TArray<FAssetData> OutAssetData;
 	AssetRegistryModule.Get().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), OutAssetData, false);
-
+	FString TabURL = bNewTab ? FString("new") : FString("current");
 	if (OutAssetData.Num() == 1)
 	{
 		UArticyImportData* ImportData = Cast<UArticyImportData>(OutAssetData[0].GetAsset());
@@ -355,7 +342,7 @@ const bool UserInterfaceHelperFunctions::ShowObjectInArticy(const FArticyId Arti
 		const uint64 OriginalId = HighOriginal + LowOriginal;
 
 		FString ArticyObjectId = FString::Printf(TEXT("%llu"), OriginalId);
-		FString ArticyURL = FString::Printf(TEXT("articy://localhost/view/%s/%s?pane=selected&tab=current"), *ProjectGuid, *ArticyObjectId);
+		FString ArticyURL = FString::Printf(TEXT("articy://localhost/view/%s/%s?window=main&pane=first&tab=%s"), *ProjectGuid, *ArticyObjectId, *TabURL);
 		UKismetSystemLibrary::LaunchURL(ArticyURL);
 	}
 
