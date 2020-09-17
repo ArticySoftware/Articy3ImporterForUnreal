@@ -76,12 +76,12 @@ void SArticyRefPin::OnArticyObjectSelected(const FAssetData& ArticyObjectData)
 	{
 		ArticyId = FArticyId();
 		// remove the old ID string
-		const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Low=")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+		const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Id=(")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
 		const int32 EndOfIdIndex = FormattedValueString.Find(FString(TEXT(")")), ESearchCase::IgnoreCase, ESearchDir::FromStart, IdIndex);
 		FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
 
 		// reconstruct the value string with the new ID
-		const FString NewIdString = FString::Format(TEXT("Low={0}, High={1}"), { 0, 0 });
+		const FString NewIdString = FString::Format(TEXT("Id=(Low={0}, High={1})"), { 0, 0 });
 		FormattedValueString.InsertAt(IdIndex, *NewIdString);
 	}
 	else
@@ -90,12 +90,12 @@ void SArticyRefPin::OnArticyObjectSelected(const FAssetData& ArticyObjectData)
 
 		ArticyId = NewId;
 		// remove the old ID string
-		const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Low=")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+		const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Id=(")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
 		const int32 EndOfIdIndex = FormattedValueString.Find(FString(TEXT(")")), ESearchCase::IgnoreCase, ESearchDir::FromStart, IdIndex);
 		FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
 
 		// reconstruct the value string with the new ID
-		const FString NewIdString = FString::Format(TEXT("Low={0}, High={1}"), { NewId.Low, NewId.High, });
+		const FString NewIdString = FString::Format(TEXT("Id=(Low={0}, High={1})"), { NewId.Low, NewId.High, });
 		FormattedValueString.InsertAt(IdIndex, *NewIdString);
 	}
 
