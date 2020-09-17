@@ -34,5 +34,5 @@ namespace UserInterfaceHelperFunctions
 	//const TArray< GetColor(const UArticyObject* ArticyObject);
 
 	const ARTICYEDITOR_API bool ShowObjectInArticy(const UArticyObject* ArticyObject);
-	const ARTICYEDITOR_API bool ShowObjectInArticy(const FArticyId ArticyId);	
+	const ARTICYEDITOR_API bool ShowObjectInArticy(const FArticyId ArticyId, bool bNewTab);
 };

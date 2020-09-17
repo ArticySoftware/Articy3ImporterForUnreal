@@ -34,6 +34,10 @@ public:
 	UPROPERTY(EditAnywhere, config, Category=RuntimeSettings, meta=(DisplayName="Keep global variables between worlds"))
 	bool bKeepGlobalVariablesBetweenWorlds;
 
+	/** If true will attempt to sort the children using the exported position properties. */
+	UPROPERTY(EditAnywhere, config, Category = EditorSettings, meta = (DisplayName = "Sort children when importing"))
+	bool bSortChildrenAtGeneration;
+
 	// internal cached data for data consistency between imports (setting restoration etc.)
 	UPROPERTY()
 	TMap<FString, bool> PackageLoadSettings;

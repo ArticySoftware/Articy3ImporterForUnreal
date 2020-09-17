@@ -9,6 +9,8 @@
 #include "UObject/Package.h"
 #include "ObjectTools.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Interfaces/ArticyObjectWithPosition.h"
+#include "Interfaces/ArticyNode.h"
 
 namespace ArticyImporterHelpers
 {
@@ -107,5 +109,28 @@ namespace ArticyImporterHelpers
 		}
 		return false;
 	}
+
+	// Helper struct to sort two articy Ids based on position, if available
+	// ref: BehaviorTreeEditorTypes.h
+	struct FCompareArticyNodeXLocation
+	{
+		FORCEINLINE bool operator()(const FArticyId& A, const FArticyId& B) const
+		{
+			const IArticyObjectWithPosition* AObjectWithPosition = Cast<IArticyObjectWithPosition>(UArticyObject::FindAsset(A));
+			const IArticyObjectWithPosition* BObjectWithPosition = Cast<IArticyObjectWithPosition>(UArticyObject::FindAsset(B));
+
+			if (!AObjectWithPosition || !BObjectWithPosition) return true;
+
+			const FVector2D& APos = AObjectWithPosition->GetPosition();
+			const FVector2D& BPos = BObjectWithPosition->GetPosition();
+
+			if (APos.X == BPos.X)
+			{
+				return APos.Y < BPos.Y;
+			}
+
+			return APos.X < BPos.X;
+		}
+	};
 
 }

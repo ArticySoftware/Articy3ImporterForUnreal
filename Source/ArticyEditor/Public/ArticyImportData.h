@@ -334,7 +334,7 @@ public:
 	const TSet<FArticyExpressoFragment>& GetScriptFragments() const { return ScriptFragments; }
 
 	void AddChildToParentCache(FArticyId Parent, FArticyId Child);
-	const TMap<FArticyId, FArticyIdArray> GetParentChildrenCache() const { return ParentChildrenCache; }
+	const TMap<FArticyId, FArticyIdArray>& GetParentChildrenCache() const { return ParentChildrenCache; }
 
 	void BuildCachedVersion();
 	void ResolveCachedVersion();

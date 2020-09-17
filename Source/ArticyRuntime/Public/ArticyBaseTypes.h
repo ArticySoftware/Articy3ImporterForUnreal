@@ -90,6 +90,11 @@ public:
 	{
 		return High == 0 && Low == 0;
 	}
+
+	FString ToString() const
+	{
+		return FString::Printf(TEXT("Low=%d, High=%d"), Low, High);
+	}
 };
 
 //---------------------------------------------------------------------------//
