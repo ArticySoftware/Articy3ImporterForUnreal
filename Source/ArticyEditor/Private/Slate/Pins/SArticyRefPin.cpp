@@ -8,7 +8,8 @@
 #include "EdGraph/EdGraphNode.h"
 #include "Slate/SArticyIdProperty.h"
 #include "ScopedTransaction.h"
-#include "ArticyEditorModule.h"
+#include "Widgets/Input/SMultiLineEditableTextBox.h"
+
 
 void SArticyRefPin::Construct(const FArguments& InArgs, UEdGraphPin* GraphPin)
 {
@@ -18,10 +19,10 @@ void SArticyRefPin::Construct(const FArguments& InArgs, UEdGraphPin* GraphPin)
 
 TSharedRef<SWidget> SArticyRefPin::GetDefaultValueWidget()
 {
-	return SAssignNew(DefaultValueWidget, SArticyIdProperty)
-	.Visibility(this, &SArticyRefPin::GetDefaultValueVisibility)
-	.ShownObject(this, &SArticyRefPin::GetArticyId)
-	.OnArticyObjectSelected(this, &SArticyRefPin::OnArticyObjectSelected);
+	return SNew(SArticyIdProperty)
+		.ArticyIdToDisplay(this, &SArticyRefPin::GetArticyId)
+		.OnArticyIdChanged(this, &SArticyRefPin::OnArticyIdChanged)
+		.Visibility(this, &SArticyRefPin::GetDefaultValueVisibility);
 }
 
 EVisibility SArticyRefPin::GetDefaultValueVisibility() const
@@ -66,38 +67,21 @@ FArticyId SArticyRefPin::GetArticyId() const
 	return Id;
 }
 
-void SArticyRefPin::OnArticyObjectSelected(const FAssetData& ArticyObjectData)
+void SArticyRefPin::OnArticyIdChanged(const FArticyId& NewArticyId)
 {
 	FString FormattedValueString;
 	FArticyRef::StaticStruct()->ExportText(FormattedValueString, &ArticyId, nullptr, nullptr, (PPF_ExportsNotFullyQualified | PPF_Copy | PPF_IncludeTransient), nullptr);
 
-	UArticyObject* SelectedArticyObject = Cast<UArticyObject>(ArticyObjectData.GetAsset());
-	if (!SelectedArticyObject)
-	{
-		ArticyId = FArticyId();
-		// remove the old ID string
-		const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Id=(")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
-		const int32 EndOfIdIndex = FormattedValueString.Find(FString(TEXT(")")), ESearchCase::IgnoreCase, ESearchDir::FromStart, IdIndex);
-		FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
+	ArticyId = NewArticyId;
+	
+	// remove the old ID string
+	const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Id=(")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+	const int32 EndOfIdIndex = FormattedValueString.Find(FString(TEXT(")")), ESearchCase::IgnoreCase, ESearchDir::FromStart, IdIndex);
+	FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
 
-		// reconstruct the value string with the new ID
-		const FString NewIdString = FString::Format(TEXT("Id=(Low={0}, High={1})"), { 0, 0 });
-		FormattedValueString.InsertAt(IdIndex, *NewIdString);
-	}
-	else
-	{
-		FArticyId NewId = SelectedArticyObject ? SelectedArticyObject->GetId() : FArticyId();
-
-		ArticyId = NewId;
-		// remove the old ID string
-		const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Id=(")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
-		const int32 EndOfIdIndex = FormattedValueString.Find(FString(TEXT(")")), ESearchCase::IgnoreCase, ESearchDir::FromStart, IdIndex);
-		FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
-
-		// reconstruct the value string with the new ID
-		const FString NewIdString = FString::Format(TEXT("Id=(Low={0}, High={1})"), { NewId.Low, NewId.High, });
-		FormattedValueString.InsertAt(IdIndex, *NewIdString);
-	}
+	// reconstruct the value string with the new ID
+	const FString NewIdString = FString::Format(TEXT("Id=(Low={0}, High={1})"), { NewArticyId.Low, NewArticyId.High });
+	FormattedValueString.InsertAt(IdIndex, *NewIdString);
 
 	if(GraphPinObj->GetDefaultAsString() != FormattedValueString)
 	{

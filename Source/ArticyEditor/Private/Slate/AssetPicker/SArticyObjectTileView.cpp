@@ -15,14 +15,21 @@
 #include "Editor.h"
 #include "ArticyEditorModule.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
+#include "HAL/PlatformApplicationMisc.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectTileView"
 
-void SArticyObjectTileView::UpdateDisplayedArticyObject()
-{
-	CachedArticyId = ArticyIdAttribute.Get();
+void SArticyObjectTileView::Update(const FArticyId& NewArticyId)
+{	
+	CachedArticyId = NewArticyId;
 	CachedArticyObject = UArticyObject::FindAsset(CachedArticyId);
+	
+	UpdateWidget();
+}
 
+void SArticyObjectTileView::UpdateWidget()
+{
 	bHasPreviewImage = UserInterfaceHelperFunctions::RetrievePreviewImage(CachedArticyObject.Get(), PreviewBrush);
 	// if we failed getting a preview image, use the default type image instead
 	if (!bHasPreviewImage)
@@ -35,11 +42,15 @@ void SArticyObjectTileView::UpdateDisplayedArticyObject()
 
 void SArticyObjectTileView::Construct(const FArguments& InArgs)
 {
-	ArticyIdAttribute = InArgs._ObjectToDisplay;
+	ArticyIdToDisplay = InArgs._ArticyIdToDisplay;
+	OnArticyIdChanged = InArgs._OnArticyIdChanged;
 	ThumbnailSize = InArgs._ThumbnailSize;
 	ThumbnailPadding = InArgs._ThumbnailPadding;
 	LabelVisibility = InArgs._LabelVisibility;
-
+	bIsReadOnly = InArgs._bIsReadOnly;
+	CopyAction = InArgs._CopyAction;
+	PasteAction = InArgs._PasteAction;
+	
 	TAttribute<FOptionalSize> WidthScaleAttribute = ThumbnailSize.X / 3.f;
 	TAttribute<FOptionalSize> HeightScaleAttribute = ThumbnailSize.Y / 3.f;
 
@@ -57,12 +68,12 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 		.TextStyle(EntityNameTextStyle.Get())
 		.Justification(ETextJustify::Center);
 
-	UpdateDisplayedArticyObject();
+	Update(ArticyIdToDisplay.Get(FArticyId()));
 
-	SetToolTip(SNew(SArticyObjectToolTip).ObjectToDisplay(ArticyIdAttribute));
+	SetToolTip(SNew(SArticyObjectToolTip).ObjectToDisplay(ArticyIdToDisplay));
 
 	this->SetOnMouseDoubleClick(InArgs._OnMouseDoubleClick);
-
+	
 	this->ChildSlot
 	[
 		SAssignNew(WidgetContainerBorder, SBorder)
@@ -136,9 +147,9 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 void SArticyObjectTileView::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
 	// if the Id is different from the cached Id, update the widget
-	if(CachedArticyId != ArticyIdAttribute.Get() || !CachedArticyObject.IsValid())
+	if(CachedArticyId != ArticyIdToDisplay.Get() || (!CachedArticyObject.IsValid() && !CachedArticyId.IsNull()))
 	{
-		UpdateDisplayedArticyObject();
+		Update(ArticyIdToDisplay.Get());
 	}
 }
 
@@ -172,5 +183,60 @@ const FSlateBrush* SArticyObjectTileView::GetTypeImage() const
 	return TypeImage;
 }
 
+void SArticyObjectTileView::OnContextMenuOpening(FMenuBuilder& Builder)
+{
+	// Hide separator line if it only contains the SearchWidget, making the next 2 elements the top of the list
+	if (Builder.GetMultiBox()->GetBlocks().Num() > 1)
+	{
+		Builder.AddMenuSeparator();
+	}
+	
+	if (CopyAction.IsBound())
+	{
+		Builder.AddMenuEntry(
+			NSLOCTEXT("PropertyView", "CopyProperty", "Copy"),
+			NSLOCTEXT("PropertyView", "CopyProperty_ToolTip", "Copy this property value"),
+			FSlateIcon(FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Copy"),
+			CopyAction);
+
+	}
+	if(PasteAction.IsBound())
+	{
+		Builder.AddMenuEntry(
+			NSLOCTEXT("PropertyView", "PasteProperty", "Paste"),
+			NSLOCTEXT("PropertyView", "PasteProperty_ToolTip", "Paste the copied value here"),
+			FSlateIcon(FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Paste"),
+			PasteAction);
+	}
+}
+
+FReply SArticyObjectTileView::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+	{
+		FReply Reply = FReply::Handled();
+		// this will register this widget as prioritised widget for the mouse button up event, even if child widgets would handle the button up event
+		Reply.CaptureMouse(SharedThis(this));
+		return Reply;
+	}
+
+	return FReply::Unhandled();
+}
+
+FReply SArticyObjectTileView::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+	{
+		FMenuBuilder MenuBuilder(true, nullptr, nullptr, true);
+
+		OnContextMenuOpening(MenuBuilder);
+		FWidgetPath WidgetPath = MouseEvent.GetEventPath() != nullptr ? *MouseEvent.GetEventPath() : FWidgetPath();
+		FSlateApplication::Get().PushMenu(AsShared(), WidgetPath, MenuBuilder.MakeWidget(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect::ContextMenu);
+
+		return FReply::Handled();
+	}
+
+	return FReply::Unhandled();
+}
 #undef LOCTEXT_NAMESPACE
 

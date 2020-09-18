@@ -34,8 +34,8 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	HeaderRow.IsEnabled(EnableAttribute);
 ;
 	ArticyIdPropertyWidget = SNew(SArticyIdProperty)
-	.ShownObject(this, &FArticyRefCustomization::GetArticyId)
-	.OnArticyObjectSelected(this, &FArticyRefCustomization::SetAsset)
+	.ArticyIdToDisplay(this, &FArticyRefCustomization::GetArticyId)
+	.OnArticyIdChanged(this, &FArticyRefCustomization::OnArticyIdChanged)
 	.TopLevelClassRestriction(this, &FArticyRefCustomization::GetClassRestrictionMetaData)
 	.bExactClass(IsExactClass())
 	.bExactClassEditable(!HasExactClassMetaData())
@@ -73,7 +73,7 @@ void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Prop
 		// UProperty is not set to ReadOnly due to needing to be editable to access "SetValue" functions from the IPropertyHandle system
 		if(!bIsEditable || ChildHandle->GetPropertyDisplayName().EqualTo(FText::FromString(TEXT("Id"))))
 		{
-			Row.IsEnabled(false);
+			//Row.IsEnabled(false);
 		}
 	}
 }
@@ -93,17 +93,11 @@ FArticyId FArticyRefCustomization::GetArticyId() const
 	return ArticyRef ? ArticyRef->GetId() : FArticyId();
 }
 
-void FArticyRefCustomization::SetAsset(const FAssetData& AssetData) const
+void FArticyRefCustomization::OnArticyIdChanged(const FArticyId& NewArticyId) const
 {
-	// retrieve the newly selected articy object
-	const UArticyObject* NewSelection = Cast<UArticyObject>(AssetData.GetAsset());
-
-	// if the new selection is not valid we cleared the selection
-	const FArticyId NewId = NewSelection ? NewSelection->GetId() : FArticyId();
-
 	// get the current articy ref struct as formatted string
 	FString FormattedValueString;
-	ArticyRefPropertyHandle->GetValueAsFormattedString(FormattedValueString);
+	ArticyRefPropertyHandle->GetValueAsFormattedString(FormattedValueString, EPropertyPortFlags::PPF_Copy);
 
 	// remove the old ID string
 	const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Low=")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
@@ -111,7 +105,7 @@ void FArticyRefCustomization::SetAsset(const FAssetData& AssetData) const
 	FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
 
 	// reconstruct the value string with the new ID
-	const FString NewIdString = FString::Format(TEXT("Low={0}, High={1}"), { NewId.Low, NewId.High, });
+	const FString NewIdString = FString::Format(TEXT("Low={0}, High={1}"), { NewArticyId.Low, NewArticyId.High, });
 	FormattedValueString.InsertAt(IdIndex, *NewIdString);
 
 	// update the articy ref with the new ID:
@@ -119,6 +113,7 @@ void FArticyRefCustomization::SetAsset(const FAssetData& AssetData) const
 	// - CDO default change forwarding to instances
 	// - marking dirty
 	// - transaction buffer (Undo, Redo)
+	
 	ArticyRefPropertyHandle->SetValueFromFormattedString(FormattedValueString);
 }
 

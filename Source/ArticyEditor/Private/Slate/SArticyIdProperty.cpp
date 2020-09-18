@@ -6,7 +6,6 @@
 #include <Templates/SharedPointer.h>
 #include <Kismet2/KismetEditorUtilities.h>
 #include <Kismet2/SClassPickerDialog.h>
-#include <ARFilter.h>
 #include <IContentBrowserSingleton.h>
 #include <ContentBrowserModule.h>
 #include <Widgets/Input/SComboButton.h>
@@ -15,10 +14,9 @@
 #include "Slate/AssetPicker/SArticyObjectAssetPicker.h"
 #include "Editor.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
-#include "Customizations/Details/ArticyIdCustomization.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Framework/MultiBox/MultiBoxDefs.h"
-#include "Layout/LayoutUtils.h"
+#include "HAL/PlatformApplicationMisc.h"
 
 #define LOCTEXT_NAMESPACE "ArticyRefProperty"
 
@@ -44,72 +42,116 @@ void SFixedSizeMenuComboButton::Tick(const FGeometry& AllottedGeometry, const do
 
 void SArticyIdProperty::Construct(const FArguments& InArgs)
 {
-	this->ShownObject = InArgs._ShownObject;
-	this->OnAssetSelected = InArgs._OnArticyObjectSelected;
+	if(ArticyIdToDisplay.IsBound())
+	{
+		ensureMsgf(InArgs._OnArticyIdChanged.IsBound(), TEXT("Since the shown object is given externally per event, the handler also needs to handle updates."));
+	}
+
+	this->ArticyIdToDisplay = InArgs._ArticyIdToDisplay;
+	this->OnArticyIdChanged = InArgs._OnArticyIdChanged;
 	this->TopLevelClassRestriction = InArgs._TopLevelClassRestriction;
 	this->bExactClass = InArgs._bExactClass;
 	this->bExactClassEditable = InArgs._bExactClassEditable;
 	this->bClassFilterEditable = InArgs._bClassFilterEditable;
+	this->bIsReadOnly = InArgs._bIsReadOnly;
 	
-	ensure(ShownObject.IsBound() || ShownObject.IsSet());
 	Cursor = EMouseCursor::Hand;
+	
+	CachedArticyId = ArticyIdToDisplay.Get(FArticyId());
+	CachedArticyObject = !CachedArticyId.IsNull() ? UArticyObject::FindAsset(CachedArticyId) : nullptr;
+	
+	CreateInternalWidgets();
 
-	ComboButton = SNew(SFixedSizeMenuComboButton)
-	.OnGetMenuContent(this, &SArticyIdProperty::CreateArticyObjectAssetPicker)
-	.ButtonContent()
+	UpdateWidget();
+
+	this->ChildSlot
 	[
-		SNew(STextBlock)
-		.Text(this, &SArticyIdProperty::OnGetArticyObjectDisplayName)
+		ChildBox.ToSharedRef()
 	];
+}
 
+void SArticyIdProperty::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+{
+	const FArticyId CurrentRefId = ArticyIdToDisplay.Get() ? ArticyIdToDisplay.Get() : FArticyId();
+	if (CurrentRefId != CachedArticyId || (!CurrentRefId.IsNull() && !CachedArticyObject.IsValid()))
+	{
+		Update(CurrentRefId);
+	}
+}
+
+void SArticyIdProperty::CreateInternalWidgets()
+{
+	ComboButton = SNew(SFixedSizeMenuComboButton)
+		.OnGetMenuContent(this, &SArticyIdProperty::CreateArticyObjectAssetPicker)
+		.ButtonContent()
+		[
+			SNew(STextBlock)
+			.Text(this, &SArticyIdProperty::OnGetArticyObjectDisplayName)
+		];
+
+	FUIAction CopyAction;
+	FUIAction PasteAction;
+
+	CopyAction.ExecuteAction = FExecuteAction::CreateSP(this, &SArticyIdProperty::OnCopyProperty);
+	PasteAction.CanExecuteAction = FCanExecuteAction::CreateSP(this, &SArticyIdProperty::CanPasteProperty);
+	PasteAction.ExecuteAction = FExecuteAction::CreateSP(this, &SArticyIdProperty::OnPasteProperty);
+	
 	TileView = SNew(SArticyObjectTileView)
-	.ObjectToDisplay(this, &SArticyIdProperty::GetCurrentObjectID)
-	.OnMouseDoubleClick(this, &SArticyIdProperty::OnAssetThumbnailDoubleClick)
-	.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize)
-	.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding);
+		.ArticyIdToDisplay(ArticyIdToDisplay)
+		.OnArticyIdChanged(OnArticyIdChanged)
+		.CopyAction(CopyAction)
+		.PasteAction(PasteAction)
+		.OnMouseDoubleClick(this, &SArticyIdProperty::OnAssetThumbnailDoubleClick)
+		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize)
+		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding);
 
 	ExtraButtons = SNew(SHorizontalBox);
 
-	UpdateWidget();
-	
-	this->ChildSlot
+	ChildBox = SNew(SHorizontalBox)
+	+ SHorizontalBox::Slot()
+	.VAlign(VAlign_Center)
+	.AutoWidth()
+	.Padding(0, 0, 2, 0)
 	[
-		SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
-		.VAlign(VAlign_Center)
-		.AutoWidth()
-		.Padding(0, 0, 2, 0)
+		SAssignNew(ThumbnailBorder, SBorder)
+		.Padding(5.0f)
 		[
-			SAssignNew(ThumbnailBorder, SBorder)
-			.Padding(5.0f)
+			SAssignNew(TileContainer, SBox)
 			[
-				SAssignNew(TileContainer, SBox)
-				[
-					TileView.ToSharedRef()
-				]
+				TileView.ToSharedRef()
 			]
 		]
-		+ SHorizontalBox::Slot()
-		.VAlign(VAlign_Fill)
-		.HAlign(HAlign_Fill)
+	]
+	+ SHorizontalBox::Slot()
+	.VAlign(VAlign_Fill)
+	.HAlign(HAlign_Fill)
+	[
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		.HAlign(HAlign_Left)
+		.VAlign(VAlign_Center)
+		.Padding(3, 5, 3, 0)
 		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			.HAlign(HAlign_Left)
-			.VAlign(VAlign_Center)
-			.Padding(3, 5, 3, 0)
-			[
-				ComboButton.ToSharedRef()
-			]
-			+ SVerticalBox::Slot()
-			.VAlign(VAlign_Center)
-			.HAlign(HAlign_Left)
-			.Padding(3, 0, 3, 2)
-			[
-				ExtraButtons.ToSharedRef()
-			]
+			ComboButton.ToSharedRef()
+		]
+		+ SVerticalBox::Slot()
+		.VAlign(VAlign_Center)
+		.HAlign(HAlign_Left)
+		.Padding(3, 0, 3, 0)
+		[
+			ExtraButtons.ToSharedRef()
 		]
 	];
+}
+
+
+void SArticyIdProperty::Update(const FArticyId& NewId)
+{
+	// the actual update. This will be forwarded into the tile view and will cause an update
+	CachedArticyId = NewId;
+	CachedArticyObject = !CachedArticyId.IsNull() ? UArticyObject::FindAsset(CachedArticyId) : nullptr;
+
+	UpdateWidget();
 }
 
 void SArticyIdProperty::UpdateWidget()
@@ -120,14 +162,10 @@ void SArticyIdProperty::UpdateWidget()
 	}
 	ActiveCustomizations.Reset();
 	
-	// the actual update. This will be forwarded into the tile view and will cause an update
-	CurrentArticyId = ShownObject.Get() ? ShownObject.Get() : FArticyId();
-	CachedArticyObject = !CurrentArticyId.IsNull() ? UArticyObject::FindAsset(CurrentArticyId) : nullptr;
-	
 	FArticyEditorModule::Get().GetCustomizationManager()->CreateArticyRefWidgetCustomizations(CachedArticyObject.Get(), ActiveCustomizations);
 
 	FArticyRefWidgetCustomizationBuilder Builder(CachedArticyObject.Get());
-	for(TSharedPtr<IArticyRefWidgetCustomization>& Customization : ActiveCustomizations)
+	for (TSharedPtr<IArticyRefWidgetCustomization>& Customization : ActiveCustomizations)
 	{
 		Customization->RegisterArticyRefWidgetCustomization(Builder);
 	}
@@ -162,24 +200,17 @@ void SArticyIdProperty::ApplyArticyRefCustomizations(const TArray<FArticyRefWidg
 	Builder.EndSection();
 
 	ExtraButtons->AddSlot()
+	.VAlign(VAlign_Center)
+	.HAlign(HAlign_Center)
 	[
 		Builder.MakeWidget()
 	];
 }
 
-void SArticyIdProperty::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
-{
-	const FArticyId CurrentRefId = ShownObject.Get() ? ShownObject.Get(): FArticyId();
-	if (CurrentRefId != CurrentArticyId || (!CurrentRefId.IsNull() && !CachedArticyObject.IsValid()))
-	{
-		UpdateWidget();
-	}	
-}
-
 TSharedRef<SWidget> SArticyIdProperty::CreateArticyObjectAssetPicker()
 {
 	TSharedRef<SArticyObjectAssetPicker> AssetPicker = SNew(SArticyObjectAssetPicker)
-		.OnArticyObjectSelected(OnAssetSelected)
+		.OnArticyObjectSelected(this, &SArticyIdProperty::OnArticyObjectPicked)
 		.CurrentClassRestriction(CachedArticyObject.IsValid() ? CachedArticyObject->UObject::GetClass() : UArticyObject::StaticClass())
 		.TopLevelClassRestriction(TopLevelClassRestriction)
 		.bExactClass(bExactClass)
@@ -188,9 +219,23 @@ TSharedRef<SWidget> SArticyIdProperty::CreateArticyObjectAssetPicker()
 	return AssetPicker;
 }
 
+void SArticyIdProperty::OnArticyObjectPicked(const FAssetData& ArticyObjectData) const
+{
+	UArticyObject* NewObject = Cast<UArticyObject>(ArticyObjectData.GetAsset());
+
+	if(NewObject)
+	{
+		OnArticyIdChanged.ExecuteIfBound(NewObject->GetId());
+	}
+	else
+	{
+		OnArticyIdChanged.ExecuteIfBound(FArticyId());
+	}
+}
+
 FReply SArticyIdProperty::OnArticyButtonClicked() const
 {
-	UserInterfaceHelperFunctions::ShowObjectInArticy(UArticyObject::FindAsset(CurrentArticyId));
+	UserInterfaceHelperFunctions::ShowObjectInArticy(UArticyObject::FindAsset(CachedArticyId));
 	return FReply::Handled();
 }
 
@@ -212,31 +257,56 @@ FText SArticyIdProperty::OnGetArticyObjectDisplayName() const
 
 FArticyId SArticyIdProperty::GetCurrentObjectID() const
 {
-	return CurrentArticyId;
+	return CachedArticyId;
 }
 
-//FGeometry SArticyIdProperty::ComputeNewWindowMenuPlacement(const FGeometry& AllottedGeometry,
-//	const FVector2D& PopupDesiredSize, EMenuPlacement PlacementMode) const
-//{
-//	// Compute the popup size, offset, and anchor rect  in local space
-//	const SMenuAnchor::FPopupPlacement PopupPlacement(AllottedGeometry, PopupDesiredSize, PlacementMode);
-//
-//	// already handled
-//	const bool bAutoAdjustForDPIScale = false;
-//
-//	// ask the application to compute the proper desktop offset for the anchor. This requires the offsets to be in desktop space.
-//	const FVector2D NewPositionDesktopSpace = FSlateApplication::Get().CalculatePopupWindowPosition(
-//		TransformRect(AllottedGeometry.GetAccumulatedLayoutTransform(), PopupPlacement.AnchorLocalSpace),
-//		TransformVector(AllottedGeometry.GetAccumulatedLayoutTransform(), PopupPlacement.LocalPopupSize),
-//		bAutoAdjustForDPIScale,
-//		TransformPoint(AllottedGeometry.GetAccumulatedLayoutTransform(), PopupPlacement.LocalPopupOffset),
-//		PopupPlacement.Orientation);
-//
-//	// transform the desktop offset into local space and use that as the layout transform for the child content.
-//	return AllottedGeometry.MakeChild(
-//		PopupPlacement.LocalPopupSize,
-//		FSlateLayoutTransform(TransformPoint(Inverse(AllottedGeometry.GetAccumulatedLayoutTransform()), NewPositionDesktopSpace)));
-//}
+void SArticyIdProperty::OnCopyProperty() const
+{
+	FString ValueString = CachedArticyId.ToString();
+	FPlatformApplicationMisc::ClipboardCopy(*ValueString);
+}
 
+void SArticyIdProperty::OnPasteProperty()
+{
+	FString ClipboardContent;
+	FPlatformApplicationMisc::ClipboardPaste(ClipboardContent);
+
+	FArticyId NewId;
+	bool bSuccess = NewId.InitFromString(ClipboardContent);
+	if (ensureMsgf(bSuccess, TEXT("String was garbage, therefore Id was not properly updated")))
+	{
+		OnArticyIdChanged.ExecuteIfBound(NewId);
+		Update(NewId);
+	}
+}
+
+bool SArticyIdProperty::CanPasteProperty() const
+{
+	if (bIsReadOnly.Get())
+	{
+		return false;
+	}
+
+	FString ClipboardContent;
+	FPlatformApplicationMisc::ClipboardPaste(ClipboardContent);
+
+	if (ClipboardContent.IsEmpty() || !ClipboardContent.Contains("Low=") || !ClipboardContent.Contains("High="))
+	{
+		return false;
+	}
+
+	FArticyId CandidateId;
+	if(CandidateId.InitFromString(ClipboardContent))
+	{
+		UArticyObject* Object = UArticyObject::FindAsset(CandidateId);
+		if(!Object)
+		{
+			return false;
+		}
+
+		return Object->UObject::GetClass()->IsChildOf(TopLevelClassRestriction.Get());
+	}
+	
+	return false;
+}
 #undef LOCTEXT_NAMESPACE
-

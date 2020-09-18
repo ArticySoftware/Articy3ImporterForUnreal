@@ -40,5 +40,5 @@ private:
 	bool HasExactClassMetaData() const;
 
 	FArticyId GetArticyId() const;
-	void SetAsset(const FAssetData& AssetData) const;
+	void OnArticyIdChanged(const FArticyId& NewArticyId) const;
 };

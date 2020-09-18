@@ -10,7 +10,6 @@
 #include "ArticyGlobalVariables.h"
 #include <ContentBrowserModule.h>
 #include "ArticyPluginSettings.h"
-#include "ClassViewerModule.h"
 #include "Customizations/Details/ArticyIdCustomization.h"
 #include "Types/WidgetActiveTimerDelegate.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
@@ -21,6 +20,7 @@
 #include "Layout/WidgetPath.h"
 #include "Framework/Application/SlateApplication.h"
 #include "ArticyEditorModule.h"
+#include "HAL/PlatformApplicationMisc.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectAssetPicker"
 
@@ -32,6 +32,7 @@ SArticyObjectAssetPicker::~SArticyObjectAssetPicker()
 void SArticyObjectAssetPicker::Construct(const FArguments& InArgs)
 {
 	OnAssetSelected = InArgs._OnArticyObjectSelected;
+	OnClassPicked = InArgs._OnClassPicked;
 	CurrentClassRestriction = InArgs._CurrentClassRestriction;
 	TopLevelClassRestriction = InArgs._TopLevelClassRestriction;
 	bExactClass = InArgs._bExactClass;
@@ -120,8 +121,6 @@ void SArticyObjectAssetPicker::CreateInternalWidgets()
 	.WidthOverride(325)
 	.HeightOverride(325)
 	[
-
-		//TileView1.ToSharedRef()
 		SAssignNew(AssetView, STileView<TWeakObjectPtr<UArticyObject>>)
 		.SelectionMode(ESelectionMode::Single)
 		.ListItemsSource(&FilteredObjects)
@@ -176,17 +175,24 @@ void SArticyObjectAssetPicker::CreateInternalWidgets()
 		]
 	]
 	+ SHorizontalBox::Slot()
-	.AutoWidth()
+	.FillWidth(1.f)
 	[
 		SNew(SSpacer)		
 	]
     + SHorizontalBox::Slot()
     .VAlign(VAlign_Center)
     .HAlign(HAlign_Right)
+	.AutoWidth()
 	.MaxWidth(200.f)
     [
         ClassFilterButton.ToSharedRef()
 	];
+}
+
+void SArticyObjectAssetPicker::OnCopyProperty(FArticyId Id) const
+{
+	FString ValueString = Id.ToString();
+	FPlatformApplicationMisc::ClipboardCopy(*ValueString);
 }
 
 TSharedRef<SWidget> SArticyObjectAssetPicker::CreateClassPicker()
@@ -196,14 +202,16 @@ TSharedRef<SWidget> SArticyObjectAssetPicker::CreateClassPicker()
 	ClassViewerConfig.bAllowViewOptions = true;
 	ClassViewerConfig.ClassFilter = MakeShareable(new FArticyRefClassFilter(TopLevelClassRestriction.Get(), bExactClass.Get()));
 
-	return FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(ClassViewerConfig, FOnClassPicked::CreateRaw(this, &SArticyObjectAssetPicker::OnClassPicked));
+	return FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(ClassViewerConfig, FOnClassPicked::CreateRaw(this, &SArticyObjectAssetPicker::OnClassPicked_Func));
 }
 
-void SArticyObjectAssetPicker::OnClassPicked(UClass* InChosenClass)
+void SArticyObjectAssetPicker::OnClassPicked_Func(UClass* InChosenClass)
 {
 	CurrentClassRestriction = InChosenClass;
 	ClassFilter->UpdateFilteredClass(CurrentClassRestriction);
 	ClassFilterButton->SetIsOpen(false, false);
+
+	OnClassPicked.ExecuteIfBound(InChosenClass);
 }
 
 FText SArticyObjectAssetPicker::GetChosenClassName() const
@@ -224,10 +232,15 @@ TSharedRef<class ITableRow> SArticyObjectAssetPicker::MakeTileViewWidget(TWeakOb
 		.Cursor(true ? EMouseCursor::GrabHand : EMouseCursor::Default)
 		.Padding(3.f);
 
+	FUIAction CopyAction;
+	CopyAction.ExecuteAction = FExecuteAction::CreateSP(this, &SArticyObjectAssetPicker::OnCopyProperty, Entity->GetId());
+	
 	// create the new tile view; the object to display is fixed so it can't change without the asset picker being recreated.
 	TSharedRef<SArticyObjectTileView> Item =
 		SNew(SArticyObjectTileView)
-		.ObjectToDisplay(Entity->GetId())
+		.bIsReadOnly(true)
+		.CopyAction(CopyAction)
+		.ArticyIdToDisplay(Entity->GetId())
 		.ThumbnailSize(FArticyObjectAssetPicketConstants::TileSize)
 		.ThumbnailPadding(FArticyObjectAssetPicketConstants::ThumbnailPadding);
 

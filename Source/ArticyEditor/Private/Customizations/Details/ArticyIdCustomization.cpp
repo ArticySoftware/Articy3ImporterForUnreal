@@ -33,8 +33,8 @@ void FArticyIdCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Propert
 	bIsEditable = PropertyHandle->GetNumPerObjectValues() == 1;
 
 	ArticyIdPropertyWidget = SNew(SArticyIdProperty)
-		.ShownObject(this, &FArticyIdCustomization::GetArticyId)
-		.OnArticyObjectSelected(this, &FArticyIdCustomization::SetAsset)
+		.ArticyIdToDisplay(this, &FArticyIdCustomization::GetArticyId)
+		.OnArticyIdChanged(this, &FArticyIdCustomization::OnArticyIdChanged)
 		.TopLevelClassRestriction(this, &FArticyIdCustomization::GetClassRestrictionMetaData)
 		.bExactClass(IsExactClass())
 		.bExactClassEditable(HasExactClassMetaData())
@@ -128,25 +128,19 @@ FArticyId FArticyIdCustomization::GetArticyId() const
 	return ArticyId ? *ArticyId : FArticyId();
 }
 
-void FArticyIdCustomization::SetAsset(const FAssetData& AssetData) const
+void FArticyIdCustomization::OnArticyIdChanged(const FArticyId &NewArticyId) const
 {
-	// retrieve the newly selected articy object
-	const UArticyObject* NewSelection = Cast<UArticyObject>(AssetData.GetAsset());
-
-	// if the new selection is not valid we cleared the selection
-	const FArticyId NewId = NewSelection ? NewSelection->GetId() : FArticyId();
-
 	// get the current articy ref struct as formatted string
 	FString FormattedValueString;
 	ArticyIdPropertyHandle->GetValueAsFormattedString(FormattedValueString);
 
 	// remove the old ID string
-	const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Low=")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+	const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Id=(")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
 	const int32 EndOfIdIndex = FormattedValueString.Find(FString(TEXT(")")), ESearchCase::IgnoreCase, ESearchDir::FromStart, IdIndex);
 	FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
 
 	// reconstruct the value string with the new ID
-	const FString NewIdString = FString::Format(TEXT("Low={0}, High={1}"), { NewId.Low, NewId.High, });
+	const FString NewIdString = FString::Format(TEXT("Id=(Low={0}, High={1})"), { NewArticyId.Low, NewArticyId.High, });
 	FormattedValueString.InsertAt(IdIndex, *NewIdString);
 
 	// update the articy ref with the new ID:

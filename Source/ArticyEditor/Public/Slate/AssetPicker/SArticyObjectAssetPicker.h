@@ -12,13 +12,12 @@
 #include <Widgets/Views/STableViewBase.h>
 #include <Widgets/Views/STableRow.h>
 #include <IContentBrowserSingleton.h>
-#include "Interfaces/ArticyObjectWithPreviewImage.h"
 #include <SAssetSearchBox.h>
 #include <Types/SlateEnums.h>
 #include <Misc/TextFilterExpressionEvaluator.h>
 #include "Widgets/Input/SComboButton.h"
-#include "SArticyObjectTileView.h"
 #include "Slate/ArticyFilterHelpers.h"
+#include "ClassViewerModule.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectAssetPicker"
 
@@ -45,6 +44,7 @@ public:
 		SLATE_ATTRIBUTE(bool, bExactClass)
 		SLATE_ATTRIBUTE(bool, bExactClassEditable)
 		SLATE_ATTRIBUTE(bool, bClassFilterEditable)
+		SLATE_EVENT(FOnClassPicked, OnClassPicked)
 	SLATE_END_ARGS()
 
 	~SArticyObjectAssetPicker();
@@ -55,10 +55,10 @@ public:
 	void SelectAsset(TWeakObjectPtr<UArticyObject> AssetItem, ESelectInfo::Type SelectInfo) const;
 private:
 	void CreateInternalWidgets();
+	void OnCopyProperty(FArticyId Id) const;
 	TSharedRef<SWidget> CreateClassPicker();
-	FReply CreateClassPicker(const FGeometry& Geometry, const FPointerEvent& Event);
 	void OnExactClassCheckBoxChanged(ECheckBoxState NewState);
-	void OnClassPicked(UClass* InChosenClass);
+	void OnClassPicked_Func(UClass* InChosenClass);
 	FText GetChosenClassName() const;
 	TSharedRef<class ITableRow> MakeTileViewWidget(TWeakObjectPtr<UArticyObject> Entity, const TSharedRef<STableViewBase>& OwnerTable) const;
 	float GetTileViewHeight() const;
@@ -75,6 +75,7 @@ private:
 	
 private: // Slate Attributes
 	FOnAssetSelected OnAssetSelected;
+	FOnClassPicked OnClassPicked;
 	TAttribute<UClass*> TopLevelClassRestriction;
 	UClass* CurrentClassRestriction = nullptr;
 	TAttribute<bool> bExactClass;

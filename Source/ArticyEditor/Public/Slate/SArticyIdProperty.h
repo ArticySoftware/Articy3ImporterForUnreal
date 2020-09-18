@@ -31,22 +31,31 @@ class SFixedSizeMenuComboButton : public SComboButton
 protected:
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 };
+
 /**
  *  REFERENCE: SPropertyEditorAsset, which is the normal asset selection widget
  */
 class ARTICYEDITOR_API SArticyIdProperty : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SArticyIdProperty) 
-		: _TopLevelClassRestriction(UArticyObject::StaticClass()), _bExactClass(false), _bExactClassEditable(true), _bClassFilterEditable(true)
+
+	SLATE_BEGIN_ARGS(SArticyIdProperty)
+		: _ArticyIdToDisplay(FArticyId())
+		, _TopLevelClassRestriction(UArticyObject::StaticClass())
+		, _bExactClass(false)
+		, _bExactClassEditable(true)
+		, _bClassFilterEditable(true)
+		, _bIsReadOnly(false)
 	{}
-		SLATE_ATTRIBUTE(FArticyId, ShownObject)
-		SLATE_EVENT(FOnAssetSelected, OnArticyObjectSelected)
+		SLATE_ATTRIBUTE(FArticyId, ArticyIdToDisplay)
+		SLATE_EVENT(FOnArticyIdChanged, OnArticyIdChanged)
 		SLATE_ATTRIBUTE(UClass*, TopLevelClassRestriction)
 		SLATE_ATTRIBUTE(bool, bExactClass)
 		SLATE_ATTRIBUTE(bool, bExactClassEditable)
 		SLATE_ATTRIBUTE(bool, bClassFilterEditable)
+		SLATE_ATTRIBUTE(bool, bIsReadOnly)
 	SLATE_END_ARGS()
+
 /**
  * Construct this widget
  *
@@ -54,12 +63,22 @@ public:
  */
 	void Construct(const FArguments& InArgs);
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+	void CreateInternalWidgets();
 
 private:
+	TAttribute<FArticyId> ArticyIdToDisplay;
+	FOnArticyIdChanged OnArticyIdChanged;
+	TAttribute<UClass*> TopLevelClassRestriction;
+	TAttribute<bool> bExactClass;
+	TAttribute<bool> bExactClassEditable;
+	TAttribute<bool> bClassFilterEditable;
+	TAttribute<bool> bIsReadOnly;
+	
 	// the articy object this widget currently represents
 	TWeakObjectPtr<UArticyObject> CachedArticyObject = nullptr;
-	mutable FArticyId CurrentArticyId = FArticyId();
-	
+	mutable FArticyId CachedArticyId = FArticyId();
+
+	TSharedPtr<SHorizontalBox> ChildBox;
 	TSharedPtr<SArticyObjectTileView> TileView;
 	TSharedPtr<SBox> TileContainer;
 	TSharedPtr<SBorder> ThumbnailBorder;
@@ -67,26 +86,28 @@ private:
 	TSharedPtr<SWidget> ComboButton;
 	TSharedPtr<SHorizontalBox> ExtraButtons;
 	
-	TAttribute<UClass*> TopLevelClassRestriction;
-	TAttribute<bool> bExactClass = false;
-	TAttribute<bool> bExactClassEditable = true;
-	TAttribute<bool> bClassFilterEditable = true;
 private:
-	/** Updates the widget including customizations. Called when the selected object changes */
+	/** Updates the internal values, fires delegates */
+	void Update(const FArticyId& NewId);
+	/** Updates the widget including customizations */
 	void UpdateWidget();
+
 	/** Applies a single customization */
 	void ApplyArticyRefCustomization(const FArticyRefWidgetCustomizationInfo& Customization);
 	/** Applies the given customizations, such as the ExtraButton extensions */
 	void ApplyArticyRefCustomizations(const TArray<FArticyRefWidgetCustomizationInfo>& Customizations);
 
+private:
 	TSharedRef<SWidget> CreateArticyObjectAssetPicker();
+	void OnArticyObjectPicked(const FAssetData& ArticyObjectData) const;
 	FReply OnArticyButtonClicked() const;
 	FReply OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const;
 	FText OnGetArticyObjectDisplayName() const;
 	FArticyId GetCurrentObjectID() const;
-
-	//FGeometry ComputeNewWindowMenuPlacement(const FGeometry& AllottedGeometry, const FVector2D& PopupDesiredSize, EMenuPlacement PlacementMode) const;
-
+	
+	void OnCopyProperty() const;
+	void OnPasteProperty();
+	bool CanPasteProperty() const;
 private:
 	/** The current customizations are cached in here to achieve ownership */
 	TArray<TSharedPtr<IArticyRefWidgetCustomization>> ActiveCustomizations;
@@ -94,6 +115,5 @@ private:
 	/** The ExtraButton extenders of the currently active customizations */
 	TArray<TSharedPtr<FExtender>> ExtraButtonExtenders;
 
-	TAttribute<FArticyId> ShownObject;
-	FOnAssetSelected OnAssetSelected;
+	
 };

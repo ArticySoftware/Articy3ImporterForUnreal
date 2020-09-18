@@ -28,8 +28,7 @@ private:
 	 * The actual value is saved in the DefaultValue of the parent UEdGraphPin 
 	 */
 	FArticyId ArticyId;
-	TSharedPtr<SWidget> DefaultValueWidget;	
 private:
 	FArticyId GetArticyId() const;
-	void OnArticyObjectSelected(const FAssetData& ArticyObjectData);
+	void OnArticyIdChanged(const FArticyId& NewArticyId);
 };
