@@ -91,11 +91,13 @@ void FArticyEditorModule::RegisterConsoleCommands()
 
 void FArticyEditorModule::RegisterDefaultArticyRefWidgetExtensions() const
 {
-	// this registers the articy button extension for all UArticyObjects.
+#if PLATFORM_WINDOWS
+	// this registers the articy button extension for all UArticyObjects. Only for Windows, since articy is only available for windows
 	GetCustomizationManager()->RegisterArticyRefWidgetCustomizationFactory(FOnCreateArticyRefWidgetCustomizationFactory::CreateLambda([]()
 	{
 		return MakeShared<FArticyButtonCustomizationFactory>();
 	}));
+#endif
 }
 
 void FArticyEditorModule::RegisterDetailCustomizations() const

@@ -32,6 +32,8 @@ void FArticyButtonCustomization::CreateArticyButton(FToolBarBuilder& Builder)
 	const FSlateBrush* ArticyDraftLogo = FArticyEditorStyle::Get().GetBrush("ArticyImporter.ArticyDraft.16");
 
 	TSharedRef<SButton> ArticyButton = SNew(SButton)
+		.VAlign(VAlign_Center)
+		.HAlign(HAlign_Center)
 		.OnClicked(FOnClicked::CreateRaw(this, &FArticyButtonCustomization::OnArticyButtonClicked))
 		.ToolTipText(FText::FromString("Show selected object in articy:draft"))
 		.Content()
@@ -45,7 +47,7 @@ void FArticyButtonCustomization::CreateArticyButton(FToolBarBuilder& Builder)
 
 FReply FArticyButtonCustomization::OnArticyButtonClicked()
 {
-	UserInterfaceHelperFunctions::ShowObjectInArticy(ArticyObject->GetId());
+	UserInterfaceHelperFunctions::ShowObjectInArticy(ArticyObject.Get());
 	return FReply::Handled();
 }
 
