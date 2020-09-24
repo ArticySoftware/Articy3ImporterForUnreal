@@ -56,6 +56,7 @@ private:
 	UClass* ClassRestriction = nullptr;
 	/** Used when there are multiple objects to edit */
 	bool bIsEditable = false;
+	bool bShouldCustomize = true;
 private:
 	UClass* GetClassRestriction() const;
 	UClass* GetClassRestrictionMetaData() const;

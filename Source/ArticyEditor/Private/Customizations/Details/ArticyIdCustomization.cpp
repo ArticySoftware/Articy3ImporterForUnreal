@@ -29,6 +29,24 @@ TSharedRef<IPropertyTypeCustomization> FArticyIdCustomization::MakeInstance()
 void FArticyIdCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	ArticyIdPropertyHandle = PropertyHandle;
+
+	if(ArticyIdPropertyHandle->HasMetaData("ArticyNoWidget"))
+	{
+		bShouldCustomize = !ArticyIdPropertyHandle->GetBoolMetaData("ArticyNoWidget");
+	}
+
+	if(!bShouldCustomize)
+	{
+		HeaderRow.NameContent()
+		[
+			ArticyIdPropertyHandle->CreatePropertyNameWidget()
+		]
+		.ValueContent()
+		[
+			ArticyIdPropertyHandle->CreatePropertyValueWidget()
+		];
+		return;
+	}
 	
 	bIsEditable = PropertyHandle->GetNumPerObjectValues() == 1;
 
@@ -84,21 +102,30 @@ void FArticyIdCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Propert
 }
 
 void FArticyIdCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
-{	
+{
 	uint32 NumChildren;
 	ArticyIdPropertyHandle->GetNumChildren(NumChildren);
-
+	
+	IDetailPropertyRow* IdRow = nullptr;
 	// restore all default editor property widgets
 	for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
 	{
 		const TSharedRef< IPropertyHandle > ChildHandle = ArticyIdPropertyHandle->GetChildHandle(ChildIndex).ToSharedRef();
 		IDetailPropertyRow& Row = ChildBuilder.AddProperty(ChildHandle);
 
+		if (ChildHandle->GetPropertyDisplayName().EqualTo(FText::FromString(TEXT("Id"))))
+		{
+			IdRow = &Row;
+		}
+	}
+	
+	if (bShouldCustomize)
+	{
 		// disable the Id property here so that the user can't manipulate the ArticyID directly
 		// UProperty is not set to ReadOnly due to needing to be editable to access "SetValue" functions from the IPropertyHandle system
-		if(!bIsEditable || ChildHandle->GetPropertyDisplayName().EqualTo(FText::FromString(TEXT("Id"))))
+		if (!bIsEditable && IdRow != nullptr)
 		{
-			Row.IsEnabled(false);
+			IdRow->IsEnabled(false);
 		}
 	}
 }
@@ -157,7 +184,7 @@ UClass* FArticyIdCustomization::GetClassRestrictionMetaData() const
 
 	if(HasClassRestrictionMetaData())
 	{
-		const FString ArticyClassRestriction = ArticyIdPropertyHandle->GetMetaData(TEXT("ArticyClassRestriction"));
+		const FString ArticyClassRestriction = ArticyIdPropertyHandle->GetMetaData("ArticyClassRestriction");
 
 		auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyRuntime"), *ArticyClassRestriction);
 		Restriction = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyObject::StaticClass());
@@ -175,14 +202,14 @@ UClass* FArticyIdCustomization::GetClassRestrictionMetaData() const
 
 bool FArticyIdCustomization::HasClassRestrictionMetaData() const
 {
-	return ArticyIdPropertyHandle->HasMetaData(TEXT("ArticyClassRestriction"));
+	return ArticyIdPropertyHandle->HasMetaData("ArticyClassRestriction");
 }
 
 bool FArticyIdCustomization::IsExactClass() const
 {
 	if(HasExactClassMetaData())
 	{
-		return ArticyIdPropertyHandle->GetBoolMetaData(TEXT("ArticyExactClass"));
+		return ArticyIdPropertyHandle->GetBoolMetaData("ArticyExactClass");
 	}
 
 	return false;
@@ -190,7 +217,7 @@ bool FArticyIdCustomization::IsExactClass() const
 
 bool FArticyIdCustomization::HasExactClassMetaData() const
 {
-	return ArticyIdPropertyHandle->HasMetaData(TEXT("ArticyExactClass"));
+	return ArticyIdPropertyHandle->HasMetaData("ArticyExactClass");
 }
 
 FArticyId FArticyIdCustomization::GetIdFromValueString(FString SourceString)
