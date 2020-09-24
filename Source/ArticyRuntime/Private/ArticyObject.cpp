@@ -63,6 +63,7 @@ TArray<FArticyId> UArticyObject::GetChildrenIDs() const
 	return Children;
 }
 
+#if WITH_EDITOR
 TArray<FArticyId> UArticyObject::GetArticyObjectChildrenIDs() const
 {
 	TArray<FArticyId> OutIDs;
@@ -80,26 +81,68 @@ TArray<FArticyId> UArticyObject::GetArticyObjectChildrenIDs() const
 
 UArticyObject* UArticyObject::FindAsset(const FArticyId& Id)
 {
-	//UArticyDatabase::LoadAllObjects();
-
-	//get the reference object by Id
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryConstants::ModuleName);
-	TArray<FAssetData> AssetData;
-
-	AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), AssetData, true);
-
-	for (const auto ArticyPackage : AssetData)
+	if(ArticyCache.Contains(Id) && ArticyCache[Id].IsValid())
 	{
-		const auto Package = Cast<UArticyPackage>(ArticyPackage.GetAsset());
+		return ArticyCache[Id].Get();
+	}
 
-		if (Package != nullptr)
+	bool bRefreshPackages = false;
+	
+	if(CachedPackages.Num() >= 1)
+	{
+		for(auto& Package : CachedPackages)
 		{
-			UArticyObject* ArticyObject = Package->GetAssetById(Id);
-			if(ArticyObject && ArticyObject->WasLoaded())
+			bRefreshPackages = !Package.IsValid();
+
+			if(bRefreshPackages)
 			{
+				break;
+			}
+		}
+	}
+	else if(CachedPackages.Num() == 0)
+	{
+		bRefreshPackages = true;
+	}
+
+	// refresh packages if needed 
+	if(bRefreshPackages)
+	{
+		CachedPackages.Empty();
+		
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryConstants::ModuleName);
+		TArray<FAssetData> AssetData;
+
+		AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), AssetData, true);
+
+		for (const auto ArticyPackage : AssetData)
+		{
+			const auto Package = Cast<UArticyPackage>(ArticyPackage.GetAsset());
+
+			if (Package != nullptr)
+			{
+				CachedPackages.Add(Package);
+			}
+		}
+	}
+
+	for (TWeakObjectPtr<UArticyPackage> ArticyPackage : CachedPackages)
+	{
+		if (ArticyPackage.IsValid())
+		{
+			UArticyObject* ArticyObject = ArticyPackage->GetAssetById(Id);
+			if (ArticyObject && ArticyObject->WasLoaded())
+			{
+				ArticyCache.Add(Id, ArticyObject);
 				return ArticyObject;
 			}
 		}
+	}
+
+	// if the object wasn't found in any package but exists in the object map, remove it
+	if(ArticyCache.Contains(Id))
+	{
+		ArticyCache.Remove(Id);
 	}
 
 	return nullptr;
@@ -127,3 +170,4 @@ UArticyObject* UArticyObject::FindAsset(const FString& TechnicalName)// MM_CHANG
 
 	return nullptr;
 }
+#endif
