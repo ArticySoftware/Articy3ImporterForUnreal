@@ -40,6 +40,9 @@ public:
 	UFUNCTION()
 	UArticyObject* GetAssetById(const FArticyId& Id) const;
 
+	UFUNCTION()
+	UArticyObject* GetAssetByTechnicalName(const FName& TechnicalName) const;
+
 	const bool IsAssetContained(FName TechnicalName) const;
 
 	const bool IsAssetContained(const FArticyId& Id) const;
@@ -93,6 +96,16 @@ inline UArticyObject* UArticyPackage::GetAssetById(const FArticyId& Id) const
 	if(AssetsById.Contains(Id))
 	{
 		return AssetsById[Id].Get();
+	}
+
+	return nullptr;
+}
+
+inline UArticyObject* UArticyPackage::GetAssetByTechnicalName(const FName& TechnicalName) const
+{
+	if (AssetsByTechnicalName.Contains(TechnicalName))
+	{
+		return AssetsByTechnicalName[TechnicalName].Get();
 	}
 
 	return nullptr;

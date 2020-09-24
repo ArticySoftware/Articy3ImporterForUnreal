@@ -7,9 +7,7 @@
 #include "CoreMinimal.h"
 #include "ArticyPrimitive.h"
 #include "ArticyBaseTypes.h"
-#include "ArticyPackage.h"
 #include "Dom/JsonValue.h"
-
 #include "ArticyObject.generated.h"
 
 /**
@@ -39,8 +37,10 @@ public:
 	static UArticyObject* FindAsset(const FArticyId& Id);
 	static UArticyObject* FindAsset(const FString& TechnicalName);// MM_CHANGE
 
-	static TSet<TWeakObjectPtr<UArticyPackage>> CachedPackages;
-	static TMap<FArticyId, TWeakObjectPtr<UArticyObject>> ArticyCache;
+private:
+	static TSet<TWeakObjectPtr<class UArticyPackage>> CachedPackages;
+	static TMap<FArticyId, TWeakObjectPtr<UArticyObject>> ArticyIdCache;
+	static TMap<FName, TWeakObjectPtr<UArticyObject>> ArticyNameCache;
 #endif
 
 protected:
