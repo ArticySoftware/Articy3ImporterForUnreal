@@ -32,15 +32,44 @@ public:
 	template<typename T = UArticyObject>
 	T* GetObject(const UObject* WorldContext) const;
 
+	
+	enum EStringInitResult
+	{
+		NoneSet,
+		IdSet,
+		RefSet,
+		AllSet
+	};
+
 	// reference: color.h
-	// used in details customization 
-	bool InitFromString(const FString& SourceString) const
+	// used in details customization
+	EStringInitResult InitFromString(const FString& SourceString)
 	{
 		Id.High = Id.Low = 0;
 
-		const bool bSuccess = FParse::Value(*SourceString, TEXT("Low="), Id.Low) && FParse::Value(*SourceString, TEXT("High="), Id.High);
+		const bool IdSet =
+			FParse::Value(*SourceString, TEXT("Low="), Id.Low) &&
+			FParse::Value(*SourceString, TEXT("High="), Id.High);
+		const bool RefSet =
+			FParse::Bool(*SourceString, TEXT("bReferenceBaseObject="), bReferenceBaseObject) &&
+			FParse::Value(*SourceString, TEXT("CloneId="), CloneId);
 
-		return bSuccess;
+		return IdSet && RefSet ? EStringInitResult::AllSet : IdSet ? EStringInitResult::IdSet : RefSet ? EStringInitResult::RefSet : EStringInitResult::NoneSet;
+	}
+
+	FString ToString() const
+	{
+		return FString::Printf(TEXT("(bReferenceBaseObject=%s, CloneId=%d, Id=(Low=%d, High=%d))"), bReferenceBaseObject ? TEXT("True") : TEXT("False"), CloneId, Id.Low, Id.High);
+	}
+
+	bool operator==(const FArticyRef& Other) const
+	{
+		return Other.Id.Low == Id.Low && Other.Id.High == Id.High && Other.bReferenceBaseObject == bReferenceBaseObject && Other.CloneId == CloneId;
+	}
+
+	bool operator!=(const FArticyRef& Other) const
+	{
+		return !this->operator==(Other);
 	}
 private:
 	/** The actual reference: we keep track of the Reference's Id.

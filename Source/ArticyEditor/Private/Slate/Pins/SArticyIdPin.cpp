@@ -2,7 +2,7 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 //
 
-#include "Slate/Pins/SArticyRefPin.h"
+#include "Slate/Pins/SArticyIdPin.h"
 #include "ArticyRef.h"
 #include "EdGraph/EdGraphSchema.h"
 #include "EdGraph/EdGraphNode.h"
@@ -11,20 +11,20 @@
 #include "Widgets/Input/SMultiLineEditableTextBox.h"
 #include "Slate/SArticyRefProperty.h"
 
-void SArticyRefPin::Construct(const FArguments& InArgs, UEdGraphPin* GraphPin)
+void SArticyIdPin::Construct(const FArguments& InArgs, UEdGraphPin* GraphPin)
 {
 	SGraphPin::Construct(SGraphPin::FArguments(), GraphPin);
 }
 
-TSharedRef<SWidget> SArticyRefPin::GetDefaultValueWidget()
+TSharedRef<SWidget> SArticyIdPin::GetDefaultValueWidget()
 {
-	return SNew(SArticyRefProperty)
-		.ArticyRefToDisplay(this, &SArticyRefPin::GetArticyRef)
-		.OnArticyRefChanged(this, &SArticyRefPin::OnArticyRefChanged)
-		.Visibility(this, &SArticyRefPin::GetDefaultValueVisibility);
+	return SNew(SArticyIdProperty)
+		.ArticyIdToDisplay(this, &SArticyIdPin::GetArticyId)
+		.OnArticyIdChanged(this, &SArticyIdPin::OnArticyIdChanged)
+		.Visibility(this, &SArticyIdPin::GetDefaultValueVisibility);
 }
 
-EVisibility SArticyRefPin::GetDefaultValueVisibility() const
+EVisibility SArticyIdPin::GetDefaultValueVisibility() const
 {
 	if (bOnlyShowDefaultValue)
 	{
@@ -53,32 +53,32 @@ EVisibility SArticyRefPin::GetDefaultValueVisibility() const
 	return IsConnected() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
-FArticyRef SArticyRefPin::GetArticyRef() const
+FArticyId SArticyIdPin::GetArticyId() const
 {
-	FString RefString = GraphPinObj->GetDefaultAsString();
-	FArticyRef Ref;
+	FString IdString = GraphPinObj->GetDefaultAsString();
+	FArticyId Id;
 
-	if(!Ref.InitFromString(RefString))
+	if(!Id.InitFromString(IdString))
 	{
-		Ref = FArticyRef();
+		Id = FArticyId();
 	}
 	
-	return Ref;
+	return Id;
 }
 
-void SArticyRefPin::OnArticyRefChanged(const FArticyRef& NewArticyRef)
+void SArticyIdPin::OnArticyIdChanged(const FArticyId& NewArticyId)
 {
 	FString FormattedValueString;
-	FArticyRef::StaticStruct()->ExportText(FormattedValueString, &ArticyRef, nullptr, nullptr, (PPF_Copy), nullptr);
+	FArticyRef::StaticStruct()->ExportText(FormattedValueString, &NewArticyId, nullptr, nullptr, (PPF_Copy), nullptr);
 
-	ArticyRef = NewArticyRef;
+	ArticyId = NewArticyId;
 
 	if(GraphPinObj->GetDefaultAsString() != FormattedValueString)
 	{
-		const FScopedTransaction Transaction(NSLOCTEXT("GraphEditor", "ChangeArticyRefValue", "Change Articy Ref Value"));
+		const FScopedTransaction Transaction(NSLOCTEXT("GraphEditor", "ChangeArticyIdValue", "Change Articy Id Value"));
 		GraphPinObj->Modify();
 		
-		GraphPinObj->GetSchema()->TrySetDefaultValue(*GraphPinObj, ArticyRef.ToString());
+		GraphPinObj->GetSchema()->TrySetDefaultValue(*GraphPinObj, NewArticyId.ToString());
 
 		if (OwnerNodePtr.IsValid())
 		{

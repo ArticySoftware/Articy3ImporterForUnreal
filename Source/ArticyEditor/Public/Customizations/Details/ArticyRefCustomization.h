@@ -8,6 +8,7 @@
 #include <IPropertyTypeCustomization.h>
 #include "ArticyRef.h"
 #include "Slate/SArticyIdProperty.h"
+#include "Slate/SArticyRefProperty.h"
 #include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
 #include "ArticyObject.h"
@@ -39,6 +40,6 @@ private:
 	bool HasClassRestrictionMetaData() const;
 	bool HasExactClassMetaData() const;
 
-	FArticyId GetArticyId() const;
-	void OnArticyIdChanged(const FArticyId& NewArticyId) const;
+	FArticyRef GetArticyRef() const;
+	void OnArticyRefChanged(const FArticyRef& NewArticyRef) const;
 };

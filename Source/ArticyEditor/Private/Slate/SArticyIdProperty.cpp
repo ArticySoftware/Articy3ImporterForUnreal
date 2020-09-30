@@ -50,9 +50,12 @@ void SArticyIdProperty::Construct(const FArguments& InArgs)
 	this->ArticyIdToDisplay = InArgs._ArticyIdToDisplay;
 	this->OnArticyIdChanged = InArgs._OnArticyIdChanged;
 	this->TopLevelClassRestriction = InArgs._TopLevelClassRestriction;
+	this->CustomizationHighExtender = InArgs._HighExtender;
 	this->bExactClass = InArgs._bExactClass;
 	this->bExactClassEditable = InArgs._bExactClassEditable;
 	this->bClassFilterEditable = InArgs._bClassFilterEditable;
+	this->CopyAction = InArgs._CopyAction;
+	this->PasteAction = InArgs._PasteAction;
 	this->bIsReadOnly = InArgs._bIsReadOnly;
 	
 	Cursor = EMouseCursor::Hand;
@@ -89,12 +92,15 @@ void SArticyIdProperty::CreateInternalWidgets()
 			.Text(this, &SArticyIdProperty::OnGetArticyObjectDisplayName)
 		];
 
-	FUIAction CopyAction;
-	FUIAction PasteAction;
-
-	CopyAction.ExecuteAction = FExecuteAction::CreateSP(this, &SArticyIdProperty::OnCopyProperty);
-	PasteAction.CanExecuteAction = FCanExecuteAction::CreateSP(this, &SArticyIdProperty::CanPasteProperty);
-	PasteAction.ExecuteAction = FExecuteAction::CreateSP(this, &SArticyIdProperty::OnPasteProperty);
+	if(!CopyAction.IsBound())
+	{
+		CopyAction.ExecuteAction = FExecuteAction::CreateSP(this, &SArticyIdProperty::OnCopyProperty);
+	}
+	if(!PasteAction.IsBound())
+	{
+		PasteAction.CanExecuteAction = FCanExecuteAction::CreateSP(this, &SArticyIdProperty::CanPasteProperty);
+		PasteAction.ExecuteAction = FExecuteAction::CreateSP(this, &SArticyIdProperty::OnPasteProperty);		
+	}
 	
 	TileView = SNew(SArticyObjectTileView)
 		.ArticyIdToDisplay(ArticyIdToDisplay)
@@ -105,8 +111,22 @@ void SArticyIdProperty::CreateInternalWidgets()
 		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize)
 		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding);
 
-	ExtraButtons = SNew(SHorizontalBox);
+	CustomizationButtonBox_High = SNew(SHorizontalBox);
+	if(CustomizationHighExtender.IsValid())
+	{
+		FToolBarBuilder Builder(nullptr, FMultiBoxCustomization("ArticyIdCustomizationHigh"), CustomizationHighExtender);
 
+		Builder.BeginSection("Base");
+		Builder.EndSection();
+		
+		CustomizationButtonBox_High->AddSlot()
+		[
+			Builder.MakeWidget()
+		];
+	}
+	
+	CustomizationButtonBox_Low = SNew(SHorizontalBox);
+	
 	ChildBox = SNew(SHorizontalBox)
 	+ SHorizontalBox::Slot()
 	.VAlign(VAlign_Center)
@@ -130,16 +150,29 @@ void SArticyIdProperty::CreateInternalWidgets()
 		+ SVerticalBox::Slot()
 		.HAlign(HAlign_Left)
 		.VAlign(VAlign_Center)
-		.Padding(3, 5, 3, 0)
+		.Padding(3, 0, 3, 0)
+		[
+			CustomizationButtonBox_High.ToSharedRef()
+		]
+		+ SVerticalBox::Slot()
+		.HAlign(HAlign_Left)
+		.VAlign(VAlign_Center)
+		.Padding(3, 1, 3, 1)
+		.AutoHeight()
 		[
 			ComboButton.ToSharedRef()
 		]
 		+ SVerticalBox::Slot()
-		.VAlign(VAlign_Center)
 		.HAlign(HAlign_Left)
+		.VAlign(VAlign_Center)
 		.Padding(3, 0, 3, 0)
+		.AutoHeight()
 		[
-			ExtraButtons.ToSharedRef()
+			SNew(SBox)
+			.MinDesiredHeight(32.f)
+			[
+				CustomizationButtonBox_Low.ToSharedRef()		
+			]
 		]
 	];
 }
@@ -178,28 +211,28 @@ void SArticyIdProperty::ApplyArticyRefCustomization(const FArticyRefWidgetCustom
 {
 	if(Customization.ExtraButtonExtender.IsValid())
 	{
-		ExtraButtonExtenders.Add(Customization.ExtraButtonExtender);
+		ArticyIdCustomizationExtenders.Add(Customization.ExtraButtonExtender);
 	}
 }
 
 void SArticyIdProperty::ApplyArticyRefCustomizations(const TArray<FArticyRefWidgetCustomizationInfo>& Customizations)
 {
-	ExtraButtonExtenders.Empty();
-	ExtraButtons->ClearChildren();
+	ArticyIdCustomizationExtenders.Empty();
+	CustomizationButtonBox_Low->ClearChildren();
 
 	for(const FArticyRefWidgetCustomizationInfo& Info : Customizations)
 	{
 		ApplyArticyRefCustomization(Info);
 	}
 
-	TSharedPtr<FExtender> ExtraButtonExtender = FExtender::Combine(ExtraButtonExtenders);
-	FToolBarBuilder Builder(nullptr, FMultiBoxCustomization(TEXT("ExtraButtons")), ExtraButtonExtender);
+	TSharedPtr<FExtender> ExtraButtonExtender = FExtender::Combine(ArticyIdCustomizationExtenders);
+	FToolBarBuilder Builder(nullptr, FMultiBoxCustomization(TEXT("ArticyIdCustomizationLow")), ExtraButtonExtender);
 
 	// we need to begin a section so the extenders know where to apply themselves
 	Builder.BeginSection(TEXT("Base"));
 	Builder.EndSection();
 
-	ExtraButtons->AddSlot()
+	CustomizationButtonBox_Low->AddSlot()
 	.VAlign(VAlign_Center)
 	.HAlign(HAlign_Center)
 	[
@@ -271,7 +304,7 @@ void SArticyIdProperty::OnPasteProperty()
 	FString ClipboardContent;
 	FPlatformApplicationMisc::ClipboardPaste(ClipboardContent);
 
-	FArticyId NewId;
+	FArticyId NewId = CachedArticyId;
 	bool bSuccess = NewId.InitFromString(ClipboardContent);
 	if (ensureMsgf(bSuccess, TEXT("String was garbage, therefore Id was not properly updated")))
 	{

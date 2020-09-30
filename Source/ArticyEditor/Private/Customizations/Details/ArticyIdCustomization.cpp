@@ -103,31 +103,7 @@ void FArticyIdCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Propert
 
 void FArticyIdCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	uint32 NumChildren;
-	ArticyIdPropertyHandle->GetNumChildren(NumChildren);
-	
-	IDetailPropertyRow* IdRow = nullptr;
-	// restore all default editor property widgets
-	for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
-	{
-		const TSharedRef< IPropertyHandle > ChildHandle = ArticyIdPropertyHandle->GetChildHandle(ChildIndex).ToSharedRef();
-		IDetailPropertyRow& Row = ChildBuilder.AddProperty(ChildHandle);
-
-		if (ChildHandle->GetPropertyDisplayName().EqualTo(FText::FromString(TEXT("Id"))))
-		{
-			IdRow = &Row;
-		}
-	}
-	
-	if (bShouldCustomize)
-	{
-		// disable the Id property here so that the user can't manipulate the ArticyID directly
-		// UProperty is not set to ReadOnly due to needing to be editable to access "SetValue" functions from the IPropertyHandle system
-		if (!bIsEditable && IdRow != nullptr)
-		{
-			IdRow->IsEnabled(false);
-		}
-	}
+	// dont do children
 }
 
 FArticyId* FArticyIdCustomization::RetrieveArticyId(IPropertyHandle* ArticyIdHandle)
@@ -157,25 +133,12 @@ FArticyId FArticyIdCustomization::GetArticyId() const
 
 void FArticyIdCustomization::OnArticyIdChanged(const FArticyId &NewArticyId) const
 {
-	// get the current articy ref struct as formatted string
-	FString FormattedValueString;
-	ArticyIdPropertyHandle->GetValueAsFormattedString(FormattedValueString);
-
-	// remove the old ID string
-	const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Id=(")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
-	const int32 EndOfIdIndex = FormattedValueString.Find(FString(TEXT(")")), ESearchCase::IgnoreCase, ESearchDir::FromStart, IdIndex);
-	FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
-
-	// reconstruct the value string with the new ID
-	const FString NewIdString = FString::Format(TEXT("Id=(Low={0}, High={1})"), { NewArticyId.Low, NewArticyId.High, });
-	FormattedValueString.InsertAt(IdIndex, *NewIdString);
-
 	// update the articy ref with the new ID:
 	// done via Set functions instead of accessing the ref object directly because using "Set" handles various Unreal logic, such as:
 	// - CDO default change forwarding to instances
 	// - marking dirty
 	// - transaction buffer (Undo, Redo)
-	ArticyIdPropertyHandle->SetValueFromFormattedString(FormattedValueString);
+	ArticyIdPropertyHandle->SetValueFromFormattedString(NewArticyId.ToString());
 }
 
 UClass* FArticyIdCustomization::GetClassRestrictionMetaData() const

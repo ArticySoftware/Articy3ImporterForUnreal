@@ -18,6 +18,7 @@
 #include "EditorCategoryUtils.h"
 #include "Customizations/Details/ArticyIdCustomization.h"
 
+
 TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 {
 	return MakeShareable(new FArticyRefCustomization());
@@ -26,22 +27,22 @@ TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	ArticyRefPropertyHandle = PropertyHandle;
-	
+
 	bIsEditable = PropertyHandle->GetNumPerObjectValues() == 1;
 
 	TAttribute<bool> EnableAttribute;
 	EnableAttribute.Bind(this, &FArticyRefCustomization::IsEditable);
 	HeaderRow.IsEnabled(EnableAttribute);
 ;
-	ArticyIdPropertyWidget = SNew(SArticyIdProperty)
-	.ArticyIdToDisplay(this, &FArticyRefCustomization::GetArticyId)
-	.OnArticyIdChanged(this, &FArticyRefCustomization::OnArticyIdChanged)
+	ArticyIdPropertyWidget = SNew(SArticyRefProperty)
+	.ArticyRefToDisplay(this, &FArticyRefCustomization::GetArticyRef)
+	.OnArticyRefChanged(this, &FArticyRefCustomization::OnArticyRefChanged)
 	.TopLevelClassRestriction(this, &FArticyRefCustomization::GetClassRestrictionMetaData)
 	.bExactClass(IsExactClass())
 	.bExactClassEditable(!HasExactClassMetaData())
 	.bClassFilterEditable(!IsExactClass())
 	.IsEnabled(bIsEditable);
-	
+
 	HeaderRow.NameContent()
 	[
 		ArticyRefPropertyHandle->CreatePropertyNameWidget()
@@ -55,27 +56,7 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 
 void FArticyRefCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {	
-	uint32 NumChildren;
-	ArticyRefPropertyHandle->GetNumChildren(NumChildren);
-
-	// restore all default editor property widgets
-	for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
-	{
-		const TSharedRef< IPropertyHandle > ChildHandle = ArticyRefPropertyHandle->GetChildHandle(ChildIndex).ToSharedRef();
-		if(ChildHandle->GetPropertyDisplayName().EqualTo(FText::FromString("Id")))
-		{
-			//continue;
-		}
-		
-		IDetailPropertyRow& Row = ChildBuilder.AddProperty(ChildHandle);
-
-		// disable the Id property here so that the user can't manipulate the ArticyID directly
-		// UProperty is not set to ReadOnly due to needing to be editable to access "SetValue" functions from the IPropertyHandle system
-		if(!bIsEditable || ChildHandle->GetPropertyDisplayName().EqualTo(FText::FromString(TEXT("Id"))))
-		{
-			//Row.IsEnabled(false);
-		}
-	}
+	// dont do children
 }
 
 FArticyRef* FArticyRefCustomization::RetrieveArticyRef(IPropertyHandle* ArticyRefHandle)
@@ -87,34 +68,20 @@ FArticyRef* FArticyRefCustomization::RetrieveArticyRef(IPropertyHandle* ArticyRe
 	return ArticyRef;
 }
 
-FArticyId FArticyRefCustomization::GetArticyId() const
+FArticyRef FArticyRefCustomization::GetArticyRef() const
 {
 	FArticyRef* ArticyRef = RetrieveArticyRef(ArticyRefPropertyHandle.Get());
-	return ArticyRef ? ArticyRef->GetId() : FArticyId();
+	return ArticyRef ? *ArticyRef : FArticyRef();
 }
 
-void FArticyRefCustomization::OnArticyIdChanged(const FArticyId& NewArticyId) const
+void FArticyRefCustomization::OnArticyRefChanged(const FArticyRef& NewArticyRef) const
 {
-	// get the current articy ref struct as formatted string
-	FString FormattedValueString;
-	ArticyRefPropertyHandle->GetValueAsFormattedString(FormattedValueString, EPropertyPortFlags::PPF_Copy);
-
-	// remove the old ID string
-	const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Low=")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
-	const int32 EndOfIdIndex = FormattedValueString.Find(FString(TEXT(")")), ESearchCase::IgnoreCase, ESearchDir::FromStart, IdIndex);
-	FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
-
-	// reconstruct the value string with the new ID
-	const FString NewIdString = FString::Format(TEXT("Low={0}, High={1}"), { NewArticyId.Low, NewArticyId.High, });
-	FormattedValueString.InsertAt(IdIndex, *NewIdString);
-
 	// update the articy ref with the new ID:
 	// done via Set functions instead of accessing the ref object directly because using "Set" handles various Unreal logic, such as:
 	// - CDO default change forwarding to instances
 	// - marking dirty
 	// - transaction buffer (Undo, Redo)
-	
-	ArticyRefPropertyHandle->SetValueFromFormattedString(FormattedValueString);
+	ArticyRefPropertyHandle->SetValueFromFormattedString(NewArticyRef.ToString());
 }
 
 UClass* FArticyRefCustomization::GetClassRestrictionMetaData() const

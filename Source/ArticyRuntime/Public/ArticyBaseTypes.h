@@ -94,7 +94,7 @@ public:
 	/** This function is primarily used for custom UI works that require Ids to be set via String. Do not change this without consideration! */
 	FString ToString() const
 	{
-		return FString::Printf(TEXT("Low=%d, High=%d"), Low, High);
+		return FString::Printf(TEXT("(Low=%d, High=%d)"), Low, High);
 	}
 
 	/** This function is used instead of the normal ToString function when asset friendly names are required (no commas etc.)! */

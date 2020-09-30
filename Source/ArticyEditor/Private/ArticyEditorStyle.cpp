@@ -39,6 +39,7 @@ FName FArticyEditorStyle::GetStyleSetName()
 #define BORDER_BRUSH( RelativePath, ... ) FSlateBorderBrush( Style->RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
 #define TTF_FONT( RelativePath, ... ) FSlateFontInfo( Style->RootToContentDir( RelativePath, TEXT(".ttf") ), __VA_ARGS__ )
 #define OTF_FONT( RelativePath, ... ) FSlateFontInfo( Style->RootToContentDir( RelativePath, TEXT(".otf") ), __VA_ARGS__ )
+#define DEFAULT_FONT(...) FCoreStyle::GetDefaultFontStyle(__VA_ARGS__)
 
 const FVector2D Icon8x8(8.0f, 8.0f);
 const FVector2D Icon16x16(16.0f, 16.0f);
@@ -61,7 +62,13 @@ TSharedRef< FSlateStyleSet > FArticyEditorStyle::Create()
 		NameText.Font.Size = 16;
 		Style->Set("ArticyImporter.GlobalVariables.Namespace", NameText);
 	}
-	
+
+	FTextBlockStyle SmallTextBlockStyle = FTextBlockStyle()
+		.SetFont(DEFAULT_FONT("Regular", 8))
+		.SetColorAndOpacity(FSlateColor::UseForeground());
+	{
+		Style->Set("ArticyImporter.SmallTextBlock", SmallTextBlockStyle);
+	}
 	// the default icon for a command has to have the name "Plugin.CommandName"
 	//Style->Set("ArticyImporter.OpenArticyImporter", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
 

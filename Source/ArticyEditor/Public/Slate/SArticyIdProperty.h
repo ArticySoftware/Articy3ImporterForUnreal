@@ -42,6 +42,9 @@ public:
 	SLATE_BEGIN_ARGS(SArticyIdProperty)
 		: _ArticyIdToDisplay(FArticyId())
 		, _TopLevelClassRestriction(UArticyObject::StaticClass())
+		, _HighExtender(nullptr)
+		, _CopyAction()
+		, _PasteAction()
 		, _bExactClass(false)
 		, _bExactClassEditable(true)
 		, _bClassFilterEditable(true)
@@ -50,6 +53,9 @@ public:
 		SLATE_ATTRIBUTE(FArticyId, ArticyIdToDisplay)
 		SLATE_EVENT(FOnArticyIdChanged, OnArticyIdChanged)
 		SLATE_ATTRIBUTE(UClass*, TopLevelClassRestriction)
+		SLATE_ARGUMENT(TSharedPtr<FExtender>, HighExtender)
+		SLATE_ARGUMENT(FUIAction, CopyAction)
+		SLATE_ARGUMENT(FUIAction, PasteAction)
 		SLATE_ATTRIBUTE(bool, bExactClass)
 		SLATE_ATTRIBUTE(bool, bExactClassEditable)
 		SLATE_ATTRIBUTE(bool, bClassFilterEditable)
@@ -84,7 +90,10 @@ private:
 	TSharedPtr<SBorder> ThumbnailBorder;
 	TSharedPtr<FSlateBrush> ImageBrush;
 	TSharedPtr<SWidget> ComboButton;
-	TSharedPtr<SHorizontalBox> ExtraButtons;
+	/** The high box is used to register additional widgets when creating an SArticyIdProperty */
+	TSharedPtr<SHorizontalBox> CustomizationButtonBox_High;
+	/** The low box is used for the articyref customization system. */
+	TSharedPtr<SHorizontalBox> CustomizationButtonBox_Low;
 	
 private:
 	/** Updates the internal values, fires delegates */
@@ -109,11 +118,13 @@ private:
 	void OnPasteProperty();
 	bool CanPasteProperty() const;
 private:
+	FUIAction CopyAction;
+	FUIAction PasteAction;
 	/** The current customizations are cached in here to achieve ownership */
 	TArray<TSharedPtr<IArticyRefWidgetCustomization>> ActiveCustomizations;
 
-	/** The ExtraButton extenders of the currently active customizations */
-	TArray<TSharedPtr<FExtender>> ExtraButtonExtenders;
-
+	TSharedPtr<FExtender> CustomizationHighExtender;
+	/** The customization extenders of the currently active customizations */
+	TArray<TSharedPtr<FExtender>> ArticyIdCustomizationExtenders;
 	
 };

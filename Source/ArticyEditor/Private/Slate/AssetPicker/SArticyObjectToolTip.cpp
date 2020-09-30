@@ -158,34 +158,38 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 	// add class name
 	AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyObjectToolTipClass", "Class"), ClassText, false);
 
+	const FText ArticyIdText = FText::FromString(ArticyIdAttribute.Get().ToString());
+	// add id
+	AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyId", "Id"), ArticyIdText, true);
+
 	TSharedRef<SVerticalBox> OverallTooltipVBox = SNew(SVerticalBox);
 
 	// Top section (asset name, type, is checked out)
 	OverallTooltipVBox->AddSlot()
-		.AutoHeight()
-		.Padding(0, 0, 0, 4)
+	.AutoHeight()
+	.Padding(0, 0, 0, 4)
+	[
+		SNew(SBorder)
+		.Padding(6)
+		.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
 		[
-			SNew(SBorder)
-			.Padding(6)
-			.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.AutoHeight()
 			[
-				SNew(SVerticalBox)
-				+ SVerticalBox::Slot()
-				.AutoHeight()
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.VAlign(VAlign_Center)
+				.Padding(0, 0, 4, 0)
 				[
-					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot()
-					.VAlign(VAlign_Center)
-					.Padding(0, 0, 4, 0)
-					[
-						SNew(STextBlock)
-						.Text(NameText)
-						.Font(FEditorStyle::GetFontStyle("ContentBrowser.TileViewTooltip.NameFont"))
-						.AutoWrapText(true)
-					]
+					SNew(STextBlock)
+					.Text(NameText)
+					.Font(FEditorStyle::GetFontStyle("ContentBrowser.TileViewTooltip.NameFont"))
+					.AutoWrapText(true)
 				]
 			]
-		];
+		]
+	];
 
 	// Bottom section (additional information)
 	OverallTooltipVBox->AddSlot()

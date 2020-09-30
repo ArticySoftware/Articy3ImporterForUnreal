@@ -6,6 +6,7 @@
 
 #include <EdGraphUtilities.h>
 #include "Slate/Pins/SArticyRefPin.h"
+#include "Slate/Pins/SArticyIdPin.h"
 
 class FArticyRefPinFactory : public FGraphPanelPinFactory
 {
@@ -15,6 +16,10 @@ public:
 		if(Pin->PinType.PinSubCategoryObject.IsValid() && Pin->PinType.PinSubCategoryObject.Get() == FArticyRef::StaticStruct())
 		{
 			return SNew(SArticyRefPin, Pin);
+		}
+		if(Pin->PinType.PinSubCategoryObject.IsValid() && Pin->PinType.PinSubCategoryObject.Get() == FArticyId::StaticStruct()) 
+		{
+			return SNew(SArticyIdPin, Pin);
 		}
 
 		return nullptr;

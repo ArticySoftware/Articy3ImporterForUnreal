@@ -8,12 +8,12 @@
 #include "EdGraph/EdGraphNode.h"
 #include "ArticyBaseTypes.h"
 #include <SGraphPin.h>
-#include "ArticyRef.h"
+
 // Ref: SGraphPinColor
-class SArticyRefPin : public SGraphPin
+class SArticyIdPin : public SGraphPin
 {
 public:
-	SLATE_BEGIN_ARGS(SArticyRefPin) {}
+	SLATE_BEGIN_ARGS(SArticyIdPin) {}
 
 	SLATE_END_ARGS()
 
@@ -27,8 +27,8 @@ private:
 	/** Serves as cache of the currently selected value.
 	 * The actual value is saved in the DefaultValue of the parent UEdGraphPin 
 	 */
-	FArticyRef ArticyRef = FArticyRef();
+	FArticyId ArticyId = FArticyId();
 private:
-	FArticyRef GetArticyRef() const;
-	void OnArticyRefChanged(const FArticyRef& NewArticyRef);
+	FArticyId GetArticyId() const;
+	void OnArticyIdChanged(const FArticyId& NewArticyId);
 };
