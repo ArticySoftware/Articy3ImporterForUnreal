@@ -4,7 +4,6 @@
 
 #include "Slate/AssetPicker/SArticyObjectTileView.h"
 #include <GenericPlatform/ICursor.h>
-#include "ArticyBuiltinTypes.h"
 #include <Widgets/Layout/SBorder.h>
 #include <Widgets/Text/STextBlock.h>
 #include <Styling/SlateTypes.h>
@@ -17,6 +16,8 @@
 #include "Slate/UserInterfaceHelperFunctions.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Layout/WidgetPath.h"
+#include "Framework/Application/SlateApplication.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectTileView"
 
@@ -183,7 +184,7 @@ const FSlateBrush* SArticyObjectTileView::GetTypeImage() const
 	return TypeImage;
 }
 
-void SArticyObjectTileView::OnContextMenuOpening(FMenuBuilder& Builder)
+void SArticyObjectTileView::OnContextMenuOpening(FMenuBuilder& Builder) const
 {
 	// Hide separator line if it only contains the SearchWidget, making the next 2 elements the top of the list
 	if (Builder.GetMultiBox()->GetBlocks().Num() > 1)

@@ -5,13 +5,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "ArticyGlobalVariables.h"
 #include "Misc/TextFilterExpressionEvaluator.h"
 #include "Slate/ArticyFilterHelpers.h"
+#include "Widgets/SCompoundWidget.h"
 #include "Widgets/Layout/SExpandableArea.h"
-#include "Widgets/Layout/SWidgetSwitcher.h"
+#include "Widgets/Layout/SSplitter.h"
+#include "Widgets/SBoxPanel.h"
 
 /** ref: detailcategorygroupnode.cpp */
 struct FGlobalVariablesSizeData

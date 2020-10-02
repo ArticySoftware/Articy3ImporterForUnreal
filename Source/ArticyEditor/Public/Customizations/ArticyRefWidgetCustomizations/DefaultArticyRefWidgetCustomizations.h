@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Customizations/ArticyEditorCustomizationManager.h"
 #include "ArticyRef.h"
+#include "Input/Reply.h"
 
 class FArticyButtonCustomization : public IArticyRefWidgetCustomization
 {

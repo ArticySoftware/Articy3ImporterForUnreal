@@ -12,7 +12,7 @@
 #include "ArticyBaseTypes.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Text/STextBlock.h"
-
+#include "Framework/Commands/UIAction.h"
 
 DECLARE_DELEGATE_OneParam(FOnArticyIdChanged, const FArticyId&);
 
@@ -75,7 +75,7 @@ private:
 	bool bHasPreviewImage = false;
 
 private:
-  void OnContextMenuOpening(FMenuBuilder& Builder);
+	void OnContextMenuOpening(class FMenuBuilder& Builder) const;
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	

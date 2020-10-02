@@ -10,9 +10,11 @@
 #include "AssetRegistryModule.h"
 #include "ArticyPackage.h"
 
+#if WITH_EDITOR
 TSet<TWeakObjectPtr<UArticyPackage>> UArticyObject::CachedPackages;
 TMap<FArticyId, TWeakObjectPtr<UArticyObject>> UArticyObject::ArticyIdCache;
 TMap<FName, TWeakObjectPtr<UArticyObject>> UArticyObject::ArticyNameCache;
+#endif
 
 void UArticyObject::InitFromJson(TSharedPtr<FJsonValue> Json)
 {
@@ -154,7 +156,7 @@ UArticyObject* UArticyObject::FindAsset(const FArticyId& Id)
 
 UArticyObject* UArticyObject::FindAsset(const FString& TechnicalName)// MM_CHANGE
 {
-	const FName Name(TechnicalName);
+	const FName Name(*TechnicalName);
 	if (ArticyNameCache.Contains(Name) && ArticyNameCache[Name].IsValid())
 	{
 		return ArticyNameCache[Name].Get();

@@ -1,10 +1,11 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
 #include "ArticyObjectWith_Base.h"
+#include "UObject/TextProperty.h"
 #include "ArticyObjectWithText.generated.h"
 
 UINTERFACE(MinimalAPI, BlueprintType, meta=(CannotImplementInterfaceInBlueprint))

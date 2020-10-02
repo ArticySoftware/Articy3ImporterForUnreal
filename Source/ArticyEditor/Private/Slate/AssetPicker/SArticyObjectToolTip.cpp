@@ -14,7 +14,6 @@
 #include <Internationalization/Text.h>
 #include "Slate/UserInterfaceHelperFunctions.h"
 #include "Interfaces/ArticyObjectWithSpeaker.h"
-#include "Widgets/Layout/SScaleBox.h"
 #include "ArticyEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectToolTip"
@@ -32,7 +31,6 @@ void SArticyObjectToolTip::Construct(const FArguments& InArgs)
 		// Text makes tooltip show, probably because it doesn't initialize otherwise
 		.Text(FText::FromString("TEST"))
 		);
-
 }
 
 void SArticyObjectToolTip::OnOpening()
@@ -45,7 +43,6 @@ void SArticyObjectToolTip::OnOpening()
 	{
 		SetContentWidget(CreateEmptyContent());
 	}
-
 }
 
 void SArticyObjectToolTip::OnClosed()

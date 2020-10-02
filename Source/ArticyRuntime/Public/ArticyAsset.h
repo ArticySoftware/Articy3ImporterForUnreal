@@ -8,6 +8,7 @@
 #include "ArticyObject.h"
 #include "FileMediaSource.h"
 #include "Sound/SoundWave.h"
+#include "Engine/Texture2D.h"
 #include "ArticyAsset.generated.h"
 
 UENUM(BlueprintType)

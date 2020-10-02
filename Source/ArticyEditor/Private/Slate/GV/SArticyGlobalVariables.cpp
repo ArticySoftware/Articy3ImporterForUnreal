@@ -9,6 +9,7 @@
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Layout/SScrollBox.h"
+#include "Widgets/Layout/SBox.h"
 #include "Editor.h"
 #include "ScopedTransaction.h"
 
