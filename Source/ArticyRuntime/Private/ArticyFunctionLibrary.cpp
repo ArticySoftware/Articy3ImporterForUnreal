@@ -28,6 +28,16 @@ void UArticyFunctionLibrary::ArticyRef_SetObjectId(FArticyRef& Ref, FArticyId Id
 	Ref.SetId(Id);
 }
 
+bool UArticyFunctionLibrary::MatchesRaw(const FArticyRef& A, const FArticyRef& B)
+{
+	return A.MatchesRaw(B);
+}
+
+bool UArticyFunctionLibrary::MatchesEffective(const FArticyRef& A, const FArticyRef& B)
+{
+	return A.MatchesEffective(B);
+}
+
 UArticyObject* UArticyFunctionLibrary::ArticyId_GetObject(const FArticyId& Id, TSubclassOf<class UArticyObject> CastTo, const UObject* WorldContext)
 {
 	return Cast<UArticyObject>(Id.GetObject(WorldContext));

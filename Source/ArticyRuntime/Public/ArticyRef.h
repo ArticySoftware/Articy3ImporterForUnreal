@@ -20,6 +20,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Setup")
 	bool bReferenceBaseObject = true;
 
+	/** The currently assigned clone ID. Use */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition="!bReferenceBaseObject"), Category="Setup")
 	mutable int32 CloneId;
 
@@ -32,6 +33,10 @@ public:
 	template<typename T = UArticyObject>
 	T* GetObject(const UObject* WorldContext) const;
 
+	uint32 GetEffectiveCloneId() const
+	{
+		return bReferenceBaseObject ? 0ul : *reinterpret_cast<uint32*>(&CloneId);
+	}
 	
 	enum EStringInitResult
 	{
@@ -62,15 +67,37 @@ public:
 		return FString::Printf(TEXT("(bReferenceBaseObject=%s, CloneId=%d, Id=(Low=%d, High=%d))"), bReferenceBaseObject ? TEXT("True") : TEXT("False"), CloneId, Id.Low, Id.High);
 	}
 
+	/** Is used in hash operations, and in that case we want to know about effective data rather than literal data,
+	 *  so a 'hidden' CloneID (bReferenceBaseObject = true) does not influence the comparison
+	 */
 	bool operator==(const FArticyRef& Other) const
 	{
+		return MatchesEffective(Other);
+	}
+
+	/** Used to compare raw data; CloneID might have different values between two ArticyRefs that have bReferenceBaseObject = true. */
+    bool MatchesRaw(const FArticyRef& Other) const
+	{
 		return Other.Id.Low == Id.Low && Other.Id.High == Id.High && Other.bReferenceBaseObject == bReferenceBaseObject && Other.CloneId == CloneId;
+	}
+
+	/** Used to compare effective data; will act as if CloneID was 0 when bReferenceBaseObject = true.*/
+    bool MatchesEffective(const FArticyRef& Other) const
+	{
+		return Other.Id.Low == Id.Low && Other.Id.High == Id.High && Other.bReferenceBaseObject == bReferenceBaseObject && Other.GetEffectiveCloneId() == GetEffectiveCloneId();
 	}
 
 	bool operator!=(const FArticyRef& Other) const
 	{
 		return !this->operator==(Other);
 	}
+
+	friend uint32 GetTypeHash(const FArticyRef& Ref)
+	{
+		return HashCombine(GetTypeHash(Ref.GetId()), Ref.GetEffectiveCloneId());
+	}
+
+	
 private:
 	/** The actual reference: we keep track of the Reference's Id.
 	 * Set to EditAnywhere here to allow for a hack in manipulating properties
