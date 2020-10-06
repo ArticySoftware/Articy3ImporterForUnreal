@@ -9,7 +9,7 @@
 #include "ArticyEditorStyle.h"
 #include "ArticyFlowClasses.h"
 #include "CodeGeneration/CodeGenerator.h"
-#include "Customizations/ArticyRefWidgetCustomizations/DefaultArticyRefWidgetCustomizations.h"
+#include "Customizations/ArticyIdPropertyWidgetCustomizations/DefaultArticyIdPropertyWidgetCustomizations.h"
 #include "Developer/Settings/Public/ISettingsModule.h"
 #include "Developer/Settings/Public/ISettingsSection.h"
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
@@ -45,7 +45,7 @@ void FArticyEditorModule::StartupModule()
 	RegisterArticyToolbar();
 	RegisterAssetTypeActions();
 	RegisterConsoleCommands();
-	RegisterDefaultArticyRefWidgetExtensions();
+	RegisterDefaultArticyIdPropertyWidgetExtensions();
 	RegisterDetailCustomizations();
 	RegisterGraphPinFactory();
 	RegisterPluginSettings();
@@ -89,11 +89,11 @@ void FArticyEditorModule::RegisterConsoleCommands()
 	ConsoleCommands = new FArticyEditorConsoleCommands(*this);
 }
 
-void FArticyEditorModule::RegisterDefaultArticyRefWidgetExtensions() const
+void FArticyEditorModule::RegisterDefaultArticyIdPropertyWidgetExtensions() const
 {
 #if PLATFORM_WINDOWS
 	// this registers the articy button extension for all UArticyObjects. Only for Windows, since articy is only available for windows
-	GetCustomizationManager()->RegisterArticyRefWidgetCustomizationFactory(FOnCreateArticyRefWidgetCustomizationFactory::CreateLambda([]()
+	GetCustomizationManager()->RegisterArticyIdPropertyWidgetCustomizationFactory(FOnCreateArticyIdPropertyWidgetCustomizationFactory::CreateLambda([]()
 	{
 		return MakeShared<FArticyButtonCustomizationFactory>();
 	}));
@@ -193,9 +193,9 @@ void FArticyEditorModule::RegisterPluginSettings() const
 
 void FArticyEditorModule::UnregisterDefaultArticyRefWidgetExtensions() const
 {
-	for(const IArticyRefWidgetCustomizationFactory* DefaultFactory : DefaultArticyRefWidgetCustomizationFactories)
+	for(const IArticyIdPropertyWidgetCustomizationFactory* DefaultFactory : DefaultArticyRefWidgetCustomizationFactories)
 	{
-		GetCustomizationManager()->UnregisterArticyRefWidgetCustomizationFactory(DefaultFactory);
+		GetCustomizationManager()->UnregisterArticyIdPropertyWidgetCustomizationFactory(DefaultFactory);
 	}
 }
 

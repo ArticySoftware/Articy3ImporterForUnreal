@@ -99,9 +99,9 @@ private:
 	void UpdateWidget();
 
 	/** Applies a single customization */
-	void ApplyArticyRefCustomization(const FArticyRefWidgetCustomizationInfo& Customization);
+	void ApplyArticyRefCustomization(const FArticyIdPropertyWidgetCustomizationInfo& Customization);
 	/** Applies the given customizations, such as the ExtraButton extensions */
-	void ApplyArticyRefCustomizations(const TArray<FArticyRefWidgetCustomizationInfo>& Customizations);
+	void ApplyArticyRefCustomizations(const TArray<FArticyIdPropertyWidgetCustomizationInfo>& Customizations);
 
 private:
 	TSharedRef<SWidget> CreateArticyObjectAssetPicker();
@@ -122,7 +122,7 @@ private:
 	FUIAction CopyAction;
 	FUIAction PasteAction;
 	/** The current customizations are cached in here to achieve ownership */
-	TArray<TSharedPtr<IArticyRefWidgetCustomization>> ActiveCustomizations;
+	TArray<TSharedPtr<IArticyIdPropertyWidgetCustomization>> ActiveCustomizations;
 
 	TSharedPtr<FExtender> CustomizationHighExtender;
 	/** The customization extenders of the currently active customizations */

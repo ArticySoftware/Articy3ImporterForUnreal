@@ -10,43 +10,43 @@
 
 /** Architecture Ref: SequenceCustomizationManager */
 
-struct FArticyRefWidgetCustomizationInfo
+struct FArticyIdPropertyWidgetCustomizationInfo
 {
 	TSharedPtr<FExtender> ExtraButtonExtender;
 };
 
-class FArticyRefWidgetCustomizationBuilder
+class FArticyIdPropertyWidgetCustomizationBuilder
 {
 public:
-	FArticyRefWidgetCustomizationBuilder(const UArticyObject* InObject) : ArticyObject(InObject)
+	FArticyIdPropertyWidgetCustomizationBuilder(const UArticyObject* InObject) : ArticyObject(InObject)
 	{}
-	void AddCustomization(const FArticyRefWidgetCustomizationInfo& Customization) { Customizations.Add(Customization); }
-	const TArray<FArticyRefWidgetCustomizationInfo>& GetCustomizations() const { return Customizations; }
+	void AddCustomization(const FArticyIdPropertyWidgetCustomizationInfo& Customization) { Customizations.Add(Customization); }
+	const TArray<FArticyIdPropertyWidgetCustomizationInfo>& GetCustomizations() const { return Customizations; }
 
 	const UArticyObject* GetArticyObject() const { return ArticyObject; }
 private:
 	const UArticyObject* ArticyObject;
-	TArray<FArticyRefWidgetCustomizationInfo> Customizations;
+	TArray<FArticyIdPropertyWidgetCustomizationInfo> Customizations;
 };
 
-class ARTICYEDITOR_API IArticyRefWidgetCustomization
+class ARTICYEDITOR_API IArticyIdPropertyWidgetCustomization
 {
 public:
-	virtual ~IArticyRefWidgetCustomization() {}
+	virtual ~IArticyIdPropertyWidgetCustomization() {}
 	/** Supply the Builder with a WidgetCustomizationInfo struct that extends the UI. Keep the widgets small (16x16 icons preferred) */
-	virtual void RegisterArticyRefWidgetCustomization(FArticyRefWidgetCustomizationBuilder& Builder) = 0;
-	virtual void UnregisterArticyRefWidgetCustomization() = 0;
+	virtual void RegisterArticyIdPropertyWidgetCustomization(FArticyIdPropertyWidgetCustomizationBuilder& Builder) = 0;
+	virtual void UnregisterArticyIdPropertyWidgetCustomization() = 0;
 };
 
-class ARTICYEDITOR_API IArticyRefWidgetCustomizationFactory
+class ARTICYEDITOR_API IArticyIdPropertyWidgetCustomizationFactory
 {
 public:
-	virtual ~IArticyRefWidgetCustomizationFactory() {}
-	virtual TSharedPtr<IArticyRefWidgetCustomization> CreateCustomization() = 0;
+	virtual ~IArticyIdPropertyWidgetCustomizationFactory() {}
+	virtual TSharedPtr<IArticyIdPropertyWidgetCustomization> CreateCustomization() = 0;
 	virtual bool SupportsType(const UArticyObject* InObject) = 0;
 };
 
-DECLARE_DELEGATE_RetVal(TSharedRef<IArticyRefWidgetCustomizationFactory>, FOnCreateArticyRefWidgetCustomizationFactory);
+DECLARE_DELEGATE_RetVal(TSharedRef<IArticyIdPropertyWidgetCustomizationFactory>, FOnCreateArticyIdPropertyWidgetCustomizationFactory);
 
 /** Singleton-style class for managing articy editor customizations. */
 class ARTICYEDITOR_API FArticyEditorCustomizationManager
@@ -54,12 +54,12 @@ class ARTICYEDITOR_API FArticyEditorCustomizationManager
 public:
 	FArticyEditorCustomizationManager();
 
-	/** Registers an ArticyRefWidget customization factory and returns the index */
-	IArticyRefWidgetCustomizationFactory* RegisterArticyRefWidgetCustomizationFactory(FOnCreateArticyRefWidgetCustomizationFactory GetCustomizationDelegate);
-	/** Unregisters an ArticyRefWidget customization */
-	void UnregisterArticyRefWidgetCustomizationFactory(const IArticyRefWidgetCustomizationFactory*);
-	/** Creates the ArticyRefWidget customizations for an ArticyRef */
-	void CreateArticyRefWidgetCustomizations(const UArticyObject* ArticyObject, TArray<TSharedPtr<IArticyRefWidgetCustomization>>& OutCustomizations);
+	/** Registers an ArticyIdPropertyWidget customization factory and returns the index */
+	IArticyIdPropertyWidgetCustomizationFactory* RegisterArticyIdPropertyWidgetCustomizationFactory(FOnCreateArticyIdPropertyWidgetCustomizationFactory GetCustomizationDelegate);
+	/** Unregisters an ArticyIdPropertyyWidget customization */
+	void UnregisterArticyIdPropertyWidgetCustomizationFactory(const IArticyIdPropertyWidgetCustomizationFactory*);
+	/** Creates the ArticyIdPropertyWidget customizations for an ArticyRef */
+	void CreateArticyIdPropertyWidgetCustomizations(const UArticyObject* ArticyObject, TArray<TSharedPtr<IArticyIdPropertyWidgetCustomization>>& OutCustomizations);
 
 private:
 	/** Since we only want one customization manager, delete other constructors */
@@ -67,6 +67,6 @@ private:
 	FArticyEditorCustomizationManager& operator=(const FArticyEditorCustomizationManager&) = delete;
 
 
-	TArray<TSharedPtr<IArticyRefWidgetCustomizationFactory>> ArticyRefWidgetCustomizationFactories;
+	TArray<TSharedPtr<IArticyIdPropertyWidgetCustomizationFactory>> ArticyIdPropertyWidgetCustomizationFactories;
 };
 

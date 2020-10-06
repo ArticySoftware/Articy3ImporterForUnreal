@@ -31,10 +31,10 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Object Id", DefaultToSelf = "WorldContext", BlueprintAutoCast), Category = "ArticyRef")
 	static void ArticyRef_SetObjectId(UPARAM(Ref) FArticyRef& Ref, UPARAM(Ref) FArticyId Id);
 	/** Used to compare raw data; CloneID might have different values between two ArticyRefs that have bReferenceBaseObject = true. */
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "ArtiycRef")
 	static bool MatchesRaw(const FArticyRef& A, const FArticyRef& B);
 	/** Used to compare effective data; will act as if CloneID was 0 when bReferenceBaseObject = true.*/
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "ArtiycRef")
 	static bool MatchesEffective(const FArticyRef& A, const FArticyRef& B);
 
 	/** Converts an ArticyId to an object. */
