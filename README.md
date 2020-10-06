@@ -61,10 +61,12 @@ Projects that existed prior to using the importer and used only Blueprints can b
 
 Click Next, name the class "MyActor" and finish the setup. Unreal Engine should now compile the "MyActor" class. After having compiled, your project now also works with C++.
 
-## Clone/Copy the importer into the Unreal project
+## Downloading the plugin
 
+You can decide to get the plugin at the [Unreal Engine marketplace](https://www.unrealengine.com/marketplace/en-US/product/articy-draft-importer) as an Engine plugin, or alternatively here via GitHub as a project-based plugin. Functionally, there are no differences.
+
+### Project-based plugin
 *Unreal Engine 4.19 and below: use [the respectively tagged version](https://github.com/ArticySoftware/ArticyImporterForUnreal/releases) of the importer*
-
 
 Get a copy of the importer and copy it into your projects **Plugins** folder. It is possible that you don't have one if it is a new project, so you can just create it.
 Copy the folder **ArticyImporter** into this **Plugins** folder. Your project structure should now look something like this.
@@ -72,6 +74,9 @@ Copy the folder **ArticyImporter** into this **Plugins** folder. Your project st
 <p align="center">
   <img src="https://www.articy.com/articy-importer/unreal/copy_plugin.png">
 </p>
+
+### Engine-based plugin
+If you decide to get the plugin on the marketplace, the Epic Games Launcher will handle the installation for you.
 
 ## Adjust build configuration
 
@@ -119,7 +124,7 @@ Make sure to save the file and close the editor.
 ## Enable the importer in Unreal
 
 Now you can open your Unreal project and open the Plugins window by selecting Edit->Plugins in the main window menu bar.
-Inside this window scroll in the list of groups down until you find the Group **Project** and the sub group **Articy**, click on Articy and enable the ArticyImporter on the right.
+Inside this window scroll in the list of groups down until you find the Group **Project** (in case you are using the plugin on a project basis), or under **Installed** (in case you are using it as an engine plugin) and the sub group **Articy**, click on Articy and enable the ArticyImporter on the right.
 
 <p align="center">
   <img src="https://www.articy.com/articy-importer/unreal/enable_plugin.png">
@@ -138,6 +143,8 @@ When exporting, chose your Unreal projects **Content** folder as the target for 
 </p>
 
 ## Import into Unreal
+**Warning: Please make sure you have your project's build configuration adjusted**
+
 After every export, going back to Unreal will trigger the ArticyImporter plugin to automatically parse the new file and show a prompt to import the changes. While this option is generally robust, there are certain cases in which more control over the import process is required.
 
 Therefore the articy importer menu, which can be accessed via the level toolbar, enables you to import with more control.
@@ -276,6 +283,54 @@ store the branch in every button. When you instantiate the button you should pas
 
 If you want to learn more about the flow player and its events you can read the [unity documentation](https://www.articy.com/articy-importer/unity/html/howto_flowplayer.htm) as both implementations are based on the same principles.
 
+## Articy Global Variables Debugger
+The Global Variables debugger can be accessed in the toolbar. It shows all global variables while the game is running and lets you search by namespace or variable namewhich makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
+Furthermore, you can also change the global variables while the game is running, and your game code that listens to variable changes is going to get triggered. This is useful to replicate specific conditions without needing to go through all steps manually.
+For example, if your global variables control your quest states, checking a "quest accepted" global variable in the debugger will make your quest system initiate a quest.
+
+## Advanced features (requiring C++)
+There are some specific workflow features that can be exposed to Blueprints using C++ only.
+
+### UPROPERTY meta data
+There are currentl three articy UPROPERTY meta specifiers.
+- ArticyClassRestriction (for FArticyId and FArticyRef): Restricts the articy asset picker to the given class and, on its own, its descendants. The class is assigned without the C++ Prefix (i.e. UArticyEntity becomes ArticyEntity)
+- ArticyExactClass (for FArticyId and FArticyRef): Restricts the Exact Class checkbox in the articy asset picker to the specified value. Useful to exlude child classes of a given class in combination with ArticyClassRestriction
+- ArticyNoWidget (for FArticyId). This is a performance optimization for large projects and can be used to disable the custom widgets for FArticyIds, as they are more computationally expensive.
+
+Below is example code:
+```
+class AMyActor : public AActor
+{
+public:
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, meta = (ArticyClassRestriction=ArticyNode, ArticyExactClass = true)
+	FArticyRef NodeReference;
+	
+	UPROPERTY(EditAnywhere, meta = (ArticyClassRestriction=ArticyEntity, ArticyNoWidget = true)
+	FArticyId EntityId	
+}
+```
+
+### ArticyId Widget Customization
+The ArticyId Widget customization is a system to let you add custom widgets to any ArticyId or ArticyRef property in the Unreal Engine editor without having to modify the plugin code. The Articy button that opens up the currently selected object inside articy:draft 3 itself is also implemented using the same system.
+The system also allows you to test the associated object for its data, or to only use your custom widget for specific types of articy objects. For example, all objects that have a "Quest giver" feature in articy:draft 3 can show a button inside Unreal that will open up the asset in which the associated quest is contained.
+
+To create a customization, there are three steps:
+1. Create a Customization class inheriting from IArticyIdPropertyWidgetCustomization and override its functions. This class is responsible for actually creating the FExtender and the widget for the customization.
+2. Create a Customization Factory class inheriting from IArticyIdPropertyWidgetCustomizationFactory and override its functions. The SupportsType function gives you the object that is being considered for customization as a parameter, so you can retrieve its data and decide whether the factory supports the articy object or not.
+3. Register the Customization Factory with the ArticyCustomizationManager that resides in the FArticyEditorModule using a FOnCreateArticyIdPropertyWidgetCustomizationFactory object, which is going to instantiate a factory internally.
+
+Sample code can be found in the following files inside the ArticyEditor module, which demonstrates how the articy button itself was added:
+- "DefaultArticyIdPropertyWidgetCustomizations" (Customization + Factory)
+- "ArticyEditorModule" (Registering of the factory via FOnCreateArticyIdPropertyWidgetCustomizationFactory object)
+
+Keep in mind that this customization needs to be stripped from a packaged build, so this should only be done in an editor module.
+The editor module needs to have "ArticyEditor" listed as a dependency.
+Additionally, to get access to the customization manager from outside the FArticyEditorModule, use the following code:
+```
+FArticyEditorModule::Get().GetCustomizationManager()->RegisterArticyIdPropertyWidgetCustomizationFactory...
+```
 # Contributing
 
 We are very grateful for any kind of contribution that you bring to the ArticyImporter, no matter if it is reporting any issues, or by actively adding new features, or fixing existing issues. If you want to know more about how to contribute please check our [Contribution](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) article.
