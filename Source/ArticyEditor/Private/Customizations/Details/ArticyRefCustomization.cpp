@@ -24,10 +24,9 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	ArticyRefPropertyWidget = SNew(SArticyRefProperty)
 	.ArticyRefToDisplay(this, &FArticyRefCustomization::GetArticyRef)
 	.OnArticyRefChanged(this, &FArticyRefCustomization::OnArticyRefChanged)
-	.TopLevelClassRestriction(this, &FArticyRefCustomization::GetClassRestrictionMetaData)
+	.TopLevelClassRestriction(this, &FArticyRefCustomization::GetClassRestriction)
 	.bExactClass(IsExactClass())
 	.bExactClassEditable(!HasExactClassMetaData())
-	.bClassFilterEditable(!IsExactClass())
 	.bIsReadOnly(this, &FArticyRefCustomization::IsReadOnly);
 
 	HeaderRow.NameContent()
@@ -71,7 +70,7 @@ void FArticyRefCustomization::OnArticyRefChanged(const FArticyRef& NewArticyRef)
 	ArticyRefPropertyHandle->SetValueFromFormattedString(NewArticyRef.ToString());
 }
 
-UClass* FArticyRefCustomization::GetClassRestrictionMetaData() const
+UClass* FArticyRefCustomization::GetClassRestriction() const
 {
 	UClass* Restriction = nullptr;
 

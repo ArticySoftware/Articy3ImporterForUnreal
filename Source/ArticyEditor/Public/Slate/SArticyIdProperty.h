@@ -47,7 +47,6 @@ public:
 		, _PasteAction()
 		, _bExactClass(false)
 		, _bExactClassEditable(true)
-		, _bClassFilterEditable(true)
 		, _bIsReadOnly(false)
 	{}
 		SLATE_ATTRIBUTE(FArticyId, ArticyIdToDisplay)
@@ -58,7 +57,6 @@ public:
 		SLATE_ARGUMENT(FUIAction, PasteAction)
 		SLATE_ATTRIBUTE(bool, bExactClass)
 		SLATE_ATTRIBUTE(bool, bExactClassEditable)
-		SLATE_ATTRIBUTE(bool, bClassFilterEditable)
 		SLATE_ATTRIBUTE(bool, bIsReadOnly)
 	SLATE_END_ARGS()
 
@@ -77,7 +75,6 @@ private:
 	TAttribute<UClass*> TopLevelClassRestriction;
 	TAttribute<bool> bExactClass;
 	TAttribute<bool> bExactClassEditable;
-	TAttribute<bool> bClassFilterEditable;
 	TAttribute<bool> bIsReadOnly;
 	
 	// the articy object this widget currently represents
@@ -108,6 +105,10 @@ private:
 
 private:
 	TSharedRef<SWidget> CreateArticyObjectAssetPicker();
+	/**  Class filter is uneditable if we demand an exact class and also the exact class checkbox is not editable.
+	 *   Which just means that ArticyExactClass = true. 
+	 */
+	bool IsClassFilterEditable() const;
 	void OnArticyObjectPicked(const FAssetData& ArticyObjectData) const;
 	FReply OnArticyButtonClicked() const;
 	FReply OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const;

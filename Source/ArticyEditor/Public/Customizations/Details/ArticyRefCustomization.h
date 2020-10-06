@@ -30,7 +30,7 @@ private:
 	TSharedPtr<SWidget> ArticyRefPropertyWidget;
 
 private:
-	UClass* GetClassRestrictionMetaData() const;
+	UClass* GetClassRestriction() const;
 	bool IsExactClass() const;
 	bool IsReadOnly() const;
 	bool HasClassRestrictionMetaData() const;

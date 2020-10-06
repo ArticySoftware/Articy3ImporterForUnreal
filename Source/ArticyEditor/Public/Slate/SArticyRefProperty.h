@@ -25,7 +25,6 @@ public:
 		, _TopLevelClassRestriction(UArticyObject::StaticClass())
 		, _bExactClass(false)
 		, _bExactClassEditable(true)
-		, _bClassFilterEditable(true)
 		, _bIsReadOnly(false)
 	{}
 		SLATE_ATTRIBUTE(FArticyRef, ArticyRefToDisplay)
@@ -33,7 +32,6 @@ public:
 		SLATE_ATTRIBUTE(UClass*, TopLevelClassRestriction)
 		SLATE_ATTRIBUTE(bool, bExactClass)
 		SLATE_ATTRIBUTE(bool, bExactClassEditable)
-		SLATE_ATTRIBUTE(bool, bClassFilterEditable)
 		SLATE_ATTRIBUTE(bool, bIsReadOnly)
 	SLATE_END_ARGS()
 

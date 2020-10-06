@@ -45,9 +45,9 @@ void FArticyIdCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Propert
 	ArticyIdPropertyWidget = SNew(SArticyIdProperty)
 	.ArticyIdToDisplay(this, &FArticyIdCustomization::GetArticyId)
 	.OnArticyIdChanged(this, &FArticyIdCustomization::OnArticyIdChanged)
-	.TopLevelClassRestriction(this, &FArticyIdCustomization::GetClassRestrictionMetaData)
+	.TopLevelClassRestriction(this, &FArticyIdCustomization::GetClassRestriction)
 	.bExactClass(IsExactClass())
-	.bExactClassEditable(HasExactClassMetaData())
+	.bExactClassEditable(!HasExactClassMetaData())
 	.bIsReadOnly(this, &FArticyIdCustomization::IsReadOnly);
 
 	HeaderRow.NameContent()
@@ -91,7 +91,7 @@ void FArticyIdCustomization::OnArticyIdChanged(const FArticyId &NewArticyId) con
 	ArticyIdPropertyHandle->SetValueFromFormattedString(NewArticyId.ToString());
 }
 
-UClass* FArticyIdCustomization::GetClassRestrictionMetaData() const
+UClass* FArticyIdCustomization::GetClassRestriction() const
 {
 	UClass* Restriction = nullptr;
 

@@ -52,10 +52,9 @@ public:
 private:
 	TSharedPtr<IPropertyHandle> ArticyIdPropertyHandle;
 	TSharedPtr<SArticyIdProperty> ArticyIdPropertyWidget;
-	UClass* ClassRestriction = nullptr;
 	bool bShouldCustomize = true;
 private:
-	UClass* GetClassRestrictionMetaData() const;
+	UClass* GetClassRestriction() const;
 	bool IsExactClass() const;
 	bool IsReadOnly() const;
 	bool HasClassRestrictionMetaData() const;

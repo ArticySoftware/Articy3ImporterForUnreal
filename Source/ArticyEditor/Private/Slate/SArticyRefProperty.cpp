@@ -31,7 +31,6 @@ void SArticyRefProperty::Construct(const FArguments& InArgs)
 	this->TopLevelClassRestriction = InArgs._TopLevelClassRestriction;
 	this->bExactClass = InArgs._bExactClass;
 	this->bExactClassEditable = InArgs._bExactClassEditable;
-	this->bClassFilterEditable = InArgs._bClassFilterEditable;
 	this->bIsReadOnly = InArgs._bIsReadOnly;
 	
 	Cursor = EMouseCursor::Hand;
@@ -78,7 +77,6 @@ void SArticyRefProperty::CreateInternalWidgets()
 		.HighExtender(ArticyIdExtender)
 		.bExactClass(bExactClass)
 		.bExactClassEditable(bExactClassEditable)
-		.bClassFilterEditable(bClassFilterEditable)
 		.bIsReadOnly(bIsReadOnly)
 		.CopyAction(CopyAction)
 		.PasteAction(PasteAction);

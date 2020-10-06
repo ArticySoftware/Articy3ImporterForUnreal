@@ -53,7 +53,6 @@ void SArticyIdProperty::Construct(const FArguments& InArgs)
 	this->CustomizationHighExtender = InArgs._HighExtender;
 	this->bExactClass = InArgs._bExactClass;
 	this->bExactClassEditable = InArgs._bExactClassEditable;
-	this->bClassFilterEditable = InArgs._bClassFilterEditable;
 	this->CopyAction = InArgs._CopyAction;
 	this->PasteAction = InArgs._PasteAction;
 	this->bIsReadOnly = InArgs._bIsReadOnly;
@@ -247,15 +246,20 @@ void SArticyIdProperty::ApplyArticyRefCustomizations(const TArray<FArticyRefWidg
 }
 
 TSharedRef<SWidget> SArticyIdProperty::CreateArticyObjectAssetPicker()
-{
+{	
 	TSharedRef<SArticyObjectAssetPicker> AssetPicker = SNew(SArticyObjectAssetPicker)
 		.OnArticyObjectSelected(this, &SArticyIdProperty::OnArticyObjectPicked)
-		.CurrentClassRestriction(CachedArticyObject.IsValid() ? CachedArticyObject->UObject::GetClass() : UArticyObject::StaticClass())
+		.CurrentClassRestriction(TopLevelClassRestriction.Get())
 		.TopLevelClassRestriction(TopLevelClassRestriction)
 		.bExactClass(bExactClass)
 		.bExactClassEditable(bExactClassEditable)
-		.bClassFilterEditable(bClassFilterEditable);
+		.bClassFilterEditable(this, &SArticyIdProperty::IsClassFilterEditable);
 	return AssetPicker;
+}
+
+bool SArticyIdProperty::IsClassFilterEditable() const
+{
+	return bExactClass.Get() == false || bExactClassEditable.Get() == true;
 }
 
 void SArticyIdProperty::OnArticyObjectPicked(const FAssetData& ArticyObjectData) const
