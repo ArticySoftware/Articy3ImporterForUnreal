@@ -113,20 +113,49 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetDefault(const UObject* WorldC
 
 		if(keepBetweenWorlds)
 		{
-			Clone = DuplicateObject(asset, world->GetGameInstance());
+			Clone = DuplicateObject(asset, world->GetGameInstance(), TEXT("Persistent Runtime GV"));
 #if !WITH_EDITOR
 			Clone->AddToRoot();
 #endif
 		}
 		else
 		{
-			Clone = DuplicateObject(asset, world);
+			Clone = DuplicateObject(asset, world, *FString::Printf(TEXT("%s GV"), *world->GetName()));
 		}
 
 		ensureMsgf(Clone.IsValid(), TEXT("Cloning GV asset failed!"));
 	}
 
 	return Clone.Get();
+}
+
+UArticyGlobalVariables* UArticyGlobalVariables::GetMutableOriginal()
+{
+	static TWeakObjectPtr<UArticyGlobalVariables> Asset = nullptr;
+
+	if (!Asset.IsValid())
+	{
+		//create a clone of the database
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+		TArray<FAssetData> AssetData;
+		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetFName(), AssetData, true);
+
+		if (AssetData.Num() != 0)
+		{
+			if (AssetData.Num() > 1)
+			{
+				UE_LOG(LogArticyRuntime, Warning, TEXT("More than one ArticyGV was found, this is not supported! The first one will be selected."));
+			}
+
+			Asset = Cast<UArticyGlobalVariables>(AssetData[0].GetAsset());
+		}
+		else
+		{
+			UE_LOG(LogArticyRuntime, Warning, TEXT("No ArticyDraftGV was found."));
+		}
+	}
+
+	return Asset.Get();
 }
 
 void UArticyGlobalVariables::UnloadGlobalVariables()

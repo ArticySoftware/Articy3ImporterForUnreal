@@ -1,51 +1,59 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
-
 
 #include "ArticyEditorModule.h"
 #include "ArticyPluginSettings.h"
-#include "Customizations/ArticyPluginSettingsCustomization.h"
+#include "ArticyEditorCommands.h"
+#include "ArticyEditorFunctionLibrary.h"
+#include "ArticyEditorStyle.h"
+#include "ArticyFlowClasses.h"
+#include "CodeGeneration/CodeGenerator.h"
+#include "Customizations/ArticyIdPropertyWidgetCustomizations/DefaultArticyIdPropertyWidgetCustomizations.h"
 #include "Developer/Settings/Public/ISettingsModule.h"
 #include "Developer/Settings/Public/ISettingsSection.h"
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
+#include "Misc/MessageDialog.h"
 #include "Dialogs/Dialogs.h"
 #include <Widgets/SWindow.h>
+#include "AssetToolsModule.h"
 #include "Widgets/Docking/SDockTab.h"
-#include "ArticyEditorCommands.h"
-#include "ArticyEditorFunctionLibrary.h"
 #include "Editor.h"
-#include "Customizations/ArticyRefCustomization.h"
-#include "ArticyEditorStyle.h"
-#include "CodeGeneration/CodeGenerator.h"
 #include "DirectoryWatcherModule.h"
 #include "HAL/FileManager.h"
 #include "Widgets/Images/SImage.h"
 #include "IDirectoryWatcher.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "LevelEditor.h"
+#include "Customizations/ArticyPinFactory.h"
+#include "Customizations/AssetActions/AssetTypeActions_ArticyGV.h"
+#include "Customizations/Details/ArticyGVCustomization.h"
+#include "Customizations/Details/ArticyPluginSettingsCustomization.h"
+#include "Customizations/Details/ArticyIdCustomization.h"
+#include "Customizations/Details/ArticyRefCustomization.h"
 
 DEFINE_LOG_CATEGORY(LogArticyEditor)
 
 #define LOCTEXT_NAMESPACE "FArticyImporterModule"
-static const FName ArticyWindowTabID("ArticyTab");
+static const FName ArticyWindowTabID("ArticyWindowTab");
+static const FName ArticyGVDebuggerTabID("ArticyGVDebuggerTab");
 
 void FArticyEditorModule::StartupModule()
 {
+	CustomizationManager = MakeShareable(new FArticyEditorCustomizationManager);
+	
+	RegisterArticyToolbar();
+	RegisterAssetTypeActions();
+	RegisterConsoleCommands();
+	RegisterDefaultArticyIdPropertyWidgetExtensions();
+	RegisterDetailCustomizations();
+	RegisterGraphPinFactory();
 	RegisterPluginSettings();
 	RegisterPluginCommands();
-	RegisterConsoleCommands();
 	// directory watcher has to be changed or removed as the results aren't quite deterministic
 	//RegisterDirectoryWatcher();
-	RegisterArticyWindowTab();
-	RegisterArticyToolbar();
-
-	// register custom details for ArticyRef struct
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	PropertyModule.RegisterCustomPropertyTypeLayout("ArticyRef", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArticyRefCustomization::MakeInstance));
-	PropertyModule.NotifyCustomizationModuleChanged();
-
+	RegisterToolTabs();
+	
 	FArticyEditorStyle::Initialize();
 }
 
@@ -53,6 +61,7 @@ void FArticyEditorModule::ShutdownModule()
 {
 	if (UObjectInitialized())
 	{
+		UnregisterDefaultArticyRefWidgetExtensions();
 		UnregisterPluginSettings();
 		
 		if(ConsoleCommands != nullptr)
@@ -69,9 +78,54 @@ void FArticyEditorModule::RegisterDirectoryWatcher()
 	DirectoryWatcherModule.Get()->RegisterDirectoryChangedCallback_Handle(CodeGenerator::GetSourceFolder(), IDirectoryWatcher::FDirectoryChanged::CreateRaw(this, &FArticyEditorModule::OnGeneratedCodeChanged), GeneratedCodeWatcherHandle);
 }
 
+void FArticyEditorModule::RegisterGraphPinFactory() const
+{
+	TSharedPtr<FArticyRefPinFactory> ArticyRefPinFactory = MakeShareable(new FArticyRefPinFactory);
+	FEdGraphUtilities::RegisterVisualPinFactory(ArticyRefPinFactory);
+}
+
 void FArticyEditorModule::RegisterConsoleCommands()
 {
 	ConsoleCommands = new FArticyEditorConsoleCommands(*this);
+}
+
+void FArticyEditorModule::RegisterDefaultArticyIdPropertyWidgetExtensions() const
+{
+#if PLATFORM_WINDOWS
+	// this registers the articy button extension for all UArticyObjects. Only for Windows, since articy is only available for windows
+	GetCustomizationManager()->RegisterArticyIdPropertyWidgetCustomizationFactory(FOnCreateArticyIdPropertyWidgetCustomizationFactory::CreateLambda([]()
+	{
+		return MakeShared<FArticyButtonCustomizationFactory>();
+	}));
+#endif
+}
+
+void FArticyEditorModule::RegisterDetailCustomizations() const
+{
+	// register custom details for ArticyRef struct
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
+	PropertyModule.RegisterCustomPropertyTypeLayout("ArticyId", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArticyIdCustomization::MakeInstance));
+	PropertyModule.RegisterCustomPropertyTypeLayout("ArticyRef", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArticyRefCustomization::MakeInstance));
+	PropertyModule.RegisterCustomClassLayout("ArticyPluginSettings", FOnGetDetailCustomizationInstance::CreateStatic(&FArticyPluginSettingsCustomization::MakeInstance));
+	PropertyModule.RegisterCustomClassLayout("ArticyGlobalVariables", FOnGetDetailCustomizationInstance::CreateStatic(&FArticyGVCustomization::MakeInstance));
+
+	PropertyModule.NotifyCustomizationModuleChanged();
+}
+
+TArray<UArticyPackage*> FArticyEditorModule::GetPackagesSlow()
+{
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	TArray<FAssetData> PackageData;
+	AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), PackageData);
+
+	TArray<UArticyPackage*> Packages;
+	for(FAssetData& Data : PackageData)
+	{
+		Packages.Add(Cast<UArticyPackage>(Data.GetAsset()));
+	}
+
+	return Packages;
 }
 
 void FArticyEditorModule::RegisterArticyToolbar()
@@ -89,23 +143,38 @@ void FArticyEditorModule::RegisterArticyToolbar()
 	}
 }
 
+void FArticyEditorModule::RegisterAssetTypeActions()
+{
+	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	AssetTools.RegisterAssetTypeActions(MakeShareable(new FAssetTypeActions_ArticyGV()));
+}
+
 void FArticyEditorModule::RegisterPluginCommands()
 {
 	FArticyEditorCommands::Register();
 	
 	PluginCommands = MakeShareable(new FUICommandList);
 
-	PluginCommands->MapAction(FArticyEditorCommands::Get().OpenPluginWindow,
+	PluginCommands->MapAction(FArticyEditorCommands::Get().OpenArticyImporter,
 		FExecuteAction::CreateRaw(this, &FArticyEditorModule::OpenArticyWindow),
+		FCanExecuteAction());
+
+	PluginCommands->MapAction(FArticyEditorCommands::Get().OpenArticyGVDebugger,
+		FExecuteAction::CreateRaw(this, &FArticyEditorModule::OpenArticyGVDebugger),
 		FCanExecuteAction());
 }
 
-void FArticyEditorModule::RegisterArticyWindowTab()
+void FArticyEditorModule::RegisterToolTabs()
 {
-	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(ArticyWindowTabID, FOnSpawnTab::CreateRaw(this, &FArticyEditorModule::OnSpawnArticyTab))
+	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(ArticyWindowTabID, FOnSpawnTab::CreateRaw(this, &FArticyEditorModule::OnSpawnArticyMenuTab))
 	.SetDisplayName(LOCTEXT("ArticyWindowTitle", "Articy Menu"))
 	.SetIcon(FSlateIcon(FArticyEditorStyle::GetStyleSetName(), "ArticyImporter.ArticyImporter.16", "ArticyImporter.ArticyImporter.8"))
 	.SetMenuType(ETabSpawnerMenuType::Hidden);
+
+	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(ArticyGVDebuggerTabID, FOnSpawnTab::CreateRaw(this, &FArticyEditorModule::OnSpawnArticyGVDebuggerTab))
+		.SetDisplayName(LOCTEXT("ArticyGVDebuggerTitle", "Articy GV Debugger"))
+		.SetIcon(FSlateIcon(FArticyEditorStyle::GetStyleSetName(), "ArticyImporter.ArticyImporter.16", "ArticyImporter.ArticyImporter.8"))
+		.SetMenuType(ETabSpawnerMenuType::Hidden);
 }
 
 void FArticyEditorModule::RegisterPluginSettings() const
@@ -119,11 +188,17 @@ void FArticyEditorModule::RegisterPluginSettings() const
 			LOCTEXT("Description", "Articy Importer Configuration."),
 			GetMutableDefault<UArticyPluginSettings>()
 		);
-	}
-
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	PropertyModule.RegisterCustomClassLayout("ArticyPluginSettings", FOnGetDetailCustomizationInstance::CreateStatic(&FArticyPluginSettingsCustomization::MakeInstance));
+	}	
 }
+
+void FArticyEditorModule::UnregisterDefaultArticyRefWidgetExtensions() const
+{
+	for(const IArticyIdPropertyWidgetCustomizationFactory* DefaultFactory : DefaultArticyRefWidgetCustomizationFactories)
+	{
+		GetCustomizationManager()->UnregisterArticyIdPropertyWidgetCustomizationFactory(DefaultFactory);
+	}
+}
+
 
 void FArticyEditorModule::UnregisterPluginSettings() const
 {
@@ -152,6 +227,11 @@ void FArticyEditorModule::QueueImport()
 void FArticyEditorModule::OpenArticyWindow()
 {
 	FGlobalTabmanager::Get()->InvokeTab(ArticyWindowTabID);
+}
+
+void FArticyEditorModule::OpenArticyGVDebugger()
+{
+	FGlobalTabmanager::Get()->InvokeTab(ArticyGVDebuggerTabID);
 }
 
 EImportStatusValidity FArticyEditorModule::CheckImportStatusValidity() const
@@ -236,11 +316,23 @@ void FArticyEditorModule::TriggerQueuedImport(bool b)
 
 void FArticyEditorModule::AddToolbarExtension(FToolBarBuilder& Builder)
 {
-	//Builder.AddToolBarButton(FArticyEditorCommands::Get().OpenPluginWindow);
-	Builder.AddToolBarButton(FArticyEditorCommands::Get().OpenPluginWindow, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FArticyEditorStyle::GetStyleSetName(), "ArticyImporter.ArticyImporter.40") );
+	Builder.AddComboButton(FUIAction(), FOnGetContent::CreateRaw(this, &FArticyEditorModule::OnGenerateArticyToolsMenu), FText::FromString(TEXT("Articy Tools")), TAttribute<FText>(), FSlateIcon(FArticyEditorStyle::GetStyleSetName(), "ArticyImporter.ArticyImporter.40") );
+	//Builder.AddToolBarButton(FArticyEditorCommands::Get().OpenPluginWindow, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FArticyEditorStyle::GetStyleSetName(), "ArticyImporter.ArticyImporter.40") );
 }
 
-TSharedRef<SDockTab> FArticyEditorModule::OnSpawnArticyTab(const FSpawnTabArgs& SpawnTabArgs) const
+TSharedRef<SWidget> FArticyEditorModule::OnGenerateArticyToolsMenu() const
+{
+	FMenuBuilder MenuBuilder(true, PluginCommands);
+
+	MenuBuilder.BeginSection("ArticyTools", LOCTEXT("ArticyTools", "Articy Tools"));
+	MenuBuilder.AddMenuEntry(FArticyEditorCommands::Get().OpenArticyImporter);
+	MenuBuilder.AddMenuEntry(FArticyEditorCommands::Get().OpenArticyGVDebugger);
+	MenuBuilder.EndSection();
+	
+	return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SDockTab> FArticyEditorModule::OnSpawnArticyMenuTab(const FSpawnTabArgs& SpawnTabArgs) const
 {
 	float ButtonWidth = 333.f / 1.3f;
 	float ButtonHeight = 101.f / 1.3f;
@@ -308,14 +400,6 @@ TSharedRef<SDockTab> FArticyEditorModule::OnSpawnArticyTab(const FSpawnTabArgs& 
 				]
 			]
 		]
-		/*+ SOverlay::Slot()
-		.VAlign(VAlign_Bottom)
-		.HAlign(HAlign_Left)
-		.Padding(5.f)
-		[
-			SNew(SImage)
-			.Image(FArticyEditorStyle::Get().GetBrush("ArticyImporter.ArticySoftware.64"))
-		]*/
 		+ SOverlay::Slot()
 		.VAlign(VAlign_Bottom)
 		.HAlign(HAlign_Right)
@@ -324,19 +408,15 @@ TSharedRef<SDockTab> FArticyEditorModule::OnSpawnArticyTab(const FSpawnTabArgs& 
 			SNew(SImage)
 			.Image(FArticyEditorStyle::Get().GetBrush("ArticyImporter.Window.ArticyLogo"))
 		]
-		// #TODO Additional widgets/controls go here
-		/*+ SHorizontalBox::Slot()
-		[
-			SNew(SSpacer)
-		]
-		+ SHorizontalBox::Slot()
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			[
-				SNullWidget::NullWidget
-			]
-		]*/
+	];
+}
+
+TSharedRef<SDockTab> FArticyEditorModule::OnSpawnArticyGVDebuggerTab(const FSpawnTabArgs& SpawnTabArgs) const
+{
+	return SNew(SDockTab)
+	.TabRole(ETabRole::NomadTab)
+	[
+		SNew(SArticyGlobalVariablesRuntimeDebugger).bInitiallyCollapsed(true)
 	];
 }
 

@@ -343,9 +343,8 @@ UCLASS()
 class ARTICYRUNTIME_API UArticyBaseVariableSet : public UObject, public IArticyReflectable
 {
 	GENERATED_BODY()
-
-protected:
-	UPROPERTY()
+public:
+	UPROPERTY(VisibleAnywhere, Category = "ArticyGlobalVariables")
 	TArray<UArticyVariable*> Variables;
 
 public:
@@ -419,6 +418,8 @@ public:
 	 * Creates a temporary copy if the 
 	 */
 	static UArticyGlobalVariables* GetDefault(const UObject* WorldContext);
+
+	static UArticyGlobalVariables* GetMutableOriginal();
 
 	/* Unloads the global variables, which causes that all changes get removed. */
 	UFUNCTION(BlueprintCallable, Category = "Packages")

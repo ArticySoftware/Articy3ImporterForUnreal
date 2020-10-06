@@ -326,7 +326,7 @@ UADIHierarchyObject* UADIHierarchyObject::CreateFromJson(UObject* Outer, const T
 
 	//fill in children
 	const TArray<TSharedPtr<FJsonValue>>* jsonChildren;
-	if(!JsonObject->TryGetArrayField(TEXT("Children"), jsonChildren) && jsonChildren)
+	if(JsonObject->TryGetArrayField(TEXT("Children"), jsonChildren) && jsonChildren)
 	{
 		obj->Children.Reset(jsonChildren->Num());
 		for(auto jsonChild : *jsonChildren)
@@ -379,10 +379,6 @@ void UArticyImportData::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags)
 
 void UArticyImportData::PostImport()
 {
-	// update the internal save state of the package settings (add settings for new packages, remove outdated package settings, restore previous settings for still existing packages)
-	UArticyPluginSettings* settings = GetMutableDefault<UArticyPluginSettings>();
-	settings->UpdatePackageSettings();
-
 	FArticyEditorModule& ArticyEditorModule = FModuleManager::Get().GetModuleChecked<FArticyEditorModule>("ArticyEditor");
 	ArticyEditorModule.OnImportFinished.Broadcast();
 }
@@ -397,6 +393,8 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	UserMethods.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_SCRIPTMEETHODS));
 
 	bool bNeedsCodeGeneration = false;
+
+	ParentChildrenCache.Empty();
 	
 	// import GVs and ObjectDefs only if needed
 	if(Settings.DidObjectDefsOrGVsChange())
@@ -431,9 +429,9 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 			// this will have either the current import data or the cached version
 			PostImportHandle = FArticyEditorModule::Get().OnCompilationFinished.AddLambda([this](UArticyImportData* Data)
 			{
-				CodeGenerator::GenerateAssets(Data);
 				BuildCachedVersion();
-				UArticyImportData::PostImport();
+				CodeGenerator::GenerateAssets(Data);
+				PostImport();
 			});
 
 			CodeGenerator::Recompile(this);
@@ -442,10 +440,38 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	// if we are importing but no code needed to be generated, generate assets immediately and perform post import
 	else
 	{
-		CodeGenerator::GenerateAssets(this);
 		BuildCachedVersion();
-		UArticyImportData::PostImport();
+		CodeGenerator::GenerateAssets(this);
+		PostImport();
 	}
+}
+
+const TWeakObjectPtr<UArticyImportData> UArticyImportData::GetImportData()
+{
+	static TWeakObjectPtr<UArticyImportData> ImportData = nullptr;
+
+	if(!ImportData.IsValid())
+	{
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+		TArray<FAssetData> AssetData;
+		AssetRegistryModule.Get().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), AssetData);
+
+		if (!AssetData.Num())
+		{
+			UE_LOG(LogArticyEditor, Warning, TEXT("Could not find articy import data asset."));
+		}
+		else
+		{
+			ImportData = Cast<UArticyImportData>(AssetData[0].GetAsset());
+
+			if (AssetData.Num() > 1)
+			{
+				UE_LOG(LogArticyEditor, Error, TEXT("Found more than one import file. This is not supported by the plugin. Using the first found file for now: %s"), *AssetData[0].ObjectPath.ToString());
+			}
+		}
+	}
+	
+	return ImportData;	
 }
 
 TArray<UArticyPackage*> UArticyImportData::GetPackagesDirect()

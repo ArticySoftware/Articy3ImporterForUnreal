@@ -1,9 +1,10 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
+#include "UObject/Interface.h"
 #include "ShadowStateManager.generated.h"
 
 // This class does not need to be modified.

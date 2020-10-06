@@ -5,62 +5,70 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/Input/SComboButton.h"
-#include "Widgets/Layout/SBorder.h"
 #include "Slate/AssetPicker/SArticyObjectTileView.h"
-#include "PropertyHandle.h"
-#include "Widgets/Layout/SBox.h"
-#include "Widgets/Input/SButton.h"
+#include "Customizations/ArticyEditorCustomizationManager.h"
+#include "SArticyIdProperty.h"
+#include "AssetPicker/SArticyObjectAssetPicker.h"
 
-namespace ArticyRefPropertyConstants {
-	const FVector2D ThumbnailSize(64, 64);
-	const FVector2D ThumbnailPadding(2, 2);
-
-}
 /**
  *  REFERENCE: SPropertyEditorAsset, which is the normal asset selection widget
  */
+
+DECLARE_DELEGATE_OneParam(FOnArticyRefChanged, const FArticyRef&);
+
 class ARTICYEDITOR_API SArticyRefProperty : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SArticyRefProperty) 
-		: _ClassRestriction(nullptr)
+
+	SLATE_BEGIN_ARGS(SArticyRefProperty)
+		: _ArticyRefToDisplay(FArticyRef())
+		, _TopLevelClassRestriction(UArticyObject::StaticClass())
+		, _bExactClass(false)
+		, _bExactClassEditable(true)
+		, _bIsReadOnly(false)
 	{}
-
-	SLATE_ATTRIBUTE(UClass*, ClassRestriction)
-
+		SLATE_ATTRIBUTE(FArticyRef, ArticyRefToDisplay)
+		SLATE_EVENT(FOnArticyRefChanged, OnArticyRefChanged)
+		SLATE_ATTRIBUTE(UClass*, TopLevelClassRestriction)
+		SLATE_ATTRIBUTE(bool, bExactClass)
+		SLATE_ATTRIBUTE(bool, bExactClassEditable)
+		SLATE_ATTRIBUTE(bool, bIsReadOnly)
 	SLATE_END_ARGS()
+
 /**
  * Construct this widget
  *
  * @param	InArgs	The declaration data for this widget
  */
-	void Construct(const FArguments& InArgs, IPropertyHandle* InArticyRefPropHandle);
+	void Construct(const FArguments& InArgs);
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+	void CreateInternalWidgets();
 
 private:
+	TAttribute<FArticyRef> ArticyRefToDisplay;
+	FOnArticyRefChanged OnArticyRefChanged;
+	TAttribute<UClass*> TopLevelClassRestriction;
+	TAttribute<bool> bExactClass;
+	TAttribute<bool> bExactClassEditable;
+	TAttribute<bool> bClassFilterEditable;
+	TAttribute<bool> bIsReadOnly;
 
-	mutable FArticyId CurrentObjectID;
+	void OnArticyIdChanged(const FArticyId& ArticyId);
+	FArticyId GetArticyIdToDisplay() const;
 	// the articy object this widget currently represents
 	TWeakObjectPtr<UArticyObject> CachedArticyObject = nullptr;
-	// the property handle for the articy ref that will be manipulated
-	IPropertyHandle* ArticyRefPropertyHandle = nullptr;
+	mutable FArticyRef CachedArticyRef = FArticyRef();
 	
-	TSharedPtr<SArticyObjectTileView> TileView;
-	TSharedPtr<SBox> TileContainer;
-	TSharedPtr<SBorder> ThumbnailBorder;
-	TSharedPtr<FSlateBrush> ImageBrush;
-	TSharedPtr<SComboButton> ComboButton;
-	TSharedPtr<SButton> ArticyButton;
-	TAttribute<UClass*> ClassRestriction;
+	TSharedPtr<SArticyIdProperty> ArticyIdProperty;
+	TSharedPtr<FExtender> ArticyIdExtender;
 private:
+	void CreateAdditionalRefWidgets(FToolBarBuilder& Builder);
+	/** Updates the internal values, fires delegates */
+	void Update(const FArticyRef& NewRef);
+	/** Updates the widget including customizations */
 	void UpdateWidget();
-	TSharedRef<SWidget> CreateArticyObjectAssetPicker();
-	FReply OnArticyButtonClicked() const;
-	/** Updates the underlying ArticyRef to reference the new articy object. Can be null */
-	void SetAsset(const FAssetData& AssetData) const;
-	FReply OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const;
-	FText OnGetArticyObjectDisplayName() const;
-	FArticyId GetCurrentObjectID() const;
-	
+private:
+	void OnCopyProperty() const;
+	void OnPasteProperty();
+	bool CanPasteProperty() const;	
 };

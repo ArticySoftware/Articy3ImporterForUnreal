@@ -3,19 +3,24 @@
 //
 
 #include "Slate/AssetPicker/SArticyObjectAssetPicker.h"
-#include "ArticyAsset.h"
-#include "ArticyBuiltinTypes.h"
 #include "ArticyObject.h"
 #include "EditorStyleSet.h"
 #include "GenericPlatform/ICursor.h"
 #include "Slate/AssetPicker/SArticyObjectTileView.h"
 #include "ArticyGlobalVariables.h"
 #include <ContentBrowserModule.h>
+#include "ArticyPluginSettings.h"
+#include "Customizations/Details/ArticyIdCustomization.h"
 #include "Types/WidgetActiveTimerDelegate.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Widgets/Views/STileView.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Input/SComboButton.h"
+#include "Widgets/Layout/SSpacer.h"
 #include "Layout/WidgetPath.h"
 #include "Framework/Application/SlateApplication.h"
+#include "ArticyEditorModule.h"
+#include "HAL/PlatformApplicationMisc.h"
 
 #define LOCTEXT_NAMESPACE "ArticyObjectAssetPicker"
 
@@ -26,9 +31,19 @@ SArticyObjectAssetPicker::~SArticyObjectAssetPicker()
 
 void SArticyObjectAssetPicker::Construct(const FArguments& InArgs)
 {
-	AssetPickerConfig = InArgs._AssetPickerConfig;
+	OnAssetSelected = InArgs._OnArticyObjectSelected;
+	OnClassPicked = InArgs._OnClassPicked;
+	CurrentClassRestriction = InArgs._CurrentClassRestriction;
+	TopLevelClassRestriction = InArgs._TopLevelClassRestriction;
+	bExactClass = InArgs._bExactClass;
+	bExactClassEditable = InArgs._bExactClassEditable;
+	bClassFilterEditable = InArgs._bClassFilterEditable;
 
-	OnAssetSelected = InArgs._AssetPickerConfig.OnAssetSelected;
+	if(!CurrentClassRestriction->IsChildOf(TopLevelClassRestriction.Get()))
+	{
+		CurrentClassRestriction = TopLevelClassRestriction.Get();
+	}
+	
 	Cursor = EMouseCursor::Hand;
 
 	const bool bInShouldCloseWindowAfterMenuSelection = true;
@@ -37,45 +52,13 @@ void SArticyObjectAssetPicker::Construct(const FArguments& InArgs)
 	FrontendFilters = MakeShareable(new FAssetFilterCollectionType());
 	FrontendFilters->OnChanged().AddSP(this, &SArticyObjectAssetPicker::OnFrontendFiltersChanged);
 	ArticyObjectFilter = MakeShareable(new FFrontendFilter_ArticyObject());
+	ClassFilter = MakeShareable(new FArticyClassRestrictionFilter(CurrentClassRestriction, bExactClass.Get()));
 
-	ClassFilter = MakeShareable(new FArticyClassRestrictionFilter());
-	// kind of a hack: AssetPickerConfig gets used ONLY to filter with ClassNames[0]
-	UClass* Class = FindObjectFast<UClass>(nullptr, AssetPickerConfig.Filter.ClassNames[0], false, true, RF_NoFlags);
-	ClassFilter->AllowedClass = Class;
-	
+	CreateInternalWidgets();
+
 	FMenuBuilder MenuBuilder(bInShouldCloseWindowAfterMenuSelection, nullptr, nullptr, bCloseSelfOnly);
-
 	MenuBuilder.BeginSection(NAME_None, LOCTEXT("CurrentAssetOperationsHeader", "Current Asset"));
-	{
-		/*if (CurrentObject.IsValid())
-		{
-			MenuBuilder.AddMenuEntry(
-				LOCTEXT("EditAsset", "Edit"),
-				LOCTEXT("EditAsset_Tooltip", "Edit this asset"),
-				FSlateIcon(),
-				FUIAction(FExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::OnEdit)));
-		}
-
-		if (bAllowCopyPaste)
-		{
-			MenuBuilder.AddMenuEntry(
-				LOCTEXT("CopyAsset", "Copy"),
-				LOCTEXT("CopyAsset_Tooltip", "Copies the asset to the clipboard"),
-				FSlateIcon(),
-				FUIAction(FExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::OnCopy))
-			);
-
-			MenuBuilder.AddMenuEntry(
-				LOCTEXT("PasteAsset", "Paste"),
-				LOCTEXT("PasteAsset_Tooltip", "Pastes an asset from the clipboard to this field"),
-				FSlateIcon(),
-				FUIAction(
-					FExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::OnPaste),
-					FCanExecuteAction::CreateSP(this, &SPropertyMenuAssetPicker::CanPaste))
-			);
-		}*/
-
-		
+	{		
 		MenuBuilder.AddMenuEntry(
 			LOCTEXT("ClearAsset", "Clear"),
 			LOCTEXT("ClearAsset_ToolTip", "Clears the articy object reference"),
@@ -88,43 +71,24 @@ void SArticyObjectAssetPicker::Construct(const FArguments& InArgs)
 
 	MenuBuilder.BeginSection(NAME_None, LOCTEXT("BrowseHeader", "Browse"));
 	{
-		SAssignNew(SearchField, SAssetSearchBox)
-			.HintText(NSLOCTEXT("ContentBrowser", "SearchBoxHint", "Search Assets"))
-			.OnTextChanged(this, &SArticyObjectAssetPicker::OnSearchBoxChanged)
-			.OnTextCommitted(this, &SArticyObjectAssetPicker::OnSearchBoxCommitted)
-			.DelayChangeNotificationsWhileTyping(true);
-
-
-		const TSharedPtr<SWidget> MenuContent =
-			SNew(SBox)
-			.WidthOverride(320)
-			.HeightOverride(320)
-			[
-				SAssignNew(AssetView, STileView<TWeakObjectPtr<UArticyObject>>)
-				.SelectionMode(ESelectionMode::Single)
-				.ListItemsSource(&FilteredObjects)
-				.OnGenerateTile(this, &SArticyObjectAssetPicker::MakeTileViewWidget)
-				.ItemHeight(this, &SArticyObjectAssetPicker::GetTileViewHeight)
-				.ItemWidth(this, &SArticyObjectAssetPicker::GetTileViewWidth)
-				.OnSelectionChanged(this, &SArticyObjectAssetPicker::SelectAsset)
-				.ItemAlignment(EListItemAlignment::EvenlySize)
-			];
-
 		MenuBuilder.AddWidget(SearchField.ToSharedRef(), FText::GetEmpty(), true);
-		MenuBuilder.AddWidget(MenuContent.ToSharedRef(), FText::GetEmpty(), true);
+		MenuBuilder.AddWidget(AssetViewContainer.ToSharedRef(), FText::GetEmpty(), true);
 	}
 	MenuBuilder.EndSection();
 
+	MenuBuilder.BeginSection(NAME_None, LOCTEXT("FilterHeader", "Filter"));
+	{
+		MenuBuilder.AddWidget(FilterBox.ToSharedRef(), FText::GetEmpty(), true);
+	}
+	MenuBuilder.EndSection();
+	
 	this->ChildSlot
 	[
 		MenuBuilder.MakeWidget()
 	];
 
-	// focus the search bar the next frame
-	if (AssetPickerConfig.bFocusSearchBoxWhenOpened)
-	{
-		RegisterActiveTimer(0.f, FWidgetActiveTimerDelegate::CreateSP(this, &SArticyObjectAssetPicker::FocusSearchField));
-	}
+	// focus the search field next frame
+	RegisterActiveTimer(0.f, FWidgetActiveTimerDelegate::CreateSP(this, &SArticyObjectAssetPicker::FocusSearchField));
 
 	// filter has be added after the widgets have been created since adding will trigger a callback function that accesses the widgets (FrontEndFilters OnChanged, which causes a refresh)
 	FrontendFilters->Add(ClassFilter);
@@ -136,6 +100,7 @@ void SArticyObjectAssetPicker::Construct(const FArguments& InArgs)
 
 void SArticyObjectAssetPicker::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
+
 	// reference: assetview.cpp:1189
 	if (bSlowFullListRefreshRequested)
 	{
@@ -144,18 +109,139 @@ void SArticyObjectAssetPicker::Tick(const FGeometry& AllottedGeometry, const dou
 	}
 }
 
+void SArticyObjectAssetPicker::CreateInternalWidgets()
+{	
+	SAssignNew(SearchField, SAssetSearchBox)
+	.HintText(NSLOCTEXT("ContentBrowser", "SearchBoxHint", "Search Assets"))
+	.OnTextChanged(this, &SArticyObjectAssetPicker::OnSearchBoxChanged)
+	.OnTextCommitted(this, &SArticyObjectAssetPicker::OnSearchBoxCommitted)
+	.DelayChangeNotificationsWhileTyping(true);
+
+	SAssignNew(AssetViewContainer, SBox)
+	.WidthOverride(325)
+	.HeightOverride(325)
+	[
+		SAssignNew(AssetView, STileView<TWeakObjectPtr<UArticyObject>>)
+		.SelectionMode(ESelectionMode::Single)
+		.ListItemsSource(&FilteredObjects)
+		.OnGenerateTile(this, &SArticyObjectAssetPicker::MakeTileViewWidget)
+		.ItemHeight(this, &SArticyObjectAssetPicker::GetTileViewHeight)
+		.ItemWidth(this, &SArticyObjectAssetPicker::GetTileViewWidth)
+		.OnSelectionChanged(this, &SArticyObjectAssetPicker::SelectAsset)
+		.ItemAlignment(EListItemAlignment::EvenlyDistributed)
+	];
+
+	ClassFilterButton = SNew(SComboButton)
+	.OnGetMenuContent(this, &SArticyObjectAssetPicker::CreateClassPicker)
+	.IsEnabled_Lambda([this]() -> bool
+	{
+		return bClassFilterEditable.Get();
+	})
+	//.ContentPadding(2.f)
+	.ButtonContent()
+	[
+		SNew(STextBlock)
+		.Text(this, &SArticyObjectAssetPicker::GetChosenClassName)
+	];
+	
+	SAssignNew(FilterBox, SHorizontalBox)
+	+ SHorizontalBox::Slot()
+	.VAlign(VAlign_Center)
+	.HAlign(HAlign_Center)
+	.AutoWidth()
+	[
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		.AutoWidth()
+		.VAlign(VAlign_Center)
+		.HAlign(HAlign_Center)
+		.Padding(3.f)
+		[
+			SNew(STextBlock).Text(FText::FromString("Exact Class "))
+		]
+		+ SHorizontalBox::Slot()
+		.AutoWidth()
+		.VAlign(VAlign_Center)
+		.HAlign(HAlign_Center)
+		//.Padding(3.f)
+		[
+			SNew(SCheckBox)
+			.IsEnabled(bExactClassEditable)				
+			.IsChecked_Lambda([=]()
+			{
+				return bExactClass.Get() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+			})
+			.OnCheckStateChanged(this, &SArticyObjectAssetPicker::OnExactClassCheckBoxChanged)	
+		]
+	]
+	+ SHorizontalBox::Slot()
+	.FillWidth(1.f)
+	[
+		SNew(SSpacer)		
+	]
+    + SHorizontalBox::Slot()
+    .VAlign(VAlign_Center)
+    .HAlign(HAlign_Right)
+	.AutoWidth()
+	.MaxWidth(200.f)
+    [
+        ClassFilterButton.ToSharedRef()
+	];
+}
+
+void SArticyObjectAssetPicker::OnCopyProperty(FArticyId Id) const
+{
+	FString ValueString = Id.ToString();
+	FPlatformApplicationMisc::ClipboardCopy(*ValueString);
+}
+
+TSharedRef<SWidget> SArticyObjectAssetPicker::CreateClassPicker()
+{
+	FClassViewerInitializationOptions ClassViewerConfig;
+	ClassViewerConfig.DisplayMode = EClassViewerDisplayMode::ListView;
+	ClassViewerConfig.bAllowViewOptions = true;
+	ClassViewerConfig.ClassFilter = MakeShareable(new FArticyRefClassFilter(TopLevelClassRestriction.Get(), false));
+
+	return FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(ClassViewerConfig, FOnClassPicked::CreateRaw(this, &SArticyObjectAssetPicker::OnClassPicked_Func));
+}
+
+void SArticyObjectAssetPicker::OnClassPicked_Func(UClass* InChosenClass)
+{
+	CurrentClassRestriction = InChosenClass;
+	ClassFilter->UpdateFilteredClass(CurrentClassRestriction);
+	ClassFilterButton->SetIsOpen(false, false);
+
+	OnClassPicked.ExecuteIfBound(InChosenClass);
+}
+
+FText SArticyObjectAssetPicker::GetChosenClassName() const
+{
+	if (CurrentClassRestriction) 
+	{
+		return FText::FromString(CurrentClassRestriction->GetName());
+	}
+
+	return FText::FromString("None");
+}
+
 TSharedRef<class ITableRow> SArticyObjectAssetPicker::MakeTileViewWidget(TWeakObjectPtr<UArticyObject> Entity, const TSharedRef<STableViewBase>& OwnerTable) const
 {
 	TSharedPtr< STableRow<TWeakObjectPtr<UArticyObject>>> TableRowWidget;
 	SAssignNew(TableRowWidget, STableRow<TWeakObjectPtr<UArticyObject>>, OwnerTable)
 		.Style(FEditorStyle::Get(), "ContentBrowser.AssetListView.TableRow")
-		.Cursor(true ? EMouseCursor::GrabHand : EMouseCursor::Default);
+		.Cursor(true ? EMouseCursor::GrabHand : EMouseCursor::Default)
+		.Padding(3.f);
 
+	FUIAction CopyAction;
+	CopyAction.ExecuteAction = FExecuteAction::CreateSP(this, &SArticyObjectAssetPicker::OnCopyProperty, Entity->GetId());
+	
 	// create the new tile view; the object to display is fixed so it can't change without the asset picker being recreated.
 	TSharedRef<SArticyObjectTileView> Item =
 		SNew(SArticyObjectTileView)
-		.ObjectToDisplay(Entity->GetId())
-		.ThumbnailSize(FArticyObjectAssetPicketConstants::TileSize.X)
+		.bIsReadOnly(true)
+		.CopyAction(CopyAction)
+		.ArticyIdToDisplay(Entity->GetId())
+		.ThumbnailSize(FArticyObjectAssetPicketConstants::TileSize)
 		.ThumbnailPadding(FArticyObjectAssetPicketConstants::ThumbnailPadding);
 
 	TableRowWidget->SetContent(Item);
@@ -165,12 +251,12 @@ TSharedRef<class ITableRow> SArticyObjectAssetPicker::MakeTileViewWidget(TWeakOb
 
 float SArticyObjectAssetPicker::GetTileViewHeight() const
 {
-	return FArticyObjectAssetPicketConstants::TileSize.Y;
+	return FArticyObjectAssetPicketConstants::TileSize.Y + 2*FArticyObjectAssetPicketConstants::ThumbnailPadding;
 }
 
 float SArticyObjectAssetPicker::GetTileViewWidth() const
 {
-	return FArticyObjectAssetPicketConstants::TileSize.X;
+	return FArticyObjectAssetPicketConstants::TileSize.X + 2*FArticyObjectAssetPicketConstants::ThumbnailPadding;
 }
 
 void SArticyObjectAssetPicker::OnClear() const
@@ -242,7 +328,6 @@ bool SArticyObjectAssetPicker::TestAgainstFrontendFilters(const FAssetData& Item
 	return true;
 }
 
-
 EActiveTimerReturnType SArticyObjectAssetPicker::FocusSearchField(double InCurrentTime, float InDeltaTime) const
 {
 	if(!SearchField.IsValid())
@@ -267,6 +352,13 @@ void SArticyObjectAssetPicker::SelectAsset(TWeakObjectPtr<UArticyObject> AssetIt
 {
 	const FAssetData NewAsset(AssetItem.Get());
 	OnAssetSelected.ExecuteIfBound(NewAsset);
+	FSlateApplication::Get().DismissAllMenus();
+}
+
+void SArticyObjectAssetPicker::OnExactClassCheckBoxChanged(ECheckBoxState NewState)
+{
+	bExactClass = NewState == ECheckBoxState::Checked;
+	ClassFilter->UpdateExactClass(bExactClass.Get());
 }
 
 void SArticyObjectAssetPicker::OnSearchBoxChanged(const FText& InSearchText) const

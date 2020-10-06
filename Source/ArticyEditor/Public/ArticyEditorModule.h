@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 #pragma once
 
@@ -8,13 +7,16 @@
 #include "Modules/ModuleManager.h"
 #include "Delegates/IDelegateInstance.h"
 #include "ArticyEditorConsoleCommands.h"
+#include "Customizations/ArticyEditorCustomizationManager.h"
 #include "Framework/Commands/UICommandList.h"
+#include "Slate/SArticyIdProperty.h"
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogArticyEditor, Log, All)
 
 DECLARE_MULTICAST_DELEGATE(FOnImportFinished);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCompilationFinished, UArticyImportData*);
+DECLARE_MULTICAST_DELEGATE(FOnAssetsGenerated);
 
 class FToolBarBuilder;
 class FMenuBuilder;
@@ -40,25 +42,36 @@ public:
 		return FModuleManager::LoadModuleChecked<FArticyEditorModule>(TEXT("ArticyEditor"));
 	}
 
-	void RegisterDirectoryWatcher();
-	void RegisterConsoleCommands();
-	void RegisterPluginCommands();
-	void RegisterArticyWindowTab();
+	TSharedPtr<FArticyEditorCustomizationManager> GetCustomizationManager() const { return CustomizationManager; }
+	TArray<UArticyPackage*> ARTICYEDITOR_API GetPackagesSlow();
+	
 	void RegisterArticyToolbar();
-
-
-	/* Plugin settings menu */
+	void RegisterAssetTypeActions();
+	void RegisterConsoleCommands();
+	/** Registers all default widget extensions. As of this point, the articy button */
+	void RegisterDefaultArticyIdPropertyWidgetExtensions() const;
+	void RegisterDetailCustomizations() const;
+	void RegisterDirectoryWatcher();
+	void RegisterGraphPinFactory() const;
+	void RegisterPluginCommands();
 	void RegisterPluginSettings() const;
+	void RegisterToolTabs();
+
 	void UnregisterPluginSettings() const;
+	void UnregisterDefaultArticyRefWidgetExtensions() const;
 
 	void QueueImport();
 	bool IsImportQueued();
 
-	FOnImportFinished OnImportFinished;
+	/** Delegate to bind custom logic you want to perform after the import has successfully finished */
 	FOnCompilationFinished OnCompilationFinished;
+	FOnAssetsGenerated OnAssetsGenerated;
+	FOnImportFinished OnImportFinished;
 
 private:
 	void OpenArticyWindow();
+	void OpenArticyGVDebugger();
+
 	EImportStatusValidity CheckImportStatusValidity() const;
 	void OnGeneratedCodeChanged(const TArray<struct FFileChangeData>& FileChanges) const;
 
@@ -66,7 +79,9 @@ private:
 	void TriggerQueuedImport(bool b);
 	
 	void AddToolbarExtension(FToolBarBuilder& Builder);
-	TSharedRef<class SDockTab> OnSpawnArticyTab(const class FSpawnTabArgs& SpawnTabArgs) const;
+	TSharedRef<SWidget> OnGenerateArticyToolsMenu() const;
+	TSharedRef<class SDockTab> OnSpawnArticyMenuTab(const class FSpawnTabArgs& SpawnTabArgs) const;
+	TSharedRef<class SDockTab> OnSpawnArticyGVDebuggerTab(const class FSpawnTabArgs& SpawnTabArgs) const;
 	
 private:
 	bool bIsImportQueued = false;
@@ -74,4 +89,9 @@ private:
 	FDelegateHandle GeneratedCodeWatcherHandle;
 	FArticyEditorConsoleCommands* ConsoleCommands = nullptr;
 	TSharedPtr<FUICommandList> PluginCommands;
+	/** The CustomizationManager registers and owns all customization factories */
+	TSharedPtr<FArticyEditorCustomizationManager> CustomizationManager = nullptr;
+
+	/** The CustomizationManager has ownership of the factories. These here are cached for removal at shutdown */
+	TArray<const IArticyIdPropertyWidgetCustomizationFactory*> DefaultArticyRefWidgetCustomizationFactories;
 };

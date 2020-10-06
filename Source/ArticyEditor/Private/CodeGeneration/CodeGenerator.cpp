@@ -25,6 +25,7 @@
 #include "ObjectTools.h"
 #include "HAL/PlatformFilemanager.h"
 #include "Misc/App.h"
+#include "Misc/MessageDialog.h"
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
@@ -301,6 +302,12 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	{
 		UE_LOG(LogArticyEditor, Error, TEXT("Could not save package %s"), *Package->GetName());
 	}
+
+	FArticyEditorModule::Get().OnAssetsGenerated.Broadcast();
+
+	// update the internal save state of the package settings (add settings for new packages, remove outdated package settings, restore previous settings for still existing packages)
+	UArticyPluginSettings* ArticyPluginSettings = GetMutableDefault<UArticyPluginSettings>();
+	ArticyPluginSettings->UpdatePackageSettings();
 }
 
 void CodeGenerator::OnCompiled(UArticyImportData* Data)

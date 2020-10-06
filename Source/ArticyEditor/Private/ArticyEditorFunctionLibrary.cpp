@@ -65,23 +65,27 @@ EImportDataEnsureResult FArticyEditorFunctionLibrary::EnsureImportDataAsset(UArt
 	}
 	else
 	{
-		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-		TArray<FAssetData> AssetData;
-		AssetRegistryModule.Get().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), AssetData);
+		TWeakObjectPtr<UArticyImportData> ImportDataAsset = UArticyImportData::GetImportData();
 
-		if (!AssetData.Num())
+		if (!ImportDataAsset.IsValid())
 		{
-			UE_LOG(LogArticyEditor, Warning, TEXT("Could not find articy import data asset. Attempting to create from .articyue4 export file"));
-			*ImportData = GenerateImportDataAsset();
-			*ImportData ? Result = Generation : Result = Failure;
+			UE_LOG(LogArticyEditor, Warning, TEXT("Attempting to create from .articyue4 export file"));
+			ImportDataAsset = GenerateImportDataAsset();
+
+			if(ImportDataAsset.IsValid())
+			{
+				*ImportData = ImportDataAsset.Get();
+				Result = Generation;
+			}
+			else
+			{
+				Result = Failure;
+			}			
 		}
 		else
 		{
-			*ImportData = Cast<UArticyImportData>(AssetData[0].GetAsset());
+			*ImportData = ImportDataAsset.Get();
 			Result = AssetRegistry;
-			
-			if (AssetData.Num() > 1)
-				UE_LOG(LogArticyEditor, Error, TEXT("Found more than one import file. This is not supported by the plugin. Using the first found file for now: %s"), *AssetData[0].ObjectPath.ToString());
 		}
 	}
 

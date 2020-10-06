@@ -1,9 +1,10 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Runtime/CoreUObject/Public/UObject/Interface.h"
 #include "Launch/Resources/Version.h"
 #include "ArticyReflectable.generated.h"

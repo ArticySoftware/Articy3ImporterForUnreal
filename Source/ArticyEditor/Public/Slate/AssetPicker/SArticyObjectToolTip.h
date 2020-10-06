@@ -1,11 +1,12 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include <Widgets/SToolTip.h>
+#include "Widgets/SBoxPanel.h"
 #include "ArticyObject.h"
 
 // Reference: AssetViewWidgets.h: CreateToolTipWidget
@@ -17,9 +18,7 @@ class SArticyObjectToolTip : public SToolTip
 public:
 	SLATE_BEGIN_ARGS(SArticyObjectToolTip)		
 	{}
-
 		SLATE_ATTRIBUTE(FArticyId, ObjectToDisplay)
-
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);

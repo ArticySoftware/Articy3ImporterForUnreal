@@ -7,6 +7,7 @@
 #include "ArticyRuntimeModule.h"
 #include "ArticyDatabase.h"
 #include "ArticyGlobalVariables.h"
+#include "ArticyRef.h"
 #include "Components/BillboardComponent.h"
 #include "ArticyFlowPlayer.generated.h"
 
@@ -223,7 +224,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
 	bool bIgnoreInvalidBranches = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup", meta=(ArticyClassRestriction="ArticyNode"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup", meta = (ArticyClassRestriction = "ArticyNode"))
 	FArticyRef StartOn;
 
 	/** All the branches available at the current flow position. */

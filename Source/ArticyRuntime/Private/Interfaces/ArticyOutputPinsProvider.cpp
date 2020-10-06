@@ -1,10 +1,6 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
-#pragma once
-
-
 
 #include "Interfaces/ArticyOutputPinsProvider.h"
 

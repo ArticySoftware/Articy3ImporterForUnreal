@@ -6,204 +6,239 @@
 #include <Templates/SharedPointer.h>
 #include <Kismet2/KismetEditorUtilities.h>
 #include <Kismet2/SClassPickerDialog.h>
-#include <ARFilter.h>
-#include <IContentBrowserSingleton.h>
-#include <ContentBrowserModule.h>
-#include <Widgets/Input/SComboButton.h>
-#include "Widgets/Images/SImage.h"
 #include "ArticyObject.h"
 #include "ArticyEditorModule.h"
-#include "Slate/AssetPicker/SArticyObjectAssetPicker.h"
 #include "ArticyEditorStyle.h"
-#include "Editor.h"
-#include "Widgets/Input/SButton.h"
+#include "Slate/AssetPicker/SArticyObjectAssetPicker.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
-#include "Customizations/ArticyRefCustomization.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "HAL/PlatformApplicationMisc.h"
+#include "Widgets/Input/SNumericEntryBox.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Layout/SSpacer.h"
 
 #define LOCTEXT_NAMESPACE "ArticyRefProperty"
 
-void SArticyRefProperty::Construct(const FArguments& InArgs, IPropertyHandle* InArticyRefPropHandle)
+void SArticyRefProperty::Construct(const FArguments& InArgs)
 {
-	this->ClassRestriction = InArgs._ClassRestriction;
+	if(ArticyRefToDisplay.IsBound())
+	{
+		ensureMsgf(InArgs._OnArticyRefChanged.IsBound(), TEXT("Since the shown object is given externally per event, the handler also needs to handle updates."));
+	}
 
-	ArticyRefPropertyHandle = InArticyRefPropHandle;
-
-	FString CurrentRefValue;
-	InArticyRefPropHandle->GetValueAsFormattedString(CurrentRefValue);
-	CurrentObjectID = FArticyRefCustomization::GetIdFromValueString(CurrentRefValue);
-	CachedArticyObject = UArticyObject::FindAsset(CurrentObjectID);
+	this->ArticyRefToDisplay = InArgs._ArticyRefToDisplay;
+	this->OnArticyRefChanged = InArgs._OnArticyRefChanged;
+	this->TopLevelClassRestriction = InArgs._TopLevelClassRestriction;
+	this->bExactClass = InArgs._bExactClass;
+	this->bExactClassEditable = InArgs._bExactClassEditable;
+	this->bIsReadOnly = InArgs._bIsReadOnly;
 	
 	Cursor = EMouseCursor::Hand;
 	
-	if(!this->ClassRestriction.IsBound()) 
-	{
-		UE_LOG(LogArticyEditor, Warning, TEXT("Tried constructing articy ref property without valid class restriction. Using ArticyObject instead"));
-		this->ClassRestriction = UArticyObject::StaticClass();
-	}
+	CreateInternalWidgets();
 
-	ComboButton = SNew(SComboButton)
-		.OnGetMenuContent(this, &SArticyRefProperty::CreateArticyObjectAssetPicker)
-		.ButtonContent()
-		[
-			SNew(STextBlock)
-			.Text(this, &SArticyRefProperty::OnGetArticyObjectDisplayName)
-		];
+	UpdateWidget();
 
-	TileView = SNew(SArticyObjectTileView)
-		.ObjectToDisplay(this, &SArticyRefProperty::GetCurrentObjectID)
-		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize.X)
-		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding.X);
-	
-	const FSlateBrush* ArticyDraftLogo = FArticyEditorStyle::Get().GetBrush("ArticyImporter.ArticyDraft.16");
-	
-	ArticyButton = SNew(SButton)
-		.OnClicked(this, &SArticyRefProperty::OnArticyButtonClicked)
-		.ToolTipText(FText::FromString("Show selected object in articy:draft"))
-		.Content()
-		[
-			SNew(SImage)
-			.Image(ArticyDraftLogo)
-		];
-	
 	this->ChildSlot
 	[
-		SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
-		.VAlign(VAlign_Center)
-		.AutoWidth()
-		.Padding(0, 0, 2, 0)
-		[
-			SAssignNew(ThumbnailBorder, SBorder)
-			.Padding(5.0f)
-			.OnMouseDoubleClick(this, &SArticyRefProperty::OnAssetThumbnailDoubleClick)
-			[
-				SAssignNew(TileContainer, SBox)
-				[
-					TileView.ToSharedRef()
-				]
-			]
-		]
-		+ SHorizontalBox::Slot()
-		.VAlign(VAlign_Fill)
-		.HAlign(HAlign_Fill)
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			.HAlign(HAlign_Left)
-			.VAlign(VAlign_Center)
-			.Padding(3, 5, 3, 0)
-			[
-				ComboButton.ToSharedRef()
-			]
-			+ SVerticalBox::Slot()
-			.VAlign(VAlign_Center)
-			.HAlign(HAlign_Left)
-			.Padding(3, 0, 3, 2)
-			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot()
-				[
-#if PLATFORM_WINDOWS
-					ArticyButton.ToSharedRef()
-#else
-					SNullWidget::NullWidget
-#endif
-				]
-			]
-		]
+		ArticyIdProperty.ToSharedRef()
 	];
-}
-
-void SArticyRefProperty::UpdateWidget()
-{
-	FString RefString;
-	const FPropertyAccess::Result Result = ArticyRefPropertyHandle->GetValueAsFormattedString(RefString);
-	// the actual update. This will be forwarded into the tile view and will cause an update
-	CurrentObjectID = FArticyRefCustomization::GetIdFromValueString(RefString);
-	CachedArticyObject = UArticyObject::FindAsset(CurrentObjectID);
 }
 
 void SArticyRefProperty::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
-	FString RefString;
-	const FPropertyAccess::Result Result = ArticyRefPropertyHandle->GetValueAsFormattedString(RefString);
-
-	if(Result == FPropertyAccess::Success)
+	const FArticyRef& CurrentRef = ArticyRefToDisplay.IsBound() || ArticyRefToDisplay.IsSet() ? ArticyRefToDisplay.Get() : FArticyRef();
+	if (CurrentRef != CachedArticyRef || (!CurrentRef.GetId().IsNull() && !CachedArticyObject.IsValid()))
 	{
-		const FArticyId CurrentRefId = FArticyRefCustomization::GetIdFromValueString(RefString);
-		if (CurrentRefId != CurrentObjectID || !CachedArticyObject.IsValid())
-		{
-			UpdateWidget();
-		}
-	}	
+		Update(CurrentRef);
+	}
 }
 
-TSharedRef<SWidget> SArticyRefProperty::CreateArticyObjectAssetPicker()
-{	
-	FAssetPickerConfig AssetPickerConfig;
-	AssetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateRaw(this, &SArticyRefProperty::SetAsset);
-	AssetPickerConfig.bFocusSearchBoxWhenOpened = true;
-	AssetPickerConfig.Filter.ClassNames.Add(FName(*ClassRestriction.Get()->GetName()));
-
-	return SNew(SArticyObjectAssetPicker).AssetPickerConfig(AssetPickerConfig);
-}
-
-FReply SArticyRefProperty::OnArticyButtonClicked() const
+void SArticyRefProperty::CreateInternalWidgets()
 {
-	UserInterfaceHelperFunctions::ShowObjectInArticy(UArticyObject::FindAsset(CurrentObjectID));
-	return FReply::Handled();
-}
+	FUIAction CopyAction;
+	FUIAction PasteAction;
 
-void SArticyRefProperty::SetAsset(const FAssetData& AssetData) const
-{
-	// retrieve the newly selected articy object
-	ComboButton->SetIsOpen(false);
-	const UArticyObject* NewSelection  = Cast<UArticyObject>(AssetData.GetAsset());
+	CopyAction.ExecuteAction = FExecuteAction::CreateSP(this, &SArticyRefProperty::OnCopyProperty);
+	PasteAction.CanExecuteAction = FCanExecuteAction::CreateSP(this, &SArticyRefProperty::CanPasteProperty);
+	PasteAction.ExecuteAction = FExecuteAction::CreateSP(this, &SArticyRefProperty::OnPasteProperty);
 
-	// if the new selection is not valid we cleared the selection
-	const FArticyId NewId = NewSelection ? NewSelection->GetId() : FArticyId();
+	ArticyIdExtender = MakeShared<FExtender>();
+	ArticyIdExtender->AddToolBarExtension("Base", EExtensionHook::After, nullptr, FToolBarExtensionDelegate::CreateSP(this, &SArticyRefProperty::CreateAdditionalRefWidgets));
 	
-	// get the current articy ref struct as formatted string
-	FString FormattedValueString;
-	ArticyRefPropertyHandle->GetValueAsFormattedString(FormattedValueString);
+	FOnArticyIdChanged OnArticyIdChanged = FOnArticyIdChanged::CreateSP(this, &SArticyRefProperty::OnArticyIdChanged);
+	TAttribute<FArticyId> ArticyIdToDisplay;
+	ArticyIdToDisplay.BindRaw(this, &SArticyRefProperty::GetArticyIdToDisplay);
 
-	// remove the old ID string
-	const int32 IdIndex = FormattedValueString.Find(FString(TEXT("Low=")), ESearchCase::IgnoreCase, ESearchDir::FromEnd);
-	const int32 EndOfIdIndex = FormattedValueString.Find(FString(TEXT(")")), ESearchCase::IgnoreCase, ESearchDir::FromStart, IdIndex);	
-	FormattedValueString.RemoveAt(IdIndex, EndOfIdIndex - IdIndex);
-
-	// reconstruct the value string with the new ID
-	const FString NewIdString = FString::Format(TEXT("Low={0}, High={1}"), { NewId.Low, NewId.High, });
-	FormattedValueString.InsertAt(IdIndex, *NewIdString);
-
-	// update the articy ref with the new ID:
-	// done via Set functions instead of accessing the ref object directly because using "Set" handles various Unreal logic, such as:
-	// - CDO default change forwarding to instances
-	// - marking dirty
-	// - transaction buffer (Undo, Redo)
-	ArticyRefPropertyHandle->SetValueFromFormattedString(FormattedValueString);	
+	ArticyIdProperty = SNew(SArticyIdProperty)
+		.ArticyIdToDisplay(ArticyIdToDisplay)
+		.OnArticyIdChanged(OnArticyIdChanged)
+		.TopLevelClassRestriction(TopLevelClassRestriction)
+		.HighExtender(ArticyIdExtender)
+		.bExactClass(bExactClass)
+		.bExactClassEditable(bExactClassEditable)
+		.bIsReadOnly(bIsReadOnly)
+		.CopyAction(CopyAction)
+		.PasteAction(PasteAction);
 }
 
-FReply SArticyRefProperty::OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const
+
+void SArticyRefProperty::OnArticyIdChanged(const FArticyId& ArticyId) 
 {
-	if(CachedArticyObject.IsValid())
+	// kind of redundant
+	CachedArticyRef.SetId(ArticyId);
+	OnArticyRefChanged.ExecuteIfBound(CachedArticyRef);
+}
+
+FArticyId SArticyRefProperty::GetArticyIdToDisplay() const
+{
+	return ArticyRefToDisplay.Get().GetId();
+}
+
+void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
+{
+	TSharedRef<SHorizontalBox> AdditionalWidgetBox = SNew(SHorizontalBox)
+	.IsEnabled_Lambda([=]()
 	{
-		GEditor->EditObject(CachedArticyObject.Get());
+		return !bIsReadOnly.Get();
+	})
+	+ SHorizontalBox::Slot()
+	.HAlign(HAlign_Center)
+	.VAlign(VAlign_Center)
+	.Padding(1.f, 3.f)
+	.AutoWidth()
+	[
+		SNew(STextBlock)
+		.Text(FText::FromString("Base"))
+		.TextStyle(&FArticyEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("ArticyImporter.SmallTextBlock"))
+		.ToolTipText(FText::FromString("Should this ArticyRef reference the base object or a clone?"))
+	]
+	+ SHorizontalBox::Slot()
+	.HAlign(HAlign_Center)
+	.VAlign(VAlign_Center)
+	.Padding(1.f, 3.f)
+	.AutoWidth()
+	[
+		SNew(SCheckBox)
+		.IsChecked_Lambda([=]()
+		{
+			return CachedArticyRef.bReferenceBaseObject ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+		})
+		.OnCheckStateChanged_Lambda([=](ECheckBoxState NewState)
+		{
+			CachedArticyRef.bReferenceBaseObject = NewState == ECheckBoxState::Checked;
+			OnArticyRefChanged.ExecuteIfBound(CachedArticyRef);
+		})
+	]
+	+ SHorizontalBox::Slot()
+	.HAlign(HAlign_Center)
+	.VAlign(VAlign_Center)
+	.FillWidth(1.f)
+	[
+		SNew(SSpacer)
+	]
+	+ SHorizontalBox::Slot()
+	.HAlign(HAlign_Center)
+	.VAlign(VAlign_Center)
+	.Padding(1.f, 3.f)
+	.AutoWidth()
+	[
+		SNew(STextBlock)
+		.Text(FText::FromString("Clone"))
+		.TextStyle(&FArticyEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("ArticyImporter.SmallTextBlock"))
+		.ToolTipText(FText::FromString("Which clone Id should be referenced?"))
+		.Visibility_Lambda([=]()
+		{
+			return CachedArticyRef.bReferenceBaseObject ? EVisibility::Collapsed : EVisibility::Visible;
+		})
+	]
+	+ SHorizontalBox::Slot()
+	.HAlign(HAlign_Center)
+	.VAlign(VAlign_Center)
+	.Padding(1.f, 0.f)
+	.AutoWidth()
+	[
+		SNew(SNumericEntryBox<int32>)
+		.MinDesiredValueWidth(15.f)
+		.Value_Lambda([=]()
+		{
+			return CachedArticyRef.CloneId;
+		})
+		.OnValueChanged_Lambda([=](int32 NewValue)
+		{
+			CachedArticyRef.CloneId = NewValue;
+			OnArticyRefChanged.ExecuteIfBound(CachedArticyRef);
+		})
+		.Visibility_Lambda([=]()
+		{
+			return CachedArticyRef.bReferenceBaseObject ? EVisibility::Collapsed : EVisibility::Visible;
+		})
+	];
+	
+	Builder.AddWidget(AdditionalWidgetBox);
+}
+
+void SArticyRefProperty::Update(const FArticyRef& NewRef)
+{
+	CachedArticyRef = NewRef;
+	CachedArticyObject = !CachedArticyRef.GetId().IsNull() ? UArticyObject::FindAsset(CachedArticyRef.GetId()) : nullptr;
+	
+	UpdateWidget();
+}
+
+void SArticyRefProperty::UpdateWidget()
+{
+	// not yet done
+}
+
+void SArticyRefProperty::OnCopyProperty() const
+{
+	FString ValueString = CachedArticyRef.ToString();
+	FPlatformApplicationMisc::ClipboardCopy(*ValueString);
+}
+
+void SArticyRefProperty::OnPasteProperty()
+{
+	FString ClipboardContent;
+	FPlatformApplicationMisc::ClipboardPaste(ClipboardContent);
+
+	// copies over all values, then initializes with the string content. This makes both Ids and Refs pastable without deleting data
+	FArticyRef NewRef = CachedArticyRef;
+	const FArticyRef::EStringInitResult Success = NewRef.InitFromString(ClipboardContent);
+	if (ensureMsgf(Success != FArticyRef::NoneSet, TEXT("String was garbage, therefore Ref was not properly updated")))
+	{
+		OnArticyRefChanged.ExecuteIfBound(NewRef);
+		Update(NewRef);
+	}
+}
+
+bool SArticyRefProperty::CanPasteProperty() const
+{
+	if (bIsReadOnly.Get())
+	{
+		return false;
 	}
 
-	return FReply::Handled();
-}
+	FString ClipboardContent;
+	FPlatformApplicationMisc::ClipboardPaste(ClipboardContent);
 
-FText SArticyRefProperty::OnGetArticyObjectDisplayName() const
-{
-	const FString DisplayName = UserInterfaceHelperFunctions::GetDisplayName(CachedArticyObject.Get());
-	return FText::FromString(DisplayName);
-}
+	if (ClipboardContent.IsEmpty() || !ClipboardContent.Contains("Low=") || !ClipboardContent.Contains("High="))
+	{
+		return false;
+	}
 
-FArticyId SArticyRefProperty::GetCurrentObjectID() const
-{
-	return CurrentObjectID;
-}
+	FArticyId CandidateId;
+	if(CandidateId.InitFromString(ClipboardContent))
+	{
+		UArticyObject* Object = UArticyObject::FindAsset(CandidateId);
+		if(!Object)
+		{
+			return false;
+		}
 
+		return Object->UObject::GetClass()->IsChildOf(TopLevelClassRestriction.Get());
+	}
+	
+	return false;
+}
 #undef LOCTEXT_NAMESPACE
-

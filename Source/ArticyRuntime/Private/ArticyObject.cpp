@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
@@ -8,7 +7,14 @@
 #include "ArticyHelpers.h"
 #include "ArticyDatabase.h"
 #include "ArticyBaseTypes.h"
-#include <ArticyPackage.h>
+#include "AssetRegistryModule.h"
+#include "ArticyPackage.h"
+
+#if WITH_EDITOR
+TSet<TWeakObjectPtr<UArticyPackage>> UArticyObject::CachedPackages;
+TMap<FArticyId, TWeakObjectPtr<UArticyObject>> UArticyObject::ArticyIdCache;
+TMap<FName, TWeakObjectPtr<UArticyObject>> UArticyObject::ArticyNameCache;
+#endif
 
 void UArticyObject::InitFromJson(TSharedPtr<FJsonValue> Json)
 {
@@ -62,6 +68,7 @@ TArray<FArticyId> UArticyObject::GetChildrenIDs() const
 	return Children;
 }
 
+#if WITH_EDITOR
 TArray<FArticyId> UArticyObject::GetArticyObjectChildrenIDs() const
 {
 	TArray<FArticyId> OutIDs;
@@ -79,27 +86,69 @@ TArray<FArticyId> UArticyObject::GetArticyObjectChildrenIDs() const
 
 UArticyObject* UArticyObject::FindAsset(const FArticyId& Id)
 {
-	//UArticyDatabase::LoadAllObjects();
-
-	//get the reference object by Id
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryConstants::ModuleName);
-	TArray<FAssetData> AssetData;
-
-	AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), AssetData, true);
-
-	for (const auto ArticyPackage : AssetData)
+	if(ArticyIdCache.Contains(Id) && ArticyIdCache[Id].IsValid())
 	{
-		const auto Package = Cast<UArticyPackage>(ArticyPackage.GetAsset());
+		return ArticyIdCache[Id].Get();
+	}
 
-		if (Package != nullptr)
+	bool bRefreshPackages = false;
+	
+	if(CachedPackages.Num() >= 1)
+	{
+		for(auto& Package : CachedPackages)
 		{
-			for (const auto asset : Package->GetAssets())
+			bRefreshPackages = !Package.IsValid();
+
+			if(bRefreshPackages)
 			{
-				const auto obj = Cast<UArticyObject>(asset);
-				if (obj && obj->WasLoaded() && obj->GetId() == Id)
-					return obj;
+				break;
 			}
 		}
+	}
+	else if(CachedPackages.Num() == 0)
+	{
+		bRefreshPackages = true;
+	}
+
+	// refresh packages if needed 
+	if(bRefreshPackages)
+	{
+		CachedPackages.Empty();
+		
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryConstants::ModuleName);
+		TArray<FAssetData> AssetData;
+
+		AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), AssetData, true);
+
+		for (const auto ArticyPackage : AssetData)
+		{
+			const auto Package = Cast<UArticyPackage>(ArticyPackage.GetAsset());
+
+			if (Package != nullptr)
+			{
+				CachedPackages.Add(Package);
+			}
+		}
+	}
+
+	for (TWeakObjectPtr<UArticyPackage> ArticyPackage : CachedPackages)
+	{
+		if (ArticyPackage.IsValid())
+		{
+			UArticyObject* ArticyObject = ArticyPackage->GetAssetById(Id);
+			if (ArticyObject && ArticyObject->WasLoaded())
+			{
+				ArticyIdCache.Add(Id, ArticyObject);
+				ArticyNameCache.Add(ArticyObject->GetTechnicalName(), ArticyObject);
+				return ArticyObject;
+			}
+		}
+	}
+
+	// if the object wasn't found in any package but exists in the object map, remove it
+	if(ArticyIdCache.Contains(Id))
+	{
+		ArticyIdCache.Remove(Id);
 	}
 
 	return nullptr;
@@ -107,23 +156,72 @@ UArticyObject* UArticyObject::FindAsset(const FArticyId& Id)
 
 UArticyObject* UArticyObject::FindAsset(const FString& TechnicalName)// MM_CHANGE
 {
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryConstants::ModuleName);
-	TArray<FAssetData> AssetData;
-
-	AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), AssetData, true);
-
-	for (const auto ArticyPackage : AssetData)
+	const FName Name(*TechnicalName);
+	if (ArticyNameCache.Contains(Name) && ArticyNameCache[Name].IsValid())
 	{
-		const auto Package = Cast<UArticyPackage>(ArticyPackage.GetAsset());
+		return ArticyNameCache[Name].Get();
+	}
+	
+	bool bRefreshPackages = false;
 
-		if (Package != nullptr)
+	if (CachedPackages.Num() >= 1)
+	{
+		for (auto& Package : CachedPackages)
 		{
-			const auto assetsDict = Package->GetAssetsDict();
+			bRefreshPackages = !Package.IsValid();
 
-			if (assetsDict.Contains(*TechnicalName))
-				return assetsDict[*TechnicalName].Get();
+			if (bRefreshPackages)
+			{
+				break;
+			}
 		}
+	}
+	else if (CachedPackages.Num() == 0)
+	{
+		bRefreshPackages = true;
+	}
+
+	// refresh packages if needed 
+	if (bRefreshPackages)
+	{
+		CachedPackages.Empty();
+
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryConstants::ModuleName);
+		TArray<FAssetData> AssetData;
+
+		AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), AssetData, true);
+
+		for (const auto ArticyPackage : AssetData)
+		{
+			const auto Package = Cast<UArticyPackage>(ArticyPackage.GetAsset());
+
+			if (Package != nullptr)
+			{
+				CachedPackages.Add(Package);
+			}
+		}
+	}
+	
+	for (TWeakObjectPtr<UArticyPackage> ArticyPackage : CachedPackages)
+	{
+		if (ArticyPackage.IsValid())
+		{
+			UArticyObject* ArticyObject = ArticyPackage->GetAssetByTechnicalName(Name);
+			if (ArticyObject && ArticyObject->WasLoaded())
+			{
+				ArticyNameCache.Add(Name, ArticyObject);
+				ArticyIdCache.Add(ArticyObject->GetId(), ArticyObject);
+				return ArticyObject;
+			}
+		}
+	}
+
+	// if the object wasn't found in any package but exists in the object map, remove it
+	if (ArticyNameCache.Contains(Name))
+	{
+		ArticyNameCache.Remove(Name);
 	}
 
 	return nullptr;
 }
+#endif

@@ -1,15 +1,13 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "ArticyPrimitive.h"
 #include "ArticyBaseTypes.h"
-#include "ArticyRef.h"
 #include "Dom/JsonValue.h"
-
 #include "ArticyObject.generated.h"
 
 /**
@@ -30,12 +28,20 @@ public:
 	FArticyId GetParentID() const;
 	/** Includes all children IDs regardless of type (including pins etc.) */
 	TArray<FArticyId> GetChildrenIDs() const;
+
+#if WITH_EDITOR
 	/** Includes all children IDs that map to articy objects (excluding pins etc.) */
 	TArray<FArticyId> GetArticyObjectChildrenIDs() const;
-
 	
+	/** Find Asset fast maintains a transient database of all articy objects */
 	static UArticyObject* FindAsset(const FArticyId& Id);
 	static UArticyObject* FindAsset(const FString& TechnicalName);// MM_CHANGE
+
+private:
+	static TSet<TWeakObjectPtr<class UArticyPackage>> CachedPackages;
+	static TMap<FArticyId, TWeakObjectPtr<UArticyObject>> ArticyIdCache;
+	static TMap<FName, TWeakObjectPtr<UArticyObject>> ArticyNameCache;
+#endif
 
 protected:
 

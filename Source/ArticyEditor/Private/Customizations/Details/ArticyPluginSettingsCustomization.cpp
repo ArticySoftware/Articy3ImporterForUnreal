@@ -1,11 +1,9 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
-#include "Customizations/ArticyPluginSettingsCustomization.h"
-
+#include "Customizations/Details/ArticyPluginSettingsCustomization.h"
 #include "ArticyEditorFunctionLibrary.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
@@ -13,6 +11,7 @@
 #include "ArticyDatabase.h"
 #include "Slate/SPackageSettings.h"
 #include "ArticyEditorModule.h"
+#include "AssetRegistryModule.h"
 
 #define LOCTEXT_NAMESPACE "ArticyPluginSettings"
 

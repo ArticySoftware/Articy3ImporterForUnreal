@@ -1,14 +1,12 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include <IPropertyTypeCustomization.h>
-#include "ArticyRef.h"
-#include "Slate/SArticyRefProperty.h"
+#include "Slate/SArticyIdProperty.h"
 #include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
 #include "ArticyObject.h"
@@ -16,19 +14,29 @@
 class FArticyRefClassFilter : public IClassViewerFilter
 {
 public:
+	FArticyRefClassFilter(UClass* GivenClass = UArticyObject::StaticClass(), bool bInRequiresExactClass = false);
+	
 	virtual bool IsClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const UClass* InClass, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
 	{
-		return InClass->IsChildOf(UArticyObject::StaticClass());
+		if(bRequiresExactClass)
+		{
+			return InClass == GivenClass;
+		}
+		
+		return InClass->IsChildOf(GivenClass);
 	}
 
 	virtual bool IsUnloadedClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const TSharedRef< const IUnloadedBlueprintData > InUnloadedClassData, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
 	{
 		return false;
 	}
+
+	UClass* GivenClass = nullptr;
+	bool bRequiresExactClass = false;
 };
 
 // reference: color struct customization
-class FArticyRefCustomization : public IPropertyTypeCustomization
+class FArticyIdCustomization : public IPropertyTypeCustomization
 {
 public:
 	static TSharedRef<IPropertyTypeCustomization> MakeInstance();
@@ -37,23 +45,21 @@ public:
 	virtual void CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 
 	virtual void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
-	
-	static FArticyRef* RetrieveArticyRef(IPropertyHandle* ArticyRefHandle);
+
+	static FArticyId* RetrieveArticyId(IPropertyHandle* ArticyIdHandle);
 	static FArticyId GetIdFromValueString(FString SourceString);
 
 private:
-	TSharedPtr<IPropertyHandle> ArticyRefPropertyHandle;
-	TSharedPtr<SArticyRefProperty> ArticyRefProperty;
-	UClass* ClassRestriction = nullptr;
-	
-	UClass* GetClassRestriction() const;
-	FText GetChosenClassName() const;
-	void OnClassPicked(UClass* InChosenClass);
-	TSharedRef<SWidget> CreateClassPicker();
-
-
+	TSharedPtr<IPropertyHandle> ArticyIdPropertyHandle;
+	TSharedPtr<SArticyIdProperty> ArticyIdPropertyWidget;
+	bool bShouldCustomize = true;
 private:
-	TSharedPtr<class SComboButton> ClassRestrictionButton;
-	UClass* GetClassRestrictionMetaData() const;
+	UClass* GetClassRestriction() const;
+	bool IsExactClass() const;
+	bool IsReadOnly() const;
 	bool HasClassRestrictionMetaData() const;
+	bool HasExactClassMetaData() const;
+
+	FArticyId GetArticyId() const;
+	void OnArticyIdChanged(const FArticyId &NewArticyId) const;
 };

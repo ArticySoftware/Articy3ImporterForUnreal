@@ -247,8 +247,11 @@ struct FArticyExpressoFragment
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(VisibleAnywhere, Category = "Script")
 	FString OriginalFragment = "";
+	UPROPERTY(VisibleAnywhere, Category = "Script")
 	FString ParsedFragment = "";
+	UPROPERTY(VisibleAnywhere, Category = "Script")
 	bool bIsInstruction = false;
 
 	bool operator==(const FArticyExpressoFragment& Other) const
@@ -311,11 +314,12 @@ public:
 
 	void ImportFromJson(const TSharedPtr<FJsonObject> RootObject);
 
+	const static TWeakObjectPtr<UArticyImportData> GetImportData();
 	const FADISettings& GetSettings() const { return Settings; }
 	FADISettings& GetSettings() { return Settings; }
 	const FArticyProjectDef& GetProject() const { return Project; }
 	const FArticyGVInfo& GetGlobalVars() const { return GlobalVariables; }
-
+	const FADIHierarchy& GetHierarchy() const { return Hierarchy; }
 	const FArticyObjectDefinitions& GetObjectDefs() const { return ObjectDefinitions; }
 	const FArticyPackageDefs& GetPackageDefs() const { return PackageDefs; }
 
@@ -330,7 +334,7 @@ public:
 	const TSet<FArticyExpressoFragment>& GetScriptFragments() const { return ScriptFragments; }
 
 	void AddChildToParentCache(FArticyId Parent, FArticyId Child);
-	const TMap<FArticyId, FArticyIdArray> GetParentChildrenCache() const { return ParentChildrenCache; }
+	const TMap<FArticyId, FArticyIdArray>& GetParentChildrenCache() const { return ParentChildrenCache; }
 
 	void BuildCachedVersion();
 	void ResolveCachedVersion();
