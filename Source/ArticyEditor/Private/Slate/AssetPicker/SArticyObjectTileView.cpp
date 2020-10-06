@@ -201,7 +201,7 @@ void SArticyObjectTileView::OnContextMenuOpening(FMenuBuilder& Builder) const
 			CopyAction);
 
 	}
-	if(PasteAction.IsBound())
+	if(PasteAction.IsBound() && !bIsReadOnly.Get())
 	{
 		Builder.AddMenuEntry(
 			NSLOCTEXT("PropertyView", "PasteProperty", "Paste"),

@@ -113,7 +113,7 @@ private:
 	FReply OnAssetThumbnailDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) const;
 	FText OnGetArticyObjectDisplayName() const;
 	FArticyId GetCurrentObjectID() const;
-	
+	bool CanActivate() const { return !bIsReadOnly.Get(); }
 	void OnCopyProperty() const;
 	void OnPasteProperty();
 	bool CanPasteProperty() const;

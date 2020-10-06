@@ -85,17 +85,22 @@ void SArticyIdProperty::Tick(const FGeometry& AllottedGeometry, const double InC
 void SArticyIdProperty::CreateInternalWidgets()
 {
 	ComboButton = SNew(SFixedSizeMenuComboButton)
-		.OnGetMenuContent(this, &SArticyIdProperty::CreateArticyObjectAssetPicker)
-		.ButtonContent()
-		[
-			SNew(STextBlock)
-			.Text(this, &SArticyIdProperty::OnGetArticyObjectDisplayName)
-		];
+	.IsEnabled_Lambda([=]()
+	{
+		return !bIsReadOnly.Get();
+	})
+	.OnGetMenuContent(this, &SArticyIdProperty::CreateArticyObjectAssetPicker)
+	.ButtonContent()
+	[
+		SNew(STextBlock)
+		.Text(this, &SArticyIdProperty::OnGetArticyObjectDisplayName)
+	];
 
 	if(!CopyAction.IsBound())
 	{
 		CopyAction.ExecuteAction = FExecuteAction::CreateSP(this, &SArticyIdProperty::OnCopyProperty);
 	}
+	
 	if(!PasteAction.IsBound())
 	{
 		PasteAction.CanExecuteAction = FCanExecuteAction::CreateSP(this, &SArticyIdProperty::CanPasteProperty);
@@ -109,7 +114,8 @@ void SArticyIdProperty::CreateInternalWidgets()
 		.PasteAction(PasteAction)
 		.OnMouseDoubleClick(this, &SArticyIdProperty::OnAssetThumbnailDoubleClick)
 		.ThumbnailSize(ArticyRefPropertyConstants::ThumbnailSize)
-		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding);
+		.ThumbnailPadding(ArticyRefPropertyConstants::ThumbnailPadding)
+		.bIsReadOnly(bIsReadOnly);
 
 	CustomizationButtonBox_High = SNew(SHorizontalBox);
 	if(CustomizationHighExtender.IsValid())

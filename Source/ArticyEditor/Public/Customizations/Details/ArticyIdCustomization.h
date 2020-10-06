@@ -6,7 +6,6 @@
 
 #include "CoreMinimal.h"
 #include <IPropertyTypeCustomization.h>
-#include "ArticyRef.h"
 #include "Slate/SArticyIdProperty.h"
 #include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
@@ -54,14 +53,11 @@ private:
 	TSharedPtr<IPropertyHandle> ArticyIdPropertyHandle;
 	TSharedPtr<SArticyIdProperty> ArticyIdPropertyWidget;
 	UClass* ClassRestriction = nullptr;
-	/** Used when there are multiple objects to edit */
-	bool bIsEditable = false;
 	bool bShouldCustomize = true;
 private:
-	UClass* GetClassRestriction() const;
 	UClass* GetClassRestrictionMetaData() const;
 	bool IsExactClass() const;
-	bool IsEditable() const { return bIsEditable; }
+	bool IsReadOnly() const;
 	bool HasClassRestrictionMetaData() const;
 	bool HasExactClassMetaData() const;
 

@@ -6,15 +6,12 @@
 #include <Templates/SharedPointer.h>
 #include <Kismet2/KismetEditorUtilities.h>
 #include <Kismet2/SClassPickerDialog.h>
-#include <IContentBrowserSingleton.h>
-#include <ContentBrowserModule.h>
 #include "ArticyObject.h"
 #include "ArticyEditorModule.h"
 #include "ArticyEditorStyle.h"
 #include "Slate/AssetPicker/SArticyObjectAssetPicker.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
-#include "Framework/MultiBox/MultiBoxDefs.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Input/SCheckBox.h"
@@ -74,7 +71,6 @@ void SArticyRefProperty::CreateInternalWidgets()
 	TAttribute<FArticyId> ArticyIdToDisplay;
 	ArticyIdToDisplay.BindRaw(this, &SArticyRefProperty::GetArticyIdToDisplay);
 
-	
 	ArticyIdProperty = SNew(SArticyIdProperty)
 		.ArticyIdToDisplay(ArticyIdToDisplay)
 		.OnArticyIdChanged(OnArticyIdChanged)
@@ -104,6 +100,10 @@ FArticyId SArticyRefProperty::GetArticyIdToDisplay() const
 void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
 {
 	TSharedRef<SHorizontalBox> AdditionalWidgetBox = SNew(SHorizontalBox)
+	.IsEnabled_Lambda([=]()
+	{
+		return !bIsReadOnly.Get();
+	})
 	+ SHorizontalBox::Slot()
 	.HAlign(HAlign_Center)
 	.VAlign(VAlign_Center)

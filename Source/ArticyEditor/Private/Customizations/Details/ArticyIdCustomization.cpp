@@ -6,13 +6,7 @@
 #include "ArticyFunctionLibrary.h"
 #include "IDetailChildrenBuilder.h"
 #include "DetailWidgetRow.h"
-#include "Widgets/SWidget.h"
-#include "Modules/ModuleManager.h"
-#include "IDetailPropertyRow.h"
-#include "Delegates/Delegate.h"
 #include "ArticyObject.h"
-#include "ArticyRef.h"
-#include "ClassViewerModule.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
 #include "EditorCategoryUtils.h"
@@ -47,49 +41,15 @@ void FArticyIdCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Propert
 		];
 		return;
 	}
-	
-	bIsEditable = PropertyHandle->GetNumPerObjectValues() == 1;
 
 	ArticyIdPropertyWidget = SNew(SArticyIdProperty)
-		.ArticyIdToDisplay(this, &FArticyIdCustomization::GetArticyId)
-		.OnArticyIdChanged(this, &FArticyIdCustomization::OnArticyIdChanged)
-		.TopLevelClassRestriction(this, &FArticyIdCustomization::GetClassRestrictionMetaData)
-		.bExactClass(IsExactClass())
-		.bExactClassEditable(HasExactClassMetaData())
-		.IsEnabled(bIsEditable);
+	.ArticyIdToDisplay(this, &FArticyIdCustomization::GetArticyId)
+	.OnArticyIdChanged(this, &FArticyIdCustomization::OnArticyIdChanged)
+	.TopLevelClassRestriction(this, &FArticyIdCustomization::GetClassRestrictionMetaData)
+	.bExactClass(IsExactClass())
+	.bExactClassEditable(HasExactClassMetaData())
+	.bIsReadOnly(this, &FArticyIdCustomization::IsReadOnly);
 
-	if(bIsEditable)
-	{
-		// update the reference upon selecting the ref; this only serves cosmetic purposes. The underlying Id will not be changed
-		FString ValueString;
-		const FPropertyAccess::Result Result = ArticyIdPropertyHandle->GetValueAsFormattedString(ValueString);
-
-		FArticyId Id = FArticyId();
-		if (Result == FPropertyAccess::Success)
-		{
-			Id.InitFromString(ValueString);
-		}
-		
-		UArticyObject* SelectedObject = UArticyObject::FindAsset(Id);
-
-		// attempt to set the class restriction via meta data (cpp means that the programmer has mandated a specific type)
-		ClassRestriction = GetClassRestrictionMetaData();
-		
-		// if the class of the current object is within 
-		if (SelectedObject)
-		{
-			UClass* CurrentClass = SelectedObject->UObject::GetClass();
-			if (CurrentClass->IsChildOf(ClassRestriction))
-			{
-				ClassRestriction = CurrentClass;
-			}
-		}
-	}
-
-	TAttribute<bool> EnableAttribute;
-	EnableAttribute.Bind(this, &FArticyIdCustomization::IsEditable);
-	HeaderRow.IsEnabled(EnableAttribute);
-	
 	HeaderRow.NameContent()
 	[
 		ArticyIdPropertyHandle->CreatePropertyNameWidget()
@@ -115,16 +75,6 @@ FArticyId* FArticyIdCustomization::RetrieveArticyId(IPropertyHandle* ArticyIdHan
 	return ArticyId;
 }
 
-UClass* FArticyIdCustomization::GetClassRestriction() const
-{
-	if (ClassRestriction)
-	{
-		return ClassRestriction;
-	}
-
-	return UArticyObject::StaticClass();
-}
-
 FArticyId FArticyIdCustomization::GetArticyId() const
 {
 	FArticyId* ArticyId = RetrieveArticyId(ArticyIdPropertyHandle.Get());
@@ -143,7 +93,7 @@ void FArticyIdCustomization::OnArticyIdChanged(const FArticyId &NewArticyId) con
 
 UClass* FArticyIdCustomization::GetClassRestrictionMetaData() const
 {
-	UClass* Restriction = UArticyObject::StaticClass();
+	UClass* Restriction = nullptr;
 
 	if(HasClassRestrictionMetaData())
 	{
@@ -158,6 +108,11 @@ UClass* FArticyIdCustomization::GetClassRestrictionMetaData() const
 			FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *ArticyClassRestriction);
 			Restriction = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyObject::StaticClass());
 		}
+	}
+
+	if(Restriction == nullptr)
+	{
+		Restriction = UArticyObject::StaticClass();
 	}
 
 	return Restriction;
@@ -176,6 +131,11 @@ bool FArticyIdCustomization::IsExactClass() const
 	}
 
 	return false;
+}
+
+bool FArticyIdCustomization::IsReadOnly() const
+{
+	return ArticyIdPropertyHandle->GetNumPerObjectValues() != 1 || ArticyIdPropertyHandle->IsEditConst();
 }
 
 bool FArticyIdCustomization::HasExactClassMetaData() const

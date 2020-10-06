@@ -6,18 +6,11 @@
 #include "ArticyFunctionLibrary.h"
 #include "IDetailChildrenBuilder.h"
 #include "DetailWidgetRow.h"
-#include "Widgets/SWidget.h"
-#include "Modules/ModuleManager.h"
-#include "IDetailPropertyRow.h"
-#include "Delegates/Delegate.h"
 #include "ArticyObject.h"
 #include "ArticyRef.h"
-#include "ClassViewerModule.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
 #include "EditorCategoryUtils.h"
-#include "Customizations/Details/ArticyIdCustomization.h"
-
 
 TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 {
@@ -27,21 +20,15 @@ TSharedRef<IPropertyTypeCustomization> FArticyRefCustomization::MakeInstance()
 void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	ArticyRefPropertyHandle = PropertyHandle;
-
-	bIsEditable = PropertyHandle->GetNumPerObjectValues() == 1;
-
-	TAttribute<bool> EnableAttribute;
-	EnableAttribute.Bind(this, &FArticyRefCustomization::IsEditable);
-	HeaderRow.IsEnabled(EnableAttribute);
 ;
-	ArticyIdPropertyWidget = SNew(SArticyRefProperty)
+	ArticyRefPropertyWidget = SNew(SArticyRefProperty)
 	.ArticyRefToDisplay(this, &FArticyRefCustomization::GetArticyRef)
 	.OnArticyRefChanged(this, &FArticyRefCustomization::OnArticyRefChanged)
 	.TopLevelClassRestriction(this, &FArticyRefCustomization::GetClassRestrictionMetaData)
 	.bExactClass(IsExactClass())
 	.bExactClassEditable(!HasExactClassMetaData())
 	.bClassFilterEditable(!IsExactClass())
-	.IsEnabled(bIsEditable);
+	.bIsReadOnly(this, &FArticyRefCustomization::IsReadOnly);
 
 	HeaderRow.NameContent()
 	[
@@ -50,7 +37,7 @@ void FArticyRefCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 	.ValueContent()
 	.MinDesiredWidth(150)
 	[
-		ArticyIdPropertyWidget.ToSharedRef()
+		ArticyRefPropertyWidget.ToSharedRef()
 	];
 }
 
@@ -86,21 +73,26 @@ void FArticyRefCustomization::OnArticyRefChanged(const FArticyRef& NewArticyRef)
 
 UClass* FArticyRefCustomization::GetClassRestrictionMetaData() const
 {
-	UClass* Restriction = UArticyObject::StaticClass();
+	UClass* Restriction = nullptr;
 
-	if(HasClassRestrictionMetaData())
+	if (HasClassRestrictionMetaData())
 	{
-		const FString ArticyClassRestriction = ArticyRefPropertyHandle->GetMetaData(TEXT("ArticyClassRestriction"));
+		const FString ArticyClassRestriction = ArticyRefPropertyHandle->GetMetaData("ArticyClassRestriction");
 
 		auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyRuntime"), *ArticyClassRestriction);
 		Restriction = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyObject::StaticClass());
 
 		// the class name can be in the ArticyRuntime module or in the project module. If it wasn't found in ArticyRuntime, check the project module
-		if(Restriction == nullptr)
+		if (Restriction == nullptr)
 		{
 			FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *ArticyClassRestriction);
 			Restriction = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyObject::StaticClass());
 		}
+	}
+
+	if (Restriction == nullptr)
+	{
+		Restriction = UArticyObject::StaticClass();
 	}
 
 	return Restriction;
@@ -119,6 +111,11 @@ bool FArticyRefCustomization::IsExactClass() const
 	}
 
 	return false;
+}
+
+bool FArticyRefCustomization::IsReadOnly() const
+{
+	return ArticyRefPropertyHandle->GetNumPerObjectValues() != 1 || ArticyRefPropertyHandle->IsEditConst();
 }
 
 bool FArticyRefCustomization::HasExactClassMetaData() const
