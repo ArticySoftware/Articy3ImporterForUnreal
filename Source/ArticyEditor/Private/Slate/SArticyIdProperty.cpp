@@ -194,25 +194,25 @@ void SArticyIdProperty::Update(const FArticyId& NewId)
 
 void SArticyIdProperty::UpdateWidget()
 {
-	for (TSharedPtr<IArticyRefWidgetCustomization>& Customization : ActiveCustomizations)
+	for (TSharedPtr<IArticyIdPropertyWidgetCustomization>& Customization : ActiveCustomizations)
 	{
-		Customization->UnregisterArticyRefWidgetCustomization();
+		Customization->UnregisterArticyIdPropertyWidgetCustomization();
 	}
 	ActiveCustomizations.Reset();
 	
-	FArticyEditorModule::Get().GetCustomizationManager()->CreateArticyRefWidgetCustomizations(CachedArticyObject.Get(), ActiveCustomizations);
+	FArticyEditorModule::Get().GetCustomizationManager()->CreateArticyIdPropertyWidgetCustomizations(CachedArticyObject.Get(), ActiveCustomizations);
 
-	FArticyRefWidgetCustomizationBuilder Builder(CachedArticyObject.Get());
-	for (TSharedPtr<IArticyRefWidgetCustomization>& Customization : ActiveCustomizations)
+	FArticyIdPropertyWidgetCustomizationBuilder Builder(CachedArticyObject.Get());
+	for (TSharedPtr<IArticyIdPropertyWidgetCustomization>& Customization : ActiveCustomizations)
 	{
-		Customization->RegisterArticyRefWidgetCustomization(Builder);
+		Customization->RegisterArticyIdPropertyWidgetCustomization(Builder);
 	}
 
 	// this empties the extra buttons box and refills it based on the registered customizations
 	ApplyArticyRefCustomizations(Builder.GetCustomizations());
 }
 
-void SArticyIdProperty::ApplyArticyRefCustomization(const FArticyRefWidgetCustomizationInfo& Customization)
+void SArticyIdProperty::ApplyArticyRefCustomization(const FArticyIdPropertyWidgetCustomizationInfo& Customization)
 {
 	if(Customization.ExtraButtonExtender.IsValid())
 	{
@@ -220,12 +220,12 @@ void SArticyIdProperty::ApplyArticyRefCustomization(const FArticyRefWidgetCustom
 	}
 }
 
-void SArticyIdProperty::ApplyArticyRefCustomizations(const TArray<FArticyRefWidgetCustomizationInfo>& Customizations)
+void SArticyIdProperty::ApplyArticyRefCustomizations(const TArray<FArticyIdPropertyWidgetCustomizationInfo>& Customizations)
 {
 	ArticyIdCustomizationExtenders.Empty();
 	CustomizationButtonBox_Low->ClearChildren();
 
-	for(const FArticyRefWidgetCustomizationInfo& Info : Customizations)
+	for(const FArticyIdPropertyWidgetCustomizationInfo& Info : Customizations)
 	{
 		ApplyArticyRefCustomization(Info);
 	}

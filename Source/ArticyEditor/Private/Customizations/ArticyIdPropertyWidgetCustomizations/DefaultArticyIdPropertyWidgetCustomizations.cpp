@@ -2,7 +2,7 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.
 //
 
-#include "Customizations/ArticyRefWidgetCustomizations/DefaultArticyRefWidgetCustomizations.h"
+#include "Customizations/ArticyIdPropertyWidgetCustomizations/DefaultArticyIdPropertyWidgetCustomizations.h"
 #include "ArticyEditorStyle.h"
 #include "Slate/UserInterfaceHelperFunctions.h"
 #include "ArticyObject.h"
@@ -10,11 +10,11 @@
 #include "Widgets/Input/SButton.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 
-void FArticyButtonCustomization::RegisterArticyRefWidgetCustomization(FArticyRefWidgetCustomizationBuilder& Builder)
+void FArticyButtonCustomization::RegisterArticyIdPropertyWidgetCustomization(FArticyIdPropertyWidgetCustomizationBuilder& Builder)
 {
 	ArticyObject = Builder.GetArticyObject();
 
-	FArticyRefWidgetCustomizationInfo Info;
+	FArticyIdPropertyWidgetCustomizationInfo Info;
 	Info.ExtraButtonExtender = MakeShared<FExtender>();
 	Info.ExtraButtonExtender->AddToolBarExtension(TEXT("Base"), EExtensionHook::After, nullptr,
 		FToolBarExtensionDelegate::CreateRaw(this, &FArticyButtonCustomization::CreateArticyButton));
@@ -22,7 +22,7 @@ void FArticyButtonCustomization::RegisterArticyRefWidgetCustomization(FArticyRef
 	Builder.AddCustomization(Info);
 }
 
-void FArticyButtonCustomization::UnregisterArticyRefWidgetCustomization()
+void FArticyButtonCustomization::UnregisterArticyIdPropertyWidgetCustomization()
 {
 	ArticyObject = nullptr;
 }
@@ -51,7 +51,7 @@ FReply FArticyButtonCustomization::OnArticyButtonClicked()
 	return FReply::Handled();
 }
 
-TSharedPtr<IArticyRefWidgetCustomization> FArticyButtonCustomizationFactory::CreateCustomization()
+TSharedPtr<IArticyIdPropertyWidgetCustomization> FArticyButtonCustomizationFactory::CreateCustomization()
 {
 	return MakeShareable(new FArticyButtonCustomization);
 }

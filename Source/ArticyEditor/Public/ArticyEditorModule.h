@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 #pragma once
 
@@ -50,7 +49,7 @@ public:
 	void RegisterAssetTypeActions();
 	void RegisterConsoleCommands();
 	/** Registers all default widget extensions. As of this point, the articy button */
-	void RegisterDefaultArticyRefWidgetExtensions() const;
+	void RegisterDefaultArticyIdPropertyWidgetExtensions() const;
 	void RegisterDetailCustomizations() const;
 	void RegisterDirectoryWatcher();
 	void RegisterGraphPinFactory() const;
@@ -94,5 +93,5 @@ private:
 	TSharedPtr<FArticyEditorCustomizationManager> CustomizationManager = nullptr;
 
 	/** The CustomizationManager has ownership of the factories. These here are cached for removal at shutdown */
-	TArray<const IArticyRefWidgetCustomizationFactory*> DefaultArticyRefWidgetCustomizationFactories;
+	TArray<const IArticyIdPropertyWidgetCustomizationFactory*> DefaultArticyRefWidgetCustomizationFactories;
 };
