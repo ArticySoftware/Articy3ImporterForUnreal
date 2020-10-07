@@ -21,7 +21,6 @@ TSharedRef<SWidget> SArticyRefPin::GetDefaultValueWidget()
 	return SNew(SArticyRefProperty)
 		.ArticyRefToDisplay(this, &SArticyRefPin::GetArticyRef)
 		.OnArticyRefChanged(this, &SArticyRefPin::OnArticyRefChanged)
-		.bIsReadOnly(true)
 		.Visibility(this, &SArticyRefPin::GetDefaultValueVisibility);
 }
 
