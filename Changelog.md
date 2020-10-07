@@ -1,3 +1,41 @@
+## Unreal Importer 1.1.0 Changelog
+- New Features:
+	- Articy Global Variables Debugger added to the articy toolbar
+	- ArticyIdProperty Widget Customization system. Lets you add widgets from C++ to any SArticyIdProperty widget (ArticyId and ArticyRef structs primarily) without modifying plugin code
+	- Custom widgets for ArticRef and ArticyId Blueprint pins
+	- New ArticyRef widget supports Clone settings
+	- ArticyIds use the previous ArticyRef widget
+	- New C++ meta specifiers for ArticyRef and ArticyId types:
+		- ArticyExactClass (locks the class filter if set to true)
+		- ArticyNoWidget (only for ArticyId, removes the customized widget)
+		
+- General:
+	- Added: Copy & Paste support for ArticyRef & ArticyId. ArticyRef copies can get pasted into ArticyIds and vice versa.
+	- Added: Global Variables asset uses the same view as the new GV debugger. This fixes categorization issues and allows for search by namespace and variablename.
+	- Added: Option in the plugin settings to sort children upon import. Default off as it degrades import performance.
+	- Changed: Revamp of articy asset picker: now includes the class filter button and an 'Exact Class' filter checkbox
+	- Changed: Articy asset picker now will always have its initial class restriction set to the highest possible in the hierarchy. Meaning: Blueprint created ArticyIds and ArticyRefs will display ArticyObject when opening the asset picker, C++-created ArticyIds and ArticyRefs with an "ArticyClassRestriction=..." meta specifier will have that class as the starting point.
+	- Changed: The class filter in the Articy asset picker now uses a list rather than a tree structure
+	- Changed: Articy Button on ArticyID/ArticyRef widgets now uses the current tab for ArticyNode elements (dialogues etc.) and opens up a new tab for entities instead. No more new windows!
+	- Fix: Articy Import Data now constructs its hierarchy objects properly
+	- Fix: Crash when selecting two actors of the same type with the same ArticyRef variables
+	
+- Blueprints:
+	- Added: ArticyRef is now hashable and can be used in sets and maps as keys. You can add duplicates at the moment, which will get removed upon Blueprint compilation, rather than the default behavior of not letting you add duplicates in the first place. This lets you easily tweak the data structures. This might change in the future. See below in the C++ section for a more detailed explanation.
+	- Added: MatchesRaw and MatchesEffective comparison functions for comparison of ArticyRefs. See below in the C++ section for a more detailed explanation.
+	
+- C++:
+	- Added: Static UArticyImportData::GetImportData() function
+	- Added: OnAssetsGenerated delegatein FArticyEditorModule, called whenever assets are generated. Previous "OnImportFinished" would not get called upon asset regeneration only.
+	- Added: Static GetPackagesSlow() function in FArticyEditorModule
+	- Added: GetExpression function for ArticyScriptFragments, returning a script as a const FString reference
+	- Added: Different ToString functions for FArtiyId and FArticyRef types
+	- Added: Made FArticyRef hashable (combination of underlying ID + effective CloneId is used). Since hash containers in UE4 make use of the == operator the effective CloneID is compared rather than the actual CloneID (bReferenceBaseObject = true implies effective CloneId = 0, but the actual CloneId value can be different)
+	- Added: New comparison functions for FArticyRef: MatchesRaw and MatchesEffective.
+	- Added: FArticyId InitFromString function. Relies on the string contents to include a "Low=XXX" and "High=YYY" section.
+	- Changed: UArticyObject::FindAsset() now is an editor-only function
+	- Changed: UArticyObject::FindAsset() uses caching to avoid module and asset registry lookup. This improves performance significantly and ensures functionality for large articy projects inside UE4.	
+
 ## Unreal Importer 1.0.2 Changelog
 - New Features:
     - Articy Flow Debugger added
