@@ -1,6 +1,7 @@
 
 #include "Customizations/ArticyGVEditor.h"
 #include "ArticyEditorStyle.h"
+#include "Editor.h"
 #include "Widgets/Docking/SDockTab.h"
 
 #define LOCTEXT_NAMESPACE "ArticyGVEditor"
