@@ -62,6 +62,18 @@ public:
 		return IdSet && RefSet ? EStringInitResult::AllSet : IdSet ? EStringInitResult::IdSet : RefSet ? EStringInitResult::RefSet : EStringInitResult::NoneSet;
 	}
 
+	/** TODO
+	 * The ToString function is used to update Refs in the property system.
+	 * When determining if a ref is the same as another ref in a TMap in BP, the ExportItem function is used and strings are compared
+	 * The ExportItem function delivers Strings like below, but without spaces. Therefore it is possible to insert 2x the same ArticyRef.
+	 * However, when we remove the spaces, typical BP Map problems start existing.
+	 * If CharacterA Base = true exists, you can't add another CharacterA (because Base would be initialized to true)
+	 * Keep it like it is for now, as compiling will remove the duplicates.
+	 *
+	 * Future fixes: When Base is set to true, just set CloneId to 0 (data loss)
+	 * Or use another ToString function that only works with effective data, not literal data!
+	 * Same goes for FArticyId!
+	 */
 	FString ToString() const
 	{
 		return FString::Printf(TEXT("(bReferenceBaseObject=%s, CloneId=%d, Id=(Low=%d, High=%d))"), bReferenceBaseObject ? TEXT("True") : TEXT("False"), CloneId, Id.Low, Id.High);
