@@ -226,12 +226,22 @@ void FArticyEditorModule::QueueImport()
 
 void FArticyEditorModule::OpenArticyWindow()
 {
+    // @TODO Engine versioning
+#if ENGINE_MINOR_VERSION < 26
 	FGlobalTabmanager::Get()->InvokeTab(ArticyWindowTabID);
+#else
+	FGlobalTabmanager::Get()->TryInvokeTab(ArticyWindowTabID);
+#endif
 }
 
 void FArticyEditorModule::OpenArticyGVDebugger()
 {
+	// @TODO Engine versioning
+#if ENGINE_MINOR_VERSION < 26
 	FGlobalTabmanager::Get()->InvokeTab(ArticyGVDebuggerTabID);
+#else
+	FGlobalTabmanager::Get()->TryInvokeTab(ArticyGVDebuggerTabID);
+#endif
 }
 
 EImportStatusValidity FArticyEditorModule::CheckImportStatusValidity() const

@@ -112,7 +112,14 @@ UArticyImportData* FArticyEditorFunctionLibrary::GenerateImportDataAsset()
 	const FString PackagePath = TEXT("/Game/") + FileName;
 
 	const FString CleanedPackagePath = PackagePath.Replace(TEXT(" "), TEXT("_")).Replace(TEXT("."), TEXT("_"));
+
+	// @TODO Engine Versioning
+#if ENGINE_MINOR_VERSION >= 26
+	UPackage* Outer = CreatePackage(*CleanedPackagePath);
+#else
 	UPackage* Outer = CreatePackage(nullptr, *CleanedPackagePath);
+#endif
+
 	Outer->FullyLoad();
 
 	const FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir(), ArticyImportFiles[0]);

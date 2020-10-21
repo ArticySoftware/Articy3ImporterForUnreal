@@ -90,7 +90,7 @@ private:// Widgets
 	TSharedPtr<SComboButton> ClassFilterButton;
 	
 private: // Internal Data
-	TSharedPtr<FAssetFilterCollectionType> FrontendFilters;
+	TSharedPtr<FArticyObjectFilterCollectionType> FrontendFilters;
 	TSharedPtr<FArticyClassRestrictionFilter> ClassFilter;
 	TSharedPtr<FFrontendFilter_ArticyObject> ArticyObjectFilter;
 	

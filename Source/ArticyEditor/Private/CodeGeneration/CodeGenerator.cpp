@@ -2,7 +2,6 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 //
 
-
 #include "CodeGenerator.h"
 #include "ArticyImportData.h"
 #include "DatabaseGenerator.h"
@@ -20,8 +19,6 @@
 #include "ArticyPluginSettings.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Misc/FileHelper.h"
-#include "Dialogs/Dialogs.h"
-#include "IContentBrowserSingleton.h"
 #include "ObjectTools.h"
 #include "HAL/PlatformFilemanager.h"
 #include "Misc/App.h"
