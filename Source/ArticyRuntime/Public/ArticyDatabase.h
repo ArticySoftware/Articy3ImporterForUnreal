@@ -385,9 +385,14 @@ TArray<T*> UArticyDatabase::GetObjectsOfClass(int32 CloneId) const
 			arr.Add(obj);
 		}*/
 
-		if(obj->Get(this, CloneId, false) && Cast<T>(obj))
+		UArticyObject* Object = obj->Get(this, CloneId, false);
+		if(Object)
 		{
-			arr.Add(obj);
+			T* TypedObject = Cast<T>(Object);
+			if(TypedObject)
+			{
+				arr.Add(TypedObject);
+			}
 		}
 	}
 	return arr;
