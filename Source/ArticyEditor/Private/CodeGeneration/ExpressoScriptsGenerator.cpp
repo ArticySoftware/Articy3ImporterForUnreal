@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
@@ -28,7 +27,7 @@ void GenerateMethodInterface(CodeFileGenerator* header, const UArticyImportData*
 					displayName = FString::Printf(TEXT("%s (%s)"), *method.Name, *method.OrigininalParameterTypes);
 
 				header->Method(method.GetCPPReturnType(), method.BlueprintName, method.ParameterList, nullptr, "", true, 
-					FString::Printf(TEXT("BlueprintCallable, BlueprintNativeEvent, meta=(DisplayName=\"%s\")"), *displayName));
+					FString::Printf(TEXT("BlueprintCallable, BlueprintNativeEvent, Category=\"Articy Methods Provider\", meta=(DisplayName=\"%s\")"), *displayName));
 				header->Method("virtual " + method.GetCPPReturnType(), method.BlueprintName + "_Implementation", method.ParameterList, nullptr, "", false, "",
 					FString::Printf(TEXT("{ %s }"), *returnOrEmpty));
 			}
@@ -152,7 +151,7 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 				header->Line(FString::Printf(TEXT("Conditions.Add(%d, [&]"), cleanScriptHash));
 				header->Line("{");
 				{
-					//the fragment might be emtpy or contain only a comment, so we need to wrap it in
+					//the fragment might be empty or contain only a comment, so we need to wrap it in
 					//the ConditionOrTrue method
 					header->Line("return ConditionOrTrue(", false, true, 1);
 					//now comes the fragment (in next line and indented)
