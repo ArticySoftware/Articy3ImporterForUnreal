@@ -1,12 +1,12 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #include "ArticyPluginSettings.h"
 #include "Modules/ModuleManager.h"
 #include "AssetRegistryModule.h"
 #include "ArticyDatabase.h"
+#include "Misc/ConfigCacheIni.h"
 
 UArticyPluginSettings::UArticyPluginSettings()
 {
@@ -15,7 +15,7 @@ UArticyPluginSettings::UArticyPluginSettings()
 	bKeepGlobalVariablesBetweenWorlds = true;
 
 	bSortChildrenAtGeneration = false;
-	
+	ArticyDirectory.Path = TEXT("/Game");
 	// update package load settings after all files have been loaded
 	FAssetRegistryModule& AssetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	AssetRegistry.Get().OnFilesLoaded().AddUObject(this, &UArticyPluginSettings::UpdatePackageSettings);
@@ -40,9 +40,13 @@ const UArticyPluginSettings* UArticyPluginSettings::Get()
 
 void UArticyPluginSettings::UpdatePackageSettings()
 {
-	UArticyDatabase* ArticyDatabase = UArticyDatabase::GetMutableOriginal();
+	TWeakObjectPtr<UArticyDatabase> ArticyDatabase = UArticyDatabase::GetMutableOriginal();
 
-	if (!ArticyDatabase) return;
+	if (!ArticyDatabase.IsValid())
+	{
+		return;
+	}
+	
 	TArray<FString> ImportedPackageNames = ArticyDatabase->GetImportedPackageNames();
 
 	// remove outdated settings
@@ -74,10 +78,37 @@ void UArticyPluginSettings::UpdatePackageSettings()
 void UArticyPluginSettings::ApplyPreviousSettings() const
 {
 	// restore the package default settings with the cached data of the plugin settings
-	UArticyDatabase* OriginalDatabase = UArticyDatabase::GetMutableOriginal();
+	TWeakObjectPtr<UArticyDatabase> OriginalDatabase = UArticyDatabase::GetMutableOriginal();
 
 	for(FString PackageName : OriginalDatabase->GetImportedPackageNames())
 	{
 		OriginalDatabase->ChangePackageDefault(FName(*PackageName), GetDefault<UArticyPluginSettings>()->PackageLoadSettings[PackageName]);
 	}
 }
+#if WITH_EDITOR
+void UArticyPluginSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	GConfig->Flush(false, GEngineIni);
+	FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
+
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+
+void UArticyPluginSettings::PostReloadConfig(class FProperty* PropertyThatWasLoaded)
+{
+	Super::PostReloadConfig(PropertyThatWasLoaded);
+	GConfig->Flush(false, GEngineIni);
+}
+
+void UArticyPluginSettings::PostInitProperties()
+{
+	Super::PostInitProperties();
+	GConfig->Flush(false, GEngineIni);
+}
+
+void UArticyPluginSettings::PostTransacted(const FTransactionObjectEvent& TransactionEvent)
+{
+	Super::PostTransacted(TransactionEvent);
+	GConfig->Flush(false, GEngineIni);
+}
+#endif

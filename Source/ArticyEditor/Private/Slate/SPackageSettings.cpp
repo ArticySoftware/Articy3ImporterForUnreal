@@ -39,6 +39,10 @@ void SPackageSettings::Construct(const FArguments& InArgs)
 			.Padding(FMargin(5, 0, 0, 5))
 			[
 				SNew(SCheckBox)
+				.IsEnabled_Lambda([]()
+				{
+					return UArticyDatabase::GetMutableOriginal().IsValid();
+				})
 				.OnCheckStateChanged(this, &SPackageSettings::OnCheckStateChanged)
 				.IsChecked(this, &SPackageSettings::IsChecked)
 			]
@@ -55,8 +59,8 @@ FText SPackageSettings::GetPackageName() const
 void SPackageSettings::OnCheckStateChanged(ECheckBoxState NewState) const
 {
 	const bool bChecked = NewState == ECheckBoxState::Checked ? true : false;
-	UArticyDatabase* originalDatabase = UArticyDatabase::GetMutableOriginal();
-	originalDatabase->ChangePackageDefault(PackageToDisplay, bChecked);
+	TWeakObjectPtr<UArticyDatabase> ArticyDatabase = UArticyDatabase::GetMutableOriginal();
+	ArticyDatabase->ChangePackageDefault(PackageToDisplay, bChecked);
 	
 	UArticyPluginSettings* settings = GetMutableDefault<UArticyPluginSettings>();
 	settings->PackageLoadSettings.Add(PackageToDisplay.ToString(), bChecked);
@@ -64,8 +68,13 @@ void SPackageSettings::OnCheckStateChanged(ECheckBoxState NewState) const
 
 ECheckBoxState SPackageSettings::IsChecked() const
 {
-	UArticyDatabase* originalDatabase = UArticyDatabase::GetMutableOriginal();
-	const bool bIsDefaultPackage = originalDatabase->IsPackageDefaultPackage(PackageToDisplay.ToString());
+	TWeakObjectPtr<UArticyDatabase> ArticyDatabase = UArticyDatabase::GetMutableOriginal();
+	if(!ArticyDatabase.IsValid())
+	{
+		return ECheckBoxState::Undetermined;
+	}
+	
+	const bool bIsDefaultPackage = ArticyDatabase->IsPackageDefaultPackage(PackageToDisplay.ToString());
 	
 	return bIsDefaultPackage ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }

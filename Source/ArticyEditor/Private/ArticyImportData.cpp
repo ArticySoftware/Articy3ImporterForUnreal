@@ -1,13 +1,11 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
 #include "ArticyImportData.h"
 #include "EditorFramework/AssetImportData.h"
 #include "CodeGeneration/CodeGenerator.h"
-#include "ArticyJSONFactory.h"
 #include "ArticyPluginSettings.h"
 #include "Internationalization/Regex.h"
 #include "ArticyEditorModule.h"

@@ -265,7 +265,7 @@ EImportStatusValidity FArticyEditorModule::CheckImportStatusValidity() const
 	}
 	
 	TArray<FAssetData> ArticyAssets;
-	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), ArticyAssets, true);
+	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::GetArticyGeneratedFolder()), ArticyAssets, true);
 
 	// check if all assets are actually valid (classes not found would result in a nullptr)
 	for(FAssetData& Data : ArticyAssets)

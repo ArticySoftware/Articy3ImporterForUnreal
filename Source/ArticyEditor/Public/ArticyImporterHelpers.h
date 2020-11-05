@@ -16,7 +16,7 @@ namespace ArticyImporterHelpers
 {
 	inline UPackage* FindOrCreatePackage(const FString Name)
 	{
-		const FString PackageName = ArticyHelpers::ArticyGeneratedFolder / Name;
+		const FString PackageName = ArticyHelpers::GetArticyGeneratedFolder() / Name;
 
 		// @TODO Engine Versioning
 #if ENGINE_MINOR_VERSION >= 26

@@ -308,7 +308,7 @@ public:
 	 */
 	UArticyExpressoScripts* GetExpressoInstance() const;
 
-	static UArticyDatabase* GetMutableOriginal();
+	static TWeakObjectPtr<UArticyDatabase> GetMutableOriginal();
 
 	void ChangePackageDefault(FName PackageName, bool bIsDefaultPackage);
 

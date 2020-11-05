@@ -1,11 +1,10 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ArticyHelpers.h"
 #include "ObjectDefinitionsImport.h"
 #include "PackagesImport.h"
 #include "ArticyPackage.h"
@@ -170,9 +169,6 @@ public:
 	/** A list of parameters (original types), used for generating the blueprint function display name. */
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
 	FString OrigininalParameterTypes;
-
-
-
 
 	const FString& GetCPPReturnType() const;
 	const FString& GetCPPDefaultReturn() const;

@@ -145,7 +145,7 @@ bool CodeGenerator::DeleteGeneratedAssets()
 {
 	FAssetRegistryModule& AssetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> OutAssets;
-	AssetRegistry.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), OutAssets, true, false);
+	AssetRegistry.Get().GetAssetsByPath(FName(*ArticyHelpers::GetArticyGeneratedFolder()), OutAssets, true, false);
 	
 	TArray<UObject*> ExistingAssets;
 	TArray<FAssetData> InvalidAssets;
@@ -281,7 +281,7 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	//gather all articy assets to save them
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> GeneratedAssets;
-	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), GeneratedAssets, true);
+	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::GetArticyGeneratedFolder()), GeneratedAssets, true);
 
 	TArray<UPackage*> PackagesToSave;
 

@@ -406,7 +406,7 @@ const UArticyDatabase* UArticyDatabase::GetOriginal(bool bLoadAllPackages)
 	return Asset.Get();
 }
 
-UArticyDatabase* UArticyDatabase::GetMutableOriginal()
+TWeakObjectPtr<UArticyDatabase> UArticyDatabase::GetMutableOriginal()
 {
 	static TWeakObjectPtr<UArticyDatabase> Asset = nullptr;
 
@@ -432,7 +432,7 @@ UArticyDatabase* UArticyDatabase::GetMutableOriginal()
 		}
 	}
 
-	return Asset.Get();
+	return Asset;
 }
 
 void UArticyDatabase::ChangePackageDefault(FName PackageName, bool bIsDefaultPackage)

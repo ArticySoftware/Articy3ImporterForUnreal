@@ -40,9 +40,9 @@ void FArticyPluginSettingsCustomization::CustomizeDetails(IDetailLayoutBuilder& 
 	FArticyEditorModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyEditorModule>("ArticyEditor");
 	RefreshHandle = ArticyImporterModule.OnImportFinished.AddRaw(this, &FArticyPluginSettingsCustomization::RefreshSettingsUI);
 
-	const UArticyDatabase* OriginalDatabase = UArticyDatabase::GetMutableOriginal();
+	TWeakObjectPtr<const UArticyDatabase> OriginalDatabase = UArticyDatabase::GetMutableOriginal();
 	
-	if (!OriginalDatabase) {
+	if (!OriginalDatabase.IsValid()) {
 
 		// if there was no database found, check if we are still loading assets; if we are, refresh the custom UI once it's done
 		FAssetRegistryModule& AssetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");

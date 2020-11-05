@@ -1,12 +1,13 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Templates/SharedPointer.h"
 #include "UObject/Object.h"
+#include "Engine/EngineTypes.h"
 #include "ArticyPluginSettings.generated.h"
 
 UCLASS(config = Engine, defaultconfig)
@@ -24,19 +25,26 @@ public:
 	UPROPERTY(EditAnywhere, config, Category=ImportSettings, meta=(DisplayName="Create Blueprint type for script method interface"))
 	bool bCreateBlueprintTypeForScriptMethods;
 
-	/* --------------------------------------------------------------------- */
+	/** If true will attempt to sort the children using the exported position properties. Will be slower */
+	UPROPERTY(EditAnywhere, config, Category = ImportSettings, meta = (DisplayName = "Sort children when importing"))
+	bool bSortChildrenAtGeneration;
 
+	/** The directory where ArticyContent will be generated and assets are looked for (when using ArticyAsset)
+	 *	Also used to search for the .articyue4 file to regenerate the import asset.
+	 *. Automatically set to the location of the import asset during import.
+	 *  Change only to manually apply a fix!
+	 */
+	UPROPERTY(VisibleAnywhere, config, Category = ImportSettings, meta = (DisplayName = "Articy Directory", ContentDir, LongPackageName))
+	FDirectoryPath ArticyDirectory;
+	
 	/** Keeps one instance of the database for the whole game alive, even if the world changes */
 	UPROPERTY(EditAnywhere, config, Category=RuntimeSettings, meta=(DisplayName="Keep database between worlds"))
 	bool bKeepDatabaseBetweenWorlds;
-
+	
 	/** Keeps one instance of the global variables for the whole game alive, even if the world changes */
 	UPROPERTY(EditAnywhere, config, Category=RuntimeSettings, meta=(DisplayName="Keep global variables between worlds"))
 	bool bKeepGlobalVariablesBetweenWorlds;
 
-	/** If true will attempt to sort the children using the exported position properties. */
-	UPROPERTY(EditAnywhere, config, Category = EditorSettings, meta = (DisplayName = "Sort children when importing"))
-	bool bSortChildrenAtGeneration;
 
 	// internal cached data for data consistency between imports (setting restoration etc.)
 	UPROPERTY()
@@ -50,5 +58,16 @@ public:
 	void UpdatePackageSettings();
 
 	void ApplyPreviousSettings() const;
+
+
+#if WITH_EDITOR
+	/** Those functions will primarily flush the config so changes get written to the config file */
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+	virtual void PostReloadConfig(class FProperty* PropertyThatWasLoaded) override;
+	virtual void PostInitProperties() override;
+
+	virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;
+#endif
 
 };

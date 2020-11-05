@@ -40,6 +40,19 @@ UClass* UArticyJSONFactory::ResolveSupportedClass()
 
 UObject* UArticyJSONFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn, bool& bOutOperationCanceled)
 {
+	FString Path = FPaths::GetPath(InParent->GetPathName());
+
+	// properly update the config file and delete previous import assets
+	UArticyPluginSettings* CDO_Settings = GetMutableDefault<UArticyPluginSettings>();
+    if(!CDO_Settings->ArticyDirectory.Path.Equals(Path))
+	{    	
+		CDO_Settings->ArticyDirectory.Path = Path;
+		FString ConfigName = CDO_Settings->GetDefaultConfigFilename();
+		GConfig->SetString(TEXT("/Script/ArticyRuntime.ArticyPluginSettings"), TEXT("ArticyDirectory"), *Path, ConfigName);
+		GConfig->FindConfigFile(ConfigName)->Dirty = true;
+		GConfig->Flush(false, ConfigName);
+    }
+	
 	auto ArticyImportData = NewObject<UArticyImportData>(InParent, InName, Flags);
 
 	const bool bImportQueued = HandleImportDuringPlay(ArticyImportData);

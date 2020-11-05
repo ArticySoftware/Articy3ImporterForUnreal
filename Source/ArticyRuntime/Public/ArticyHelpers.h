@@ -5,8 +5,12 @@
 #pragma once
 
 #include <sstream>
+
+#include "ArticyPluginSettings.h"
+#include "AssetRegistryModule.h"
 #include "Dom/JsonValue.h"
 #include "Dom/JsonObject.h"
+#include "ArticyRuntimeModule.h"
 
 namespace ArticyHelpers
 {
@@ -39,6 +43,8 @@ namespace ArticyHelpers
 /** Tries to get the string with name "x" from json and stores it into 'x'. */
 #define JSON_TRY_FNAME(json, x) { FString str; if(json->TryGetStringField(TEXT(#x), str)) x = *str; }
 
+#define JSON_TRY_TEXT(json, x) { FString str; if(json->TryGetStringField(TEXT(#x), str)) x = FText::FromString(str); }
+
 /** Tries to get the string with name "x" from json, converts it to uint64 and stores it into 'x' of type FArticyId. */
 #define JSON_TRY_HEX_ID(json, x) static_assert(std::is_same<decltype(x), FArticyId>::value, #x " is not a uint64!"); \
 	{ FString hex; \
@@ -67,14 +73,20 @@ namespace ArticyHelpers
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
 
-	static const FString ArticyFolder = FString(TEXT("/Game/ArticyContent/"));
-	static const FString ArticyAssetsFolder = ArticyFolder / TEXT("Resources");
-	static const FString ArticyGeneratedFolder = ArticyFolder / TEXT("Generated");
-	static const FString ArticyGeneratedPackagesFolder = ArticyGeneratedFolder / TEXT("Packages");
-	static const FString ArticyFolderRelativeToContent = FString(TEXT("ArticyContent/"));
-	static const FString ArticyGeneratedFolderRelativeToContent = ArticyFolderRelativeToContent / TEXT("Generated");
-	static const FString ArticyGeneratedPackagesFolderRelativeToContent = ArticyGeneratedFolderRelativeToContent / TEXT("Packages");
+	inline FString GetArticyFolder()
+	{
+		return GetDefault<UArticyPluginSettings>()->ArticyDirectory.Path;
+	}
 
+	inline FString GetArticyResourcesFolder()
+	{
+		return GetArticyFolder() / TEXT("ArticyContent") / TEXT("Resources");
+	}
+
+	inline FString GetArticyGeneratedFolder()
+	{
+		return GetArticyFolder() / TEXT("ArticyContent") / TEXT("Generated");
+	}
 
 	inline uint64 HexToUint64(FString str) { return FCString::Strtoui64(*str, nullptr, 16); }
 	inline FString Uint64ToHex(uint64 id)
