@@ -41,7 +41,7 @@ void SArticyObjectToolTip::OnOpening()
 	}
 	else
 	{
-		SetContentWidget(CreateEmptyContent());
+		SetContentWidget(CreateContentForEmpty());
 	}
 }
 
@@ -52,16 +52,86 @@ void SArticyObjectToolTip::OnClosed()
 
 void SArticyObjectToolTip::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
-	if(CachedArticyId != ArticyIdAttribute.Get())
+	if(CachedArticyId != ArticyIdAttribute.Get() || (!CachedArticyObject.IsValid() && !CachedArticyId.IsNull()))
 	{
 		UpdateWidget();
 	}
 }
 
+TSharedRef<SWidget> SArticyObjectToolTip::CreateTooltipWidget(FText NameText, TSharedRef<SVerticalBox> InfoBox)
+{
+	TSharedRef<SVerticalBox> OverallTooltipVBox = SNew(SVerticalBox);
+
+	// Top section (asset name, type, is checked out)
+	OverallTooltipVBox->AddSlot()
+	.AutoHeight()
+	.Padding(0, 0, 0, 4)
+	[
+		SNew(SBorder)
+		.Padding(6)
+		.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
+		[
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.VAlign(VAlign_Center)
+				.Padding(0, 0, 4, 0)
+				[
+					SNew(STextBlock)
+					.Text(NameText)
+					.Font(FEditorStyle::GetFontStyle("ContentBrowser.TileViewTooltip.NameFont"))
+					.AutoWrapText(true)
+				]
+			]
+		]
+	];
+
+	// Bottom section (additional information)
+	OverallTooltipVBox->AddSlot()
+	.AutoHeight()
+	[		
+		SNew(SBorder)
+		.Padding(6)
+		.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			[
+				InfoBox
+			]
+			+ SHorizontalBox::Slot()
+			.HAlign(HAlign_Center)
+			.VAlign(VAlign_Top)
+			.AutoWidth()
+			[
+				SNew(SBox)
+				.Padding(FMargin(10, 2, 2, 2))
+				[
+					SNew(SImage)
+					.Image(this, &SArticyObjectToolTip::GetTooltipImage)
+				]
+			]
+		]			
+	];
+
+	return SNew(SBorder)
+    .Padding(6)
+    .BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.NonContentBorder"))
+	[
+		SNew(SBox)
+		.MaxDesiredWidth(500.f)
+		[
+			OverallTooltipVBox
+		]
+	];
+}
+
 TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 {
-	check(CachedArticyObject.IsValid());
-
 	// use the preview image if available
 	const bool bHasPreviewImage = UserInterfaceHelperFunctions::RetrievePreviewImage(CachedArticyObject.Get(), TooltipBrush);
 
@@ -159,84 +229,30 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 	// add id
 	AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyId", "Id"), ArticyIdText, true);
 
-	TSharedRef<SVerticalBox> OverallTooltipVBox = SNew(SVerticalBox);
-
-	// Top section (asset name, type, is checked out)
-	OverallTooltipVBox->AddSlot()
-	.AutoHeight()
-	.Padding(0, 0, 0, 4)
-	[
-		SNew(SBorder)
-		.Padding(6)
-		.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot()
-				.VAlign(VAlign_Center)
-				.Padding(0, 0, 4, 0)
-				[
-					SNew(STextBlock)
-					.Text(NameText)
-					.Font(FEditorStyle::GetFontStyle("ContentBrowser.TileViewTooltip.NameFont"))
-					.AutoWrapText(true)
-				]
-			]
-		]
-	];
-
-	// Bottom section (additional information)
-	OverallTooltipVBox->AddSlot()
-	.AutoHeight()
-	[		
-		SNew(SBorder)
-		.Padding(6)
-		.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			[
-				InfoBox
-			]
-			+ SHorizontalBox::Slot()
-			.HAlign(HAlign_Center)
-			.VAlign(VAlign_Top)
-			.AutoWidth()
-			[
-				SNew(SBox)
-				.Padding(FMargin(10, 2, 2, 2))
-				[
-					SNew(SImage)
-					.Image(this, &SArticyObjectToolTip::GetTooltipImage)
-				]
-			]
-		]			
-	];
-
-	return SNew(SBorder)
-	.Padding(6)
-	.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.NonContentBorder"))
-	[
-		SNew(SBox)
-		.MaxDesiredWidth(500.f)
-		[
-			OverallTooltipVBox
-		]
-	];
+	return CreateTooltipWidget(NameText, InfoBox);
 }
 
-TSharedRef<SWidget> SArticyObjectToolTip::CreateEmptyContent()
+TSharedRef<SWidget> SArticyObjectToolTip::CreateContentForEmpty()
 {
 	check(!CachedArticyObject.IsValid());
-	
-	// Create an empty box and return it to effectively clear the tooltip.
-	// SNullWidget::NullWidget does not work because it is filtered out byy the SetContent function
+
+	// will result in the "empty" image
+	TooltipBrush = *UserInterfaceHelperFunctions::GetArticyTypeImage(nullptr, UserInterfaceHelperFunctions::Large);
+
 	TSharedRef<SVerticalBox> InfoBox = SNew(SVerticalBox);
-	return InfoBox;
+	
+	const FText ArticyIdText = FText::FromString(ArticyIdAttribute.Get().ToString());
+	AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyId", "Id"), ArticyIdText, true);
+
+	FText ObjectNotFoundText = FText::FromString("None");
+	
+	if(!ArticyIdAttribute.Get().IsNull())
+	{
+		const FString ObjectNotFoundString = TEXT("Articy Object not found");
+		ObjectNotFoundText = FText::FromString(ObjectNotFoundString);
+	}
+
+	return CreateTooltipWidget(ObjectNotFoundText, InfoBox);
 }
 
 void SArticyObjectToolTip::AddToToolTipInfoBox(const TSharedRef<SVerticalBox>& InfoBox, const FText& Key, const FText& Value, bool bImportant) const
@@ -280,7 +296,7 @@ void SArticyObjectToolTip::UpdateWidget()
 	}
 	else
 	{
-		SetContentWidget(CreateEmptyContent());
+		SetContentWidget(CreateContentForEmpty());
 	}
 }
 
