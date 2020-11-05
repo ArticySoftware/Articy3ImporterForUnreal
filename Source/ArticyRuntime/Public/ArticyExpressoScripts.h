@@ -231,7 +231,7 @@ FORCEINLINE float operator/(const float& Lhs, const ExpressoType& Rhs)
 }
 
 /**
- * The database is used for accessing or cloning any articy object.
+ * The Expresso Scripts class is keeping track of conditions & instructions via hashes and manages parameters
  */
 UCLASS(abstract)
 class ARTICYRUNTIME_API UArticyExpressoScripts : public UObject

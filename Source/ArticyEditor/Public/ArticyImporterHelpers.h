@@ -30,15 +30,42 @@ namespace ArticyImporterHelpers
 		return AssetPackage;
 	}
 
+	/** Look for a given class in a given module.
+	 *	If no module was specified, look up in ArticyRuntime and then the project itself for generated classes
+	 */
+	inline UClass* RetrieveClass(const FString ClassName, const FString ModuleName = "", UClass* BaseClass = UArticyObject::StaticClass())
+	{
+		UClass* Result = nullptr;
+
+		if (!ModuleName.IsEmpty())
+		{
+			auto FullClassName = FString::Printf(TEXT("/Script/%s.%s"), *ModuleName, *ClassName);
+			return ConstructorHelpersInternal::FindOrLoadClass(FullClassName, BaseClass);
+		}
+
+		FString FullClassName = FString::Printf(TEXT("/Script/%s.%s"), TEXT("ArticyRuntime"), *ClassName);
+		Result = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, BaseClass);
+
+		if (Result != nullptr)
+		{
+			return Result;
+		}
+
+		FullClassName = FString::Printf(TEXT("/Script/%s.%s"), FApp::GetProjectName(), *ClassName);
+		Result = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, BaseClass);
+
+		return Result;
+	}
+
 	template <typename AssetType>
 	AssetType* GenerateAsset(const TCHAR* ClassName, const TCHAR* ModuleName, const FString AssetName = "", const FString SubFolder = "", const EObjectFlags AdditionalFlags = RF_NoFlags)
 	{
 		const auto ActualAssetName = AssetName.IsEmpty() ? ClassName : AssetName;
 		const auto FileName = (SubFolder.IsEmpty() ? ActualAssetName : SubFolder / ActualAssetName).Replace(TEXT(" "), TEXT("_"));
 
-		auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), ModuleName, ClassName);
-		auto UClass = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, AssetType::StaticClass());
-		
+		//auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), ModuleName, ClassName);
+		auto UClass = RetrieveClass(ClassName, ModuleName, AssetType::StaticClass());
+
 		if (UClass)
 		{
 			auto AssetPackage = ArticyImporterHelpers::FindOrCreatePackage(FileName);
