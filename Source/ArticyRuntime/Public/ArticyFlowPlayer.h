@@ -134,6 +134,7 @@ public:
 	 */
 	TArray<FArticyBranch> Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth);
 
+	void SetPauseOn(EArticyPausableType Types);
 	/** Returns true if Node is one of the PauseOn types. */
 	bool ShouldPauseOn(IArticyFlowObject* Node) const;
 
