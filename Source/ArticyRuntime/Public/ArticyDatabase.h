@@ -21,17 +21,17 @@ struct FArticyObjectShadow
 	GENERATED_BODY()
 	
 	FArticyObjectShadow() {}
-	FArticyObjectShadow(uint32 ShadowLevel, UArticyPrimitive* Object, int32 CloneId, UObject* Outer = nullptr) 
+	FArticyObjectShadow(uint32 ShadowLevel, UArticyObject* Object, int32 CloneId, UObject* Outer = nullptr) 
 		: ShadowLevel(ShadowLevel), Object(Object), Outer(Outer), CloneId(CloneId) {}
 
 public:
 	UPROPERTY()
 	uint32 ShadowLevel = 0;
-	UArticyPrimitive* GetObject();
+	UArticyObject* GetObject();
 	int32 GetCloneId() const { return CloneId; }
 private:
 	UPROPERTY()
-	UArticyPrimitive* Object = nullptr;
+	UArticyObject* Object = nullptr;
 
 	TWeakObjectPtr<UObject> Outer;
 
@@ -48,12 +48,12 @@ public:
 	/**
 	 * This constructor writes the Object to Shadows[0].
 	 */
-	explicit FArticyShadowableObject(UArticyPrimitive* Object, int32 CloneId, UObject* Outer = nullptr);
+	explicit FArticyShadowableObject(UArticyObject* Object, int32 CloneId, UObject* Outer = nullptr);
 
 	/**
 	 * Returns the requested shadow.
 	 */
-	UArticyPrimitive* Get(const IShadowStateManager* ShadowManager, bool ForceUnshadowed = false) const;
+	UArticyObject* Get(const IShadowStateManager* ShadowManager, bool ForceUnshadowed = false) const;
 
 private:
 
@@ -75,7 +75,7 @@ class ARTICYRUNTIME_API UArticyCloneableObject : public UObject
 	GENERATED_BODY()
 
 public:
-	void Init(UArticyPrimitive* InitialClone) { AddClone(InitialClone, 0); }
+	void Init(UArticyObject* InitialClone) { AddClone(InitialClone, 0); }
 
 	//========================================//
 
@@ -83,13 +83,13 @@ public:
 	 * Get the clone of this object with a certain CloneId.
 	 * Returns nullptr if the clone does not exist.
 	 */
-	UArticyPrimitive* Get(const IShadowStateManager* ShadowManager, int32 CloneId = 0, bool bForceUnshadowed = false) const;
+	UArticyObject* Get(const IShadowStateManager* ShadowManager, int32 CloneId = 0, bool bForceUnshadowed = false) const;
 	/**
 	 * Clone the original object and assign it the id CloneId.
 	 * If bFailIfExists is true, nullptr is returned if the clone already exists.
 	 * Otherwise, the existing clone is returned.
 	 */
-	UArticyPrimitive* Clone(const IShadowStateManager* ShadowManager, int32 CloneId, bool bFailIfExists = true);
+	UArticyObject* Clone(const IShadowStateManager* ShadowManager, int32 CloneId, bool bFailIfExists = true);
 
 private:
 
@@ -101,7 +101,7 @@ private:
 	TMap<int32, FArticyShadowableObject> Clones;
 
 	/** Adds a clone to the Clones map. */
-	void AddClone(UArticyPrimitive* Clone, int32 CloneId);
+	void AddClone(UArticyObject* Clone, int32 CloneId);
 };
 
 /**
@@ -193,7 +193,7 @@ public:
 	 * Otherwise a null-pointer is returned.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Articy", meta=(DeterminesOutputType="CastTo", AdvancedDisplay="CloneId"))
-	UArticyPrimitive* GetObject(FArticyId Id, int32 CloneId = 0, TSubclassOf<class UArticyObject> CastTo = NULL) const;
+	UArticyObject* GetObject(FArticyId Id, int32 CloneId = 0, TSubclassOf<class UArticyObject> CastTo = NULL) const;
 	template<typename T>
 	T* GetObject(FArticyId Id, int32 CloneId = 0) const { return Cast<T>(GetObject(Id, CloneId)); }
 
@@ -202,7 +202,7 @@ public:
 	 * Internally used by the flow player to replace nodes with unshadowed ones
 	 * before returning them via the flow player callbacks.
 	 */
-	UArticyPrimitive* GetObjectUnshadowed(FArticyId Id, int32 CloneId = 0) const;
+	UArticyObject* GetObjectUnshadowed(FArticyId Id, int32 CloneId = 0) const;
 
 	/**
 	 * Get an object by its TechnicalName.
@@ -252,7 +252,7 @@ public:
 	* Get all objects.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Articy")
-	TArray<UArticyPrimitive*> GetAllObjects() const;
+	TArray<UArticyObject*> GetAllObjects() const;
 
 	/**
 	 * Get all objects with a given TechnicalName.
@@ -270,7 +270,7 @@ public:
 	 * If NewCloneId is -1, the next free clone Id will be used.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Articy", meta=(DeterminesOutputType = "CastTo"))
-	UArticyPrimitive* CloneFrom(FArticyId Id, int32 NewCloneId = -1, TSubclassOf<class UArticyObject> CastTo = NULL);
+	UArticyObject* CloneFrom(FArticyId Id, int32 NewCloneId = -1, TSubclassOf<class UArticyObject> CastTo = NULL);
 	template<typename T>
 	T* CloneFrom(FArticyId Id, int32 NewCloneId = -1) { return Cast<T>(CloneFrom(Id, NewCloneId)); }
 
@@ -288,7 +288,7 @@ public:
 	 * Clone an existing object, and assign the NewCloneId to it.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Articy", meta=(DeterminesOutputType = "CastTo"))
-	UArticyPrimitive* GetOrClone(FArticyId Id, int32 NewCloneId);
+	UArticyObject* GetOrClone(FArticyId Id, int32 NewCloneId);
 	template<typename T>
 	T* GetOrClone(FArticyId Id, int32 NewCloneId) { return Cast<T>(GetOrClone(Id, NewCloneId)); }
 
@@ -342,8 +342,8 @@ private:
 	/** An instance of this class will be used to execute script fragments. */
 	UPROPERTY(Config, VisibleAnywhere, Category = "Articy")
 	TSubclassOf<UArticyExpressoScripts> ExpressoScriptsClass;
-	
-	UArticyPrimitive* GetObjectInternal(FArticyId Id, int32 CloneId = 0, bool bForceUnshadowed = false) const;
+
+	UArticyObject* GetObjectInternal(FArticyId Id, int32 CloneId = 0, bool bForceUnshadowed = false) const;
 
 	/** Get the original asset (on disk) of the database. */
 	static const UArticyDatabase* GetOriginal(bool bLoadDefaultPackages = false);

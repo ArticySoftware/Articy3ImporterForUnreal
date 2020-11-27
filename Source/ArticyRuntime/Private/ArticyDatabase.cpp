@@ -10,17 +10,17 @@
 #include "Misc/Paths.h"
 
 
-UArticyPrimitive* FArticyObjectShadow::GetObject()
+UArticyObject* FArticyObjectShadow::GetObject()
 {
 	return Object;
 }
 
-FArticyShadowableObject::FArticyShadowableObject(UArticyPrimitive* Object, int32 CloneId, UObject* Outer)
+FArticyShadowableObject::FArticyShadowableObject(UArticyObject* Object, int32 CloneId, UObject* Outer)
 {
 	ShadowCopies.Add(FArticyObjectShadow(0, Object, CloneId, Outer));
 }
 
-UArticyPrimitive* FArticyShadowableObject::Get(const IShadowStateManager* ShadowManager, bool bForceUnshadowed) const
+UArticyObject* FArticyShadowableObject::Get(const IShadowStateManager* ShadowManager, bool bForceUnshadowed) const
 {
 	if (bForceUnshadowed)
 		return ShadowCopies[0].GetObject();
@@ -54,13 +54,15 @@ UArticyPrimitive* FArticyShadowableObject::Get(const IShadowStateManager* Shadow
 	return obj;
 }
 
-UArticyPrimitive* UArticyCloneableObject::Get(const IShadowStateManager* ShadowManager, int32 CloneId, bool bForceUnshadowed) const
+UArticyObject* UArticyCloneableObject::Get(const IShadowStateManager* ShadowManager, int32 CloneId,
+                                           bool bForceUnshadowed) const
 {
 	auto info = Clones.Find(CloneId);
 	return info ? info->Get(ShadowManager, bForceUnshadowed) : nullptr;
 }
 
-UArticyPrimitive* UArticyCloneableObject::Clone(const IShadowStateManager* ShadowManager, int32 CloneId, bool bFailIfExists)
+UArticyObject* UArticyCloneableObject::Clone(const IShadowStateManager* ShadowManager, int32 CloneId,
+                                             bool bFailIfExists)
 {
 	auto clone = Get(ShadowManager, CloneId);
 
@@ -82,7 +84,7 @@ UArticyPrimitive* UArticyCloneableObject::Clone(const IShadowStateManager* Shado
 	return clone;
 }
 
-void UArticyCloneableObject::AddClone(UArticyPrimitive* Clone, int32 CloneId)
+void UArticyCloneableObject::AddClone(UArticyObject* Clone, int32 CloneId)
 {
 	if(!ensure(Clone))
 		return;
@@ -286,7 +288,7 @@ void UArticyDatabase::LoadPackage(FString PackageName)
 			continue;
 
 		auto CloneContainer = NewObject<UArticyCloneableObject>(this);
-		UArticyPrimitive* InitialClone = DuplicateObject<UArticyPrimitive>(ArticyObject, this);
+		UArticyObject* InitialClone = DuplicateObject<UArticyObject>(ArticyObject, this);
 		CloneContainer->Init(InitialClone);
 		
 		LoadedObjectsById.Add(id, CloneContainer);
@@ -461,17 +463,17 @@ void UArticyDatabase::ChangePackageDefault(FName PackageName, bool bIsDefaultPac
 
 //---------------------------------------------------------------------------//
 
-UArticyPrimitive* UArticyDatabase::GetObject(FArticyId Id, int32 CloneId, TSubclassOf<class UArticyObject> CastTo) const
+UArticyObject* UArticyDatabase::GetObject(FArticyId Id, int32 CloneId, TSubclassOf<class UArticyObject> CastTo) const
 {
 	return GetObjectInternal(Id, CloneId);
 }
 
-UArticyPrimitive* UArticyDatabase::GetObjectUnshadowed(FArticyId Id, int32 CloneId) const
+UArticyObject* UArticyDatabase::GetObjectUnshadowed(FArticyId Id, int32 CloneId) const
 {
 	return GetObjectInternal(Id, CloneId, true);
 }
 
-UArticyPrimitive* UArticyDatabase::GetObjectInternal(FArticyId Id, int32 CloneId, bool bForceUnshadowed) const
+UArticyObject* UArticyDatabase::GetObjectInternal(FArticyId Id, int32 CloneId, bool bForceUnshadowed) const
 {
 	UArticyCloneableObject* const * info = LoadedObjectsById.Find(Id);
 	return info && (*info) ? (*info)->Get(this, CloneId, bForceUnshadowed) : nullptr;
@@ -497,6 +499,7 @@ TArray<UArticyObject*> UArticyDatabase::GetObjectsOfClass(TSubclassOf<class UArt
 	TArray<UArticyObject*> arr;
 	TArray<UArticyCloneableObject*> Objects;
 	LoadedObjectsById.GenerateValueArray(Objects);
+
 	for (auto ClonableObject : Objects)
 	{
 		auto obj = ClonableObject->Get(this, CloneId, /*bForceUnshadowed = */ true);
@@ -507,9 +510,9 @@ TArray<UArticyObject*> UArticyDatabase::GetObjectsOfClass(TSubclassOf<class UArt
 	return arr;
 }
 
-TArray<UArticyPrimitive*> UArticyDatabase::GetAllObjects() const
+TArray<UArticyObject*> UArticyDatabase::GetAllObjects() const
 {
-	TArray<UArticyPrimitive*> arr;
+	TArray<UArticyObject*> arr;
 	TArray<UArticyCloneableObject*> Objects;
 	LoadedObjectsById.GenerateValueArray(Objects);
 	for (auto ClonableObject : Objects)
@@ -522,7 +525,7 @@ TArray<UArticyPrimitive*> UArticyDatabase::GetAllObjects() const
 
 //---------------------------------------------------------------------------//
 
-UArticyPrimitive* UArticyDatabase::CloneFrom(FArticyId Id, int32 NewCloneId, TSubclassOf<class UArticyObject> CastTo)
+UArticyObject* UArticyDatabase::CloneFrom(FArticyId Id, int32 NewCloneId, TSubclassOf<class UArticyObject> CastTo)
 {
 	auto info = LoadedObjectsById.Find(Id);
 	return info? (*info)->Clone(this, NewCloneId, true) : nullptr;
@@ -540,7 +543,7 @@ UArticyObject* UArticyDatabase::CloneFromByName(FName TechnicalName, int32 NewCl
 
 //---------------------------------------------------------------------------//
 
-UArticyPrimitive* UArticyDatabase::GetOrClone(FArticyId Id, int32 NewCloneId)
+UArticyObject* UArticyDatabase::GetOrClone(FArticyId Id, int32 NewCloneId)
 {
 	auto info = LoadedObjectsById.Find(Id);
 	return info? (*info)->Clone(this, NewCloneId, false) : nullptr;
