@@ -61,7 +61,7 @@ void FArticyEditorModule::ShutdownModule()
 {
 	if (UObjectInitialized())
 	{
-		UnregisterDefaultArticyRefWidgetExtensions();
+		GetCustomizationManager()->Shutdown();
 		UnregisterPluginSettings();
 		
 		if(ConsoleCommands != nullptr)
@@ -190,15 +190,6 @@ void FArticyEditorModule::RegisterPluginSettings() const
 		);
 	}	
 }
-
-void FArticyEditorModule::UnregisterDefaultArticyRefWidgetExtensions() const
-{
-	for(const IArticyIdPropertyWidgetCustomizationFactory* DefaultFactory : DefaultArticyRefWidgetCustomizationFactories)
-	{
-		GetCustomizationManager()->UnregisterArticyIdPropertyWidgetCustomizationFactory(DefaultFactory);
-	}
-}
-
 
 void FArticyEditorModule::UnregisterPluginSettings() const
 {

@@ -62,11 +62,15 @@ public:
 	void CreateArticyIdPropertyWidgetCustomizations(const UArticyObject* ArticyObject, TArray<TSharedPtr<IArticyIdPropertyWidgetCustomization>>& OutCustomizations);
 
 private:
+	/** Is called from module shutdown */
+	void Shutdown();
 	/** Since we only want one customization manager, delete other constructors */
 	FArticyEditorCustomizationManager(const FArticyEditorCustomizationManager&) = delete;
 	FArticyEditorCustomizationManager& operator=(const FArticyEditorCustomizationManager&) = delete;
 
 
 	TArray<TSharedPtr<IArticyIdPropertyWidgetCustomizationFactory>> ArticyIdPropertyWidgetCustomizationFactories;
+
+	friend class FArticyEditorModule;
 };
 

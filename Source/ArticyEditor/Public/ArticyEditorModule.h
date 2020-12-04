@@ -58,7 +58,6 @@ public:
 	void RegisterToolTabs();
 
 	void UnregisterPluginSettings() const;
-	void UnregisterDefaultArticyRefWidgetExtensions() const;
 
 	void QueueImport();
 	bool IsImportQueued();
