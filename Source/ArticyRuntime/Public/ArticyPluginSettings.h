@@ -5,9 +5,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Templates/SharedPointer.h"
 #include "UObject/Object.h"
 #include "Engine/EngineTypes.h"
+#include "Launch/Resources/Version.h"
 #include "ArticyPluginSettings.generated.h"
 
 UCLASS(config = Engine, defaultconfig)

@@ -13,6 +13,7 @@
 #include "Serialization/JsonSerializer.h"
 #include "Runtime/Launch/Resources/Version.h"
 #include "EditorFramework/AssetImportData.h"
+#include "Misc/ConfigCacheIni.h"
 
 #define LOCTEXT_NAMESPACE "ArticyJSONFactory"
 
