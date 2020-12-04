@@ -110,7 +110,7 @@ UArticyImportData* FArticyEditorFunctionLibrary::GenerateImportDataAsset()
 	IFileManager::Get().FindFiles(ArticyImportFiles, *AbsoluteDirectoryPath, TEXT("articyue4"));
 	if (ArticyImportFiles.Num() == 0)
 	{
-		UE_LOG(LogArticyEditor, Error, TEXT("Failed creation of import data asset. No .articyue4 file found in the project's articy directory. Please check the plugin settings for the correct articy directory and try again."));
+		UE_LOG(LogArticyEditor, Error, TEXT("Failed creation of import data asset. No .articyue4 file found in directory %s. Please check the plugin settings for the correct articy directory and try again."), *ArticyDirectory);
 		return nullptr;
 	}
 	
