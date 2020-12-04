@@ -64,7 +64,11 @@ public:
 	/** Those functions will primarily flush the config so changes get written to the config file */
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
+#if ENGINE_MINOR_VERSION < 25
+	virtual void PostReloadConfig(class UProperty* PropertyThatWasLoaded) override;
+#else
 	virtual void PostReloadConfig(class FProperty* PropertyThatWasLoaded) override;
+#endif
 	virtual void PostInitProperties() override;
 
 	virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;

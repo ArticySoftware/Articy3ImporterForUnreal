@@ -94,7 +94,12 @@ void UArticyPluginSettings::PostEditChangeProperty(FPropertyChangedEvent& Proper
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
-void UArticyPluginSettings::PostReloadConfig(class FProperty* PropertyThatWasLoaded)
+// @TODO 
+#if ENGINE_MINOR_VERSION < 25
+void UArticyPluginSettings::PostReloadConfig(UProperty* PropertyThatWasLoaded)
+#else
+void UArticyPluginSettings::PostReloadConfig(FProperty* PropertyThatWasLoaded)
+#endif
 {
 	Super::PostReloadConfig(PropertyThatWasLoaded);
 	GConfig->Flush(false, GEngineIni);
