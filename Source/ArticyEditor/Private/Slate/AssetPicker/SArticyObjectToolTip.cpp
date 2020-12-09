@@ -43,16 +43,19 @@ void SArticyObjectToolTip::OnOpening()
 	{
 		SetContentWidget(CreateContentForEmpty());
 	}
+
+	bIsOpen = true;
 }
 
 void SArticyObjectToolTip::OnClosed()
 {
 	SetContentWidget(SNullWidget::NullWidget);
+	bIsOpen = false;
 }
 
 void SArticyObjectToolTip::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
-	if(CachedArticyId != ArticyIdAttribute.Get() || (!CachedArticyObject.IsValid() && !CachedArticyId.IsNull()))
+	if(bIsOpen == false && ((CachedArticyId != ArticyIdAttribute.Get()) || (!CachedArticyObject.IsValid() && !CachedArticyId.IsNull())))
 	{
 		UpdateWidget();
 	}

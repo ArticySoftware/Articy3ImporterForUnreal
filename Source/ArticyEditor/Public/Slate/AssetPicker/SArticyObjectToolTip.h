@@ -34,6 +34,7 @@ protected:
 	mutable FArticyId CachedArticyId;
 	mutable TWeakObjectPtr<UArticyObject> CachedArticyObject;
 	FSlateBrush TooltipBrush;
+	bool bIsOpen = false;
 
 	TSharedRef<SWidget> CreateTooltipWidget(FText NameText, TSharedRef<SVerticalBox> InfoBox);
 	TSharedRef<SWidget> CreateToolTipContent();
