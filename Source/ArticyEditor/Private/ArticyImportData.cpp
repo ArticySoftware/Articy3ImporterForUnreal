@@ -170,13 +170,14 @@ const FString& FAIDScriptMethod::GetCPPReturnType() const
 	//TODO change this once the ReturnType is changed from C#-style ('System.Void' ecc.) to something more generic!
 	if(ReturnType == "string")
 	{
-		const static auto String = FString{ "FString" };
+		const static auto String = FString{ "const FString&" };
 		return String;
 	}
-	if(ReturnType == "ArticyObject")
+	if(ReturnType == "object")
 	{
-		const static auto ArticyObject = FString{ "UArticyObject*" };
-		return ArticyObject;
+		// object is pretty much all encompassing. We only support them as UArticyPrimitives right now, which means GetObj(...) and self works.
+		const static auto ArticyPrimitive = FString{ "UArticyPrimitive*" };
+		return ArticyPrimitive;
 	}
 	
 	return ReturnType;
@@ -210,14 +211,62 @@ const FString& FAIDScriptMethod::GetCPPDefaultReturn() const
 	return Nothing;
 }
 
+const FString FAIDScriptMethod::GetCPPParameters() const
+{
+	FString Parameters = "";
+
+	for(const auto& Parameter : ParameterList)
+	{
+		FString Type = Parameter.Type;
+
+		if(Type.Equals("string"))
+		{
+			Type = TEXT("const FString&");
+		}
+		else if(Type.Equals("object"))
+		{
+			Type = TEXT("UArticyPrimitive*");
+		}
+
+		Parameters += Type + TEXT(" ") + Parameter.Name + TEXT(", ");
+	}
+
+	return Parameters.LeftChop(2);
+}
+
+const FString FAIDScriptMethod::GetArguments() const
+{
+	FString Parameters = "";
+
+	for (const auto& Argument: ArgumentList)
+	{
+		Parameters += Argument + TEXT(", ");
+	}
+
+	return Parameters.LeftChop(2);
+}
+
+const FString FAIDScriptMethod::GetOriginalParametersForDisplayName() const
+{
+	FString DisplayNameSuffix = "";
+
+	for(const auto& OriginalParameterType : OriginalParameterTypes)
+	{
+		DisplayNameSuffix += OriginalParameterType + TEXT(", ");
+	}
+
+	return DisplayNameSuffix.LeftChop(2);
+}
+
 void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString> &OverloadedMethods)
 {
 	JSON_TRY_STRING(Json, Name);
 	JSON_TRY_STRING(Json, ReturnType);
 
 	BlueprintName = Name + TEXT("_");
-	ParameterList = TEXT("");
-	OrigininalParameterTypes = TEXT("");
+	ParameterList.Empty();
+	OriginalParameterTypes.Empty();
+
 	const TArray<TSharedPtr<FJsonValue>>* items;
 
 	if(Json->TryGetArrayField(TEXT("Parameters"), items))
@@ -237,32 +286,18 @@ void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString
 			formattedType[0] = FText::FromString(Type).ToUpper().ToString()[0];
 			BlueprintName += formattedType;
 
-			OrigininalParameterTypes += ", " + Type;
-
-			//string -> const FString& (because UE4 wants a const reference for strings..)
-			if(Type.Equals(TEXT("string")))
-				Type = TEXT("const FString&");
-			else if(Type.Equals(TEXT("ArticyObject")))
-				Type = TEXT("UArticyObject*");
+			OriginalParameterTypes.Add(Type);
 
 			//append to parameter list
-			ParameterList += TEXT(", ") + Type + TEXT(" ") + Param;
-			ArgumentList += TEXT(", ") + Param;
+			ParameterList.Emplace(Type, Param);
+			ArgumentList.Add(Param);
 		}
-
-		//remove the leading ", "
-		if(ParameterList.Len() >= 2)
-			ParameterList.RemoveAt(0, 2);
-		if(ParameterList.Len() >= 2)
-			ArgumentList.RemoveAt(0, 2);
-		if(OrigininalParameterTypes.Len() >= 2)
-			OrigininalParameterTypes.RemoveAt(0, 2);
 	}
 
 	if(BlueprintName.EndsWith("_"))
 		BlueprintName.RemoveAt(BlueprintName.Len() - 1);
 
-	// deterimine if this is an overloaded blueprint function
+	// determine if this is an overloaded blueprint function
 	static TMap<FString, FString> UsedBlueprintMethodsNames;
 	if (UsedBlueprintMethodsNames.Contains(Name))
 	{
