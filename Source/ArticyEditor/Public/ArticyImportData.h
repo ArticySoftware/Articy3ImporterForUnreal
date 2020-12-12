@@ -155,10 +155,10 @@ struct FAIDScriptMethodParameter
 	FAIDScriptMethodParameter() {}
 	FAIDScriptMethodParameter(FString InType, FString InName) : Type(InType), Name(InName) {}
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "ScriptMethods")
 	FString Type;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "ScriptMethods")
 	FString Name;
 };
 
