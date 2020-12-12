@@ -44,21 +44,12 @@ void SArticyObjectToolTip::OnOpening()
 		SetContentWidget(CreateContentForEmpty());
 	}
 
-	bIsOpen = true;
+	UpdateWidget();
 }
 
 void SArticyObjectToolTip::OnClosed()
 {
 	SetContentWidget(SNullWidget::NullWidget);
-	bIsOpen = false;
-}
-
-void SArticyObjectToolTip::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
-{
-	if(bIsOpen == false && ((CachedArticyId != ArticyIdAttribute.Get()) || (!CachedArticyObject.IsValid() && !CachedArticyId.IsNull())))
-	{
-		UpdateWidget();
-	}
 }
 
 TSharedRef<SWidget> SArticyObjectToolTip::CreateTooltipWidget(FText NameText, TSharedRef<SVerticalBox> InfoBox)

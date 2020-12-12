@@ -27,14 +27,12 @@ public:
 	virtual void OnClosed() override;
 
 protected:
-	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	void UpdateWidget();
 
 	TAttribute<FArticyId> ArticyIdAttribute;
 	mutable FArticyId CachedArticyId;
 	mutable TWeakObjectPtr<UArticyObject> CachedArticyObject;
 	FSlateBrush TooltipBrush;
-	bool bIsOpen = false;
 
 	TSharedRef<SWidget> CreateTooltipWidget(FText NameText, TSharedRef<SVerticalBox> InfoBox);
 	TSharedRef<SWidget> CreateToolTipContent();
