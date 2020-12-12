@@ -59,7 +59,7 @@ void GenerateUserMethods(CodeFileGenerator* header, const UArticyImportData* Dat
 			if(bCreateBlueprintableUserMethods)
 			{
 				FString args = "";
-				if(!method.ArgumentList.Num() == 0)
+				if(method.ArgumentList.Num() != 0)
 				{
 					args = FString::Printf(TEXT(", %s"), *method.GetArguments());
 				}
