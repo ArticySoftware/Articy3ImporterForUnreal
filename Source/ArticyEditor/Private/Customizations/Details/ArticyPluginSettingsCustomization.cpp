@@ -24,7 +24,7 @@ FArticyPluginSettingsCustomization::~FArticyPluginSettingsCustomization()
 {
 	// closing the settings window means we no longer want to refresh the UI
 	FArticyEditorModule& ArticyEditorModule = FModuleManager::Get().GetModuleChecked<FArticyEditorModule>("ArticyEditor");
-	ArticyEditorModule.OnImportFinished.Remove(RefreshHandle);
+	ArticyEditorModule.OnAssetsGenerated.Remove(RefreshHandle);
 }
 
 TSharedRef<IDetailCustomization> FArticyPluginSettingsCustomization::MakeInstance()
@@ -38,16 +38,17 @@ void FArticyPluginSettingsCustomization::CustomizeDetails(IDetailLayoutBuilder& 
 
 	// after importing, refresh the custom UI
 	FArticyEditorModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyEditorModule>("ArticyEditor");
-	RefreshHandle = ArticyImporterModule.OnImportFinished.AddRaw(this, &FArticyPluginSettingsCustomization::RefreshSettingsUI);
+	RefreshHandle = ArticyImporterModule.OnAssetsGenerated.AddRaw(this, &FArticyPluginSettingsCustomization::RefreshSettingsUI);
 
-	const UArticyDatabase* OriginalDatabase = UArticyDatabase::GetMutableOriginal();
+	TWeakObjectPtr<const UArticyDatabase> OriginalDatabase = UArticyDatabase::GetMutableOriginal();
 	
-	if (!OriginalDatabase) {
+	if (!OriginalDatabase.IsValid()) {
 
 		// if there was no database found, check if we are still loading assets; if we are, refresh the custom UI once it's done
 		FAssetRegistryModule& AssetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
 
-		if (AssetRegistry.Get().IsLoadingAssets()) {
+		if (AssetRegistry.Get().IsLoadingAssets()) 
+		{
 			AssetRegistry.Get().OnFilesLoaded().AddSP(this, &FArticyPluginSettingsCustomization::RefreshSettingsUI);
 		}
 		
@@ -86,7 +87,6 @@ void FArticyPluginSettingsCustomization::RefreshSettingsUI()
 	// the refresh will cause a new instance to be created and used, therefore clear the outdated refresh delegate handle
 	FArticyEditorModule& ArticyImporterModule = FModuleManager::Get().GetModuleChecked<FArticyEditorModule>("ArticyEditor");
 	ArticyImporterModule.OnImportFinished.Remove(RefreshHandle);
-	
 }
 
 #undef LOCTEXT_NAMESPACE

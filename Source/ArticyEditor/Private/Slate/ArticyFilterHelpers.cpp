@@ -16,7 +16,7 @@
 class FFrontendFilter_ArticyObjectFilterExpressionContext : public ITextFilterExpressionContext
 {
 public:
-	typedef TRemoveReference<FAssetFilterType>::Type* FAssetFilterTypePtr;
+	typedef TRemoveReference<FArticyObjectFilterType>::Type* FArticyObjectFilterTypePtr;
 
 	FFrontendFilter_ArticyObjectFilterExpressionContext()
 		: AssetPtr(nullptr)
@@ -29,7 +29,7 @@ public:
 	{
 	}
 
-	void SetAsset(FAssetFilterTypePtr InAsset)
+	void SetAsset(FArticyObjectFilterTypePtr InAsset)
 	{
 		AssetPtr = InAsset;
 	}
@@ -169,7 +169,7 @@ public:
 private:
 
 	/** Pointer to the asset we're currently filtering */
-	FAssetFilterTypePtr AssetPtr;
+	FArticyObjectFilterTypePtr AssetPtr;
 
 	/** Are we supposed to include the class name in our basic string tests? */
 	bool bIncludeClassName;
@@ -270,9 +270,8 @@ private:
 };
 
 
-FFrontendFilter_ArticyObject::FFrontendFilter_ArticyObject()
-	: FFrontendFilter(nullptr)
-	, TextFilterExpressionContext(MakeShareable(new FFrontendFilter_ArticyObjectFilterExpressionContext()))
+FFrontendFilter_ArticyObject::FFrontendFilter_ArticyObject() :
+	 TextFilterExpressionContext(MakeShareable(new FFrontendFilter_ArticyObjectFilterExpressionContext()))
 	, TextFilterExpressionEvaluator(ETextFilterExpressionEvaluatorMode::Complex)
 {
 }
@@ -282,7 +281,7 @@ FFrontendFilter_ArticyObject::~FFrontendFilter_ArticyObject()
 
 }
 
-bool FFrontendFilter_ArticyObject::PassesFilter(FAssetFilterType InItem) const
+bool FFrontendFilter_ArticyObject::PassesFilter(FArticyObjectFilterType InItem) const
 {
 	TextFilterExpressionContext->SetAsset(&InItem);
 	const bool bMatched = TextFilterExpressionEvaluator.TestTextFilter(*TextFilterExpressionContext);
@@ -324,7 +323,7 @@ FArticyClassRestrictionFilter::FArticyClassRestrictionFilter(TSubclassOf<UArticy
 {
 }
 
-bool FArticyClassRestrictionFilter::PassesFilter(FAssetFilterType InItem) const
+bool FArticyClassRestrictionFilter::PassesFilter(FArticyObjectFilterType InItem) const
 {
 	if(bExactClass)
 	{

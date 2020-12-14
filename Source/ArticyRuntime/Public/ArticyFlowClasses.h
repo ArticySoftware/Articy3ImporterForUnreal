@@ -32,7 +32,7 @@ class ARTICYRUNTIME_API UArticyDialogue : public UArticyNode
 	
 public:
 
-	EArticyPausableType GetType() override { return EArticyPausableType::Dialog; }
+	EArticyPausableType GetType() override { return EArticyPausableType::Dialogue; }
 };
 
 /**
@@ -45,7 +45,7 @@ class ARTICYRUNTIME_API UArticyDialogueFragment : public UArticyNode
 	
 public:
 
-	EArticyPausableType GetType() override { return EArticyPausableType::DialogFragment; }
+	EArticyPausableType GetType() override { return EArticyPausableType::DialogueFragment; }
 };
 
 /**

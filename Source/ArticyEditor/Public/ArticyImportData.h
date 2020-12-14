@@ -1,11 +1,10 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ArticyHelpers.h"
 #include "ObjectDefinitionsImport.h"
 #include "PackagesImport.h"
 #include "ArticyPackage.h"
@@ -149,6 +148,21 @@ public:
 //---------------------------------------------------------------------------//
 
 USTRUCT()
+struct FAIDScriptMethodParameter
+{
+	GENERATED_BODY()
+
+	FAIDScriptMethodParameter() {}
+	FAIDScriptMethodParameter(FString InType, FString InName) : Type(InType), Name(InName) {}
+	
+	UPROPERTY(VisibleAnywhere, Category = "ScriptMethods")
+	FString Type;
+
+	UPROPERTY(VisibleAnywhere, Category = "ScriptMethods")
+	FString Name;
+};
+
+USTRUCT()
 struct FAIDScriptMethod
 {
 	GENERATED_BODY()
@@ -163,19 +177,19 @@ public:
 
 	/** A list of parameters (type + parameter name), to be used in a method declaration. */
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
-	FString ParameterList;
+	TArray<FAIDScriptMethodParameter> ParameterList;
 	/** A list of arguments (values), including a leading comma, to be used when calling a method. */
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
-	FString ArgumentList;
+	TArray<FString> ArgumentList;
 	/** A list of parameters (original types), used for generating the blueprint function display name. */
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
-	FString OrigininalParameterTypes;
-
-
-
+	TArray<FString> OriginalParameterTypes;
 
 	const FString& GetCPPReturnType() const;
 	const FString& GetCPPDefaultReturn() const;
+	const FString GetCPPParameters() const;
+	const FString GetArguments() const;
+	const FString GetOriginalParametersForDisplayName() const;
 
 	void ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString> &OverloadedMethods);
 

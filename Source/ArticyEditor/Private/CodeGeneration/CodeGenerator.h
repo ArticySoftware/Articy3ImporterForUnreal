@@ -1,18 +1,13 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
+
 #include "CoreMinimal.h"
-#include "AssetRegistryModule.h"
 #include "ArticyImportData.h"
 #include "Misc/CompilationResult.h"
 
-//#include "CodeGenerator.generated.h"
-
-
-//---------------------------------------------------------------------------//
-//---------------------------------------------------------------------------//
 
 class UArticyImportData;
 

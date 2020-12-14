@@ -1,7 +1,7 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
 #include "ArticyRuntimeModule.h"
@@ -17,8 +17,8 @@ UENUM(BlueprintType, meta = (Bitflags))
 enum class EArticyPausableType : uint8
 {
 	FlowFragment,
-	Dialog,
-	DialogFragment,
+	Dialogue,
+	DialogueFragment,
 	Hub,
 	Jump,
 	Condition,
@@ -68,8 +68,8 @@ public:
 	//---------------------------------------------------------------------------//
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup", meta=(Bitmask, BitmaskEnum = "EArticyPausableType"))
-	uint8 PauseOn = 1 << uint8(EArticyPausableType::DialogFragment)
-					| 1 << uint8(EArticyPausableType::Dialog)
+	uint8 PauseOn = 1 << uint8(EArticyPausableType::DialogueFragment)
+					| 1 << uint8(EArticyPausableType::Dialogue)
 					| 1 << uint8(EArticyPausableType::FlowFragment);
 
 	/**
@@ -134,6 +134,7 @@ public:
 	 */
 	TArray<FArticyBranch> Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth);
 
+	void SetPauseOn(EArticyPausableType Types);
 	/** Returns true if Node is one of the PauseOn types. */
 	bool ShouldPauseOn(IArticyFlowObject* Node) const;
 

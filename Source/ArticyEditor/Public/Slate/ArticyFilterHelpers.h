@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 #pragma once
@@ -12,24 +11,33 @@
 
 #define LOCTEXT_NAMESPACE "ArticyFilterHelpers"
 
+typedef const FAssetData& FArticyObjectFilterType;
+typedef TFilterCollection<FArticyObjectFilterType> FArticyObjectFilterCollectionType;
+
 typedef const UArticyVariable*& FArticyVariableFilterType;
 typedef TFilterCollection<const UArticyVariable*&> FArticyVariableFilterCollectionType;
 
 /** A filter for testing articy objects for various traits such as display name, speaker name, text etc. */
-class FFrontendFilter_ArticyObject : public FFrontendFilter
+class FFrontendFilter_ArticyObject : public IFilter<FArticyObjectFilterType>
 {
 public:
 	FFrontendFilter_ArticyObject();
 	~FFrontendFilter_ArticyObject();
 
 	// FFrontendFilter implementation
-	virtual FString GetName() const override { return TEXT("ArticyObjectFilter"); }
-	virtual FText GetDisplayName() const override { return LOCTEXT("FrontendFilter_ArticyObjectFilter", "Articy Object Filter"); }
-	virtual FText GetToolTipText() const override { return LOCTEXT("FrontendFilter_ArticyObjectTooltip", "Show only articy objects that match the criteria"); }
+	virtual FString GetName() const { return TEXT("ArticyObjectFilter"); }
+	virtual FText GetDisplayName() const { return LOCTEXT("FrontendFilter_ArticyObjectFilter", "Articy Object Filter"); }
+	virtual FText GetToolTipText() const { return LOCTEXT("FrontendFilter_ArticyObjectTooltip", "Show only articy objects that match the criteria"); }
 
 	// IFilter implementation
-	virtual bool PassesFilter(FAssetFilterType InItem) const override;
+	virtual bool PassesFilter(FArticyObjectFilterType InItem) const override;
+	
+	DECLARE_DERIVED_EVENT(FFrontendFilter_ArticyObject, IFilter<FArticyObjectFilterType>::FChangedEvent, FChangedEvent);
+	virtual FChangedEvent& OnChanged() override { return ChangedEvent; }
 
+	FChangedEvent ChangedEvent;
+protected:
+	void BroadcastChangedEvent() const { ChangedEvent.Broadcast(); }
 public:
 	/** Returns the unsanitized and unsplit filter terms */
 	FText GetRawFilterText() const;
@@ -52,7 +60,7 @@ private:
 	FTextFilterExpressionEvaluator TextFilterExpressionEvaluator;
 };
 
-class FArticyClassRestrictionFilter : public IFilter<FAssetFilterType>
+class FArticyClassRestrictionFilter : public IFilter<FArticyObjectFilterType>
 {
 public:
 	FArticyClassRestrictionFilter(TSubclassOf<UArticyObject> AllowedClass, bool bExactClass);
@@ -60,10 +68,10 @@ public:
 	void UpdateFilteredClass(TSubclassOf<UArticyObject> NewAllowedClass) {	AllowedClass = NewAllowedClass;	OnChanged().Broadcast(); }
 	void UpdateExactClass(bool bNewExactClass) { bExactClass = bNewExactClass; OnChanged().Broadcast(); }
 	// IFilter implementation
-	virtual bool PassesFilter(FAssetFilterType InItem) const override;
+	virtual bool PassesFilter(FArticyObjectFilterType InItem) const override;
 	
 	// IFilter implementation
-	DECLARE_DERIVED_EVENT(FArticyClassRestrictionFilter, IFilter<FAssetFilterType>::FChangedEvent, FChangedEvent);
+	DECLARE_DERIVED_EVENT(FArticyClassRestrictionFilter, IFilter<FArticyObjectFilterType>::FChangedEvent, FChangedEvent);
 	virtual FChangedEvent& OnChanged() override { return ChangedEvent; }
 
 	FChangedEvent ChangedEvent;

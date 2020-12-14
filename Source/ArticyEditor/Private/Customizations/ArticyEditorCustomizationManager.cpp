@@ -40,3 +40,8 @@ void FArticyEditorCustomizationManager::CreateArticyIdPropertyWidgetCustomizatio
 		}
 	}
 }
+
+void FArticyEditorCustomizationManager::Shutdown()
+{
+	ArticyIdPropertyWidgetCustomizationFactories.Empty();
+}

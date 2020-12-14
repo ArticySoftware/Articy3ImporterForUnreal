@@ -1,6 +1,5 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
 
 
@@ -24,17 +23,17 @@ void GenerateMethodInterface(CodeFileGenerator* header, const UArticyImportData*
 			if(bCreateBlueprintableUserMethods)
 			{
 				FString displayName = method.Name;
-				if(method.bIsOverloadedFunction && method.OrigininalParameterTypes.Len() > 0)
-					displayName = FString::Printf(TEXT("%s (%s)"), *method.Name, *method.OrigininalParameterTypes);
+				if(method.bIsOverloadedFunction && method.OriginalParameterTypes.Num() > 0)
+					displayName = FString::Printf(TEXT("%s (%s)"), *method.Name, *method.GetOriginalParametersForDisplayName());
 
-				header->Method(method.GetCPPReturnType(), method.BlueprintName, method.ParameterList, nullptr, "", true, 
-					FString::Printf(TEXT("BlueprintCallable, BlueprintNativeEvent, meta=(DisplayName=\"%s\")"), *displayName));
-				header->Method("virtual " + method.GetCPPReturnType(), method.BlueprintName + "_Implementation", method.ParameterList, nullptr, "", false, "",
+				header->Method(method.GetCPPReturnType(), method.BlueprintName, method.GetCPPParameters(), nullptr, "", true, 
+					FString::Printf(TEXT("BlueprintCallable, BlueprintNativeEvent, Category=\"Articy Methods Provider\", meta=(DisplayName=\"%s\")"), *displayName));
+				header->Method("virtual " + method.GetCPPReturnType(), method.BlueprintName + "_Implementation", method.GetCPPParameters(), nullptr, "", false, "",
 					FString::Printf(TEXT("{ %s }"), *returnOrEmpty));
 			}
 			else
 			{
-				header->Method("virtual " + method.GetCPPReturnType(), method.Name, method.ParameterList, nullptr, "", false, "",
+				header->Method("virtual " + method.GetCPPReturnType(), method.Name, method.GetCPPParameters(), nullptr, "", false, "",
 					FString::Printf(TEXT("{ %s }"), *returnOrEmpty));
 			}
 		}
@@ -50,7 +49,7 @@ void GenerateUserMethods(CodeFileGenerator* header, const UArticyImportData* Dat
 	for(const auto method : Data->GetUserMethods())
 	{
 		const bool bIsVoid = method.GetCPPReturnType() == "void";
-		header->Method(method.GetCPPReturnType(), method.Name, method.ParameterList, [&]
+		header->Method(method.GetCPPReturnType(), method.Name, method.GetCPPParameters(), [&]
 		{
 			header->Line(FString::Printf(TEXT("auto methodProvider = GetUserMethodsProviderObject();")));
 			header->Line(FString::Printf(TEXT("if(!methodProvider) return %s;"), *method.GetCPPDefaultReturn()));
@@ -60,14 +59,14 @@ void GenerateUserMethods(CodeFileGenerator* header, const UArticyImportData* Dat
 			if(bCreateBlueprintableUserMethods)
 			{
 				FString args = "";
-				if(!method.ArgumentList.IsEmpty())
+				if(method.ArgumentList.Num() != 0)
 				{
-					args = FString::Printf(TEXT(", %s"), *method.ArgumentList);
+					args = FString::Printf(TEXT(", %s"), *method.GetArguments());
 				}
 				header->Line(FString::Printf(TEXT("%s%s::Execute_%s(methodProvider%s);"), *returnOrEmpty, *iClass, *method.BlueprintName, *args));
 			}
 			else
-				header->Line(FString::Printf(TEXT("%sCast<%s>(methodProvider)->%s(%s);"), *returnOrEmpty, *iClass, *method.Name, *method.ArgumentList));
+				header->Line(FString::Printf(TEXT("%sCast<%s>(methodProvider)->%s(%s);"), *returnOrEmpty, *iClass, *method.Name, *method.GetArguments()));
 
 		}, "", false, "", "const");
 	}
@@ -152,7 +151,7 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 				header->Line(FString::Printf(TEXT("Conditions.Add(%d, [&]"), cleanScriptHash));
 				header->Line("{");
 				{
-					//the fragment might be emtpy or contain only a comment, so we need to wrap it in
+					//the fragment might be empty or contain only a comment, so we need to wrap it in
 					//the ConditionOrTrue method
 					header->Line("return ConditionOrTrue(", false, true, 1);
 					//now comes the fragment (in next line and indented)

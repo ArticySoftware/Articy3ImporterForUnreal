@@ -179,10 +179,10 @@ UObject* UArticyFlowPlayer::GetMethodsProvider() const
 IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 {
 	auto db = UArticyDatabase::Get(this);
-	auto unshadowedObject = db->GetObjectUnshadowed(Cast<UArticyPrimitive>(Node)->GetId());
+	UArticyPrimitive* UnshadowedObject = db->GetObjectUnshadowed(Cast<UArticyPrimitive>(Node)->GetId());
 
 	// handle pins, because we can not request them directly from the db 
-	if (!unshadowedObject)
+	if (!UnshadowedObject)
 	{
 		auto pinOwner = db->GetObjectUnshadowed(Cast<UArticyFlowPin>(Node)->GetOwner()->GetId());
 
@@ -197,13 +197,13 @@ IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 		{
 			if (pin->GetId() == targetId)
 			{
-				unshadowedObject = pin;
+				UnshadowedObject = pin;
 				break;
 			}
 		}
 	}
 
-	return Cast<IArticyFlowObject>(unshadowedObject);
+	return Cast<IArticyFlowObject>(UnshadowedObject);
 }
 
 //---------------------------------------------------------------------------//
@@ -305,6 +305,18 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 	}
 
 	return OutBranches;
+}
+
+void UArticyFlowPlayer::SetPauseOn(EArticyPausableType Types)
+{
+	PauseOn = 1 << uint8(Types & EArticyPausableType::DialogueFragment)
+		| 1 << uint8(Types & EArticyPausableType::Dialogue)
+		| 1 << uint8(Types & EArticyPausableType::FlowFragment)
+		| 1 << uint8(Types & EArticyPausableType::Hub)
+		| 1 << uint8(Types & EArticyPausableType::Jump)
+		| 1 << uint8(Types & EArticyPausableType::Condition)
+		| 1 << uint8(Types & EArticyPausableType::Instruction)
+		| 1 << uint8(Types & EArticyPausableType::Pin);
 }
 
 //---------------------------------------------------------------------------//

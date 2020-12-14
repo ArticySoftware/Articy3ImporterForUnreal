@@ -8,7 +8,7 @@
 #include "ArticyObject.h"
 #include "ArticyFlowPlayer.h"
 
-UArticyObject* UArticyFunctionLibrary::ArticyRef_GetObject(const FArticyRef& Ref, TSubclassOf<class UArticyObject> CastTo, const UObject* WorldContext)
+UArticyObject* UArticyFunctionLibrary::ArticyRef_GetObject(FArticyRef Ref, TSubclassOf<class UArticyObject> CastTo, const UObject* WorldContext)
 {
 	return Ref.GetObject(WorldContext);
 }
@@ -18,7 +18,7 @@ void UArticyFunctionLibrary::ArticyRef_SetObject(FArticyRef& Ref, UArticyObject*
 	Ref.SetReference(Object);
 }
 
-FArticyId UArticyFunctionLibrary::ArticyRef_GetObjectId(const FArticyRef& Ref)
+FArticyId UArticyFunctionLibrary::ArticyRef_GetObjectId(FArticyRef Ref)
 {
 	return Ref.GetId();
 }
@@ -38,7 +38,7 @@ bool UArticyFunctionLibrary::MatchesEffective(const FArticyRef& A, const FArticy
 	return A.MatchesEffective(B);
 }
 
-UArticyObject* UArticyFunctionLibrary::ArticyId_GetObject(const FArticyId& Id, TSubclassOf<class UArticyObject> CastTo, const UObject* WorldContext)
+UArticyObject* UArticyFunctionLibrary::ArticyId_GetObject(FArticyId Id, TSubclassOf<class UArticyObject> CastTo, const UObject* WorldContext)
 {
 	return Cast<UArticyObject>(Id.GetObject(WorldContext));
 }

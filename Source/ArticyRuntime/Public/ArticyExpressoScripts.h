@@ -1,7 +1,7 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
 //
+
 #pragma once
 
 #include "Internationalization/Regex.h"
@@ -16,7 +16,7 @@ class UArticyBool;
 class UArticyExpressoScripts;
 
 // #TODO Remove this and restore at the bottom in the future
-#if ENGINE_MINOR_VERSION == 25
+#if ENGINE_MINOR_VERSION >= 25
 #ifdef UProperty
 	#undef UProperty
 	#define UProperty FProperty
@@ -231,7 +231,7 @@ FORCEINLINE float operator/(const float& Lhs, const ExpressoType& Rhs)
 }
 
 /**
- * The database is used for accessing or cloning any articy object.
+ * The Expresso Scripts class is keeping track of conditions & instructions via hashes and manages parameters
  */
 UCLASS(abstract)
 class ARTICYRUNTIME_API UArticyExpressoScripts : public UObject

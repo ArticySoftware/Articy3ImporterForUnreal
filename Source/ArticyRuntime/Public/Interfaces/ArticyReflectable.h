@@ -10,7 +10,7 @@
 #include "ArticyReflectable.generated.h"
 
 // #TODO Remove this and restore at the bottom in the future
-#if ENGINE_MINOR_VERSION == 25
+#if ENGINE_MINOR_VERSION >= 25
 #ifdef UProperty
 	#undef UProperty
 	#define UProperty FProperty

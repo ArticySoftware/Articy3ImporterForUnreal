@@ -169,9 +169,15 @@ void FArticyPackageDef::GatherScripts(UArticyImportData* Data) const
 UArticyPackage* FArticyPackageDef::GeneratePackageAsset(UArticyImportData* Data) const
 {
 	const FString PackageName = GetFolder();
-	const FString PackagePath = ArticyHelpers::ArticyGeneratedFolder / PackageName;
+	const FString PackagePath = ArticyHelpers::GetArticyGeneratedFolder() / PackageName;
 
-	auto AssetPackage = CreatePackage(nullptr, *PackagePath);
+	// @TODO Engine Versioning
+#if ENGINE_MINOR_VERSION >= 26
+	UPackage* AssetPackage = CreatePackage(*PackagePath);
+#else
+	UPackage* AssetPackage = CreatePackage(nullptr, *PackagePath);
+#endif
+
 	AssetPackage->FullyLoad();
 
 	const FString AssetName = FPaths::GetBaseFilename(PackageName);

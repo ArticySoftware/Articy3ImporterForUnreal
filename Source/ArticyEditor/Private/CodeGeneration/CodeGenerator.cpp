@@ -2,7 +2,6 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 //
 
-
 #include "CodeGenerator.h"
 #include "ArticyImportData.h"
 #include "DatabaseGenerator.h"
@@ -20,12 +19,11 @@
 #include "ArticyPluginSettings.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Misc/FileHelper.h"
-#include "Dialogs/Dialogs.h"
-#include "IContentBrowserSingleton.h"
 #include "ObjectTools.h"
 #include "HAL/PlatformFilemanager.h"
 #include "Misc/App.h"
 #include "Misc/MessageDialog.h"
+#include "Dialogs/Dialogs.h"
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
@@ -148,7 +146,7 @@ bool CodeGenerator::DeleteGeneratedAssets()
 {
 	FAssetRegistryModule& AssetRegistry = FModuleManager::Get().GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> OutAssets;
-	AssetRegistry.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), OutAssets, true, false);
+	AssetRegistry.Get().GetAssetsByPath(FName(*ArticyHelpers::GetArticyGeneratedFolder()), OutAssets, true, false);
 	
 	TArray<UObject*> ExistingAssets;
 	TArray<FAssetData> InvalidAssets;
@@ -284,7 +282,7 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	//gather all articy assets to save them
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> GeneratedAssets;
-	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::ArticyGeneratedFolder), GeneratedAssets, true);
+	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::GetArticyGeneratedFolder()), GeneratedAssets, true);
 
 	TArray<UPackage*> PackagesToSave;
 

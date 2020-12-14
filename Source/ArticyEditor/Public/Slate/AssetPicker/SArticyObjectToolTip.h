@@ -27,7 +27,6 @@ public:
 	virtual void OnClosed() override;
 
 protected:
-	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	void UpdateWidget();
 
 	TAttribute<FArticyId> ArticyIdAttribute;
@@ -35,8 +34,9 @@ protected:
 	mutable TWeakObjectPtr<UArticyObject> CachedArticyObject;
 	FSlateBrush TooltipBrush;
 
+	TSharedRef<SWidget> CreateTooltipWidget(FText NameText, TSharedRef<SVerticalBox> InfoBox);
 	TSharedRef<SWidget> CreateToolTipContent();
-	TSharedRef<SWidget> CreateEmptyContent();
+	TSharedRef<SWidget> CreateContentForEmpty();
 	/** Adds key value type content to the tooltip box (i.e. "Text: This Is Sample Text" */
 	void AddToToolTipInfoBox(const TSharedRef<SVerticalBox>& InfoBox, const FText& Key, const FText& Value, bool bImportant) const;
 private:

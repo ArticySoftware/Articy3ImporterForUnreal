@@ -49,7 +49,7 @@ void SArticyObjectAssetPicker::Construct(const FArguments& InArgs)
 	const bool bInShouldCloseWindowAfterMenuSelection = true;
 	const bool bCloseSelfOnly = true;
 
-	FrontendFilters = MakeShareable(new FAssetFilterCollectionType());
+	FrontendFilters = MakeShareable(new FArticyObjectFilterCollectionType());
 	FrontendFilters->OnChanged().AddSP(this, &SArticyObjectAssetPicker::OnFrontendFiltersChanged);
 	ArticyObjectFilter = MakeShareable(new FFrontendFilter_ArticyObject());
 	ClassFilter = MakeShareable(new FArticyClassRestrictionFilter(CurrentClassRestriction, bExactClass.Get()));

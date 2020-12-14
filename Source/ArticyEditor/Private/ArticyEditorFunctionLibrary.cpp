@@ -4,6 +4,7 @@
 
 
 #include "ArticyEditorFunctionLibrary.h"
+#include "ArticyPluginSettings.h"
 #include "ArticyEditorModule.h"
 #include "ArticyJSONFactory.h"
 #include "CodeGeneration/CodeGenerator.h"
@@ -99,23 +100,36 @@ UArticyImportData* FArticyEditorFunctionLibrary::GenerateImportDataAsset()
 	UArticyJSONFactory* Factory = NewObject<UArticyJSONFactory>();
 
 	TArray<FString> ArticyImportFiles;
-	IFileManager::Get().FindFiles(ArticyImportFiles, *FPaths::ProjectContentDir(), TEXT("articyue4"));
-
+	// path is virtual in the beginning
+	const FString ArticyDirectory = GetDefault<UArticyPluginSettings>()->ArticyDirectory.Path;
+	// remove /Game/ so that the non-virtual part remains
+	FString ArticyDirectoryNonVirtual = ArticyDirectory;
+	ArticyDirectoryNonVirtual.RemoveFromStart(TEXT("/Game/"));
+	// attach the non-virtual path to the content directory, then convert it to absolute
+	const FString AbsoluteDirectoryPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*(FPaths::ProjectContentDir() + ArticyDirectoryNonVirtual));
+	IFileManager::Get().FindFiles(ArticyImportFiles, *AbsoluteDirectoryPath, TEXT("articyue4"));
 	if (ArticyImportFiles.Num() == 0)
 	{
-		UE_LOG(LogArticyEditor, Error, TEXT("Failed creation of import data asset. No .articyue4 file found in the project's content folder. Aborting process."));
+		UE_LOG(LogArticyEditor, Error, TEXT("Failed creation of import data asset. No .articyue4 file found in directory %s. Please check the plugin settings for the correct articy directory and try again."), *ArticyDirectory);
 		return nullptr;
 	}
 	
 	const FString FileName = FPaths::GetBaseFilename(ArticyImportFiles[0], false);
 
-	const FString PackagePath = TEXT("/Game/") + FileName;
+	const FString PackagePath = ArticyDirectory + TEXT("/") + FileName;
 
 	const FString CleanedPackagePath = PackagePath.Replace(TEXT(" "), TEXT("_")).Replace(TEXT("."), TEXT("_"));
+
+	// @TODO Engine Versioning
+#if ENGINE_MINOR_VERSION >= 26
+	UPackage* Outer = CreatePackage(*CleanedPackagePath);
+#else
 	UPackage* Outer = CreatePackage(nullptr, *CleanedPackagePath);
+#endif
+
 	Outer->FullyLoad();
 
-	const FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir(), ArticyImportFiles[0]);
+	const FString FullPath = AbsoluteDirectoryPath + TEXT("/") + ArticyImportFiles[0];
 	bool bRequired = false;
 	UObject* ImportDataAsset = Factory->ImportObject(UArticyImportData::StaticClass(), Outer, FName(*FPaths::GetBaseFilename(CleanedPackagePath)), EObjectFlags::RF_Standalone | EObjectFlags::RF_Public, FullPath, nullptr, bRequired);
 

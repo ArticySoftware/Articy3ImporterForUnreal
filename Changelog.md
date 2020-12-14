@@ -1,3 +1,25 @@
+## Unreal Import 1.2.0 Changelog
+- Unreal Engine 4.26 Support
+- Unreal Engine 4.20 and 4.21 no longer supported
+- New Features:
+	- Custom Articy functions in expresso scripts now work properly with "self" and "GetObj" as parameters. The functions will use ArticyPrimitive as parameter. Keep in mind that "self" will give you a pin if used from inside a pin's expression. Cast to ArticyFlowPin and then call 'Get Owner' to access the node the pin is called on.
+	- Articy directory location and import asset location can now be changed! The previous hierarchy needs to be maintained. Either move your existing assets to the new location and change the "Articy Directory" in the plugin settings to the parent folder of the import asset (previously would be the Content folder), or make sure to delete all pre-existing articy assets (.articyue4 file, import asset, generated assets, assets such as images) and do a fresh import from articy to the new location.
+	
+- General:
+	- Added: Category "Articy Methods Provider" for articy custom functions
+	- Added: Support for ArticyRef/Id widget blueprint pins for Articy Function Library functions (Get Object on an ArticyRef for example)
+	- Fixed: Plugin Settings for package loading now refreshes upon asset regeneration rather than import.
+	- Fixed: Articy Object tooltips now display the Articy Id even without generated articy assets (before, you didn't know if the Id was set or not if the object didn't exist)
+	- Breaking Change: EArticyPausableType enum spelling for Dialog (-> Dialogue) and DialogFragment (-> DialogueFragment).
+	
+- C++:
+	- Added: SetPauseOn function for ArticyFlowPlayer that can take a bit-masked value to support multiple types at once
+	- Added: Automatic cleanup of your Articy Id Widget customization factories. While you can keep a reference to your factories yourself, you don't need to. The Articy Customization Manager will automatically clean up all factories that are registered at the point of shutdown.
+	- Fixed: Templated GetObjectOfClass function now contains the objects with the specified clone id, if available, rather than the base object
+	- Breaking Change: Articy Database now returns ArticyObjects rather than ArticyPrimitives (which were cast to ArticyObject in Blueprints automatically).
+	
+	
+
 ## Unreal Importer 1.1.0 Changelog
 - New Features:
 	- Articy Global Variables Debugger added to the articy toolbar
