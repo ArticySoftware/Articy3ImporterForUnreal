@@ -193,7 +193,7 @@ public:
 		*this = Value - 1;
 		return copy;
 	}
-	int& operator--() { return *this = Value + 1; }
+	int& operator--() { return *this = Value - 1; }
 
 	int& operator=(const ExpressoType &NewVal)
 	{
