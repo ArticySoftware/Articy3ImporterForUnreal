@@ -57,7 +57,7 @@ void SArticyIdProperty::Construct(const FArguments& InArgs)
 	this->PasteAction = InArgs._PasteAction;
 	this->bIsReadOnly = InArgs._bIsReadOnly;
 	
-	Cursor = EMouseCursor::Hand;
+	SetCursor(EMouseCursor::Hand);
 	
 	CachedArticyId = ArticyIdToDisplay.Get(FArticyId());
 	CachedArticyObject = !CachedArticyId.IsNull() ? UArticyObject::FindAsset(CachedArticyId) : nullptr;
