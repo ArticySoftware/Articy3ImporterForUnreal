@@ -58,7 +58,7 @@ UObject* UArticyJSONFactory::FactoryCreateFile(UClass* InClass, UObject* InParen
 
 	const bool bImportQueued = HandleImportDuringPlay(ArticyImportData);
 
-#if ENGINE_MINOR_VERSION >= 22
+#if ENGINE_MAJOR_VERSION >= 5 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 22)
 	GEditor->GetEditorSubsystem<UImportSubsystem>()->BroadcastAssetPreImport(this, InClass, InParent, InName, *FPaths::GetExtension(Filename));
 #else
 	FEditorDelegates::OnAssetPreImport.Broadcast(this, InClass, InParent, InName, *FPaths::GetExtension(Filename));
@@ -81,7 +81,7 @@ UObject* UArticyJSONFactory::FactoryCreateFile(UClass* InClass, UObject* InParen
 	}
 	
 
-#if ENGINE_MINOR_VERSION >= 22
+#if ENGINE_MAJOR_VERSION >= 5 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 22)
 	GEditor->GetEditorSubsystem<UImportSubsystem>()->BroadcastAssetPostImport(this, ArticyImportData);
 #else
 	FEditorDelegates::OnAssetPostImport.Broadcast(this, ArticyImportData);

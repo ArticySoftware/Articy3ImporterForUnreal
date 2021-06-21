@@ -95,7 +95,7 @@ void UArticyPluginSettings::PostEditChangeProperty(FPropertyChangedEvent& Proper
 }
 
 // @TODO 
-#if ENGINE_MINOR_VERSION < 25
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 25
 void UArticyPluginSettings::PostReloadConfig(UProperty* PropertyThatWasLoaded)
 #else
 void UArticyPluginSettings::PostReloadConfig(FProperty* PropertyThatWasLoaded)

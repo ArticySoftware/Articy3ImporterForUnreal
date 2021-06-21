@@ -218,7 +218,7 @@ void FArticyEditorModule::QueueImport()
 void FArticyEditorModule::OpenArticyWindow()
 {
     // @TODO Engine versioning
-#if ENGINE_MINOR_VERSION < 26
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26
 	FGlobalTabmanager::Get()->InvokeTab(ArticyWindowTabID);
 #else
 	FGlobalTabmanager::Get()->TryInvokeTab(ArticyWindowTabID);
@@ -228,7 +228,7 @@ void FArticyEditorModule::OpenArticyWindow()
 void FArticyEditorModule::OpenArticyGVDebugger()
 {
 	// @TODO Engine versioning
-#if ENGINE_MINOR_VERSION < 26
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26
 	FGlobalTabmanager::Get()->InvokeTab(ArticyGVDebuggerTabID);
 #else
 	FGlobalTabmanager::Get()->TryInvokeTab(ArticyGVDebuggerTabID);
@@ -288,7 +288,7 @@ void FArticyEditorModule::OnGeneratedCodeChanged(const TArray<FFileChangeData>& 
 	{
 		FText Message = FText::FromString(TEXT("It appears a generated code file is missing. Perform full reimport now?"));
 		FText Title = FText::FromString(TEXT("Articy detected an error"));
-#if ENGINE_MINOR_VERSION <= 24
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 		EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::YesNo, Message, Title);
 #else
 		EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::YesNo, Message, &Title);

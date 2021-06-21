@@ -10,7 +10,7 @@
 #include "ArticyReflectable.generated.h"
 
 // #TODO Remove this and restore at the bottom in the future
-#if ENGINE_MINOR_VERSION >= 25
+#if ENGINE_MAJOR_VERSION >= 5 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 25)
 #ifdef UProperty
 	#undef UProperty
 	#define UProperty FProperty
@@ -132,7 +132,7 @@ TValue& IArticyReflectable::GetProp(FName Property, int32 ArrayIndex)
 	return Empty;
 }
 
-#if ENGINE_MINOR_VERSION == 25
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION == 25
 #undef UProperty
 #define UProperty DEPRECATED_MACRO(4.25, "UProperty has been renamed to FProperty") FProperty
 #endif

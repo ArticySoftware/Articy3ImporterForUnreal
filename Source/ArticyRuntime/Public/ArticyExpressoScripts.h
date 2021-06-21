@@ -16,7 +16,7 @@ class UArticyBool;
 class UArticyExpressoScripts;
 
 // #TODO Remove this and restore at the bottom in the future
-#if ENGINE_MINOR_VERSION >= 25
+#if ENGINE_MAJOR_VERSION >= 5 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 25)
 #ifdef UProperty
 	#undef UProperty
 	#define UProperty FProperty
