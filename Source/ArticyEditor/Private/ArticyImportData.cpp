@@ -170,7 +170,7 @@ const FString& FAIDScriptMethod::GetCPPReturnType() const
 	//TODO change this once the ReturnType is changed from C#-style ('System.Void' ecc.) to something more generic!
 	if(ReturnType == "string")
 	{
-		const static auto String = FString{ "const FString&" };
+		const static auto String = FString{ "const FString" };
 		return String;
 	}
 	if(ReturnType == "object")
