@@ -2,11 +2,16 @@
   <img height="344" src="https://www.articy.com/articy-importer/unreal/ad_importer_large.png">
 </p>
 
-# ArticyImporter for Unreal Engine 4
+# ArticyImporter for Unreal Engine 5
 
-The Unreal Engine 4 importer allows integrating articy:draft content into Unreal projects and provides a simple C++ and blueprint interface to work with the data. We release this importer as a github open source project that will provide a substantial headstart into incorporating articy:draft data into Unreal projects while still allowing enough flexibility to adjust the importer to personal needs. 
+The Unreal Engine 5 importer allows integrating articy:draft content into Unreal projects and provides a simple C++ and blueprint interface to work with the data. We release this importer as a github open source project that will provide a substantial headstart into incorporating articy:draft data into Unreal projects while still allowing enough flexibility to adjust the importer to personal needs. 
 
 While full support is not guaranteed for this product, we're constantly working on improvemets and would love to hear your suggestions. Feel free to forward us your ideas or even better directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the importer.
+
+## Current working state
+ * This version compiles for UE 5 Preview 2
+ * There are known issues with the toolbar/custom UI integration that need to be fixed
+ * Auto-import already seems to work, as well as the main runtime functionality. (not extensively tested)
 
 
 # Table of contents
