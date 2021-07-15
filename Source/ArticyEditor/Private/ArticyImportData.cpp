@@ -532,6 +532,9 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 	const FRegexPattern unquotedWordDotWord(TEXT("(?<![\"a-zA-Z_])([a-zA-Z_]{1}\\w+\\.\\w+)"));
 	//match an assignment operator (an = sign that does not have any of [ = < > ] before it, and no = after it)
 	const FRegexPattern assignmentOperator(TEXT("(?<![=<>])=(?!=)"));
+	
+	// regex pattern to find literal string, even if they contain escaped quotes (looks nasty if string escaped...): "([^"\\]|\\[\s\S])*" 
+	const FRegexPattern literalStringPattern(TEXT("\"([^\"\\\\]|\\\\[\\s\\S])*\""));  
 
 	bool bCreateBlueprintableUserMethods = UArticyPluginSettings::Get()->bCreateBlueprintTypeForScriptMethods;
 
@@ -581,46 +584,68 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 			while(assignments.FindNext())
 				lastAssignment = assignments.GetMatchBeginning();
 
+			// since "line" gets modified after the gvAccess matcher was created
+			// we need to offset the values from the matcher based on the changes done to "line" in the loop
+			auto offset = 0;
+
 			//replace all remaining Namespace.Variable with *Namespace->Variable
 			//note: if the variable appears to the right of an assignment operator,
 			//write Namespace->Variable->Get() instead
-			auto offset = 0;
 			while(gvAccess.FindNext())
 			{
 				auto start = gvAccess.GetMatchBeginning() + offset;
 				auto end = gvAccess.GetMatchEnding() + offset;
-
-				if(lastAssignment < start)
+				
+				FRegexMatcher literalStrings(literalStringPattern, line);
+				auto inLiteral = false;
+				while (literalStrings.FindNext())
 				{
-					//there is an assignment operator to the left of this, thus get the raw value
-					line = line.Left(start) + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) +
-						TEXT("->Get()") + line.Mid(end);
-
-					offset += strlen(">") + strlen("->Get()");
-				}
-				else
-				{			
-					// if the value the variable should get assigned is a string, we cast it to FString
-					auto valueStr = line.Mid(end);
-					for (int i = 0; i < valueStr.Len(); i++)
+					// no offset, since this line copy is the current up-to-date one
+					auto literalStart = literalStrings.GetMatchBeginning();
+					auto literalEnd = literalStrings.GetMatchEnding();
+					
+					if ( start >= literalStart && end <= literalEnd )
 					{
-						auto currentChar = valueStr[i];
-						if (currentChar == TEXT(' ') || currentChar == TEXT('<') || currentChar == TEXT('>') || currentChar == TEXT('=') || currentChar == TEXT('+') || currentChar == TEXT('-'))
-							continue;
-						else if (currentChar == '\"' && i > 0)
-						{
-							valueStr.InsertAt(i, TEXT("(FString)"));
-							offset += strlen("(FString)");
-						}
-
+						inLiteral = true;
 						break;
 					}
-					
-					//get the dereferenced variable
-					line = line.Left(start) + TEXT("(*") + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + ")" + valueStr;
-					offset += strlen(".") + strlen(">") + strlen("()");
 				}
-			}
+				
+				if ( !inLiteral )
+				{
+					// only to GV replacement if we are not within a literal string
+					if(lastAssignment < start)
+					{
+						//there is an assignment operator to the left of this, thus get the raw value
+						line = line.Left(start) + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) +
+							TEXT("->Get()") + line.Mid(end);
+	
+						offset += strlen(">") + strlen("->Get()");
+					}
+					else
+					{			
+						// if the value the variable should get assigned is a string, we cast it to FString
+						auto valueStr = line.Mid(end);
+						for (int i = 0; i < valueStr.Len(); i++)
+						{
+							auto currentChar = valueStr[i];
+							if (currentChar == TEXT(' ') || currentChar == TEXT('<') || currentChar == TEXT('>') || currentChar == TEXT('=') || currentChar == TEXT('+') || currentChar == TEXT('-'))
+								continue;
+							else if (currentChar == '\"' && i > 0)
+							{
+								valueStr.InsertAt(i, TEXT("(FString)"));
+								offset += strlen("(FString)");
+							}
+	
+							break;
+						}
+						
+						//get the dereferenced variable
+						line = line.Left(start) + TEXT("(*") + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + ")" + valueStr;
+						offset += strlen(".") + strlen(">") + strlen("()");
+					}
+				} // !inLiteral
+			} // GV matching
 
 			//re-compose the string
 			string += line;
