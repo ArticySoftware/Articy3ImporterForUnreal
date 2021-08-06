@@ -23,14 +23,13 @@
 #include "HAL/FileManager.h"
 #include "Widgets/Images/SImage.h"
 #include "IDirectoryWatcher.h"
-#include "Framework/MultiBox/MultiBoxBuilder.h"
-#include "LevelEditor.h"
 #include "Customizations/ArticyPinFactory.h"
 #include "Customizations/AssetActions/AssetTypeActions_ArticyGV.h"
 #include "Customizations/Details/ArticyGVCustomization.h"
 #include "Customizations/Details/ArticyPluginSettingsCustomization.h"
 #include "Customizations/Details/ArticyIdCustomization.h"
 #include "Customizations/Details/ArticyRefCustomization.h"
+#include "ToolMenus.h"
 
 DEFINE_LOG_CATEGORY(LogArticyEditor)
 
@@ -42,7 +41,6 @@ void FArticyEditorModule::StartupModule()
 {
 	CustomizationManager = MakeShareable(new FArticyEditorCustomizationManager);
 	
-	RegisterArticyToolbar();
 	RegisterAssetTypeActions();
 	RegisterConsoleCommands();
 	RegisterDefaultArticyIdPropertyWidgetExtensions();
@@ -50,6 +48,7 @@ void FArticyEditorModule::StartupModule()
 	RegisterGraphPinFactory();
 	RegisterPluginSettings();
 	RegisterPluginCommands();
+	RegisterArticyToolbar();
 	// directory watcher has to be changed or removed as the results aren't quite deterministic
 	//RegisterDirectoryWatcher();
 	RegisterToolTabs();
@@ -130,16 +129,16 @@ TArray<UArticyPackage*> FArticyEditorModule::GetPackagesSlow()
 
 void FArticyEditorModule::RegisterArticyToolbar()
 {
-	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-	{/*
-		TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender());
-		MenuExtender->AddMenuExtension("WindowLayout", EExtensionHook::After, PluginCommands, FMenuExtensionDelegate::CreateRaw(this, &FStyleCheckerModule::AddMenuExtension));
-		LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MenuExtender);*/
-	}
+	// Grab the appropriate toolbar menu so we can extend it
+	UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.LevelToolbarQuickSettings");
+
 	{
-		TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender);
-		ToolbarExtender->AddToolBarExtension("Settings", EExtensionHook::After, PluginCommands, FToolBarExtensionDelegate::CreateRaw(this, &FArticyEditorModule::AddToolbarExtension));
-		LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
+		// Create a new section for Articy utilities
+		FToolMenuSection& Section = Menu->AddSection("ArticyUtilities", LOCTEXT("ArticyUtilities", "Articy Utilities"));
+
+		// Add buttons
+		Section.AddMenuEntryWithCommandList(FArticyEditorCommands::Get().OpenArticyImporter, PluginCommands);
+		Section.AddMenuEntryWithCommandList(FArticyEditorCommands::Get().OpenArticyGVDebugger, PluginCommands);
 	}
 }
 
@@ -313,24 +312,6 @@ void FArticyEditorModule::TriggerQueuedImport(bool b)
 	FArticyEditorFunctionLibrary::ReimportChanges();
 	// important to unqueue in the end to reset the state
 	UnqueueImport();
-}
-
-void FArticyEditorModule::AddToolbarExtension(FToolBarBuilder& Builder)
-{
-	Builder.AddComboButton(FUIAction(), FOnGetContent::CreateRaw(this, &FArticyEditorModule::OnGenerateArticyToolsMenu), FText::FromString(TEXT("Articy Tools")), TAttribute<FText>(), FSlateIcon(FArticyEditorStyle::GetStyleSetName(), "ArticyImporter.ArticyImporter.40") );
-	//Builder.AddToolBarButton(FArticyEditorCommands::Get().OpenPluginWindow, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FArticyEditorStyle::GetStyleSetName(), "ArticyImporter.ArticyImporter.40") );
-}
-
-TSharedRef<SWidget> FArticyEditorModule::OnGenerateArticyToolsMenu() const
-{
-	FMenuBuilder MenuBuilder(true, PluginCommands);
-
-	MenuBuilder.BeginSection("ArticyTools", LOCTEXT("ArticyTools", "Articy Tools"));
-	MenuBuilder.AddMenuEntry(FArticyEditorCommands::Get().OpenArticyImporter);
-	MenuBuilder.AddMenuEntry(FArticyEditorCommands::Get().OpenArticyGVDebugger);
-	MenuBuilder.EndSection();
-	
-	return MenuBuilder.MakeWidget();
 }
 
 TSharedRef<SDockTab> FArticyEditorModule::OnSpawnArticyMenuTab(const FSpawnTabArgs& SpawnTabArgs) const

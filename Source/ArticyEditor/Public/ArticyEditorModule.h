@@ -77,8 +77,6 @@ private:
 	void UnqueueImport();
 	void TriggerQueuedImport(bool b);
 	
-	void AddToolbarExtension(FToolBarBuilder& Builder);
-	TSharedRef<SWidget> OnGenerateArticyToolsMenu() const;
 	TSharedRef<class SDockTab> OnSpawnArticyMenuTab(const class FSpawnTabArgs& SpawnTabArgs) const;
 	TSharedRef<class SDockTab> OnSpawnArticyGVDebuggerTab(const class FSpawnTabArgs& SpawnTabArgs) const;
 	

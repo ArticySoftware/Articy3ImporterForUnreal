@@ -57,7 +57,8 @@ public class ArticyEditor : ModuleRules
 				"EditorWidgets",
 				"SourceControl",
 				"GraphEditor",
-				"ApplicationCore"
+				"ApplicationCore",
+				"ToolMenus",
 			}
 			);
 		

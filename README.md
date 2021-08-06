@@ -152,11 +152,9 @@ When exporting, chose your Unreal projects **Content** folder as the target for 
 
 After every export, going back to Unreal will trigger the ArticyImporter plugin to automatically parse the new file and show a prompt to import the changes. While this option is generally robust, there are certain cases in which more control over the import process is required.
 
-Therefore the articy importer menu, which can be accessed via the level toolbar, enables you to import with more control.
+Therefore the articy importer menu, which can be accessed via the Settings menu, enables you to import with more control.
 
-<p align="center">
-  <img src="https://www.articy.com/articy-importer/unreal/articywindow.png">
-</p>
+![](docs/ImporterButtonUE5.png)
 
 - Full Reimport: This option will always regenerate code and compile it, and afterwards generate the articy assets
 - Import Changes: This option will only regenerate code and compile it if necessary, but will always regenerate assets. This is generally faster than a full reimport and is the same as clicking on 'Import' on the prompt Unreal shows you when you've exported.
@@ -289,7 +287,7 @@ store the branch in every button. When you instantiate the button you should pas
 If you want to learn more about the flow player and its events you can read the [unity documentation](https://www.articy.com/articy-importer/unity/html/howto_flowplayer.htm) as both implementations are based on the same principles.
 
 ## Articy Global Variables Debugger
-The Global Variables debugger can be accessed in the toolbar. It shows all global variables while the game is running and lets you search by namespace or variable namewhich makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
+The Global Variables debugger can be accessed in the Settings menu on the right hand side of the level editor. It shows all global variables while the game is running and lets you search by namespace or variable namewhich makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
 Furthermore, you can also change the global variables while the game is running, and your game code that listens to variable changes is going to get triggered. This is useful to replicate specific conditions without needing to go through all steps manually.
 For example, if your global variables control your quest states, checking a "quest accepted" global variable in the debugger will make your quest system initiate a quest.
 
