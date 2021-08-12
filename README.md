@@ -10,9 +10,7 @@ While full support is not guaranteed for this product, we're constantly working 
 
 ## Current working state
  * This version compiles for UE 5 Preview 2
- * There are known issues with the toolbar/custom UI integration that need to be fixed
  * Auto-import already seems to work, as well as the main runtime functionality. (not extensively tested)
-
 
 # Table of contents
 
