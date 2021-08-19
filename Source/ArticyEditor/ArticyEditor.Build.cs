@@ -57,7 +57,10 @@ public class ArticyEditor : ModuleRules
 				"EditorWidgets",
 				"SourceControl",
 				"GraphEditor",
-				"ApplicationCore"
+				"ApplicationCore",
+#if UE_5_0_OR_LATER
+				"ToolMenus",
+#endif
 			}
 			);
 		

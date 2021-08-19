@@ -76,9 +76,13 @@ private:
 
 	void UnqueueImport();
 	void TriggerQueuedImport(bool b);
-	
+
+	// Old tool UI hook callbacks required for UE4
+#if ENGINE_MAJOR_VERSION == 4
 	void AddToolbarExtension(FToolBarBuilder& Builder);
 	TSharedRef<SWidget> OnGenerateArticyToolsMenu() const;
+#endif
+	
 	TSharedRef<class SDockTab> OnSpawnArticyMenuTab(const class FSpawnTabArgs& SpawnTabArgs) const;
 	TSharedRef<class SDockTab> OnSpawnArticyGVDebuggerTab(const class FSpawnTabArgs& SpawnTabArgs) const;
 	

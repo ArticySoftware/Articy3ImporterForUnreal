@@ -2,12 +2,15 @@
   <img height="344" src="https://www.articy.com/articy-importer/unreal/ad_importer_large.png">
 </p>
 
-# ArticyImporter for Unreal Engine 4
+# ArticyImporter for Unreal Engine
 
-The Unreal Engine 4 importer allows integrating articy:draft content into Unreal projects and provides a simple C++ and blueprint interface to work with the data. We release this importer as a github open source project that will provide a substantial headstart into incorporating articy:draft data into Unreal projects while still allowing enough flexibility to adjust the importer to personal needs. 
+The Unreal Engine importer allows integrating articy:draft content into Unreal projects and provides a simple C++ and blueprint interface to work with the data. We release this importer as a github open source project that will provide a substantial headstart into incorporating articy:draft data into Unreal projects while still allowing enough flexibility to adjust the importer to personal needs. 
 
 While full support is not guaranteed for this product, we're constantly working on improvemets and would love to hear your suggestions. Feel free to forward us your ideas or even better directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the importer.
 
+## Unreal Engine 5 Early Access Support
+
+This version of the plugin compiles for Unreal Engine 5 Early Access 2. Be warned however that UE5 support is not fully tested and you should proceed with caution.
 
 # Table of contents
 
@@ -147,15 +150,19 @@ When exporting, chose your Unreal projects **Content** folder as the target for 
 
 After every export, going back to Unreal will trigger the ArticyImporter plugin to automatically parse the new file and show a prompt to import the changes. While this option is generally robust, there are certain cases in which more control over the import process is required.
 
-Therefore the articy importer menu, which can be accessed via the level toolbar, enables you to import with more control.
+For greater control over your imports, use the Articy Importer Menu. It can be accessed through the Articy Importer button on the Level Toolbar (UE4) or through the Settings menu (UE5).
 
-<p align="center">
-  <img src="https://www.articy.com/articy-importer/unreal/articywindow.png">
-</p>
+**Unreal Engine 4**
+![](https://www.articy.com/articy-importer/unreal/articywindow.png)
 
-- Full Reimport: This option will always regenerate code and compile it, and afterwards generate the articy assets
-- Import Changes: This option will only regenerate code and compile it if necessary, but will always regenerate assets. This is generally faster than a full reimport and is the same as clicking on 'Import' on the prompt Unreal shows you when you've exported.
-- Regenerate Assets: This option will only regenerate the articy assets based on the current import data asset and compiled code.
+**Unreal Engine 5**
+![](docs/ImporterButtonUE5.png)
+
+### Importer Modes
+
+- **Full Reimport**: This option will always regenerate code and compile it, and afterwards generate the articy assets
+- **Import Changes**: This option will only regenerate code and compile it if necessary, but will always regenerate assets. This is generally faster than a full reimport and is the same as clicking on 'Import' on the prompt Unreal shows you when you've exported.
+- **Regenerate Assets**: This option will only regenerate the articy assets based on the current import data asset and compiled code.
 
 # Using the API
 
@@ -284,7 +291,7 @@ store the branch in every button. When you instantiate the button you should pas
 If you want to learn more about the flow player and its events you can read the [unity documentation](https://www.articy.com/articy-importer/unity/html/howto_flowplayer.htm) as both implementations are based on the same principles.
 
 ## Articy Global Variables Debugger
-The Global Variables debugger can be accessed in the toolbar. It shows all global variables while the game is running and lets you search by namespace or variable namewhich makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
+The Global Variables debugger can be accessed in the toolbar at the top of the level editor (UE4) or the Settings menu on the right hand side of the level editor (UE5). It shows all global variables while the game is running and lets you search by namespace or variable namewhich makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
 Furthermore, you can also change the global variables while the game is running, and your game code that listens to variable changes is going to get triggered. This is useful to replicate specific conditions without needing to go through all steps manually.
 For example, if your global variables control your quest states, checking a "quest accepted" global variable in the debugger will make your quest system initiate a quest.
 
