@@ -29,7 +29,15 @@
 #include "Customizations/Details/ArticyPluginSettingsCustomization.h"
 #include "Customizations/Details/ArticyIdCustomization.h"
 #include "Customizations/Details/ArticyRefCustomization.h"
+
+#if ENGINE_MAJOR_VERSION >= 5
+// In UE5, you use the ToolMenus API to extend the UI
 #include "ToolMenus.h"
+#else
+// Otherwise, we have to jack into the level editor module and build a new button in
+#include "LevelEditor.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#endif
 
 DEFINE_LOG_CATEGORY(LogArticyEditor)
 
@@ -41,6 +49,7 @@ void FArticyEditorModule::StartupModule()
 {
 	CustomizationManager = MakeShareable(new FArticyEditorCustomizationManager);
 	
+	RegisterArticyToolbar(); 
 	RegisterAssetTypeActions();
 	RegisterConsoleCommands();
 	RegisterDefaultArticyIdPropertyWidgetExtensions();
@@ -48,7 +57,6 @@ void FArticyEditorModule::StartupModule()
 	RegisterGraphPinFactory();
 	RegisterPluginSettings();
 	RegisterPluginCommands();
-	RegisterArticyToolbar();
 	// directory watcher has to be changed or removed as the results aren't quite deterministic
 	//RegisterDirectoryWatcher();
 	RegisterToolTabs();
@@ -129,6 +137,7 @@ TArray<UArticyPackage*> FArticyEditorModule::GetPackagesSlow()
 
 void FArticyEditorModule::RegisterArticyToolbar()
 {
+#if ENGINE_MAJOR_VERSION >= 5
 	// Grab the appropriate toolbar menu so we can extend it
 	UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.LevelToolbarQuickSettings");
 
@@ -140,7 +149,36 @@ void FArticyEditorModule::RegisterArticyToolbar()
 		Section.AddMenuEntryWithCommandList(FArticyEditorCommands::Get().OpenArticyImporter, PluginCommands);
 		Section.AddMenuEntryWithCommandList(FArticyEditorCommands::Get().OpenArticyGVDebugger, PluginCommands);
 	}
+#else 
+	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
+	{
+		TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender);
+		ToolbarExtender->AddToolBarExtension("Settings", EExtensionHook::After, PluginCommands, FToolBarExtensionDelegate::CreateRaw(this, &FArticyEditorModule::AddToolbarExtension));
+		LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
+	}
+#endif
 }
+
+// Old toolbar code for UE4
+#if ENGINE_MAJOR_VERSION == 4
+void FArticyEditorModule::AddToolbarExtension(FToolBarBuilder& Builder)
+{
+	Builder.AddComboButton(FUIAction(), FOnGetContent::CreateRaw(this, &FArticyEditorModule::OnGenerateArticyToolsMenu), FText::FromString(TEXT("Articy Tools")), TAttribute<FText>(), FSlateIcon(FArticyEditorStyle::GetStyleSetName(), "ArticyImporter.ArticyImporter.40"));
+	//Builder.AddToolBarButton(FArticyEditorCommands::Get().OpenPluginWindow, NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FArticyEditorStyle::GetStyleSetName(), "ArticyImporter.ArticyImporter.40") );
+}
+
+TSharedRef<SWidget> FArticyEditorModule::OnGenerateArticyToolsMenu() const
+{
+	FMenuBuilder MenuBuilder(true, PluginCommands);
+
+	MenuBuilder.BeginSection("ArticyTools", LOCTEXT("ArticyTools", "Articy Tools"));
+	MenuBuilder.AddMenuEntry(FArticyEditorCommands::Get().OpenArticyImporter);
+	MenuBuilder.AddMenuEntry(FArticyEditorCommands::Get().OpenArticyGVDebugger);
+	MenuBuilder.EndSection();
+
+	return MenuBuilder.MakeWidget();
+}
+#endif
 
 void FArticyEditorModule::RegisterAssetTypeActions()
 {

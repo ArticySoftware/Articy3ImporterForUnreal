@@ -58,7 +58,9 @@ public class ArticyEditor : ModuleRules
 				"SourceControl",
 				"GraphEditor",
 				"ApplicationCore",
+#if UE_5_0_OR_LATER
 				"ToolMenus",
+#endif
 			}
 			);
 		
