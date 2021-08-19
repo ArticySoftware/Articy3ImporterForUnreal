@@ -1,3 +1,9 @@
+## Unreal Import 1.3.0 Changelog
+- Unreal Engine 5 Early Access 2 Support ([#41](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/41)).
+
+- Fixes:
+    - Fixed issue with plugin marking database and package assets for delete. Fixed in [#42](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/42). Resolves [#39](https://github.com/ArticySoftware/ArticyImporterForUnreal/issues/39).
+
 ## Unreal Import 1.2.0 Changelog
 - Unreal Engine 4.26 Support
 - Unreal Engine 4.20 and 4.21 no longer supported
