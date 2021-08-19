@@ -49,7 +49,6 @@ void FArticyEditorModule::StartupModule()
 {
 	CustomizationManager = MakeShareable(new FArticyEditorCustomizationManager);
 	
-	RegisterArticyToolbar(); 
 	RegisterAssetTypeActions();
 	RegisterConsoleCommands();
 	RegisterDefaultArticyIdPropertyWidgetExtensions();
@@ -57,6 +56,7 @@ void FArticyEditorModule::StartupModule()
 	RegisterGraphPinFactory();
 	RegisterPluginSettings();
 	RegisterPluginCommands();
+	RegisterArticyToolbar();
 	// directory watcher has to be changed or removed as the results aren't quite deterministic
 	//RegisterDirectoryWatcher();
 	RegisterToolTabs();
