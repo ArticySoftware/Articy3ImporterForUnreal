@@ -292,13 +292,15 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 		PackagesToSave.Add(AssetData.GetAsset()->GetOutermost());
 	}
 
-	// automatically save all articy assets
-	TArray<UPackage*> FailedToSavePackages;
-	FEditorFileUtils::PromptForCheckoutAndSave(PackagesToSave, false, false, &FailedToSavePackages);
+	// Check out all the assets we want to save
+	TArray<UPackage*> CheckedOutPackages;
+	FEditorFileUtils::CheckoutPackages(PackagesToSave, &CheckedOutPackages, false);
 
-	for (auto Package : FailedToSavePackages)
+	// Save the packages to disk
+	for (auto Package : PackagesToSave) { Package->SetDirtyFlag(true); }
+	if (!UEditorLoadingAndSavingUtils::SavePackages(PackagesToSave, true))
 	{
-		UE_LOG(LogArticyEditor, Error, TEXT("Could not save package %s"), *Package->GetName());
+		UE_LOG(LogArticyEditor, Error, TEXT("Failed to save packages. Make sure to save before submitting in Perforce."));
 	}
 
 	FArticyEditorModule::Get().OnAssetsGenerated.Broadcast();
