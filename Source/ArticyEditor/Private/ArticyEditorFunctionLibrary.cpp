@@ -121,7 +121,7 @@ UArticyImportData* FArticyEditorFunctionLibrary::GenerateImportDataAsset()
 	const FString CleanedPackagePath = PackagePath.Replace(TEXT(" "), TEXT("_")).Replace(TEXT("."), TEXT("_"));
 
 	// @TODO Engine Versioning
-#if ENGINE_MINOR_VERSION >= 26
+#if ENGINE_MAJOR_VERSION >= 5 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 26)
 	UPackage* Outer = CreatePackage(*CleanedPackagePath);
 #else
 	UPackage* Outer = CreatePackage(nullptr, *CleanedPackagePath);

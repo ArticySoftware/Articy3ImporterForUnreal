@@ -292,13 +292,15 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 		PackagesToSave.Add(AssetData.GetAsset()->GetOutermost());
 	}
 
-	// automatically save all articy assets
-	TArray<UPackage*> FailedToSavePackages;
-	FEditorFileUtils::PromptForCheckoutAndSave(PackagesToSave, false, false, &FailedToSavePackages);
+	// Check out all the assets we want to save
+	TArray<UPackage*> CheckedOutPackages;
+	FEditorFileUtils::CheckoutPackages(PackagesToSave, &CheckedOutPackages, false);
 
-	for (auto Package : FailedToSavePackages)
+	// Save the packages to disk
+	for (auto Package : PackagesToSave) { Package->SetDirtyFlag(true); }
+	if (!UEditorLoadingAndSavingUtils::SavePackages(PackagesToSave, true))
 	{
-		UE_LOG(LogArticyEditor, Error, TEXT("Could not save package %s"), *Package->GetName());
+		UE_LOG(LogArticyEditor, Error, TEXT("Failed to save packages. Make sure to save before submitting in Perforce."));
 	}
 
 	FArticyEditorModule::Get().OnAssetsGenerated.Broadcast();
@@ -346,7 +348,7 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 	if(!Data->HasCachedVersion())
 	{
 		const FText CacheNotAvailableText = FText::Format(LOCTEXT("NoCacheAvailable", "Aborting import process. No cache available to restore. Deleting import asset but leaving generated code intact. Please delete manually in Source/ArticyGenerated if necessary and rebuild. Reason: {0}."), ReasonForRestoreText);
-#if ENGINE_MINOR_VERSION <= 24
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 		EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, CacheNotAvailableText, ArticyImportErrorText);
 #else
 		EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheNotAvailableText, &ArticyImportErrorText);
@@ -379,7 +381,7 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 		if (bNotifyUser)
 		{
 			const FText CacheRestoredText = FText::Format(LOCTEXT("ImportDataCacheRestoredText", "Restored previously generated articy code. Reason: {0}. Continuing import with last valid state."), ReasonForRestoreText);
-#if ENGINE_MINOR_VERSION <= 24
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 			EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, CacheRestoredText, ArticyImportErrorText);
 #else
 			EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheRestoredText, &ArticyImportErrorText);
@@ -395,7 +397,7 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 			if (bNotifyUser)
 			{
 				const FText CacheDeletedText = FText::Format(LOCTEXT("ImportDataCacheDeletedText", "Deleted generated articy code. Reason: {0}. Aborting import process."), ReasonForRestoreText);
-#if ENGINE_MINOR_VERSION <= 24
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 				EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletedText, ArticyImportErrorText);
 #else
 				EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheDeletedText, &ArticyImportErrorText);
@@ -408,7 +410,7 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 			if (bNotifyUser)
 			{
 				const FText CacheDeletionFailedText = FText::Format(LOCTEXT("ImportDataCacheDeletionFailedText", "Tried to delete generated articy code. Reason: {0}. Failed to delete. Aborting import process."), ReasonForRestoreText);
-#if ENGINE_MINOR_VERSION <= 24
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 				EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletionFailedText, ArticyImportErrorText);
 #else
 				EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheDeletionFailedText, &ArticyImportErrorText);

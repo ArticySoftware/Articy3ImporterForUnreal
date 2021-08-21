@@ -28,7 +28,7 @@ UObject* UArticyAsset::LoadAsset() const
 		//construct the asset path like UE4 wants it
 		auto path = ArticyHelpers::GetArticyResourcesFolder() / folder / filename;
 		//UE_LOG(LogTemp, Warning, TEXT("Asset Path %s"), *path)
-#if ENGINE_MINOR_VERSION <= 24
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 		Asset = ConstructorHelpersInternal::FindOrLoadObject<UObject>(path);
 #else
 		Asset = ConstructorHelpersInternal::FindOrLoadObject<UObject>(path, LOAD_None);

@@ -33,7 +33,7 @@ void SArticyRefProperty::Construct(const FArguments& InArgs)
 	this->bExactClassEditable = InArgs._bExactClassEditable;
 	this->bIsReadOnly = InArgs._bIsReadOnly;
 	
-	Cursor = EMouseCursor::Hand;
+	SetCursor(EMouseCursor::Hand);
 	
 	CreateInternalWidgets();
 

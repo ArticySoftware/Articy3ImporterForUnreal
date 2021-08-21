@@ -55,7 +55,7 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 	TAttribute<FOptionalSize> WidthScaleAttribute = ThumbnailSize.X / 3.f;
 	TAttribute<FOptionalSize> HeightScaleAttribute = ThumbnailSize.Y / 3.f;
 
-	Cursor = EMouseCursor::Hand;
+	SetCursor(EMouseCursor::Hand);
 
 	PreviewBrush.ImageSize = ThumbnailSize;
 	

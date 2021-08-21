@@ -44,7 +44,7 @@ void SArticyObjectAssetPicker::Construct(const FArguments& InArgs)
 		CurrentClassRestriction = TopLevelClassRestriction.Get();
 	}
 	
-	Cursor = EMouseCursor::Hand;
+	SetCursor(EMouseCursor::Hand);
 
 	const bool bInShouldCloseWindowAfterMenuSelection = true;
 	const bool bCloseSelfOnly = true;

@@ -29,7 +29,7 @@ void FArticyGVCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilde
 	TArray<FName> CategoryNames;
 	// @TODO GetCategoryNames was introduces in 4.22.
 	// Since the details panel should generally never be seen, it's okay that other categories are not hidden in < 4.22
-#if ENGINE_MINOR_VERSION >= 22
+#if ENGINE_MAJOR_VERSION >= 5 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 22)
 	DetailBuilder.GetCategoryNames(CategoryNames);
 #endif
 
