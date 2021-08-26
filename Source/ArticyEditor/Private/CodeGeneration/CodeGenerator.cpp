@@ -24,6 +24,7 @@
 #include "Misc/App.h"
 #include "Misc/MessageDialog.h"
 #include "Dialogs/Dialogs.h"
+#include "ISourceControlModule.h"
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
