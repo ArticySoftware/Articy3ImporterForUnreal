@@ -292,9 +292,13 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 		PackagesToSave.Add(AssetData.GetAsset()->GetOutermost());
 	}
 
-	// Check out all the assets we want to save
-	TArray<UPackage*> CheckedOutPackages;
-	FEditorFileUtils::CheckoutPackages(PackagesToSave, &CheckedOutPackages, false);
+	// Check out all the assets we want to save (if source control is enabled)
+	ISourceControlProvider& SourceControlProvider = ISourceControlModule::Get().GetProvider();
+	if (SourceControlProvider.IsEnabled())
+	{
+		TArray<UPackage*> CheckedOutPackages;
+		FEditorFileUtils::CheckoutPackages(PackagesToSave, &CheckedOutPackages, false);
+	}
 
 	// Save the packages to disk
 	for (auto Package : PackagesToSave) { Package->SetDirtyFlag(true); }
