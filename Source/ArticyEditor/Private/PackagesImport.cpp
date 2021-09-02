@@ -2,8 +2,6 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 //
 
-#pragma once
-
 #include "PackagesImport.h"
 #include "ArticyEditorModule.h"
 #include "ArticyImporterHelpers.h"
