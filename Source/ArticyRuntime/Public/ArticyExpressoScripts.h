@@ -351,7 +351,7 @@ void UArticyExpressoScripts::print(const FString& Msg, ArgTypes... Args)
 
 	auto arr = TArray<ExpressoType>{ Args... };
 	for(int i = 0; i < arr.Num(); ++i)
-		msg.Replace(*FString::Printf(TEXT("{%d}"), i), *FString{ arr[i] });
+		msg = msg.Replace(*FString::Printf(TEXT("{%d}"), i), *FString{ arr[i] });
 
 	PrintInternal(msg);
 }
