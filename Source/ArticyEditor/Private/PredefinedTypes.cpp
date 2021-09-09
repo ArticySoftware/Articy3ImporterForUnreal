@@ -2,9 +2,6 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
  
 //
-#pragma once
-
-
 
 #include "PredefinedTypes.h"
 #include "ArticyImportData.h"
