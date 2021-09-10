@@ -18,6 +18,7 @@ This version of the plugin compiles for Unreal Engine 5 Early Access 2. Be warne
 * [Setup](https://github.com/ArticySoftware/ArticyImporterForUnreal#setup)
 * [Export from articy:draft](https://github.com/ArticySoftware/ArticyImporterForUnreal#export-project-from-articydraft)
 * [Using the importer](https://github.com/ArticySoftware/ArticyImporterForUnreal#using-the-importer)
+* [Common Issues](#common-issues)
 
 
 
@@ -341,3 +342,39 @@ FArticyEditorModule::Get().GetCustomizationManager()->RegisterArticyIdPropertyWi
 # Contributing
 
 We are very grateful for any kind of contribution that you bring to the ArticyImporter, no matter if it is reporting any issues, or by actively adding new features, or fixing existing issues. If you want to know more about how to contribute please check our [Contribution](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) article.
+
+# Common Issues
+
+## `Error: Could not get articy database` when Running a Packaged Build
+
+The Articy Generated assets like the Database and Packages are probably not making it into your final packaged build, hence the error. 
+
+Make sure the `ArticyContent` folder is listed under `Additional Asset Directories to Cook` in your project's `Packaging` settings.
+
+![](docs/CookSettings.png)
+
+To verify the Articy assets are actually making it into the package, you can use the UnrealPak utility included with Unreal to unzip the packaged build and check the bundled assets.
+
+Run the following command:
+
+```bash
+UnrealPak.exe "C:\Path\To\Your\ShippingBuild\WindowsNoEditor\ProjcetName\Content\Paks\ProjectName.pak" -Extract "C:\Path\To\Extract\To"
+```
+
+Replacing the paths to match the location of your exported build and a temporary directory to extract to. Make sure to use absolute paths, as we've found UnrealPak behaves best with them.
+
+Then, check the contents of that directory and ensure that the Articy Generated assets are in the `ArticyContent/Generated` folder.
+
+The `UnrealPak` executable is located in the `\Engine\Binaries` folder in your Unreal installation. On Windows, it's at `\Engine\Binaries\Win64\UnrealPak.exe`. 
+
+## Files Marked as Delete in Perforce/Plastic SCM
+
+Older versions of the plugin had issues with various source control plugins for Unreal like Perforce and Plastic SCM. Frequently, generated Articy assets would get marked as `delete` instead of `edit`, making it easy to accidentally commit to your repository without these critical assets.
+
+These issues have been fixed in version `1.3.0` of the plugin. If you're still seeing issues with source control after updating, [create an issue on GitHub](https://github.com/ArticySoftware/ArticyImporterForUnreal/issues/new/choose) or contact support@articy.com for assistance.
+
+## My Articy Assets (Textures/Sounds) are Not Appearing in Unreal
+
+Make sure you are exporting directly from Articy into your Unreal game directory. Alongside the `.articyue4` file there should be an `ArticyContent` directory with all your assets. 
+
+Both need to be copied into your Unreal project.
