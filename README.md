@@ -4,9 +4,9 @@
 
 # ArticyImporter for Unreal Engine
 
-The Unreal Engine importer allows integrating articy:draft content into Unreal projects and provides a simple C++ and blueprint interface to work with the data. We release this importer as a github open source project that will provide a substantial headstart into incorporating articy:draft data into Unreal projects while still allowing enough flexibility to adjust the importer to personal needs. 
+The Unreal Engine importer allows integrating articy:draft content into Unreal projects and provides a simple C++ and blueprint interface to work with the data. We release this importer as a GitHub open source project that will provide a substantial head start into incorporating articy:draft data into Unreal projects while still allowing enough flexibility to adjust the importer to personal needs. 
 
-While full support is not guaranteed for this product, we're constantly working on improvemets and would love to hear your suggestions. Feel free to forward us your ideas or even better directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the importer.
+While full support is not guaranteed for this product, we're constantly working on improvements and would love to hear your suggestions. Feel free to forward us your ideas or even better directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the importer.
 
 ## Unreal Engine 5 Early Access Support
 
@@ -133,7 +133,7 @@ Inside this window scroll in the list of groups down until you find the Group **
   <img src="https://www.articy.com/articy-importer/unreal/enable_plugin.png">
 </p>
 
-After enabling the importer the window will prompt you to restart the editor, please do so to activate it for your project. When the editor restarts it will prompt you to rebuild missing dll files for the importer which you should confirm. This can take a bit depending on the size of the project and the power of your computer but once finished the Unreal editor should be back up again.
+After enabling the importer the window will prompt you to restart the editor, please do so to activate it for your project. When the editor restarts it will prompt you to rebuild missing DLL files for the importer which you should confirm. This can take a bit depending on the size of the project and the power of your computer but once finished the Unreal editor should be back up again.
 
 ## Export project from articy:draft
 
@@ -198,7 +198,7 @@ Most of the time if you want to access the properties of an objects you queried 
 cast the object to the correct type first. 
 
 If you have an object without a template the type to cast into is easy.
-Every built-in class is named as the object in articy:draft with your project name as a prefix. Lets say your project is named `ManiacManfred` so you will find `ManiacManfredFlowFragment`, `ManiacManfredDialogueFragment`, `ManiacManfredLocation`, `ManiacManfredEntity` and alot more. 
+Every built-in class is named as the object in articy:draft with your project name as a prefix. Lets say your project is named `ManiacManfred` so you will find `ManiacManfredFlowFragment`, `ManiacManfredDialogueFragment`, `ManiacManfredLocation`, `ManiacManfredEntity` and a lot more. 
 All those respective objects have their expected properties, so you will find the `Speaker` property inside the `ManiacManfredDialogueFragment` object etc.
 
 <p align="center">
@@ -206,7 +206,7 @@ All those respective objects have their expected properties, so you will find th
 </p>
 
 > You will also find classes with the `Articy` prefix. Those are the base classes for the generated classes and casting into them works almost the same. This would allow you to create code that is reusable
-> independant of any imported project.  
+> independent of any imported project.  
 
 Dealing with templates is a bit more complicated. First thing to understand is that **all your articy:draft templates are new types** inside Unreal. 
 
@@ -222,7 +222,7 @@ Accessing is easy once you have cast the object into the correct type, just drag
 For templates it works the same way, but you will also find fields for every feature inside your template, so in the case of the `Conditional_Zone` template, there is a `ZoneCondition` field for the feature with the same name.
 > Please note: It is possible that the **context sensitive** search does not properly work at this point in blueprint. When you disable it, you should be able to see all the fields inside your object.
 
-Some properties are a bit more complex like reference strips and scripts etc:
+Some properties are a bit more complex like reference strips and scripts:
 
 * Scripts contain methods to `Evaluate` the underlying script. You can also access the `Expression` which is the original script in text form.
 * ReferenceStrips and QueryStrips are just arrays.
@@ -271,7 +271,7 @@ Here is an example blueprint implementation for both methods
   <img src="https://www.articy.com/articy-importer/unreal/component_basic_event_implementation.png">
 </p>
 
-The `ShowPausedObject` method is to display the current pause on the ui. Here is the implementation of that method.
+The `ShowPausedObject` method is to display the current pause on the UI. Here is the implementation of that method.
 
 
 <p align="center">
@@ -282,7 +282,7 @@ The `ShowPausedObject` method is to display the current pause on the ui. Here is
 
 
 And the **On Branches Updated** is used to create a vertical list of buttons. How to create those buttons, creating the layout etc. is out of scope of this quick guide but it is important that you
-store the branch in every button. When you instantiate the button you should pass in the reference used in the forloop and when the button is clicked you use that branch as the index for the flow player so it knows where to continue.
+store the branch in every button. When you instantiate the button you should pass in the reference used in the for-loop and when the button is clicked you use that branch as the index for the flow player so it knows where to continue.
 
 <p align="center">
   <img src="https://www.articy.com/articy-importer/unreal/clicked_branch.png">
@@ -291,7 +291,7 @@ store the branch in every button. When you instantiate the button you should pas
 If you want to learn more about the flow player and its events you can read the [unity documentation](https://www.articy.com/articy-importer/unity/html/howto_flowplayer.htm) as both implementations are based on the same principles.
 
 ## Articy Global Variables Debugger
-The Global Variables debugger can be accessed in the toolbar at the top of the level editor (UE4) or the Settings menu on the right hand side of the level editor (UE5). It shows all global variables while the game is running and lets you search by namespace or variable namewhich makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
+The Global Variables debugger can be accessed in the toolbar at the top of the level editor (UE4) or the Settings menu on the right hand side of the level editor (UE5). It shows all global variables while the game is running and lets you search by namespace or variable name which makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
 Furthermore, you can also change the global variables while the game is running, and your game code that listens to variable changes is going to get triggered. This is useful to replicate specific conditions without needing to go through all steps manually.
 For example, if your global variables control your quest states, checking a "quest accepted" global variable in the debugger will make your quest system initiate a quest.
 
@@ -299,9 +299,9 @@ For example, if your global variables control your quest states, checking a "que
 There are some specific workflow features that can be exposed to Blueprints using C++ only.
 
 ### UPROPERTY meta data
-There are currentl three articy UPROPERTY meta specifiers.
+There are currently three articy UPROPERTY meta specifiers.
 - ArticyClassRestriction (for FArticyId and FArticyRef): Restricts the articy asset picker to the given class and, on its own, its descendants. The class is assigned without the C++ Prefix (i.e. UArticyEntity becomes ArticyEntity)
-- ArticyExactClass (for FArticyId and FArticyRef): Restricts the Exact Class checkbox in the articy asset picker to the specified value. Useful to exlude child classes of a given class in combination with ArticyClassRestriction
+- ArticyExactClass (for FArticyId and FArticyRef): Restricts the Exact Class checkbox in the articy asset picker to the specified value. Useful to exclude child classes of a given class in combination with ArticyClassRestriction
 - ArticyNoWidget (for FArticyId). This is a performance optimization for large projects and can be used to disable the custom widgets for FArticyIds, as they are more computationally expensive.
 
 Below is example code:
