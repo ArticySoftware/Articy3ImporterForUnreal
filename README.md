@@ -14,13 +14,11 @@ This version of the plugin compiles for Unreal Engine 5 Early Access 2. Be warne
 
 # Table of contents
 
-* [Features](https://github.com/ArticySoftware/ArticyImporterForUnreal#features)
-* [Setup](https://github.com/ArticySoftware/ArticyImporterForUnreal#setup)
-* [Export from articy:draft](https://github.com/ArticySoftware/ArticyImporterForUnreal#export-project-from-articydraft)
-* [Using the importer](https://github.com/ArticySoftware/ArticyImporterForUnreal#using-the-importer)
+* [Features](#features)
+* [Setup](#setup)
+* [Export from articy:draft](#export-project-from-articydraft)
+* [Using the importer](#using-the-importer)
 * [Common Issues](#common-issues)
-
-
 
 # Features
 
@@ -97,7 +95,7 @@ If you are working on macOS, you should also add `"Json"` to `PrivateDependencyM
 
 Your file should now look something like this:
 
-```
+```cpp
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
@@ -139,7 +137,9 @@ After enabling the importer the window will prompt you to restart the editor, pl
 ## Export project from articy:draft
 
 Now that the importer is running, you are ready to export your data from articy:draft.
+
 Open your articy:draft project and open the export window. Here you will find the Unreal Engine export. Please note that the Unreal export uses [Rulesets](https://www.articy.com/help/Exports_Rulesets.html) to choose what and how to export.
+
 When exporting, chose your Unreal projects **Content** folder as the target for the `.articyue4` export file.
 
 <p align="center">
@@ -180,6 +180,7 @@ An ArticyRef variable can be assigned using the custom asset picker.
 ## Getting the object
 
 Once you have assigned your ArticyRef variable, you can then get access to the object by calling the 'Get Object' function. The returned object is an ArticyObject that requires casting or alternatively, the 'Get Object' function will cast it for you to the specified class.
+
 A simple setup that prints the display name of the selected ArticyObject is shown below. Please note that the 'Get Display Name' function is an interface call, meaning that you don't need to cast if the object has a display name. If the object does not have a display name, such as a dialogue fragment, an empty text is returned.
 
 <p align="center">
@@ -187,6 +188,7 @@ A simple setup that prints the display name of the selected ArticyObject is show
 </p>
 
 There are many other ways to access your objects, check this screenshot for a blueprint sample code showing you how to access an object by id/technical or directly clone it. The ArticyDatabase is the central object that lets you access all imported articy data. Even the 'Get Object' function above makes use of the ArticyDatabase.
+
 Also make sure to cast the object to the desired type to get access to its properties and its template.
 
 <p align="center">
@@ -293,7 +295,9 @@ If you want to learn more about the flow player and its events you can read the 
 
 ## Articy Global Variables Debugger
 The Global Variables debugger can be accessed in the toolbar at the top of the level editor (UE4) or the Settings menu on the right hand side of the level editor (UE5). It shows all global variables while the game is running and lets you search by namespace or variable name which makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
+
 Furthermore, you can also change the global variables while the game is running, and your game code that listens to variable changes is going to get triggered. This is useful to replicate specific conditions without needing to go through all steps manually.
+
 For example, if your global variables control your quest states, checking a "quest accepted" global variable in the debugger will make your quest system initiate a quest.
 
 ## Advanced features (requiring C++)
@@ -301,12 +305,12 @@ There are some specific workflow features that can be exposed to Blueprints usin
 
 ### UPROPERTY meta data
 There are currently three articy UPROPERTY meta specifiers.
-- ArticyClassRestriction (for FArticyId and FArticyRef): Restricts the articy asset picker to the given class and, on its own, its descendants. The class is assigned without the C++ Prefix (i.e. UArticyEntity becomes ArticyEntity)
-- ArticyExactClass (for FArticyId and FArticyRef): Restricts the Exact Class checkbox in the articy asset picker to the specified value. Useful to exclude child classes of a given class in combination with ArticyClassRestriction
-- ArticyNoWidget (for FArticyId). This is a performance optimization for large projects and can be used to disable the custom widgets for FArticyIds, as they are more computationally expensive.
+- **ArticyClassRestriction** (for FArticyId and FArticyRef): Restricts the articy asset picker to the given class and, on its own, its descendants. The class is assigned without the C++ Prefix (i.e. UArticyEntity becomes ArticyEntity)
+- **ArticyExactClass** (for FArticyId and FArticyRef): Restricts the Exact Class checkbox in the articy asset picker to the specified value. Useful to exclude child classes of a given class in combination with ArticyClassRestriction
+- **ArticyNoWidget** (for FArticyId). This is a performance optimization for large projects and can be used to disable the custom widgets for FArticyIds, as they are more computationally expensive.
 
 Below is example code:
-```
+```cpp
 class AMyActor : public AActor
 {
 public:
@@ -322,6 +326,7 @@ public:
 
 ### ArticyId Widget Customization
 The ArticyId Widget customization is a system to let you add custom widgets to any ArticyId or ArticyRef property in the Unreal Engine editor without having to modify the plugin code. The Articy button that opens up the currently selected object inside articy:draft 3 itself is also implemented using the same system.
+
 The system also allows you to test the associated object for its data, or to only use your custom widget for specific types of articy objects. For example, all objects that have a "Quest giver" feature in articy:draft 3 can show a button inside Unreal that will open up the asset in which the associated quest is contained.
 
 To create a customization, there are three steps:
@@ -336,7 +341,7 @@ Sample code can be found in the following files inside the ArticyEditor module, 
 Keep in mind that this customization needs to be stripped from a packaged build, so this should only be done in an editor module.
 The editor module needs to have "ArticyEditor" listed as a dependency.
 Additionally, to get access to the customization manager from outside the FArticyEditorModule, use the following code:
-```
+```cpp
 FArticyEditorModule::Get().GetCustomizationManager()->RegisterArticyIdPropertyWidgetCustomizationFactory...
 ```
 # Contributing
