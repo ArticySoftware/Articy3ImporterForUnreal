@@ -266,19 +266,30 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 		if (!ensure(ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyGlobalVariables::StaticClass())))
 		UE_LOG(LogArticyEditor, Error, TEXT("Could not find generated global variables class after compile!"));
 	}
-	ensure(DeleteGeneratedAssets());
+	if(!ensureAlwaysMsgf(DeleteGeneratedAssets(), 
+		TEXT("DeletedGeneratedAssets() has failed. The Articy Importer can not proceed without\n"
+		"being able to delete the previously generated assets to replace them with new ones.\n"
+		"Please make sure the Generated folder in ArticyContent is editable.")))
+	{
+		// Failed to delete generated assets. We can't continue
+		return;
+	}
 
 	//generate the global variables asset
 	GlobalVarsGenerator::GenerateAsset(Data);
 	//generate the database asset
 	UArticyDatabase* ArticyDatabase = DatabaseGenerator::GenerateAsset(Data);
+	if (!ensureAlwaysMsgf(ArticyDatabase != nullptr, TEXT("Could not create ArticyDatabase asset!")))
+	{
+		// Somehow, we failed to load the database. We just need to stop right here and right now.
+		// In the future, it'd be nice to have a popup or notification here. For now, we'll
+		//  have to settle with the ensures.
+		return;
+	}
+
 	//generate assets for all the imported objects
 	PackagesGenerator::GenerateAssets(Data);
-
-	if (ensureMsgf(ArticyDatabase != nullptr, TEXT("Could not create ArticyDatabase asset!")))
-	{
-		ArticyDatabase->SetLoadedPackages(Data->GetPackagesDirect());
-	}
+	ArticyDatabase->SetLoadedPackages(Data->GetPackagesDirect());
 
 	//gather all articy assets to save them
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");

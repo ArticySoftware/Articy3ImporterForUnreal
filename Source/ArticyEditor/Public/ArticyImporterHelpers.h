@@ -58,7 +58,7 @@ namespace ArticyImporterHelpers
 	}
 
 	template <typename AssetType>
-	AssetType* GenerateAsset(const TCHAR* ClassName, const TCHAR* ModuleName, const FString AssetName = "", const FString SubFolder = "", const EObjectFlags AdditionalFlags = RF_NoFlags)
+	AssetType* GenerateAsset(const TCHAR* ClassName, const TCHAR* ModuleName, const FString AssetName = "", const FString SubFolder = "", const EObjectFlags AdditionalFlags = RF_NoFlags, bool MustCreate = false)
 	{
 		const auto ActualAssetName = AssetName.IsEmpty() ? ClassName : AssetName;
 		const auto FileName = (SubFolder.IsEmpty() ? ActualAssetName : SubFolder / ActualAssetName).Replace(TEXT(" "), TEXT("_"));
@@ -70,6 +70,25 @@ namespace ArticyImporterHelpers
 		{
 			auto AssetPackage = ArticyImporterHelpers::FindOrCreatePackage(FileName);
 			EObjectFlags Flags = RF_Public | RF_Standalone;
+
+			// If this asset is flagged as MustCreate...
+			if (MustCreate)
+			{
+				// ... Then make sure the asset doesn't already exist.
+				// If it does, throw the most helpful ensure message we can and return nullptr
+				AssetType* Existing = FindObject<AssetType>(AssetPackage, *ActualAssetName);
+				if (!ensureAlwaysMsgf(Existing == nullptr, TEXT(
+					"Warning!! Somehow you have managed to load an old Articy Asset asset (%s) when it\n"
+					"_should_ have been deleted already by DeleteGeneratedAssets() in CodeGenerator.cpp.\n"
+					"This is likely caused by your Source Control plugin in Unreal restoring deleted files\n"
+					"unexpectedly. If you're not sure what's going on, please contact support@articy.com for\n"
+					"assistance with details on how you triggered this issue.\n"
+					"Loading will be cancelled to avoid crashing Unreal."
+				), *ActualAssetName))
+				{
+					return nullptr;
+				}
+			}
 
 			// primarily added so we can add RF_ArchetypeObject to the database and GV asset creation.
 			// It fixes a problem in which the CDO would not get refreshed after reimporting changes via Hot Reload
