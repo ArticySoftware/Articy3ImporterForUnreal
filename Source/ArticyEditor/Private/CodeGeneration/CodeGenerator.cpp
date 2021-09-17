@@ -25,6 +25,9 @@
 #include "Misc/MessageDialog.h"
 #include "Dialogs/Dialogs.h"
 #include "ISourceControlModule.h"
+#ifdef WITH_LIVE_CODING
+#include "Windows/LiveCoding/Public/ILiveCodingModule.h"
+#endif
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
@@ -184,6 +187,22 @@ bool CodeGenerator::DeleteGeneratedAssets()
 
 void CodeGenerator::Compile(UArticyImportData* Data)
 {
+#ifdef WITH_LIVE_CODING
+	ILiveCodingModule& LiveCodingModule = FModuleManager::LoadModuleChecked<ILiveCodingModule>("LiveCoding");
+	if (LiveCodingModule.IsEnabledForSession())
+	{
+		// Cancel
+		FText ErrorTitle = FText(LOCTEXT("LiveReloadErrorTitle", "Disable Experimental Live Reload"));
+		FText ErrorText = FText(LOCTEXT("LiveReloadErrorMessage", "Unable to reimport Articy:Draft project changes because Experimental Live Reload is enabled. Please disable Live Reload and run a Full Reimport to continue."));
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
+		EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, ErrorText, ErrorTitle);
+#else
+		EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, ErrorText, &ErrorTitle);
+#endif
+		return;
+	}
+#endif
+
 	bool bWaitingForOtherCompile = false;
 
 	// We can only hot-reload via DoHotReloadFromEditor when we already had code in our project
