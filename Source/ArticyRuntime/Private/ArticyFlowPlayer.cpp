@@ -57,7 +57,7 @@ void UArticyFlowPlayer::SetCursorTo(TScriptInterface<IArticyFlowObject> Node)
 	}
 	
 	Cursor = Node;
-	UpdateAvailableBranches();
+	UpdateAvailableBranchesInternal(true);
 }
 
 void UArticyFlowPlayer::Play(int BranchIndex)
@@ -208,7 +208,7 @@ IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 
 //---------------------------------------------------------------------------//
 
-TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth)
+TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth, bool IncludeCurrent)
 {
 	TArray<FArticyBranch> OutBranches;
 
@@ -292,15 +292,21 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 			}
 		}
 
-		//add this node to the head of all the branches
-		for(auto& branch : OutBranches)
+		// add this node to the head of all the branches
+		// 
+		// Only do this if IncludeCurrent is true. 
+		// See https://github.com/ArticySoftware/ArticyImporterForUnreal/issues/50
+		if (IncludeCurrent)
 		{
-			auto unshadowedNode = GetUnshadowedNode(Node);
-			TScriptInterface<IArticyFlowObject> ptr;
-			ptr.SetObject(unshadowedNode->_getUObject());
-			ptr.SetInterface(unshadowedNode);
+			for (auto& branch : OutBranches)
+			{
+				auto unshadowedNode = GetUnshadowedNode(Node);
+				TScriptInterface<IArticyFlowObject> ptr;
+				ptr.SetObject(unshadowedNode->_getUObject());
+				ptr.SetInterface(unshadowedNode);
 
-			branch.Path.Insert(ptr, 0); //TODO inserting at front is not ideal performance wise
+				branch.Path.Insert(ptr, 0); //TODO inserting at front is not ideal performance wise
+			}
 		}
 	}
 
@@ -323,6 +329,13 @@ void UArticyFlowPlayer::SetPauseOn(EArticyPausableType Types)
 
 void UArticyFlowPlayer::UpdateAvailableBranches()
 {
+	UpdateAvailableBranchesInternal(false);
+}
+
+//---------------------------------------------------------------------------//
+
+void UArticyFlowPlayer::UpdateAvailableBranchesInternal(bool IncludeCurrent)
+{
 	AvailableBranches.Reset();
 
 	if(PauseOn == 0)
@@ -332,7 +345,10 @@ void UArticyFlowPlayer::UpdateAvailableBranches()
 	else
 	{
 		const bool bMustBeShadowed = true;
-		AvailableBranches = Explore(&*Cursor, bMustBeShadowed, 0);
+		AvailableBranches = Explore(&*Cursor, bMustBeShadowed, 0, IncludeCurrent);
+
+		// Prune empty branches
+		AvailableBranches.RemoveAllSwap([](const FArticyBranch& branch) { return branch.Path.Num() == 0; });
 
 		// NP: Every branch needs the index so that Play() can actually take a branch as input
 		for (int32 i = 0; i < AvailableBranches.Num(); i++)

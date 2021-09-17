@@ -132,7 +132,7 @@ public:
 	 * The explore can be performed as shadowed operation.
 	 * If the node is submergeable, a submerge is performed.
 	 */
-	TArray<FArticyBranch> Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth);
+	TArray<FArticyBranch> Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth, bool IncludeCurrent = true);
 
 	void SetPauseOn(EArticyPausableType Types);
 	/** Returns true if Node is one of the PauseOn types. */
@@ -258,6 +258,15 @@ private:
 	mutable uint32 ShadowLevel = 0;
 
 private:
+	/**
+	 * Updates the list of available branches.
+	 * 
+	 * If IncludeCurrent is set, the branches will all begin with the current node.
+	 * This should only be done on startup when the cursor is reset. Otherwise, we'd
+	 * end up executing the current node twice (once upon playing a branch to it, once again when
+	 * playing a branch away from it). See https://github.com/ArticySoftware/ArticyImporterForUnreal/issues/50
+	 */
+	void UpdateAvailableBranchesInternal(bool IncludeCurrent);
 
 	/** The current position in the flow. */
 	UPROPERTY(Transient)
