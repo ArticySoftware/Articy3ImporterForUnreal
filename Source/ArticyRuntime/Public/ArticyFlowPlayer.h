@@ -261,12 +261,10 @@ private:
 	/**
 	 * Updates the list of available branches.
 	 * 
-	 * If IncludeCurrent is set, the branches will all begin with the current node.
-	 * This should only be done on startup when the cursor is reset. Otherwise, we'd
-	 * end up executing the current node twice (once upon playing a branch to it, once again when
-	 * playing a branch away from it). See https://github.com/ArticySoftware/ArticyImporterForUnreal/issues/50
+	 * Use Startup if this is the first time we're creating branches for a starting node.
+	 * This will make sure FastForward gets called and we end up on a valid PauseOn node.
 	 */
-	void UpdateAvailableBranchesInternal(bool IncludeCurrent);
+	void UpdateAvailableBranchesInternal(bool Startup);
 
 	/** The current position in the flow. */
 	UPROPERTY(Transient)

@@ -334,7 +334,7 @@ void UArticyFlowPlayer::UpdateAvailableBranches()
 
 //---------------------------------------------------------------------------//
 
-void UArticyFlowPlayer::UpdateAvailableBranchesInternal(bool IncludeCurrent)
+void UArticyFlowPlayer::UpdateAvailableBranchesInternal(bool Startup)
 {
 	AvailableBranches.Reset();
 
@@ -345,7 +345,7 @@ void UArticyFlowPlayer::UpdateAvailableBranchesInternal(bool IncludeCurrent)
 	else
 	{
 		const bool bMustBeShadowed = true;
-		AvailableBranches = Explore(&*Cursor, bMustBeShadowed, 0, IncludeCurrent);
+		AvailableBranches = Explore(&*Cursor, bMustBeShadowed, 0, Startup);
 
 		// Prune empty branches
 		AvailableBranches.RemoveAllSwap([](const FArticyBranch& branch) { return branch.Path.Num() == 0; });
@@ -354,8 +354,8 @@ void UArticyFlowPlayer::UpdateAvailableBranchesInternal(bool IncludeCurrent)
 		for (int32 i = 0; i < AvailableBranches.Num(); i++)
 			AvailableBranches[i].Index = i;
 
-		//if the cursor is at the StartOn node, check if we should fast-forward
-		if(Cursor.GetObject() == StartOn.GetObject(this) && FastForwardToPause())
+		// If we're just starting up, check if we should fast-forward
+		if(Startup && FastForwardToPause())
 		{
 			//fast-forwarding will call UpdateAvailableBranches again, can abort here
 			return;
@@ -420,7 +420,7 @@ bool UArticyFlowPlayer::FastForwardToPause()
 		}
 	}
 
-	if(ffwdIndex <= 0 || ffwdIndex >= firstPath.Num())
+	if(ffwdIndex < 0 || ffwdIndex >= firstPath.Num())
 	{
 		//no need to fast-forward
 		return false;
