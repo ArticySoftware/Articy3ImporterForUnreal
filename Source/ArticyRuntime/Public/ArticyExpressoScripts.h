@@ -49,6 +49,8 @@ struct ARTICYRUNTIME_API ExpressoType
 	virtual FString& GetString() { return StringValue; }
 	virtual const FString& GetString() const { return StringValue; }
 
+	virtual FString ToString() const;
+
 
 	//---------------------------------------------------------------------------//
 
@@ -328,7 +330,7 @@ protected:
 	 * Don't change the name, it's called like this in script fragments!
 	 */
 	template<typename ...ArgTypes>
-	static void print(const ExpressoType& Msg, ArgTypes... Args) { print(Msg.GetString(), Args...); }
+	static void print(const ExpressoType& Msg, ArgTypes... Args) { print(Msg.ToString(), Args...); }
 
 	/** Script conditions that are not empty, but rather contain something that evaluates to bool, return that condition. */
 	static const bool& ConditionOrTrue(const bool &Condition) { return Condition; }
