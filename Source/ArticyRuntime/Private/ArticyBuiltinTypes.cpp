@@ -146,5 +146,11 @@ void UArticyTransformation::InitFromJson(TSharedPtr<FJsonValue> Json)
 			Translation = ArticyHelpers::ParseFVector2DFromJson(translationJson);
 	}
 
+	{
+		auto matrixJson = obj->TryGetField(STRINGIFY(Matrix));
+		if (matrixJson.IsValid())
+			Matrix = ArticyHelpers::ParseFMatrixFromJson(matrixJson);
+	}
+
 	JSON_TRY_FLOAT(obj, Rotation);
 }

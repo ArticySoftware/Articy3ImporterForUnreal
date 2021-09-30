@@ -117,6 +117,31 @@ namespace ArticyHelpers
 		return FVector2D{ static_cast<float>(X), static_cast<float>(Y) };
 	}
 
+	inline FMatrix ParseFMatrixFromJson(const TSharedPtr<FJsonValue> Json)
+	{
+		if (!Json.IsValid() || !ensure(Json->Type == EJson::Array))
+			return FMatrix::Identity;
+
+		auto JsonArray = Json->AsArray();
+		if (!ensure(JsonArray.Num() == 9))
+			return FMatrix::Identity;
+
+		TArray< float > FloatArray = TArray<float>();
+		for (auto& JsonFloatValue : JsonArray)
+		{
+			FloatArray.Add(static_cast<float>(JsonFloatValue->AsNumber()));
+		}
+
+		// Take the 2D 3x3 Matrix from Articy:draft and conver it to a 3D 4x4 Matrix for Unreal
+		return FMatrix{
+			FPlane{FloatArray[0], FloatArray[1], FloatArray[2], 0.f},
+			FPlane{FloatArray[3], FloatArray[4], FloatArray[5], 0.f},
+			FPlane{0.f, 0.f, FloatArray[8], 0.f},
+			// Translation values need to be moved over as they're always on the last column of the matrix
+			FPlane{FloatArray[6], FloatArray[7], 0.f, 1.f},
+		};
+	}
+
 	inline FLinearColor ParseColorFromJson(const TSharedPtr<FJsonValue> Json)
 	{
 		if(!Json.IsValid() || !ensure(Json->Type == EJson::Object))

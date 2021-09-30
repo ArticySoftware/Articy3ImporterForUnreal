@@ -143,6 +143,8 @@ public:
 	float Rotation;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
 	FVector2D Translation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
+	FMatrix Matrix;
 
 private:
 	template<typename Type, typename PropType>
