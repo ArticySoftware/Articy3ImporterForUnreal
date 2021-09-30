@@ -1,3 +1,17 @@
+## Unreal Import 1.3.1 Changelog
+
+- General:
+    - New warning dialogue if you try to run the importer and a hotload is required while Live Coding is enabled (#53).
+- New Features:
+    - Support for the new `Matrix` property for Location objects like Zones, Images, Text, etc. (#56)
+    - Allow `setProp` Expresso function to be used to set Reference Slots using `getObj` (#51).
+- Fixes:
+    - Show an error message instead of crashing when failing to regenerate assets (#48).
+    - PausedOn nodes are no longer executed twice (once on arrival, once on leaving). This only has an effect if you're pausing on Instruction nodes (#52).
+    - No longer generate uncompilable code while using Blueprint Nativize (#55).
+    - Added proper dependencies so `ArticyEditorModule` can be included in another module without errors (#57).
+
+
 ## Unreal Import 1.3.0 Changelog
 - Unreal Engine 5 Early Access 2 Support ([#41](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/41)).
 
