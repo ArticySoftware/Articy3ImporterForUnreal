@@ -188,7 +188,7 @@ IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 
 		TArray<UArticyFlowPin*> pins;
 		auto inputPinsOwner = Cast<IArticyInputPinsProvider>(pinOwner);
-		pins.Append(*inputPinsOwner->GetInputPins());
+		pins.Append(*inputPinsOwner->GetInputPinsPtr());
 		auto outputPinsOwner = Cast<IArticyOutputPinsProvider>(pinOwner);
 		pins.Append(*outputPinsOwner->GetOutputPinsPtr());
 
