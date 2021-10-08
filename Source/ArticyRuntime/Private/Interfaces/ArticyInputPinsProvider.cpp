@@ -14,7 +14,7 @@ bool IArticyInputPinsProvider::TrySubmerge(class UArticyFlowPlayer* Player, TArr
 {
 	bool bSubmerged = false;
 
-	auto inPins = GetInputPins();
+	auto inPins = GetInputPinsPtr();
 	if(ensure(inPins) && inPins->Num() > 0)
 	{
 		//if there is more than one pin or the single pin has more connections,
@@ -40,8 +40,17 @@ bool IArticyInputPinsProvider::TrySubmerge(class UArticyFlowPlayer* Player, TArr
 	return bSubmerged;
 }
 	
-const TArray<UArticyInputPin*>* IArticyInputPinsProvider::GetInputPins() const
+const TArray<UArticyInputPin*>* IArticyInputPinsProvider::GetInputPinsPtr() const
 {
 	const static auto name = FName("InputPins");
 	return Cast<IArticyReflectable>(this)->GetPropPtr<TArray<UArticyInputPin*>>(name);
+}
+
+TArray<UArticyInputPin*> IArticyInputPinsProvider::GetInputPins_Implementation() const
+{
+	auto Pins = GetInputPinsPtr();
+	if (Pins)
+		return *Pins;
+	else
+		return TArray<UArticyInputPin*>();
 }
