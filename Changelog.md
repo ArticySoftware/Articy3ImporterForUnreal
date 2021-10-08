@@ -5,6 +5,7 @@
 - New Features:
     - Support for the new `Matrix` property for Location objects like Zones, Images, Text, etc. ([#56](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/56))
     - Allow `setProp` Expresso function to be used to set Reference Slots using `getObj` ([#51](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/51)).
+    - Expose `GetInputPins` to Blueprint. Note that this involves a breaking change for anyone previously using `GetInputPins()` in C++. Please change all usages to `GetInputPinsPtr()`. ([#58](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/58))
 - Fixes:
     - Show an error message instead of crashing when failing to regenerate assets ([#48](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/48)).
     - PausedOn nodes are no longer executed twice (once on arrival, once on leaving). This only has an effect if you're pausing on Instruction nodes ([#52](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/52)).
