@@ -25,7 +25,7 @@
 #include "Misc/MessageDialog.h"
 #include "Dialogs/Dialogs.h"
 #include "ISourceControlModule.h"
-#ifdef WITH_LIVE_CODING
+#if WITH_LIVE_CODING
 #include "Windows/LiveCoding/Public/ILiveCodingModule.h"
 #endif
 
@@ -187,7 +187,7 @@ bool CodeGenerator::DeleteGeneratedAssets()
 
 void CodeGenerator::Compile(UArticyImportData* Data)
 {
-#ifdef WITH_LIVE_CODING
+#if WITH_LIVE_CODING
 	ILiveCodingModule& LiveCodingModule = FModuleManager::LoadModuleChecked<ILiveCodingModule>("LiveCoding");
 	if (LiveCodingModule.IsEnabledForSession())
 	{
