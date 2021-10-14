@@ -250,7 +250,7 @@ struct FADIHierarchy
 
 public:
 	UPROPERTY(VisibleAnywhere, Category="Hierarchy")
-	UADIHierarchyObject* RootObject;
+	UADIHierarchyObject* RootObject = nullptr;
 
 	void ImportFromJson(UArticyImportData* ImportData, const TSharedPtr<FJsonObject> JsonRoot);
 };
