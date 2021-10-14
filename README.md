@@ -16,8 +16,12 @@ This version of the plugin compiles for Unreal Engine 5 Early Access 2. Be warne
 
 * [Features](#features)
 * [Setup](#setup)
-* [Export from articy:draft](#export-project-from-articydraft)
-* [Using the importer](#using-the-importer)
+  * [Export from articy:draft](#export-project-from-articydraft)
+  * [Import into Unreal](#import-into-unreal)
+* [Using the API](#using-the-api)
+  * [Getting an object](#getting-the-object)
+  * [Using the Flow Player](#articy-flow-player)
+  * 
 * [Common Issues](#common-issues)
 
 # Features
@@ -292,6 +296,68 @@ store the branch in every button. When you instantiate the button you should pas
 </p>
 
 If you want to learn more about the flow player and its events you can read the [unity documentation](https://www.articy.com/articy-importer/unity/html/howto_flowplayer.htm) as both implementations are based on the same principles.
+
+
+## Custom Script Methods
+
+To start creating custom methods you can use in Articy and implement in Unreal, start by just using a method in any articy:draft script.
+
+![](docs/custom-method-node.png)
+
+When the plugin imports your project into Unreal, the importer will generate an Interface you can implement in Blueprint that contains any methods it finds in articy:draft.
+
+There are three ways to implement the interface.
+
+1. Implement the interface on an actor containing an `ArticyFlowPlayer` component.
+2. Implement the interface on a component deriving from a `ActicyFlowPlayer` component.
+3. Implementing the interface on a custom `UObject` and setting that class as the `User Methods Provider` on a `ArticyFlowPlayer` component.
+
+Regardless of which method you use, open the Blueprint editor for the object you want to implement the interface. Go to `Class Settings` and add the interface generated from your Articy project to the Interfaces list.
+
+![](docs/interface-class-settings.png)
+
+Then, in the Blueprint editor, you'll see your interface as well as all the custom methods you've used in Articy listed below it.
+
+To implement one, right-click it and select `Implement event`.
+
+![](docs/implement-custom-function.png)
+
+This will create a new event node in your Blueprint graph with all the appropriate parameters.
+
+![](docs/custom-function-node.png)
+
+You'll notice the types of each parameter are automatically deduced based on how you used the function in Articy. Now, implement your method and it'll run in Articy.
+
+### Custom Methods that Return
+
+You can also define custom Expresso script methods that have return values.
+
+![](docs/articy-return-custom-method.png)
+
+To create implementations for these in Blueprint, use the Override function method in the Blueprint editor on the object that implements your interface.
+
+![](docs/implement-custom-return-function.png)
+
+Then, you'll get a custom function in Blueprint that can return a value.
+
+![](docs/custom-function-return-blueprint.png)
+
+
+### Shadowing
+
+You'll notice that if you put custom script methods into Instructions, Conditions or Pins, the methods will be executed *before* the node is actually reached by the Flow Player.
+
+This is because the flow player scans ahead while figuring out which branches are valid and not. In order to do this, it needs to run instructions and conditions to verify it can take that branch.
+
+During this scanning phase, the flow player goes into a **shadow state**. This causes the global variables and other state to be temporarily duplicated so changes made in instructions do not affect the actual state. This is all handled automatically.
+
+However, if you're creating your own script methods that have side effects (such as changing the state of your game or displaying something on the UI), they'll still be run twice, which you don't want.
+
+To avoid this, make use of the `Is in shadow state?` Blueprint node available on the Articy Database as seen below.
+
+![](docs/check-shadow-state.png)
+
+If your function has a return value, you still want it to return to make sure conditions can be evaluated correctly. It's only side effects or state changes you want to guard.
 
 ## Articy Global Variables Debugger
 The Global Variables debugger can be accessed in the toolbar at the top of the level editor (UE4) or the Settings menu on the right hand side of the level editor (UE5). It shows all global variables while the game is running and lets you search by namespace or variable name which makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
