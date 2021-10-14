@@ -18,6 +18,7 @@
 
 - Fixes:
     - Fixed issue with plugin marking database and package assets for delete. Fixed in [#42](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/42). Resolves [#39](https://github.com/ArticySoftware/ArticyImporterForUnreal/issues/39).
+    - Support for Unreal 4.27
 
 ## Unreal Import 1.2.0 Changelog
 - Unreal Engine 4.26 Support
