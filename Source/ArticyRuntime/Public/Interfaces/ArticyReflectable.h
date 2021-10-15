@@ -77,7 +77,7 @@ public:
 		return GetPropertyPointers(Class).Find(Property) != nullptr;
 	}
 
-	virtual UClass* GetClass() const { return _getUObject()->GetClass(); }
+	virtual UClass* GetObjectClass() const { return _getUObject()->GetClass(); }
 
 private:
 	/**
@@ -87,7 +87,7 @@ private:
 	 */
 	TMap<FName, UProperty*>& GetPropertyPointers() const
 	{
-		return GetPropertyPointers(GetClass());
+		return GetPropertyPointers(GetObjectClass());
 	}
 
 	static TMap<FName, UProperty*>& GetPropertyPointers(const UClass* Class)

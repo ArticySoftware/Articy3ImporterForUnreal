@@ -57,7 +57,7 @@ void UArticyFlowPlayer::SetCursorTo(TScriptInterface<IArticyFlowObject> Node)
 	}
 	
 	Cursor = Node;
-	UpdateAvailableBranches();
+	UpdateAvailableBranchesInternal(true);
 }
 
 void UArticyFlowPlayer::Play(int BranchIndex)
@@ -188,7 +188,7 @@ IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 
 		TArray<UArticyFlowPin*> pins;
 		auto inputPinsOwner = Cast<IArticyInputPinsProvider>(pinOwner);
-		pins.Append(*inputPinsOwner->GetInputPins());
+		pins.Append(*inputPinsOwner->GetInputPinsPtr());
 		auto outputPinsOwner = Cast<IArticyOutputPinsProvider>(pinOwner);
 		pins.Append(*outputPinsOwner->GetOutputPinsPtr());
 
@@ -208,7 +208,7 @@ IArticyFlowObject* UArticyFlowPlayer::GetUnshadowedNode(IArticyFlowObject* Node)
 
 //---------------------------------------------------------------------------//
 
-TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth)
+TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth, bool IncludeCurrent)
 {
 	TArray<FArticyBranch> OutBranches;
 
@@ -292,15 +292,21 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 			}
 		}
 
-		//add this node to the head of all the branches
-		for(auto& branch : OutBranches)
+		// add this node to the head of all the branches
+		// 
+		// Only do this if IncludeCurrent is true. 
+		// See https://github.com/ArticySoftware/ArticyImporterForUnreal/issues/50
+		if (IncludeCurrent)
 		{
-			auto unshadowedNode = GetUnshadowedNode(Node);
-			TScriptInterface<IArticyFlowObject> ptr;
-			ptr.SetObject(unshadowedNode->_getUObject());
-			ptr.SetInterface(unshadowedNode);
+			for (auto& branch : OutBranches)
+			{
+				auto unshadowedNode = GetUnshadowedNode(Node);
+				TScriptInterface<IArticyFlowObject> ptr;
+				ptr.SetObject(unshadowedNode->_getUObject());
+				ptr.SetInterface(unshadowedNode);
 
-			branch.Path.Insert(ptr, 0); //TODO inserting at front is not ideal performance wise
+				branch.Path.Insert(ptr, 0); //TODO inserting at front is not ideal performance wise
+			}
 		}
 	}
 
@@ -323,6 +329,13 @@ void UArticyFlowPlayer::SetPauseOn(EArticyPausableType Types)
 
 void UArticyFlowPlayer::UpdateAvailableBranches()
 {
+	UpdateAvailableBranchesInternal(false);
+}
+
+//---------------------------------------------------------------------------//
+
+void UArticyFlowPlayer::UpdateAvailableBranchesInternal(bool Startup)
+{
 	AvailableBranches.Reset();
 
 	if(PauseOn == 0)
@@ -332,14 +345,17 @@ void UArticyFlowPlayer::UpdateAvailableBranches()
 	else
 	{
 		const bool bMustBeShadowed = true;
-		AvailableBranches = Explore(&*Cursor, bMustBeShadowed, 0);
+		AvailableBranches = Explore(&*Cursor, bMustBeShadowed, 0, Startup);
+
+		// Prune empty branches
+		AvailableBranches.RemoveAllSwap([](const FArticyBranch& branch) { return branch.Path.Num() == 0; });
 
 		// NP: Every branch needs the index so that Play() can actually take a branch as input
 		for (int32 i = 0; i < AvailableBranches.Num(); i++)
 			AvailableBranches[i].Index = i;
 
-		//if the cursor is at the StartOn node, check if we should fast-forward
-		if(Cursor.GetObject() == StartOn.GetObject(this) && FastForwardToPause())
+		// If we're just starting up, check if we should fast-forward
+		if(Startup && FastForwardToPause())
 		{
 			//fast-forwarding will call UpdateAvailableBranches again, can abort here
 			return;
@@ -404,7 +420,7 @@ bool UArticyFlowPlayer::FastForwardToPause()
 		}
 	}
 
-	if(ffwdIndex <= 0 || ffwdIndex >= firstPath.Num())
+	if(ffwdIndex < 0 || ffwdIndex >= firstPath.Num())
 	{
 		//no need to fast-forward
 		return false;

@@ -132,7 +132,7 @@ public:
 	 * The explore can be performed as shadowed operation.
 	 * If the node is submergeable, a submerge is performed.
 	 */
-	TArray<FArticyBranch> Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth);
+	TArray<FArticyBranch> Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth, bool IncludeCurrent = true);
 
 	void SetPauseOn(EArticyPausableType Types);
 	/** Returns true if Node is one of the PauseOn types. */
@@ -258,6 +258,13 @@ private:
 	mutable uint32 ShadowLevel = 0;
 
 private:
+	/**
+	 * Updates the list of available branches.
+	 * 
+	 * Use Startup if this is the first time we're creating branches for a starting node.
+	 * This will make sure FastForward gets called and we end up on a valid PauseOn node.
+	 */
+	void UpdateAvailableBranchesInternal(bool Startup);
 
 	/** The current position in the flow. */
 	UPROPERTY(Transient)

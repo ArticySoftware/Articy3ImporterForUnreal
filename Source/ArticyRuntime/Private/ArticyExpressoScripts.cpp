@@ -62,10 +62,15 @@ ExpressoType::ExpressoType(const UArticyPrimitive* Object)
 {
 	Type = String;
 
-	if(!Object)
+	if (!Object)
+	{
+		// Return "Null" ID to avoid crashes expecting this to be in the %11u_%d format
+		StringValue = "0_0";
 		return;
+	}
 
-	StringValue = FString::Printf(TEXT("%d_%d"), Object->GetId(), Object->GetCloneId());
+	// Make sure to use the full 64-bit ID
+	StringValue = FString::Printf(TEXT("%llu_%d"), Object->GetId(), Object->GetCloneId());
 }
 
 ExpressoType::ExpressoType(const UArticyString& Value)
@@ -94,7 +99,27 @@ ExpressoType::operator bool() const
 
 ExpressoType::operator int64() const
 {
-	ensure(Type == Float || Type == Int);
+	ensure(Type == Float || Type == Int || Type == String);
+
+	if (Type == String)
+	{
+		// If we're trying to cast a string to an int64, that likely means we're trying
+		//  to assign an ArticyId via an Articy Primitive (returned by getObj or the like).
+		// In that case, the string should be of the format 0xARTICYID_0xCLONEID
+		// So, split the string along underscores (_)
+		TArray<FString> articyIds;
+		int32 numberOfParts = GetString().ParseIntoArray(articyIds, TEXT("_"), true);
+		if (!ensureMsgf(numberOfParts == 2, TEXT(
+			"Trying to convert a string to 64-bit integer (such as an Articy ID). "
+			"Only the result of getObj or similar methods can be assigned to Slots.")))
+		{
+			// Fail with 0x00000000
+			return 0;
+		}
+
+		// Now, convert
+		return FCString::Atoi64(*articyIds[0]);
+	}
 
 	if (Type == Float)
 		return GetFloat();
@@ -116,6 +141,24 @@ ExpressoType::operator FString() const
 {
 	ensure(Type == String);
 	return GetString();
+}
+
+FString ExpressoType::ToString() const
+{
+	// If we're a string, then just return that string
+	if (Type == String)
+		return GetString();
+
+	// For integers, use FString::FromInt
+	if (Type == Int)
+		return FString::FromInt(GetInt());
+
+	// For floats, use format
+	if (Type == Float)
+		return FString::SanitizeFloat(GetFloat());
+
+	ensureMsgf(false, TEXT("Unknown ArticyExpressoType!"));
+	return FString();
 }
 
 //---------------------------------------------------------------------------//
@@ -528,13 +571,14 @@ UArticyBaseObject* ExpressoType::TryFeatureReroute(UArticyBaseObject* Object, FS
 		{
 			//the property contains a dot
 			//take the part before the dot to extract the feature, and use it as Object to get the actual property from
-			Object = Object->GetProp<UArticyBaseFeature*>(*feature);
-			if(!ensure(Object))
+			UArticyBaseFeature* Feature = Object->GetProp<UArticyBaseFeature*>(*feature);
+			if(!ensure(Feature))
 			{
 				UE_LOG(LogArticyRuntime, Warning, TEXT("Feature %s on Object %s is null, cannot access property %s!"), *feature, *Object->GetName(), *Property);
 				return nullptr;
 			}
 
+			return Feature;
 		}
 	}
 

@@ -235,17 +235,17 @@ public:
 			return *this = Value / Val.GetInt();
 	}
 
-protected:
-	/** The current value of this variable (i.e. the value of a shadow state, if any is active). */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Articy")
-	int Value = -1;
-
 	/**
 	 * Set the value of this variable.
 	 * This internally calls the setter, so it guarantees that the correct shadow state is used (if any).
 	 */
-	UFUNCTION(BlueprintCallable, Category="ValueAccess")
+	UFUNCTION(BlueprintCallable, Category = "ValueAccess")
 	int Set(int NewValue) { return *this = NewValue; }
+
+protected:
+	/** The current value of this variable (i.e. the value of a shadow state, if any is active). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Articy")
+	int Value = -1;
 
 private:
 	TArray<ArticyShadowState<int>> Shadows;
@@ -273,17 +273,18 @@ public:
 		return Value = NewValue.GetBool();
 	}
 
-protected:
-	/** The current value of this variable (i.e. the value of a shadow state, if any is active). */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Articy")
-	bool Value = false;
-
 	/**
 	 * Set the value of this variable.
 	 * This internally calls the setter, so it guarantees that the correct shadow state is used (if any).
 	 */
-	UFUNCTION(BlueprintCallable, Category="ValueAccess")
+	UFUNCTION(BlueprintCallable, Category = "ValueAccess")
 	bool Set(bool NewValue) { return *this = NewValue; }
+
+protected:
+
+	/** The current value of this variable (i.e. the value of a shadow state, if any is active). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Articy")
+	bool Value = false;
 
 private:
 	TArray<ArticyShadowState<bool>> Shadows;
@@ -321,17 +322,17 @@ public:
 	bool operator ==(const char* const text) const { return Value.Equals(text); }
 	bool operator !=(const char* const text) const { return !this->operator==(text); }
 
-protected:
-	/** The current value of this variable (i.e. the value of a shadow state, if any is active). */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Articy")
-	FString Value;
-
 	/**
 	 * Set the value of this variable.
 	 * This internally calls the setter, so it guarantees that the correct shadow state is used (if any).
 	 */
-	UFUNCTION(BlueprintCallable, Category="ValueAccess")
+	UFUNCTION(BlueprintCallable, Category = "ValueAccess")
 	FString Set(FString NewValue) { return *this = NewValue; }
+
+protected:
+	/** The current value of this variable (i.e. the value of a shadow state, if any is active). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Articy")
+	FString Value;
 
 private:
 	TArray<ArticyShadowState<FString>> Shadows;

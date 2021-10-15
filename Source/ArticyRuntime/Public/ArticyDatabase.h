@@ -312,6 +312,9 @@ public:
 
 	void ChangePackageDefault(FName PackageName, bool bIsDefaultPackage);
 
+	UFUNCTION(BlueprintCallable, Category = "Articy")
+	void SetExpressoScriptsClass(TSubclassOf<UArticyExpressoScripts> NewClass);
+
 protected:
 
 	/** A list of all packages that were imported from articy:draft. */
@@ -327,9 +330,6 @@ protected:
 	TMap<FName, FArticyDatabaseObjectArray> LoadedObjectsByName;
 	
 	void UnloadAllPackages();
-
-	UFUNCTION(BlueprintCallable, Category="Articy")
-	void SetExpressoScriptsClass(TSubclassOf<UArticyExpressoScripts> NewClass);
 
 private:
 

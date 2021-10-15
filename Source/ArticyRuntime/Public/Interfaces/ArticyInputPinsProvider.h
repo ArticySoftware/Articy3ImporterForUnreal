@@ -28,6 +28,11 @@ public:
 	 * it starts on a pin), exploration of pins will happen automatically as they are reached.
 	 */
 	bool TrySubmerge(class UArticyFlowPlayer* Player, TArray<FArticyBranch>& OutBranches, const uint32& Depth, const bool bForceShadowed);
-	
-	const TArray<UArticyInputPin*>* GetInputPins() const;
+
+	const TArray<UArticyInputPin*>* GetInputPinsPtr() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Articy")
+	TArray<UArticyInputPin*> GetInputPins() const;
+
+	TArray<UArticyInputPin*> GetInputPins_Implementation() const;
 };

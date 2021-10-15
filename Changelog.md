@@ -1,8 +1,24 @@
+## Unreal Import 1.3.1 Changelog
+
+- General:
+    - New warning dialogue if you try to run the importer and a hotload is required while Live Coding is enabled ([#53](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/53)).
+- New Features:
+    - Support for the new `Matrix` property for Location objects like Zones, Images, Text, etc. ([#56](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/56))
+    - Allow `setProp` Expresso function to be used to set Reference Slots using `getObj` ([#51](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/51)).
+    - Expose `GetInputPins` to Blueprint. Note that this involves a breaking change for anyone previously using `GetInputPins()` in C++. Please change all usages to `GetInputPinsPtr()`. ([#58](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/58))
+- Fixes:
+    - Show an error message instead of crashing when failing to regenerate assets ([#48](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/48)).
+    - PausedOn nodes are no longer executed twice (once on arrival, once on leaving). This only has an effect if you're pausing on Instruction nodes ([#52](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/52)).
+    - No longer generate uncompilable code while using Blueprint Nativize ([#55](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/55)).
+    - Added proper dependencies so `ArticyEditorModule` can be included in another module without errors ([#57](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/57)).
+
+
 ## Unreal Import 1.3.0 Changelog
 - Unreal Engine 5 Early Access 2 Support ([#41](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/41)).
 
 - Fixes:
     - Fixed issue with plugin marking database and package assets for delete. Fixed in [#42](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/42). Resolves [#39](https://github.com/ArticySoftware/ArticyImporterForUnreal/issues/39).
+    - Support for Unreal 4.27
 
 ## Unreal Import 1.2.0 Changelog
 - Unreal Engine 4.26 Support
