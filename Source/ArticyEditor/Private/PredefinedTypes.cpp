@@ -11,6 +11,13 @@
 
 #define STRINGIFY(x) #x
 
+// Converts Unity rich text markup to Unreal rich text markup.
+// Amounts to just replacing all closing tags with </> as Unreal
+// does not include the tag name in the closing tag.
+//
+// Ex. "My text has <b>bold</b> words." to "My text has <b>bold</> words."
+FString ConvertUnityMarkupToUnreal(const FString& Input);
+
 //---------------------------------------------------------------------------//
 
 //make sure the static Map is filled
@@ -39,11 +46,14 @@ FArticyPredefTypes::FArticyPredefTypes()
 	Types.Add(TEXT("id"), PREDEFINE_TYPE(FArticyId));
 	Types.Add(TEXT("string"), PREDEFINE_TYPE_EXT(FString, "TEXT(\"\")", [](PROP_SETTER_PARAMS) { return Json->Type == EJson::String ? Json->AsString() : FString{}; }));
 	Types.Add(TEXT("ftext"), PREDEFINE_TYPE_EXT(FText, TEXT("FText::GetEmpty()"), [](PROP_SETTER_PARAMS)
-	{
+		{
 		if(Json->Type == EJson::String)
 		{
+			// Convert Unity rich text markup to Unreal
+			FString Processed = ConvertUnityMarkupToUnreal(Json->AsString());
+
 			//return a new FText, where the Path is the key and the Property value is the defaut-language text
-			return FText::ChangeKey(TEXT("ARTICY"), Path, FText::FromString(Json->AsString()));
+			return FText::ChangeKey(TEXT("ARTICY"), Path, FText::FromString(Processed));
 		}
 		return FText::GetEmpty();
 	}));
@@ -142,4 +152,47 @@ FArticyPredefTypes::FArticyPredefTypes()
 bool FArticyPredefTypes::IsPredefinedType(const FName& OriginalType)
 {
 	return StaticInstance.Types.Contains(OriginalType);
+}
+
+FString ConvertUnityMarkupToUnreal(const FString& Input)
+{
+	// Create a pattern to find closing tags
+	static FRegexPattern Pattern(TEXT("<\\/.+?>"));
+
+	// Create a matcher to search the input
+	FRegexMatcher myMatcher(Pattern, Input);
+
+	// Check to see if there's any matches at all
+	bool anyMatches = myMatcher.FindNext();
+
+	// If not, just return the input string
+	if (!anyMatches) { return Input; }
+
+	// Create a buffer to hold the output
+	TCHAR* buffer = new TCHAR[Input.Len() + 1];
+	FStringBuilderBase strings(buffer, Input.Len() + 1);
+
+	// Run through matches
+	int last = 0;
+	do
+	{
+		// Get bounds of match
+		int start = myMatcher.GetMatchBeginning();
+		int end = myMatcher.GetMatchEnding();
+
+		// Add all text preceeding the match to the output
+		strings.Append(Input.Mid(last, start - last));
+
+		// Replace the closing tag with just </>
+		strings.Append(TEXT("</>"));
+		last = end;
+	} while (myMatcher.FindNext());
+
+	// Add end of string
+	if (last != Input.Len())
+	{
+		strings.Append(Input.Mid(last, Input.Len() - last));
+	}
+
+	return strings.ToString();
 }
