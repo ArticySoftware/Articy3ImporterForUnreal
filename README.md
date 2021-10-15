@@ -21,7 +21,7 @@ This version of the plugin compiles for Unreal Engine 5 Early Access 2. Be warne
 * [Using the API](#using-the-api)
   * [Getting an object](#getting-the-object)
   * [Using the Flow Player](#articy-flow-player)
-  * 
+  * [Custom Script Methods](#custom-script-methods)
 * [Common Issues](#common-issues)
 
 # Features
@@ -300,25 +300,33 @@ If you want to learn more about the flow player and its events you can read the 
 
 ## Custom Script Methods
 
-To start creating custom methods you can use in Articy and implement in Unreal, start by just using a method in any articy:draft script.
+You may find the built-in methods in Expresso script insufficient for your needs, or want to create functions that can trigger side effects in your game such as moving game objects, triggering UI states, or querying input.
+
+To support these use cases, Articy allows you to extend Expresso script with **custom script methods**.
 
 ![](docs/custom-method-node.png)
 
-When the plugin imports your project into Unreal, the importer will generate an Interface you can implement in Blueprint that contains any methods it finds in articy:draft.
+Getting started with custom script methods is easy. Simply start using new methods in articy:draft as if they already exist (as pictured above) and import your project into Unreal.
 
-There are three ways to implement the interface.
+The importer will detect these methods, infer their parameter types and return signatures (in the example above, one integer and one string), and generate an Interface you can implement in Blueprint or C++ with their implementations.
 
-1. Implement the interface on an actor containing an `ArticyFlowPlayer` component.
-2. Implement the interface on a component deriving from a `ActicyFlowPlayer` component.
-3. Implementing the interface on a custom `UObject` and setting that class as the `User Methods Provider` on a `ArticyFlowPlayer` component.
+There are three ways you can implement this interface.
+
+1. Implement the interface on an actor containing an `ArticyFlowPlayer` component. Anytime that flow player component encounters a custom method, it'll call the function on this parent actor.
+2. Implement the interface on a component deriving from a `ActicyFlowPlayer` component. Anytime this flow player encounters a custom method, it'll call the function on itself.
+3. Implementing the interface on a custom `UObject` and setting that class as the `User Methods Provider` on a `ArticyFlowPlayer` component. Whenever that flow player encounters a custom method, it'll call the function on a new instance of that object.
+
+Each flow player can only use one of the above methods (you can't mix and match). 
+
+Choose one and create or open the corresponding Blueprint (whether it's the actor, the component, or the custom `UObject`).
 
 Regardless of which method you use, open the Blueprint editor for the object you want to implement the interface. Go to `Class Settings` and add the interface generated from your Articy project to the Interfaces list.
 
 ![](docs/interface-class-settings.png)
 
-Then, in the Blueprint editor, you'll see your interface as well as all the custom methods you've used in Articy listed below it.
+The first thing you need to do is make sure this Blueprint implements the generated interface. Go to the Blueprint's `Class Settings` (at the top) and then add the interface generated from your articy:draft project to its Interface list (on the right).
 
-To implement one, right-click it and select `Implement event`.
+Now, you can start implementing your custom methods. To do this, find the method in the `Interfaces` list under `My Blueprint` (bottom left), right-click it, and select `Implement event`.
 
 ![](docs/implement-custom-function.png)
 
@@ -326,7 +334,9 @@ This will create a new event node in your Blueprint graph with all the appropria
 
 ![](docs/custom-function-node.png)
 
-You'll notice the types of each parameter are automatically deduced based on how you used the function in Articy. Now, implement your method and it'll run in Articy.
+You'll notice the types of each parameter are automatically deduced based on how you used the function in Articy. Now, attach some nodes (if you just want to test it, try a Debug Print to start) and test it out.
+
+*Note: You may notice your method is called earlier and more often than expected. This is because Articy "scans ahead" in branches to find which ones are valid. To avoid executing your logic twice, see [Shadowing](#shadowing).*
 
 ### Custom Methods that Return
 
@@ -347,17 +357,21 @@ Then, you'll get a custom function in Blueprint that can return a value.
 
 You'll notice that if you put custom script methods into Instructions, Conditions or Pins, the methods will be executed *before* the node is actually reached by the Flow Player.
 
-This is because the flow player scans ahead while figuring out which branches are valid and not. In order to do this, it needs to run instructions and conditions to verify it can take that branch.
+This is because the flow player scans ahead while figuring out which branches are valid and not. This is how it knows which choices to show and which to hide. In order to make these decisions, it needs to run instructions and conditions ahead of time to see if any fail.
 
-During this scanning phase, the flow player goes into a **shadow state**. This causes the global variables and other state to be temporarily duplicated so changes made in instructions do not affect the actual state. This is all handled automatically.
+Obviously, this would create problems if any of these scripts modify variables or properties, so the flow player goes into a **shadow state** when doing this. While shadowing, the flow player duplicates the global variables and other state so that changes made by instructions do not affect the real, current state.
 
-However, if you're creating your own script methods that have side effects (such as changing the state of your game or displaying something on the UI), they'll still be run twice, which you don't want.
+All this is handled automatically and requires no input from you.
 
-To avoid this, make use of the `Is in shadow state?` Blueprint node available on the Articy Database as seen below.
+However, Articy doesn't know what your custom script methods do. If they have side effects (such as changing the state of your game or displaying something on the UI), it doesn't know that these shouldn't be executed during the shadow state.
+
+You need to handle this yourself.
+
+Thankfully, this is easy to handle with the `Is in shadow state?` Blueprint node available on the Articy Database. Gate any side effects your function has behind this method returning `False` to ensure they're only run when the node is actually being executed.
 
 ![](docs/check-shadow-state.png)
 
-If your function has a return value, you still want it to return to make sure conditions can be evaluated correctly. It's only side effects or state changes you want to guard.
+If your custom function has a return value, however, you still want to make sure it runs as normally. Remember: shadowing is how articy decides what branches are valid or not. If you return a different value while shadowing than you would otherwise, articy won't be able to figure out the proper list of branches to return. Only use `Is in shadow state?` to gate side-effects.
 
 ## Articy Global Variables Debugger
 The Global Variables debugger can be accessed in the toolbar at the top of the level editor (UE4) or the Settings menu on the right hand side of the level editor (UE5). It shows all global variables while the game is running and lets you search by namespace or variable name which makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
