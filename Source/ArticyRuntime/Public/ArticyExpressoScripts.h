@@ -270,8 +270,12 @@ public:
 	 */
 	bool Execute(const int &InstructionFragmentHash, UArticyGlobalVariables* GV, UObject* MethodProvider) const;
 
-	mutable UObject* UserMethodsProvider = nullptr;
-	mutable UObject* DefaultUserMethodsProvider = nullptr;
+	/**
+	 * Sets a default method provider, which will be always used whenever scripts get
+	 * evaluated / executed without a valid method provider.
+	 */
+	void SetDefaultUserMethodsProvider(UObject* MethodProvider);
+	UObject* GetDefaultUserMethodsProvider() const;
 
 protected:
 
@@ -336,6 +340,12 @@ protected:
 	static const bool& ConditionOrTrue(const bool &Condition) { return Condition; }
 	/** Script conditions that are empty or only contain a comment always return true. */
 	static bool ConditionOrTrue(void /*JustAComment*/) { return true; }
+
+	// This is a cache of the current methods provider set during Evaluate to use while running instructions/conditions
+	mutable UObject* UserMethodsProvider = nullptr;
+
+	// Default Methods Provider (fallback if none is set). This is a weak pointer in case it is deleted.
+	TWeakObjectPtr<UObject> DefaultUserMethodsProvider = nullptr;
 
 private:
 	
