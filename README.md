@@ -300,31 +300,25 @@ If you want to learn more about the flow player and its events you can read the 
 
 ## Custom Script Methods
 
-You may find the built-in methods in Expresso script insufficient for your needs, or want to create functions that can trigger side effects in your game such as moving game objects, triggering UI states, or querying input.
+It's possible to add new script methods into articy:draft's Expresso scripting language. These can trigger side effects in your game such as moving game objects or changing UI states, or they could return helpful values such as the location of the player.
 
-To support these use cases, Articy allows you to extend Expresso script with **custom script methods**.
+Getting started with custom script methods is easy. Simply start using new methods in articy:draft as if they already exist (as pictured below) and import your project into Unreal.
 
 ![](docs/custom-method-node.png)
-
-Getting started with custom script methods is easy. Simply start using new methods in articy:draft as if they already exist (as pictured above) and import your project into Unreal.
 
 The importer will detect these methods, infer their parameter types and return signatures (in the example above, one integer and one string), and generate an Interface you can implement in Blueprint or C++ with their implementations.
 
 There are three ways you can implement this interface.
 
-1. Implement the interface on an actor containing an `ArticyFlowPlayer` component. Anytime that flow player component encounters a custom method, it'll call the function on this parent actor.
-2. Implement the interface on a component deriving from a `ActicyFlowPlayer` component. Anytime this flow player encounters a custom method, it'll call the function on itself.
-3. Implementing the interface on a custom `UObject` and setting that class as the `User Methods Provider` on a `ArticyFlowPlayer` component. Whenever that flow player encounters a custom method, it'll call the function on a new instance of that object.
+1. Implement the interface on an actor containing an `ArticyFlowPlayer` component. Any time that flow player component encounters a custom method, it'll call the function on this parent actor.
+2. Implement the interface on a component deriving from a `ActicyFlowPlayer` component. Any time this flow player encounters a custom method, it'll call the function on itself.
+3. Implementing the interface on a custom `UObject` and setting that class as the `User Methods Provider` on a `ArticyFlowPlayer` component. Any time that flow player encounters a custom method, it'll call the function on a new instance of that object.
 
 Each flow player can only use one of the above methods (you can't mix and match). 
 
-Choose one and create or open the corresponding Blueprint (whether it's the actor, the component, or the custom `UObject`).
-
-Regardless of which method you use, open the Blueprint editor for the object you want to implement the interface. Go to `Class Settings` and add the interface generated from your Articy project to the Interfaces list.
+Choose one and create or open the corresponding Blueprint (whether it's the actor, the component, or the custom `UObject`). Go to `Class Settings` and add the interface generated from your Articy project to the Interfaces list.
 
 ![](docs/interface-class-settings.png)
-
-The first thing you need to do is make sure this Blueprint implements the generated interface. Go to the Blueprint's `Class Settings` (at the top) and then add the interface generated from your articy:draft project to its Interface list (on the right).
 
 Now, you can start implementing your custom methods. To do this, find the method in the `Interfaces` list under `My Blueprint` (bottom left), right-click it, and select `Implement event`.
 
