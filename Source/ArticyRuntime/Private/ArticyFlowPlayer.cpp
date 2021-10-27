@@ -120,7 +120,13 @@ UArticyDatabase* UArticyFlowPlayer::GetDB() const
 
 UArticyGlobalVariables* UArticyFlowPlayer::GetGVs() const
 {
-	return OverrideGV ? OverrideGV : UArticyGlobalVariables::GetDefault(this);
+	// If we have an custom GV set, make sure we're using a runtime clone of it
+	if (OverrideGV) {
+		return UArticyGlobalVariables::GetRuntimeClone(this, OverrideGV);
+	}
+	
+	// Otherwise, use the default variable set
+	return UArticyGlobalVariables::GetDefault(this);
 }
 
 UObject* UArticyFlowPlayer::GetMethodsProvider() const

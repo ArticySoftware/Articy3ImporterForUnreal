@@ -295,7 +295,8 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	}
 
 	//generate the global variables asset
-	GlobalVarsGenerator::GenerateAsset(Data);
+	UArticyGlobalVariables* DefaultGlobals = GlobalVarsGenerator::GenerateAsset(Data);
+	GlobalVarsGenerator::ReinitializeOtherGlobalVariableStores(Data);
 	//generate the database asset
 	UArticyDatabase* ArticyDatabase = DatabaseGenerator::GenerateAsset(Data);
 	if (!ensureAlwaysMsgf(ArticyDatabase != nullptr, TEXT("Could not create ArticyDatabase asset!")))
@@ -309,6 +310,9 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	//generate assets for all the imported objects
 	PackagesGenerator::GenerateAssets(Data);
 	ArticyDatabase->SetLoadedPackages(Data->GetPackagesDirect());
+
+	//set default global variables reference
+	ArticyDatabase->SetDefaultGlobalVariables(DefaultGlobals);
 
 	//gather all articy assets to save them
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");

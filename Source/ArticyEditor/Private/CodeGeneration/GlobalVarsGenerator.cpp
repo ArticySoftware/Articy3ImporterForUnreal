@@ -58,7 +58,10 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 				//in the Init method, call all the variable's Init method
 				header->Method("void", "Init", "UArticyGlobalVariables* const Store", [&]
 				{
-					header->Comment("initialize the variables");
+					header->Comment("Clear our Variables array in case we're reinitializing");
+					header->Line("this->Variables.Empty();");
+
+					header->Comment("Initialize our variables and add them to our array");
 
 					for(const auto var : ns.Variables)
 					{
@@ -110,6 +113,17 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 				}
 			});
 
+			header->Line();
+			header->Method("virtual void", "Reinitialize", "", [&]
+			{
+				header->Comment("Clear our VariableSets array as Init will re-add everything to it.");
+				header->Line("VariableSets.Empty();");
+
+				header->Comment("Now call initialize");
+				header->Line("Init();");
+
+			}, "", false, "", "override");
+
 			//---------------------------------------------------------------------------//
 			header->Line();
 
@@ -126,8 +140,28 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 	});
 }
 
-void GlobalVarsGenerator::GenerateAsset(const UArticyImportData* Data)
+UArticyGlobalVariables* GlobalVarsGenerator::GenerateAsset(const UArticyImportData* Data)
 {
 	const auto className = CodeGenerator::GetGlobalVarsClassname(Data, true);
-	ArticyImporterHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName(), TEXT(""), TEXT(""), RF_ArchetypeObject);
+	return ArticyImporterHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName(), TEXT(""), TEXT(""), RF_ArchetypeObject);
+}
+
+void GlobalVarsGenerator::ReinitializeOtherGlobalVariableStores(const UArticyImportData* Data)
+{
+	// Get class name of the GVs
+	const auto className = CodeGenerator::GetGlobalVarsClassname(Data, true);
+
+	// Get asset registry
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+
+	// Find all assets of class
+	TArray<FAssetData> GVAssets;
+	AssetRegistryModule.Get().GetAssetsByClass(FName(*className), GVAssets);
+
+	// Reinitialize all assets
+	for (const FAssetData& Asset : GVAssets)
+	{
+		UArticyGlobalVariables* gvs = Cast<UArticyGlobalVariables>(Asset.GetAsset());
+		gvs->Reinitialize();
+	}
 }

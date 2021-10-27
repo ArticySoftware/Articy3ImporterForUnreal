@@ -90,21 +90,11 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetDefault(const UObject* WorldC
 	{
 		bool keepBetweenWorlds = UArticyPluginSettings::Get()->bKeepGlobalVariablesBetweenWorlds;
 
-		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-		TArray<FAssetData> AssetData;
-		AssetRegistryModule.Get().GetAssetsByClass(UArticyGlobalVariables::StaticClass()->GetFName(), AssetData, true);
-
-		UArticyGlobalVariables* asset = nullptr;
-		if(ensureMsgf(AssetData.Num() != 0, TEXT("ArticyGlobalVariables asset not found!")))
+		UArticyGlobalVariables* asset = UArticyDatabase::Get(WorldContext)->GetDefaultGlobalVariables();
+		if(!ensureMsgf(asset != nullptr, TEXT("Couldn't find default ArticyGlobalVariables object. If you just updated the ArticyImporter plugin, try reimporting to fix this.")))
 		{
-			if(AssetData.Num() > 1)
-				UE_LOG(LogTemp, Warning, TEXT("More than one ArticyGlobalVariables asset was found, this is not supported! The first one will be selected."));
-
-			asset = Cast<UArticyGlobalVariables>(AssetData[0].GetAsset());
-		}
-
-		if(!asset)
 			return nullptr;
+		}
 
 		UE_LOG(LogTemp, Warning, TEXT("Cloning GVs."));
 
@@ -135,27 +125,64 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetMutableOriginal()
 
 	if (!Asset.IsValid())
 	{
-		//create a clone of the database
-		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-		TArray<FAssetData> AssetData;
-		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetFName(), AssetData, true);
-
-		if (AssetData.Num() != 0)
+		UArticyGlobalVariables* asset = UArticyDatabase::GetMutableOriginal()->GetDefaultGlobalVariables();
+		if (!asset)
 		{
-			if (AssetData.Num() > 1)
-			{
-				UE_LOG(LogArticyRuntime, Warning, TEXT("More than one ArticyGV was found, this is not supported! The first one will be selected."));
-			}
-
-			Asset = Cast<UArticyGlobalVariables>(AssetData[0].GetAsset());
+			UE_LOG(LogArticyRuntime, Warning, TEXT("No ArticyDraftGV was found."));
 		}
 		else
 		{
-			UE_LOG(LogArticyRuntime, Warning, TEXT("No ArticyDraftGV was found."));
+			Asset = asset;
 		}
 	}
 
 	return Asset.Get();
+}
+
+UArticyGlobalVariables* UArticyGlobalVariables::GetRuntimeClone(const UObject* WorldContext, UArticyGlobalVariables* GVs)
+{
+	// Special case: We're passed the default GV set. If so, use the GetDefault logic
+	if (GVs == GetMutableOriginal()) { return GetDefault(WorldContext);  }
+
+	// Get unique name of GV set
+	const FString Name = GVs->GetFullName();
+	const FName Key = FName(*Name);
+
+	// Check if we already have a clone
+	const auto Existing = OtherClones.Find(Key);
+	if (Existing && Existing->IsValid())
+	{
+		// If so, return it
+		return Existing->Get();
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Cloning Override GVs %s"), *GVs->GetFullName());
+
+	auto world = GEngine->GetWorldFromContextObjectChecked(WorldContext);
+	ensureMsgf(world, TEXT("Getting world for GV cloning failed!"));
+
+	// Check if we're keeping global variable objects between worlds
+	bool keepBetweenWorlds = UArticyPluginSettings::Get()->bKeepGlobalVariablesBetweenWorlds;
+
+	// If so, duplicate and add to root
+	UArticyGlobalVariables* NewClone = nullptr;
+	if (keepBetweenWorlds)
+	{
+		FString NewName = TEXT("Persistent Runtime GV Clone of ") + Name;
+		NewClone = DuplicateObject(GVs, world->GetGameInstance(), *NewName);
+#if !WITH_EDITOR
+		NewClone->AddToRoot();
+#endif
+	}
+	else
+	{
+		// Otherwise, add it to the active world
+		NewClone = DuplicateObject(GVs, world, *FString::Printf(TEXT("%s %s GV"), *world->GetName(), *Name));
+	}
+
+	// Store and return
+	OtherClones.FindOrAdd(Key) = NewClone;
+	return NewClone;
 }
 
 void UArticyGlobalVariables::UnloadGlobalVariables()
@@ -269,4 +296,5 @@ void UArticyGlobalVariables::DisableDebugLogging()
 }
 
 TWeakObjectPtr<UArticyGlobalVariables> UArticyGlobalVariables::Clone;
+TMap<FName, TWeakObjectPtr< UArticyGlobalVariables>> UArticyGlobalVariables::OtherClones;
 

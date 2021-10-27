@@ -422,6 +422,12 @@ public:
 
 	static UArticyGlobalVariables* GetMutableOriginal();
 
+	/**
+	 * Returns a runtime clone of a non-default global variable set.
+	 * Used by ArticyFlowPlayer if OverrideGV is set (this way we're not modifying the asset itself)
+	 */
+	static UArticyGlobalVariables* GetRuntimeClone(const UObject* WorldContext, UArticyGlobalVariables* GVs);
+
 	/* Unloads the global variables, which causes that all changes get removed. */
 	UFUNCTION(BlueprintCallable, Category = "Packages")
 	void UnloadGlobalVariables();
@@ -457,6 +463,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Debug")
 	void DisableDebugLogging();
 
+	/**
+	 * Reinitializes the global variable store to its default values
+	 */
+	virtual void Reinitialize() { }
+
 protected:
 
 	UPROPERTY()
@@ -468,6 +479,9 @@ protected:
 private:
 
 	static TWeakObjectPtr<UArticyGlobalVariables> Clone;
+
+	// Runtime clones of non-default global variable assets managed by GetRuntimeClone
+	static TMap<FName, TWeakObjectPtr< UArticyGlobalVariables>> OtherClones;
 
 	template <typename ArticyVariableType, typename VariablePayloadType>
 	void SetVariableValue(const FName Namespace, const FName Variable, const VariablePayloadType Value);
