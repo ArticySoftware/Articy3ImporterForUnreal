@@ -180,7 +180,7 @@ void UArticyDatabase::UnloadDatabase()
 
 void UArticyDatabase::SetDefaultUserMethodsProvider(UObject * MethodProvider)
 {
-	GetExpressoInstance()->DefaultUserMethodsProvider = MethodProvider;
+	GetExpressoInstance()->SetDefaultUserMethodsProvider(MethodProvider);
 }
 
 UArticyGlobalVariables* UArticyDatabase::GetGVs() const

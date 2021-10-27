@@ -593,7 +593,11 @@ bool UArticyExpressoScripts::Evaluate(const int& ConditionFragmentHash, UArticyG
 	UserMethodsProvider = MethodProvider;
 
 	auto condition = Conditions.Find(ConditionFragmentHash);
-	return ensure(condition) && (*condition)();
+	bool result = ensure(condition) && (*condition)();
+
+	// Clear methods provider
+	UserMethodsProvider = nullptr;
+	return result;
 }
 
 bool UArticyExpressoScripts::Execute(const int& InstructionFragmentHash, UArticyGlobalVariables* GV, UObject* MethodProvider) const
@@ -601,14 +605,17 @@ bool UArticyExpressoScripts::Execute(const int& InstructionFragmentHash, UArticy
 	SetGV(GV);
 	UserMethodsProvider = MethodProvider;
 
+	bool result = false;
 	auto instruction = Instructions.Find(InstructionFragmentHash);
 	if(ensure(instruction))
 	{
 		(*instruction)();
-		return true;
+		result = true;
 	}
 
-	return false;
+	// Clear methods provider
+	UserMethodsProvider = nullptr;
+	return result;
 }
 
 UArticyObject* UArticyExpressoScripts::getObj(const FString& NameOrId, const uint32& CloneId) const
@@ -634,6 +641,17 @@ UArticyObject* UArticyExpressoScripts::getObjInternal(const ExpressoType& Id_Clo
 
 	//finally get the object by id and cloneId
 	return getObj(Id, FCString::Atoi(*CloneId));
+}
+
+void UArticyExpressoScripts::SetDefaultUserMethodsProvider(UObject* MethodProvider)
+{
+	// Set a weak pointer to this object
+	DefaultUserMethodsProvider = MethodProvider;
+}
+
+UObject* UArticyExpressoScripts::GetDefaultUserMethodsProvider() const
+{
+	return DefaultUserMethodsProvider.Get();
 }
 
 void UArticyExpressoScripts::PrintInternal(const FString& msg)
