@@ -16,8 +16,12 @@ This version of the plugin compiles for Unreal Engine 5 Early Access 2. Be warne
 
 * [Features](#features)
 * [Setup](#setup)
-* [Export from articy:draft](#export-project-from-articydraft)
-* [Using the importer](#using-the-importer)
+  * [Export from articy:draft](#export-project-from-articydraft)
+  * [Import into Unreal](#import-into-unreal)
+* [Using the API](#using-the-api)
+  * [Getting an object](#getting-the-object)
+  * [Using the Flow Player](#articy-flow-player)
+  * [Custom Script Methods](#custom-script-methods)
 * [Common Issues](#common-issues)
 
 # Features
@@ -292,6 +296,76 @@ store the branch in every button. When you instantiate the button you should pas
 </p>
 
 If you want to learn more about the flow player and its events you can read the [unity documentation](https://www.articy.com/articy-importer/unity/html/howto_flowplayer.htm) as both implementations are based on the same principles.
+
+
+## Custom Script Methods
+
+It's possible to add new script methods into articy:draft's Expresso scripting language. These can trigger side effects in your game such as moving game objects or changing UI states, or they could return helpful values such as the location of the player.
+
+Getting started with custom script methods is easy. Simply start using new methods in articy:draft as if they already exist (as pictured below) and import your project into Unreal.
+
+![](docs/custom-method-node.png)
+
+The importer will detect these methods, infer their parameter types and return signatures (in the example above, one integer and one string), and generate an Interface you can implement in Blueprint or C++ with their implementations.
+
+There are three ways you can implement this interface.
+
+1. Implement the interface on an actor containing an `ArticyFlowPlayer` component. Any time that flow player component encounters a custom method, it'll call the function on this parent actor.
+2. Implement the interface on a component deriving from a `ActicyFlowPlayer` component. Any time this flow player encounters a custom method, it'll call the function on itself.
+3. Implementing the interface on a custom `UObject` and setting that class as the `User Methods Provider` on a `ArticyFlowPlayer` component. Any time that flow player encounters a custom method, it'll call the function on a new instance of that object.
+
+Each flow player can only use one of the above methods (you can't mix and match). 
+
+Choose one and create or open the corresponding Blueprint (whether it's the actor, the component, or the custom `UObject`). Go to `Class Settings` and add the interface generated from your Articy project to the Interfaces list.
+
+![](docs/interface-class-settings.png)
+
+Now, you can start implementing your custom methods. To do this, find the method in the `Interfaces` list under `My Blueprint` (bottom left), right-click it, and select `Implement event`.
+
+![](docs/implement-custom-function.png)
+
+This will create a new event node in your Blueprint graph with all the appropriate parameters.
+
+![](docs/custom-function-node.png)
+
+You'll notice the types of each parameter are automatically deduced based on how you used the function in Articy. Now, attach some nodes (if you just want to test it, try a Debug Print to start) and test it out.
+
+*Note: You may notice your method is called earlier and more often than expected. This is because Articy "scans ahead" in branches to find which ones are valid. To avoid executing your logic twice, see [Shadowing](#shadowing).*
+
+### Custom Methods that Return
+
+You can also define custom Expresso script methods that have return values.
+
+![](docs/articy-return-custom-method.png)
+
+To create implementations for these in Blueprint, use the Override function method in the Blueprint editor on the object that implements your interface.
+
+![](docs/implement-custom-return-function.png)
+
+Then, you'll get a custom function in Blueprint that can return a value.
+
+![](docs/custom-function-return-blueprint.png)
+
+
+### Shadowing
+
+You'll notice that if you put custom script methods into Instructions, Conditions or Pins, the methods will be executed *before* the node is actually reached by the Flow Player.
+
+This is because the flow player scans ahead while figuring out which branches are valid and not. This is how it knows which choices to show and which to hide. In order to make these decisions, it needs to run instructions and conditions ahead of time to see if any fail.
+
+Obviously, this would create problems if any of these scripts modify variables or properties, so the flow player goes into a **shadow state** when doing this. While shadowing, the flow player duplicates the global variables and other state so that changes made by instructions do not affect the real, current state.
+
+All this is handled automatically and requires no input from you.
+
+However, Articy doesn't know what your custom script methods do. If they have side effects (such as changing the state of your game or displaying something on the UI), it doesn't know that these shouldn't be executed during the shadow state.
+
+You need to handle this yourself.
+
+Thankfully, this is easy to handle with the `Is in shadow state?` Blueprint node available on the Articy Database. Gate any side effects your function has behind this method returning `False` to ensure they're only run when the node is actually being executed.
+
+![](docs/check-shadow-state.png)
+
+If your custom function has a return value, however, you still want to make sure it runs as normally. Remember: shadowing is how articy decides what branches are valid or not. If you return a different value while shadowing than you would otherwise, articy won't be able to figure out the proper list of branches to return. Only use `Is in shadow state?` to gate side-effects.
 
 ## Articy Global Variables Debugger
 The Global Variables debugger can be accessed in the toolbar at the top of the level editor (UE4) or the Settings menu on the right hand side of the level editor (UE5). It shows all global variables while the game is running and lets you search by namespace or variable name which makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
