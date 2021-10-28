@@ -19,7 +19,7 @@ public:
 	/**
 	 * Searches for other GlobalVariable assets (not the default one) and calls Init on them.
 	 */
-	static void ReinitializeOtherGlobalVariableStores(const UArticyImportData* Data);
+	static TArray<UPackage*> ReinitializeOtherGlobalVariableStores(const UArticyImportData* Data);
 
 private:
 	GlobalVarsGenerator() {}

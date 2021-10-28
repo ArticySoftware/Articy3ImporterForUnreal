@@ -294,9 +294,19 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 		return;
 	}
 
+	TArray<UPackage*> PackagesToSave;
+
 	//generate the global variables asset
 	UArticyGlobalVariables* DefaultGlobals = GlobalVarsGenerator::GenerateAsset(Data);
-	GlobalVarsGenerator::ReinitializeOtherGlobalVariableStores(Data);
+	{
+		// Reinitialize other global variable assets that may exist in the project
+		TArray<UPackage*> ModifiedPackages = GlobalVarsGenerator::ReinitializeOtherGlobalVariableStores(Data);
+		// and make sure we mark them to be saved
+		for (UPackage* Package : ModifiedPackages)
+		{
+			PackagesToSave.Add(Package);
+		}
+	}
 	//generate the database asset
 	UArticyDatabase* ArticyDatabase = DatabaseGenerator::GenerateAsset(Data);
 	if (!ensureAlwaysMsgf(ArticyDatabase != nullptr, TEXT("Could not create ArticyDatabase asset!")))
@@ -318,8 +328,6 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> GeneratedAssets;
 	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::GetArticyGeneratedFolder()), GeneratedAssets, true);
-
-	TArray<UPackage*> PackagesToSave;
 
 	PackagesToSave.Add(Data->GetOutermost());
 	for (FAssetData AssetData : GeneratedAssets)

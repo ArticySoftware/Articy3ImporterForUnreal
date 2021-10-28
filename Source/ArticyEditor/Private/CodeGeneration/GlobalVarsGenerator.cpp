@@ -146,7 +146,7 @@ UArticyGlobalVariables* GlobalVarsGenerator::GenerateAsset(const UArticyImportDa
 	return ArticyImporterHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName(), TEXT(""), TEXT(""), RF_ArchetypeObject);
 }
 
-void GlobalVarsGenerator::ReinitializeOtherGlobalVariableStores(const UArticyImportData* Data)
+TArray<UPackage*> GlobalVarsGenerator::ReinitializeOtherGlobalVariableStores(const UArticyImportData* Data)
 {
 	// Get class name of the GVs
 	const auto className = CodeGenerator::GetGlobalVarsClassname(Data, true);
@@ -159,9 +159,14 @@ void GlobalVarsGenerator::ReinitializeOtherGlobalVariableStores(const UArticyImp
 	AssetRegistryModule.Get().GetAssetsByClass(FName(*className), GVAssets);
 
 	// Reinitialize all assets
+	TArray<UPackage*> AffectedPackages;
 	for (const FAssetData& Asset : GVAssets)
 	{
 		UArticyGlobalVariables* gvs = Cast<UArticyGlobalVariables>(Asset.GetAsset());
 		gvs->Reinitialize();
+
+		AffectedPackages.Add(Asset.GetAsset()->GetOutermost());
 	}
+
+	return AffectedPackages;
 }
