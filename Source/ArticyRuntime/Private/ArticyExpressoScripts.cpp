@@ -597,6 +597,7 @@ bool UArticyExpressoScripts::Evaluate(const int& ConditionFragmentHash, UArticyG
 
 	// Clear methods provider
 	UserMethodsProvider = nullptr;
+	SetGV(nullptr);
 	return result;
 }
 
@@ -615,6 +616,7 @@ bool UArticyExpressoScripts::Execute(const int& InstructionFragmentHash, UArticy
 
 	// Clear methods provider
 	UserMethodsProvider = nullptr;
+	SetGV(nullptr);
 	return result;
 }
 

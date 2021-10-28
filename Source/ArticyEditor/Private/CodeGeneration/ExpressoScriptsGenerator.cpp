@@ -88,10 +88,13 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 	auto gvTypeName = CodeGenerator::GetGlobalVarsClassname(Data);
 	for(const auto ns : Data->GetGlobalVars().Namespaces)
 		header->Variable("mutable TWeakObjectPtr<" + ns.CppTypename + ">", ns.Namespace, "nullptr");
+	header->Variable("mutable TWeakObjectPtr<" + gvTypeName + ">", "ActiveGlobals", "nullptr");
 
 	header->Line();
 	header->Method("void", "SetGV", "UArticyGlobalVariables* GV", [&]
 	{
+		header->Comment("Handle case where we're unsetting the active globals");
+		header->Line("if(GV == nullptr) { Variables = nullptr; ActiveGlobals = nullptr; return; }");
 		header->Variable("auto", "gv", FString::Printf(TEXT("Cast<%s>(GV)"), *gvTypeName));
 		header->Line("if(ensure(gv))");
 		header->Block(true, [&]
@@ -99,8 +102,19 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 			header->Comment("Initialize all GV namespace references");
 			for(const auto ns : Data->GetGlobalVars().Namespaces)
 				header->Line(FString::Printf(TEXT("%s = gv->%s;"), *ns.Namespace, *ns.Namespace));
+
+			header->Comment("Store GVs");
+			header->Line("ActiveGlobals = gv;");
 		});
 	}, "", false, "", "const override");
+
+	header->Line();
+	header->Method("UArticyGlobalVariables*", "GetGV", "", [&]
+	{
+		header->Comment("Return active global variables as set by SetGV");
+		header->Line("if(ActiveGlobals.IsValid()) { return ActiveGlobals.Get(); }");
+		header->Line("return nullptr;");
+	}, "", false, "", "override");
 
 	header->Line();
 	header->Method("UClass*", "GetUserMethodsProviderInterface", "", [&]

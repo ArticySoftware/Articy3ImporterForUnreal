@@ -133,6 +133,8 @@ public:
 	static UArticyDatabase* Get(const UObject* WorldContext);
 	/** Get the current GVs instance. */
 	virtual UArticyGlobalVariables* GetGVs() const;
+	/** Gets the current runtime instance of a set of GVs */
+	virtual UArticyGlobalVariables* GetRuntimeGVs(UArticyGlobalVariables* Asset) const;
 
 	/** Unloads the database, which causes that all changes get removed.*/
 	UFUNCTION(BlueprintCallable, Category = "Articy")

@@ -185,7 +185,27 @@ void UArticyDatabase::SetDefaultUserMethodsProvider(UObject * MethodProvider)
 
 UArticyGlobalVariables* UArticyDatabase::GetGVs() const
 {
+	// If we have an active variable set, grab that set
+	UArticyGlobalVariables* ActiveGlobals = GetExpressoInstance()->GetGV();
+	if (ActiveGlobals)
+		return ActiveGlobals;
+
+	// Otherwise, return the default GVs
 	return UArticyGlobalVariables::GetDefault(this);
+}
+
+UArticyGlobalVariables* UArticyDatabase::GetRuntimeGVs(UArticyGlobalVariables* Asset) const
+{
+	// If the outer object of the global variables asset is NOT a package, then this is already
+	//  a runtime clone (its outer will either be a GameInstance if its a persistant clone or a World if its not)
+	//  In this case, just return the asset as we've already cloned it.
+	if (!Asset->GetOuter()->GetClass()->IsChildOf(UPackage::StaticClass()))
+	{
+		return Asset;
+	}
+
+	// Otherwise, create or get a clone of this GV asset for use at runtime
+	return UArticyGlobalVariables::GetRuntimeClone(this, Asset);
 }
 
 TArray<FString> UArticyDatabase::GetImportedPackageNames() const
