@@ -374,6 +374,10 @@ Furthermore, you can also change the global variables while the game is running,
 
 For example, if your global variables control your quest states, checking a "quest accepted" global variable in the debugger will make your quest system initiate a quest.
 
+## UMG Rich Text Support
+
+
+
 ## Advanced features (requiring C++)
 There are some specific workflow features that can be exposed to Blueprints using C++ only.
 

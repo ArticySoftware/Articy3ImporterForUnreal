@@ -157,7 +157,7 @@ bool FArticyPredefTypes::IsPredefinedType(const FName& OriginalType)
 FString ConvertUnityMarkupToUnreal(const FString& Input)
 {
 	// Create a pattern to find closing tags
-	static FRegexPattern Pattern(TEXT("<\\/.+?>"));
+	static FRegexPattern Pattern(TEXT("<\\/.+?>|<(\\w+)=\"?(.+?)\"?>"));
 
 	// Create a matcher to search the input
 	FRegexMatcher myMatcher(Pattern, Input);
@@ -180,12 +180,29 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 		int start = myMatcher.GetMatchBeginning();
 		int end = myMatcher.GetMatchEnding();
 
-		// Add all text preceeding the match to the output
+		// Add all text preceding the match to the output
 		strings.Append(Input.Mid(last, start - last));
 
-		// Replace the closing tag with just </>
-		strings.Append(TEXT("</>"));
+		// Check if we're dealing with a start tag or an end tag
+		FString tagName = myMatcher.GetCaptureGroup(1);
+		if (tagName.Len() > 0) {
+			// We want to reconstruct the opening tag in the correct format
+			FString value = myMatcher.GetCaptureGroup(2);
+
+			strings.Append(TEXT("<"));
+			strings.Append(tagName);
+			strings.Append(TEXT(" value=\""));
+			strings.Append(value);
+			strings.Append(TEXT("\">"));
+		}
+		else {
+			// Replace the closing tag with just </>
+			strings.Append(TEXT("</>"));
+		}
+
 		last = end;
+
+		
 	} while (myMatcher.FindNext());
 
 	// Add end of string
@@ -194,5 +211,13 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 		strings.Append(Input.Mid(last, Input.Len() - last));
 	}
 
-	return strings.ToString();
+	// Create string
+	FString result = strings.ToString();
+
+	// Clean memory
+	delete buffer;
+	buffer = nullptr;
+
+	// Return result
+	return result;
 }
