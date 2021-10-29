@@ -496,3 +496,25 @@ Both need to be copied into your Unreal project.
 Because of [a known issue with Unreal and hot-reloading changes to enums](https://issues.unrealengine.com/issue/UE-19528?lang=zh-CN), be very careful when hotreloading any changes to the values in a Drop-down list. If you save any Blueprint using the generated enum after hotreloading, you'll likely have all those nodes broken (converted into `bytes`) the next time you open the editor.
 
 When importing drop-down list changes, it's best to restart Unreal to avoid issues.
+
+## Error C2451: a conditional expression of type 'const TWeakObjectPtr<UObject,FWeakObjectPtr>' is not valid
+
+If you're getting the above error after updating to version `1.3.2` of the Articy Unreal plugin, you need to make a manual fix to your generated C++ file to get Unreal started.
+
+Find `{ProjectName}ExpressoScripts.h` (where `{ProjectName}` is the name of your articy:draft project) in `Source\{UnrealProjectName}\ArticyGenerated` and look for the method `GetUserMethodsProviderObject` (should be around line `50`ish).
+
+Change 
+
+```cpp
+if(DefaultUserMethodsProvider)
+	return DefaultUserMethodsProvider;
+```
+
+to
+
+```cpp
+if(DefaultUserMethodsProvider.IsValid())
+	return DefaultUserMethodsProvider.Get();
+```
+
+Once the project succesfully compiles and opens, run a [Full Reimport](#importer-modes).
