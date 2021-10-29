@@ -93,19 +93,13 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 	header->Line();
 	header->Method("void", "SetGV", "UArticyGlobalVariables* GV", [&]
 	{
-		header->Comment("Handle case where we're unsetting the active globals");
-		header->Line("if(GV == nullptr) { Variables = nullptr; ActiveGlobals = nullptr; return; }");
 		header->Variable("auto", "gv", FString::Printf(TEXT("Cast<%s>(GV)"), *gvTypeName));
-		header->Line("if(ensure(gv))");
-		header->Block(true, [&]
-		{
-			header->Comment("Initialize all GV namespace references");
-			for(const auto ns : Data->GetGlobalVars().Namespaces)
-				header->Line(FString::Printf(TEXT("%s = gv->%s;"), *ns.Namespace, *ns.Namespace));
+		header->Comment("Initialize all GV namespace references (or nullify if we're setting to nullptr)");
+		for (const auto ns : Data->GetGlobalVars().Namespaces)
+			header->Line(FString::Printf(TEXT("%s = gv ? gv->%s : nullptr;"), *ns.Namespace, *ns.Namespace));
 
-			header->Comment("Store GVs");
-			header->Line("ActiveGlobals = gv;");
-		});
+		header->Comment("Store GVs");
+		header->Line("ActiveGlobals = gv;");
 	}, "", false, "", "const override");
 
 	header->Line();
