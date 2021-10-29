@@ -119,6 +119,13 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 				header->Comment("Clear our VariableSets array as Init will re-add everything to it.");
 				header->Line("VariableSets.Empty();");
 
+				header->Comment("We need to make sure none of our sets are null because they might have been recently created");
+				for (const auto ns : Data->GetGlobalVars().Namespaces)
+				{
+					header->Line(FString::Printf(TEXT("if(%s == nullptr)"), *ns.Namespace));
+					header->Line(FString::Printf(TEXT("\t%s = CreateDefaultSubobject<%s>(\"%s\");"), *ns.Namespace, *ns.CppTypename, *ns.Namespace));
+				}
+
 				header->Comment("Now call initialize");
 				header->Line("Init();");
 
