@@ -154,10 +154,77 @@ bool FArticyPredefTypes::IsPredefinedType(const FName& OriginalType)
 	return StaticInstance.Types.Contains(OriginalType);
 }
 
+// Stores open tags in ConvertUnityMarkupToUnreal
+struct TagInfo
+{
+	TagInfo(const FString& name, const FString& val) 
+		: tagName(name), hasValue(val.Len() > 0), value(val), dummy(false) { 
+		if (tagName == TEXT("align")) { dummy = true; }
+	}
+
+	// Tag name, like b, i, u, or color
+	FString tagName;
+
+	// Does this have a value? (like color="#FFFFFF")
+	bool hasValue;
+
+	// Value (if hasValue is true)
+	FString value;
+
+	// Dummy. Ignore this in the output
+	bool dummy;
+};
+
+bool HasAnyTags(const TArray<TagInfo>& currentTags)
+{
+	for (const auto& tag : currentTags)
+	{
+		if (!tag.dummy) { return true; }
+	}
+
+	return false;
+}
+
+FString CreateOpenTag(const TArray<TagInfo>& currentTags)
+{
+	TArray<FString> tags;
+	FString valueString = "";
+
+	int numberOfTags = 0;
+	for (const auto& tag : currentTags)
+	{
+		// Ignore dummy tags
+		if (tag.dummy) continue;
+
+		// If it's a value, append to the value string
+		if (tag.hasValue) {
+			valueString = valueString + FString::Printf(TEXT(" %s=\"%s\""), *tag.tagName, *tag.value);
+		}
+		else {
+			// Otherwise, add the tag to the list
+			tags.Add(tag.tagName);
+		}
+		numberOfTags++;
+	}
+
+	if (numberOfTags == 0) { return TEXT(""); }
+
+	// Sort tag names
+	tags.Sort([](const FString& a, const FString& b) { return (*a)[0] < (*b)[0]; });
+	FString totalTags = "";
+	for (const auto& tag : tags) { totalTags += tag; }
+
+	// Handle no tags case
+	if (totalTags.Len() == 0) { totalTags = "style"; }
+
+	// Create tag
+	return FString::Printf(TEXT("<%s%s>"), *totalTags, *valueString);
+}
+
 FString ConvertUnityMarkupToUnreal(const FString& Input)
 {
 	// Create a pattern to find closing tags
-	static FRegexPattern Pattern(TEXT("<\\/.+?>|<(\\w+)=\"?(.+?)\"?>"));
+	static FRegexPattern Pattern(TEXT("<\\/.+?>|<(\\w+)(=\"?(.+?)\"?)?>"));
 
 	// Create a matcher to search the input
 	FRegexMatcher myMatcher(Pattern, Input);
@@ -169,10 +236,11 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 	if (!anyMatches) { return Input; }
 
 	// Create a buffer to hold the output
-	TCHAR* buffer = new TCHAR[Input.Len() + 1];
-	FStringBuilderBase strings(buffer, Input.Len() + 1);
+	TCHAR* buffer = new TCHAR[Input.Len() * 2];
+	FStringBuilderBase strings(buffer, Input.Len() * 2);
 
 	// Run through matches
+	TArray<TagInfo> currentTags;
 	int last = 0;
 	do
 	{
@@ -186,18 +254,39 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 		// Check if we're dealing with a start tag or an end tag
 		FString tagName = myMatcher.GetCaptureGroup(1);
 		if (tagName.Len() > 0) {
-			// We want to reconstruct the opening tag in the correct format
-			FString value = myMatcher.GetCaptureGroup(2);
+			bool hasTagsToClose = HasAnyTags(currentTags);
 
-			strings.Append(TEXT("<"));
-			strings.Append(tagName);
-			strings.Append(TEXT(" value=\""));
-			strings.Append(value);
-			strings.Append(TEXT("\">"));
+			// Add to our list
+			FString value = myMatcher.GetCaptureGroup(3);
+			TagInfo info = TagInfo(tagName, value);
+			currentTags.Add(info);
+
+			// Don't bother if this is a dummy tag we're ignoring
+			if (!info.dummy)
+			{
+				// If we have tags to close, close them
+				if (hasTagsToClose) { strings.Append(TEXT("</>")); }
+
+				// Open the tag
+				strings.Append(CreateOpenTag(currentTags));
+			}
 		}
 		else {
-			// Replace the closing tag with just </>
-			strings.Append(TEXT("</>"));
+			// Remove our last tag
+			auto popped = currentTags.Pop();
+
+			// Only do the rest if the closed tag is not a dummy
+			if (!popped.dummy)
+			{
+				// Write out the close
+				strings.Append(TEXT("</>"));
+
+				// If any tags are left, reopen
+				if (currentTags.Num() > 0)
+				{
+					strings.Append(CreateOpenTag(currentTags));
+				}
+			}
 		}
 
 		last = end;

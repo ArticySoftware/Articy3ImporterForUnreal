@@ -19,6 +19,7 @@
 #include "Misc/DefaultValueHelper.h"
 #include "UObject/UObjectGlobals.h"
 #include "UObject/Package.h"
+#include "Components/RichTextBlock.h"
 
 class FArticyRichTextDecorator : public FRichTextDecorator
 {
@@ -26,18 +27,19 @@ public:
 	FArticyRichTextDecorator(URichTextBlock* InOwner)
 		: FRichTextDecorator(InOwner)
 	{
+		for (TFieldIterator<UProperty> It(URichTextBlock::StaticClass()); It; ++It)
+		{
+			if (It->GetNameCPP() == TEXT("TextStyleSet"))
+			{
+				DataTableProp = *It;
+			}
+		}
 	}
 
 	virtual bool Supports(const FTextRunParseResults& RunParseResult, const FString& Text) const override
 	{
-		if ((RunParseResult.Name == TEXT("color") 
-			|| RunParseResult.Name == TEXT("align")
-			)
-			&& RunParseResult.MetaData.Contains(TEXT("value")))
+		if (RunParseResult.MetaData.Contains(TEXT("color")))
 		{
-			return true;
-		}
-		if (RunParseResult.Name == TEXT("b")) {
 			return true;
 		}
 
@@ -50,25 +52,38 @@ protected:
 		// Add text to string
 		InOutString += RunInfo.Content.ToString();
 
-		// Early return
-		if (!RunInfo.MetaData.Contains(TEXT("value"))) {
-			return;
+		// Check if this style is defined in our table
+		UDataTable* StyleTable = GetStyleTable();
+		if (StyleTable)
+		{
+			// If it is, use its text styling by copying the row in
+			const FRichTextStyleRow* row = StyleTable->FindRow<FRichTextStyleRow>(*RunInfo.Name, "ArticyStyleTableCheck");
+			if (row)
+			{
+				InOutTextStyle = row->TextStyle;
+			}
 		}
-		
-		// Get value
-		const FString value = RunInfo.MetaData[TEXT("value")];
 
-		// Style alignment
-		if (RunInfo.Name == TEXT("align"))
-		{
-			// nothing to do. Unreal's Rich Text Box doesn't support it :'(
-		}
-		// Color styling
-		else if (RunInfo.Name == TEXT("color"))
-		{
-			InOutTextStyle.ColorAndOpacity = FSlateColor(FColor::FromHex(value));
+		// If we have a color attribute
+		if (RunInfo.MetaData.Contains(TEXT("color"))) {
+			// Change the style color
+			const FString color = RunInfo.MetaData[TEXT("color")];
+			InOutTextStyle.ColorAndOpacity = FSlateColor(FColor::FromHex(color));
 		}
     }
+
+private:
+	// Cached pointer to data table property in URichTextBlock. Needed because the property is protected :(
+	FProperty* DataTableProp = nullptr;
+
+	// Gets the style table from the owning rich text block
+	UDataTable* GetStyleTable() const
+	{
+		if (DataTableProp == nullptr) {
+			return nullptr;
+		}
+		return *DataTableProp->ContainerPtrToValuePtr<UDataTable*>(Owner, 0);
+	}
 };
 
 UArticyRichTextDecorator::UArticyRichTextDecorator(const FObjectInitializer& ObjectInitializer)
@@ -78,7 +93,5 @@ UArticyRichTextDecorator::UArticyRichTextDecorator(const FObjectInitializer& Obj
 
 TSharedPtr<ITextDecorator> UArticyRichTextDecorator::CreateDecorator(URichTextBlock* InOwner)
 {
-	/*FRichTextStyleRow* x = InOwner->TextStyleSet->FindRow<FRichTextStyleRow>(NAME_Actor, "Hello");
-	x->TextStyle.Font.*/
 	return MakeShareable(new FArticyRichTextDecorator(InOwner));
 }
