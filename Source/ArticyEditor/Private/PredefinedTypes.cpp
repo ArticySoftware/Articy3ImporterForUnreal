@@ -49,8 +49,10 @@ FArticyPredefTypes::FArticyPredefTypes()
 		{
 		if(Json->Type == EJson::String)
 		{
-			// Convert Unity rich text markup to Unreal
-			FString Processed = ConvertUnityMarkupToUnreal(Json->AsString());
+			// Convert Unity rich text markup to Unreal (if the setting is enabled)
+			FString Processed = GetDefault<UArticyPluginSettings>()->bConvertUnityToUnrealRichText ?
+				ConvertUnityMarkupToUnreal(Json->AsString()) : 
+				Json->AsString();
 
 			//return a new FText, where the Path is the key and the Property value is the defaut-language text
 			return FText::ChangeKey(TEXT("ARTICY"), Path, FText::FromString(Processed));

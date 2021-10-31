@@ -13,6 +13,7 @@ UArticyPluginSettings::UArticyPluginSettings()
 	bCreateBlueprintTypeForScriptMethods = true;
 	bKeepDatabaseBetweenWorlds = true;
 	bKeepGlobalVariablesBetweenWorlds = true;
+	bConvertUnityToUnrealRichText = false;
 
 	bSortChildrenAtGeneration = false;
 	ArticyDirectory.Path = TEXT("/Game");
