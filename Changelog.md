@@ -1,3 +1,14 @@
+## Unreal Import 1.3.2 Changelog
+
+- New Features:
+  - Rich text support using Unreal's Rich Text Block component, including hyperlinks ([#64](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/64)).
+- Fixes:
+  - Fix packaging compiler warning concerning `FADIHierarchy::RootObject` ([#60](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/60)).
+  - Fix unsupported pragma compile error when building for PlayStation 4/5 ([#59](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/59) and [#67](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/67)).
+  - Fix crash when changing levels while using a custom script methods ([#63](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/63)).
+- Documentation
+  - Added documentation for custom script methods and shadowing to the Readme ([#61](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/61)).
+
 ## Unreal Import 1.3.1 Changelog
 
 - General:
