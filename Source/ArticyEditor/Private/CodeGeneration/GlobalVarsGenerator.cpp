@@ -123,7 +123,7 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 				for (const auto ns : Data->GetGlobalVars().Namespaces)
 				{
 					header->Line(FString::Printf(TEXT("if(%s == nullptr)"), *ns.Namespace));
-					header->Line(FString::Printf(TEXT("\t%s = CreateDefaultSubobject<%s>(\"%s\");"), *ns.Namespace, *ns.CppTypename, *ns.Namespace));
+					header->Line(FString::Printf(TEXT("\t%s = NewObject<%s>(this, \"%s\");"), *ns.Namespace, *ns.CppTypename, *ns.Namespace));
 				}
 
 				header->Comment("Now call initialize");
@@ -170,7 +170,8 @@ TArray<UPackage*> GlobalVarsGenerator::ReinitializeOtherGlobalVariableStores(con
 	for (const FAssetData& Asset : GVAssets)
 	{
 		UArticyGlobalVariables* gvs = Cast<UArticyGlobalVariables>(Asset.GetAsset());
-		gvs->Reinitialize();
+		gvs->ReinitializeProperties();
+		// gvs->Reinitialize();
 
 		AffectedPackages.Add(Asset.GetAsset()->GetOutermost());
 	}
