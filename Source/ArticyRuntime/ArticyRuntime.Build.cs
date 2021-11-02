@@ -32,7 +32,8 @@ public class ArticyRuntime : ModuleRules
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
                 "MediaAssets",
-				"Json"
+				"Json",
+				"UMG"
 			}
 			);
 			

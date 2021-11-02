@@ -374,6 +374,63 @@ Furthermore, you can also change the global variables while the game is running,
 
 For example, if your global variables control your quest states, checking a "quest accepted" global variable in the debugger will make your quest system initiate a quest.
 
+## UMG Rich Text Support
+
+If your articy:draft project has been exported using either the Unity Rich Text or Extended Markup formatting settings, you can use articy with the Unreal Rich Text Block widget to display richly formatted text.
+
+### Export and Import Configuration
+
+First, make sure you select one of these two settings in the `Export options` dialog in articy:draft
+
+![](docs/2021-10-31-10-31-19.png)
+
+Then, you'll need to enable a setting in Unreal to convert Unity rich text formatting to Unreal's format. **NOTE: Make sure you click `Import Changes` anytime you change this setting. You can find it in the [Articy Import Window](#import-into-unreal).**
+
+![](docs/2021-10-31-10-36-25.png)
+
+### Configuring Styles
+
+Next, you have to configure your styles by creating a style data table in Unreal. This asset tells the rich text widget what fonts, colors, and other styling effects to apply to each kind of text. Create this asset by creating a new `Data Table` in your Content window (under `Miscellaneous`) and for the row structure, pick `RichTextStyleRow`.
+
+![](docs/2021-10-31-10-48-28.png)
+
+Next, open the new data table and create your styles. You'll need to import a few fonts into your project to do this. On Windows, you can find the fonts installed under `C:\Windows\Fonts`. Drag one into your Unreal project to import it.
+
+You'll need to create a new row for every combination of styles you want to support. The first row is always the default style: what you'll get if there's no formatting set on text.
+
+Create a `b` row for a bold style. You can also create an `i` row for italic and `u` for underline. Make sure to set the appropriate font and style setting for each type.
+
+To support combinations (such as bold **and** italic), you need to create combination rows. Each combination is always alphabetically ordered. So, to support bold and italic, you'd create a `bi` row. For bold and underline, `bu`. For all three: `biu`. You need to create a row for each unique combination to tell Unreal which font to use. Usually, when importing a font, you'll get versions for each combination.
+
+**Example:**
+
+![](docs/2021-10-31-10-49-09.png)
+
+### Configuring your Rich Text Control
+
+Once these are all set, you can configure your rich text control. Create a Rich Text block in the UI editor and set it's Text Style Set to your new data table.
+
+![](docs/2021-10-31-10-50-17.png)
+
+Now, you'll be able to see your styling in articy appear in Unreal! Try setting the text to the text of a formatted node in articy to test.
+
+### Color Support
+
+*Note: Colors are only available with the extended markup option in the articy:draft export.*
+
+To support additional styling like custom colors, you need to add the `ArticyRichTextDecorator` to the list of `Decorator classes` on the rich text block.
+
+![](docs/2021-10-31-10-50-31.png)
+
+### Hyperlinks
+
+*Note: Hyperlinks are only available with the extended markup option in the articy:draft export.*
+
+To use hyperlinks from Articy, you'll need to do two things:
+
+1. Add the interface `ArticyHyperlinkHandler` to your user widget that owns the rich text control. You can do this in `Class Settings` under interfaces. Then, implement the `On Hyperlink Navigated` method to catch the event of users clicking the hyperlinks.
+2. Sub-class `ArticyRichTextDecorator` with a new Blueprint class and configure its `HyperlinkStyle` property. This will control the regular, hover, and underline style behavior of the hyperlinks. Then, use this new blueprint class as your Decorator class on the rich text control instead of `ArticyRichTextDecorator`.
+
 ## Advanced features (requiring C++)
 There are some specific workflow features that can be exposed to Blueprints using C++ only.
 

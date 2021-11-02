@@ -45,6 +45,10 @@ public:
 	UPROPERTY(EditAnywhere, config, Category=RuntimeSettings, meta=(DisplayName="Keep global variables between worlds"))
 	bool bKeepGlobalVariablesBetweenWorlds;
 
+	/** If true, converts Unity formatting in the exported articy:draft project into Unreal's rich text format. Hit "Import Changes" anytime you change this setting. */
+	UPROPERTY(EditAnywhere, config, Category=RuntimeSettings, meta=(DisplayName="Convert Unity formatting to Unreal Rich Text"))
+	bool bConvertUnityToUnrealRichText;
+
 
 	// internal cached data for data consistency between imports (setting restoration etc.)
 	UPROPERTY()
