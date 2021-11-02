@@ -19,7 +19,7 @@
 class UArticyObject;
 class IArticyHyperlinkHandler;
 
-UCLASS()
+UCLASS(Blueprintable)
 class ARTICYRUNTIME_API UArticyRichTextDecorator : public URichTextBlockDecorator
 {
     GENERATED_BODY()
@@ -34,8 +34,12 @@ public:
 	void OnArticyLinkNavigated(URichTextBlock* Parent, const FString Link);
 
     // Used to find the hyperlink handler parent of a rich text block
-    IArticyHyperlinkHandler* GetHyperlinkHandler(URichTextBlock* RichTextBlock);
+    UObject* GetHyperlinkHandler(URichTextBlock* RichTextBlock);
 
     // Used to match an articy object to a hyperlink url
     UArticyObject* GetLinkDestination(URichTextBlock* Owner, const FString& Link);
+
+    // Hyperlink style
+    UPROPERTY(EditAnywhere, Category = "articy")
+	FHyperlinkStyle HyperlinkStyle;
 };

@@ -24,10 +24,4 @@ public:
       */
     UFUNCTION(BlueprintImplementableEvent, Category = "articy")
     void OnHyperlinkNavigated(UArticyObject* Destination, URichTextBlock* Origin);
-
-    /**
-      * Style used on hyperlinks
-      */
-    UFUNCTION(BlueprintImplementableEvent, Category = "articy")
-	  FHyperlinkStyle GetHyperlinkStyle(UArticyObject* Destination, URichTextBlock* Origin);
 };

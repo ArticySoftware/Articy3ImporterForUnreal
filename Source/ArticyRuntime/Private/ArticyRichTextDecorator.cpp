@@ -77,21 +77,11 @@ protected:
 		FSimpleDelegate onNavigate;
 		onNavigate.BindUObject(Decorator, &UArticyRichTextDecorator::OnArticyLinkNavigated, Owner, *Reference);
 
-		// Get parent hyperlink handler
-		auto Handler = Decorator->GetHyperlinkHandler(Owner);
-		auto Destination = Decorator->GetLinkDestination(Owner, *Reference);
-
-		// Create new hyperlink
-		auto Result = SNew(SHyperlink)
-			.Text(RunInfo.Content).OnNavigate(onNavigate);
-
-		// Style it
-		if(Handler && Destination)
-		{
-			Result = Result.Style(&Handler->GetHyperlinkStyle(Destination, Owner));
-		}
-
-		return Result;
+		// Create hyperlink with appropriate style
+		return SNew(SHyperlink)
+			.Text(RunInfo.Content)
+			.OnNavigate(onNavigate)
+			.Style(&Decorator->HyperlinkStyle);
 	}
 
 private:
@@ -121,7 +111,7 @@ TSharedPtr<ITextDecorator> UArticyRichTextDecorator::CreateDecorator(URichTextBl
 	return MakeShareable(new FArticyRichTextDecorator(InOwner, this));
 }
 
-IArticyHyperlinkHandler* UArticyRichTextDecorator::GetHyperlinkHandler(URichTextBlock* RichTextBlock)
+UObject* UArticyRichTextDecorator::GetHyperlinkHandler(URichTextBlock* RichTextBlock)
 {
 	// Try to find a parent that implements the handler interface
 	UWidget* Widget = RichTextBlock;
@@ -143,7 +133,7 @@ IArticyHyperlinkHandler* UArticyRichTextDecorator::GetHyperlinkHandler(URichText
 	if(Widget == nullptr) { return nullptr; }
 
 	// Return interface
-	return Cast<IArticyHyperlinkHandler>(Widget);
+	return Widget;
 }
 
 UArticyObject* UArticyRichTextDecorator::GetLinkDestination(URichTextBlock* Owner, const FString& Link)
