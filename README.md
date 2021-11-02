@@ -416,13 +416,20 @@ Now, you'll be able to see your styling in articy appear in Unreal! Try setting 
 
 ### Color Support
 
+*Note: Colors are only available with the extended markup option in the articy:draft export.*
+
 To support additional styling like custom colors, you need to add the `ArticyRichTextDecorator` to the list of `Decorator classes` on the rich text block.
 
 ![](docs/2021-10-31-10-50-31.png)
 
 ### Hyperlinks
 
-Our rich text integration currently doesn't support hyperlinks, but we plan to expand it in the near future.
+*Note: Hyperlinks are only available with the extended markup option in the articy:draft export.*
+
+To use hyperlinks from Articy, you'll need to do two things:
+
+1. Add the interface `ArticyHyperlinkHandler` to your user widget that owns the rich text control. You can do this in `Class Settings` under interfaces. Then, implement the `On Hyperlink Navigated` method to catch the event of users clicking the hyperlinks.
+2. Sub-class `ArticyRichTextDecorator` with a new Blueprint class and configure its `HyperlinkStyle` property. This will control the regular, hover, and underline style behavior of the hyperlinks. Then, use this new blueprint class as your Decorator class on the rich text control instead of `ArticyRichTextDecorator`.
 
 ## Advanced features (requiring C++)
 There are some specific workflow features that can be exposed to Blueprints using C++ only.
