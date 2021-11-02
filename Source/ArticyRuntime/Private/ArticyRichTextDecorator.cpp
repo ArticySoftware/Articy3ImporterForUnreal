@@ -3,30 +3,20 @@
 //
 
 #include "ArticyRichTextDecorator.h"
-#include "UObject/SoftObjectPtr.h"
-#include "Rendering/DrawElements.h"
-#include "Framework/Text/SlateTextRun.h"
-#include "Framework/Text/SlateTextLayout.h"
-#include "Slate/SlateGameResources.h"
-#include "Widgets/SCompoundWidget.h"
-#include "Widgets/DeclarativeSyntaxSupport.h"
-#include "Framework/Application/SlateApplication.h"
-#include "Fonts/FontMeasure.h"
-#include "Math/UnrealMathUtility.h"
-#include "Widgets/Images/SImage.h"
-#include "Widgets/Layout/SScaleBox.h"
-#include "Widgets/Layout/SBox.h"
-#include "Misc/DefaultValueHelper.h"
-#include "UObject/UObjectGlobals.h"
-#include "UObject/Package.h"
+#include "Blueprint/WidgetTree.h"
 #include "Components/RichTextBlock.h"
+#include "Components/PanelWidget.h"
+#include "Widgets/Input/SHyperlink.h"
+#include "Interfaces/ArticyHyperlinkHandler.h"
+#include "ArticyDatabase.h"
 
 class FArticyRichTextDecorator : public FRichTextDecorator
 {
 public:
-	FArticyRichTextDecorator(URichTextBlock* InOwner)
-		: FRichTextDecorator(InOwner)
+	FArticyRichTextDecorator(URichTextBlock* InOwner, UArticyRichTextDecorator* InDecorator)
+		: FRichTextDecorator(InOwner), Decorator(InDecorator)
 	{
+		// Find the TextStyleSet property in the rich text block class
 		for (TFieldIterator<UProperty> It(URichTextBlock::StaticClass()); It; ++It)
 		{
 			if (It->GetNameCPP() == TEXT("TextStyleSet"))
@@ -38,10 +28,13 @@ public:
 
 	virtual bool Supports(const FTextRunParseResults& RunParseResult, const FString& Text) const override
 	{
+		// Always true if color appears as an attribute
 		if (RunParseResult.MetaData.Contains(TEXT("color")))
-		{
 			return true;
-		}
+
+		// Always true if link appears as an attribute
+		if(RunParseResult.MetaData.Contains(TEXT("link")))
+			return true;
 
 		return false;
 	}
@@ -72,9 +65,41 @@ protected:
 		}
     }
 
+	virtual TSharedPtr<SWidget> CreateDecoratorWidget(const FTextRunInfo& RunInfo, const FTextBlockStyle& TextStyle) const override
+	{
+		// Get link destination
+		const FString* Reference = RunInfo.MetaData.Find(TEXT("link"));
+
+		// If this isn't a link, don't use this behavior 
+		if(Reference == nullptr) { return nullptr; }
+
+		// Create delegate
+		FSimpleDelegate onNavigate;
+		onNavigate.BindUObject(Decorator, &UArticyRichTextDecorator::OnArticyLinkNavigated, Owner, *Reference);
+
+		// Get parent hyperlink handler
+		auto Handler = Decorator->GetHyperlinkHandler(Owner);
+		auto Destination = Decorator->GetLinkDestination(Owner, *Reference);
+
+		// Create new hyperlink
+		auto Result = SNew(SHyperlink)
+			.Text(RunInfo.Content).OnNavigate(onNavigate);
+
+		// Style it
+		if(Handler && Destination)
+		{
+			Result = Result.Style(&Handler->GetHyperlinkStyle(Destination, Owner));
+		}
+
+		return Result;
+	}
+
 private:
 	// Cached pointer to data table property in URichTextBlock. Needed because the property is protected :(
 	FProperty* DataTableProp = nullptr;
+
+	// Pointer to our parent decorator
+	UArticyRichTextDecorator* Decorator = nullptr;
 
 	// Gets the style table from the owning rich text block
 	UDataTable* GetStyleTable() const
@@ -93,5 +118,61 @@ UArticyRichTextDecorator::UArticyRichTextDecorator(const FObjectInitializer& Obj
 
 TSharedPtr<ITextDecorator> UArticyRichTextDecorator::CreateDecorator(URichTextBlock* InOwner)
 {
-	return MakeShareable(new FArticyRichTextDecorator(InOwner));
+	return MakeShareable(new FArticyRichTextDecorator(InOwner, this));
+}
+
+IArticyHyperlinkHandler* UArticyRichTextDecorator::GetHyperlinkHandler(URichTextBlock* RichTextBlock)
+{
+	// Try to find a parent that implements the handler interface
+	UWidget* Widget = RichTextBlock;
+	while (Widget != nullptr && !Widget->GetClass()->ImplementsInterface(UArticyHyperlinkHandler::StaticClass()))
+	{
+		UWidget* Next = Widget->GetParent();
+		if (Next == nullptr)
+		{
+			UWidgetTree* Tree = Cast<UWidgetTree>(Widget->GetOuter());
+			if (Tree)
+			{
+				Next = Cast<UWidget>(Tree->GetOuter());
+			}
+		}
+		Widget = Next;
+	}
+
+	// No widget in the hierarchy implements the handler interface.
+	if(Widget == nullptr) { return nullptr; }
+
+	// Return interface
+	return Cast<IArticyHyperlinkHandler>(Widget);
+}
+
+UArticyObject* UArticyRichTextDecorator::GetLinkDestination(URichTextBlock* Owner, const FString& Link)
+{
+	// Resolve the link text into an articy object
+	static FRegexPattern Pattern(TEXT("articy:\\/\\/localhost\\/view\\/~\\/(\\d+)"));
+	FRegexMatcher myMatcher(Pattern, Link);
+
+	// If the link doesn't match the expected format, abort.
+	if(!myMatcher.FindNext()) { return nullptr; }
+
+	// Get numeric id
+	FString Id = myMatcher.GetCaptureGroup(1);
+	uint64 id = FCString::Strtoui64(*Id, nullptr, 10);
+
+	// Resolve
+	return UArticyDatabase::Get(Owner)->GetObject(id);
+}
+
+void UArticyRichTextDecorator::OnArticyLinkNavigated(URichTextBlock* Parent, const FString Link)
+{
+	// Try to find a parent that implements the handler interface
+	auto Widget = GetHyperlinkHandler(Parent);
+	if(Widget == nullptr) { return; }
+	
+	// Resolve the link text into an articy object
+	UArticyObject* Object = GetLinkDestination(Parent, Link);
+	if(!Object) { return; }
+
+	// Call handler
+	IArticyHyperlinkHandler::Execute_OnHyperlinkNavigated(Widget, Object, Parent);
 }
