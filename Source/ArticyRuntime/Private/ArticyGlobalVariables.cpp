@@ -90,11 +90,21 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetDefault(const UObject* WorldC
 	{
 		bool keepBetweenWorlds = UArticyPluginSettings::Get()->bKeepGlobalVariablesBetweenWorlds;
 
-		UArticyGlobalVariables* asset = UArticyDatabase::Get(WorldContext)->GetDefaultGlobalVariables();
-		if(!ensureMsgf(asset != nullptr, TEXT("Couldn't find default ArticyGlobalVariables object. If you just updated the ArticyImporter plugin, try reimporting to fix this.")))
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+		TArray<FAssetData> AssetData;
+		AssetRegistryModule.Get().GetAssetsByClass(UArticyGlobalVariables::StaticClass()->GetFName(), AssetData, true);
+
+		UArticyGlobalVariables* asset = nullptr;
+		if(ensureMsgf(AssetData.Num() != 0, TEXT("ArticyGlobalVariables asset not found!")))
 		{
-			return nullptr;
+			if(AssetData.Num() > 1)
+				UE_LOG(LogTemp, Warning, TEXT("More than one ArticyGlobalVariables asset was found, this is not supported! The first one will be selected."));
+
+			asset = Cast<UArticyGlobalVariables>(AssetData[0].GetAsset());
 		}
+
+		if(!asset)
+			return nullptr;
 
 		UE_LOG(LogTemp, Warning, TEXT("Cloning GVs."));
 
@@ -125,14 +135,23 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetMutableOriginal()
 
 	if (!Asset.IsValid())
 	{
-		UArticyGlobalVariables* asset = UArticyDatabase::GetMutableOriginal()->GetDefaultGlobalVariables();
-		if (!asset)
+		//create a clone of the database
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+		TArray<FAssetData> AssetData;
+		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetFName(), AssetData, true);
+
+		if (AssetData.Num() != 0)
 		{
-			UE_LOG(LogArticyRuntime, Warning, TEXT("No ArticyDraftGV was found."));
+			if (AssetData.Num() > 1)
+			{
+				UE_LOG(LogArticyRuntime, Warning, TEXT("More than one ArticyGV was found, this is not supported! The first one will be selected."));
+			}
+
+			Asset = Cast<UArticyGlobalVariables>(AssetData[0].GetAsset());
 		}
 		else
 		{
-			Asset = asset;
+			UE_LOG(LogArticyRuntime, Warning, TEXT("No ArticyDraftGV was found."));
 		}
 	}
 
@@ -163,7 +182,7 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetRuntimeClone(const UObject* W
 	ensureMsgf(world, TEXT("Getting world for GV cloning failed!"));
 
 	// Get global variable asset to clone
-	UArticyGlobalVariables* asset = UArticyDatabase::Get(WorldContext)->GetDefaultGlobalVariables();
+	UArticyGlobalVariables* asset = UArticyGlobalVariables::GetMutableOriginal();
 
 	// Check if we're keeping global variable objects between worlds
 	bool keepBetweenWorlds = UArticyPluginSettings::Get()->bKeepGlobalVariablesBetweenWorlds;

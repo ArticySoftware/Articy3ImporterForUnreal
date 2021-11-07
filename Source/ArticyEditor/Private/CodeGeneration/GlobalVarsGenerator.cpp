@@ -58,7 +58,7 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 				//in the Init method, call all the variable's Init method
 				header->Method("void", "Init", "UArticyGlobalVariables* const Store", [&]
 				{
-					header->Comment("Initialize our variables and add them to our array");
+					header->Comment("initialize the variables");
 
 					for(const auto var : ns.Variables)
 					{
@@ -126,8 +126,8 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 	});
 }
 
-UArticyGlobalVariables* GlobalVarsGenerator::GenerateAsset(const UArticyImportData* Data)
+void GlobalVarsGenerator::GenerateAsset(const UArticyImportData* Data)
 {
 	const auto className = CodeGenerator::GetGlobalVarsClassname(Data, true);
-	return ArticyImporterHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName(), TEXT(""), TEXT(""), RF_ArchetypeObject);
+	ArticyImporterHelpers::GenerateAsset<UArticyGlobalVariables>(*className, FApp::GetProjectName(), TEXT(""), TEXT(""), RF_ArchetypeObject);
 }
