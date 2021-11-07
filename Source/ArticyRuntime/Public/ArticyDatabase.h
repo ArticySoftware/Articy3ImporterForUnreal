@@ -14,6 +14,7 @@
 class UArticyExpressoScripts;
 struct FArticyId;
 class UArticyGlobalVariables;
+class UArticyAlternativeGlobalVariables;
 
 USTRUCT(BlueprintType)
 struct FArticyObjectShadow
@@ -134,7 +135,7 @@ public:
 	/** Get the current GVs instance. */
 	virtual UArticyGlobalVariables* GetGVs() const;
 	/** Gets the current runtime instance of a set of GVs */
-	virtual UArticyGlobalVariables* GetRuntimeGVs(UArticyGlobalVariables* Asset) const;
+	virtual UArticyGlobalVariables* GetRuntimeGVs(UArticyAlternativeGlobalVariables* Asset) const;
 
 	/** Unloads the database, which causes that all changes get removed.*/
 	UFUNCTION(BlueprintCallable, Category = "Articy")

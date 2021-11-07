@@ -139,10 +139,10 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetMutableOriginal()
 	return Asset.Get();
 }
 
-UArticyGlobalVariables* UArticyGlobalVariables::GetRuntimeClone(const UObject* WorldContext, UArticyGlobalVariables* GVs)
+UArticyGlobalVariables* UArticyGlobalVariables::GetRuntimeClone(const UObject* WorldContext, UArticyAlternativeGlobalVariables* GVs)
 {
-	// Special case: We're passed the default GV set. If so, use the GetDefault logic
-	if (GVs == GetMutableOriginal()) { return GetDefault(WorldContext);  }
+	// Special case: We're passed a nullptr. Use the default shared set.
+	if (GVs == nullptr) { return GetDefault(WorldContext);  }
 
 	// Get unique name of GV set
 	const FString Name = GVs->GetFullName();
@@ -158,8 +158,12 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetRuntimeClone(const UObject* W
 
 	UE_LOG(LogTemp, Warning, TEXT("Cloning Override GVs %s"), *GVs->GetFullName());
 
+	// Get world context
 	auto world = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 	ensureMsgf(world, TEXT("Getting world for GV cloning failed!"));
+
+	// Get global variable asset to clone
+	UArticyGlobalVariables* asset = UArticyDatabase::Get(WorldContext)->GetDefaultGlobalVariables();
 
 	// Check if we're keeping global variable objects between worlds
 	bool keepBetweenWorlds = UArticyPluginSettings::Get()->bKeepGlobalVariablesBetweenWorlds;
@@ -169,7 +173,7 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetRuntimeClone(const UObject* W
 	if (keepBetweenWorlds)
 	{
 		FString NewName = TEXT("Persistent Runtime GV Clone of ") + Name;
-		NewClone = DuplicateObject(GVs, world->GetGameInstance(), *NewName);
+		NewClone = DuplicateObject(asset, world->GetGameInstance(), *NewName);
 #if !WITH_EDITOR
 		NewClone->AddToRoot();
 #endif
@@ -177,7 +181,7 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetRuntimeClone(const UObject* W
 	else
 	{
 		// Otherwise, add it to the active world
-		NewClone = DuplicateObject(GVs, world, *FString::Printf(TEXT("%s %s GV"), *world->GetName(), *Name));
+		NewClone = DuplicateObject(asset, world, *FString::Printf(TEXT("%s %s GV"), *world->GetName(), *Name));
 	}
 
 	// Store and return

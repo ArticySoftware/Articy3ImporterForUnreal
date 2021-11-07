@@ -194,17 +194,9 @@ UArticyGlobalVariables* UArticyDatabase::GetGVs() const
 	return UArticyGlobalVariables::GetDefault(this);
 }
 
-UArticyGlobalVariables* UArticyDatabase::GetRuntimeGVs(UArticyGlobalVariables* Asset) const
+UArticyGlobalVariables* UArticyDatabase::GetRuntimeGVs(UArticyAlternativeGlobalVariables* Asset) const
 {
-	// If the outer object of the global variables asset is NOT a package, then this is already
-	//  a runtime clone (its outer will either be a GameInstance if its a persistant clone or a World if its not)
-	//  In this case, just return the asset as we've already cloned it.
-	if (!Asset->GetOuter()->GetClass()->IsChildOf(UPackage::StaticClass()))
-	{
-		return Asset;
-	}
-
-	// Otherwise, create or get a clone of this GV asset for use at runtime
+	// Find or create a clone of the global variables set associated with this "alternative" set
 	return UArticyGlobalVariables::GetRuntimeClone(this, Asset);
 }
 

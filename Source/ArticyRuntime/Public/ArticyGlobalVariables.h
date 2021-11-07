@@ -11,6 +11,7 @@
 #include "ArticyExpressoScripts.h"
 #include "ArticyGlobalVariables.generated.h"
 
+class UArticyAlternativeGlobalVariables;
 
 //implicit convertion operator (= getter)
 //ReSharper disable once CppNonExplicitConversionOperator
@@ -426,7 +427,7 @@ public:
 	 * Returns a runtime clone of a non-default global variable set.
 	 * Used by ArticyFlowPlayer if OverrideGV is set (this way we're not modifying the asset itself)
 	 */
-	static UArticyGlobalVariables* GetRuntimeClone(const UObject* WorldContext, UArticyGlobalVariables* GVs);
+	static UArticyGlobalVariables* GetRuntimeClone(const UObject* WorldContext, UArticyAlternativeGlobalVariables* GVs);
 
 	/* Unloads the global variables, which causes that all changes get removed. */
 	UFUNCTION(BlueprintCallable, Category = "Packages")
@@ -481,7 +482,7 @@ private:
 	static TWeakObjectPtr<UArticyGlobalVariables> Clone;
 
 	// Runtime clones of non-default global variable assets managed by GetRuntimeClone
-	static TMap<FName, TWeakObjectPtr< UArticyGlobalVariables>> OtherClones;
+	static TMap<FName, TWeakObjectPtr<UArticyGlobalVariables>> OtherClones;
 
 	template <typename ArticyVariableType, typename VariablePayloadType>
 	void SetVariableValue(const FName Namespace, const FName Variable, const VariablePayloadType Value);
