@@ -53,6 +53,11 @@ void DatabaseGenerator::GenerateCode(const UArticyImportData* Data)
 					header->Line(FString::Printf(TEXT("return static_cast<%s*>(Super::GetGVs());"), *globalVarsClass));
 				}, "Get the global variables.", true,
 					"BlueprintPure, Category = \"articy:draft\", meta=(keywords=\"global variables\")", "const override");
+				header->Method(globalVarsClass + "*", "GetRuntimeGVs", "UArticyAlternativeGlobalVariables* Asset", [&]
+					{
+						header->Line(FString::Printf(TEXT("return static_cast<%s*>(Super::GetRuntimeGVs(Asset));"), *globalVarsClass));
+					}, "Gets the current runtime instance of a set of GVs.", true,
+					"BlueprintPure, Category = \"articy:draft\", meta=(keywords=\"global variables\")", "const override");
 			}
 		});
 	});

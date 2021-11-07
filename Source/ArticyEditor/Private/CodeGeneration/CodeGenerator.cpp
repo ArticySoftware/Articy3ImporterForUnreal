@@ -316,7 +316,7 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::GetArticyGeneratedFolder()), GeneratedAssets, true);
 
 	TArray<UPackage*> PackagesToSave;
-
+	
 	PackagesToSave.Add(Data->GetOutermost());
 	for (FAssetData AssetData : GeneratedAssets)
 	{

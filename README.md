@@ -22,6 +22,7 @@ This version of the plugin compiles for Unreal Engine 5 Early Access 2. Be warne
   * [Getting an object](#getting-the-object)
   * [Using the Flow Player](#articy-flow-player)
   * [Custom Script Methods](#custom-script-methods)
+  * [Multiple Global Variable Sets](#multiple-global-variable-sets)
 * [Common Issues](#common-issues)
 
 # Features
@@ -367,6 +368,38 @@ Thankfully, this is easy to handle with the `Is in shadow state?` Blueprint node
 
 If your custom function has a return value, however, you still want to make sure it runs as normally. Remember: shadowing is how articy decides what branches are valid or not. If you return a different value while shadowing than you would otherwise, articy won't be able to figure out the proper list of branches to return. Only use `Is in shadow state?` to gate side-effects.
 
+## Multiple Global Variable Sets
+
+Some games may require having multiple independent sets of global variables, such as each player having their own variable set. 
+
+This is supported via the `Override GV` property of the `ArticyFlowPlayer` component.
+
+To create a new, independent set of global variables, right-click in your Content window and find `Alternative Articy Global Variables`. 
+
+![](docs/create-alternative-globals.png)
+
+Now, you can simply set the `Override GV` property on your flow player to this asset. Any two flow players with the same setting will share variables, and any flow players with this property unset will share the default global variables.
+
+![](docs/assign-alternative-globals.png)
+
+Similar to the default global variables set, these new sets respect the `Keep global variables between worlds` setting of your project. If it's turned on, changes to these global variables will persist across level boundaries. If it is turned off, each will reset to their default values anytime the level changes.
+
+### Getting Variable Sets in Blueprint and C++
+
+If you want to access the values in these sets in Blueprint or C++, you need to use the `Get Runtime GVs` method/node on the Articy Database. The `Alternative Articy Global Variables` asset is just a dummy placeholder, so it has no data itself. You need to use this method to access the runtime data.
+
+![](docs/get-vars-bp.png)
+
+Pass the asset reference into the `Get Runtime GVs` method and it will return the active runtime clone for that set.
+
+### Getting the Current Variables during Custom Script Calls
+
+If you're writing a handler for a [custom script method](#custom-script-methods), you may want to access the variable set currently being used in execution.
+
+When an expresso script is running, the `Get GVs` method/Blueprint node on the Articy Database will return the *active global variables instance* that the flow player is using.
+
+![](docs/get-script-gvs-bp.png)
+
 ## Articy Global Variables Debugger
 The Global Variables debugger can be accessed in the toolbar at the top of the level editor (UE4) or the Settings menu on the right hand side of the level editor (UE5). It shows all global variables while the game is running and lets you search by namespace or variable name which makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
 
@@ -520,3 +553,25 @@ Both need to be copied into your Unreal project.
 Because of [a known issue with Unreal and hot-reloading changes to enums](https://issues.unrealengine.com/issue/UE-19528?lang=zh-CN), be very careful when hotreloading any changes to the values in a Drop-down list. If you save any Blueprint using the generated enum after hotreloading, you'll likely have all those nodes broken (converted into `bytes`) the next time you open the editor.
 
 When importing drop-down list changes, it's best to restart Unreal to avoid issues.
+
+## Error C2451: a conditional expression of type 'const TWeakObjectPtr<UObject,FWeakObjectPtr>' is not valid
+
+If you're getting the above error after updating to version `1.3.2` of the Articy Unreal plugin, you need to make a manual fix to your generated C++ file to get Unreal started.
+
+Find `{ProjectName}ExpressoScripts.h` (where `{ProjectName}` is the name of your articy:draft project) in `Source\{UnrealProjectName}\ArticyGenerated` and look for the method `GetUserMethodsProviderObject` (should be around line `50`ish).
+
+Change 
+
+```cpp
+if(DefaultUserMethodsProvider)
+	return DefaultUserMethodsProvider;
+```
+
+to
+
+```cpp
+if(DefaultUserMethodsProvider.IsValid())
+	return DefaultUserMethodsProvider.Get();
+```
+
+Once the project succesfully compiles and opens, run a [Full Reimport](#importer-modes).
