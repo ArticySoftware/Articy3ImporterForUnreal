@@ -238,8 +238,13 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 	if (!anyMatches) { return Input; }
 
 	// Create a buffer to hold the output
+	FString strings = "";
+	/*
+	// Future TODO: I wanted to use string builder for efficiency, but it's not available in older versions of Unreal
+	//  or, at least, it gave me some build errors
 	TCHAR* buffer = new TCHAR[Input.Len() * 2];
 	FStringBuilderBase strings(buffer, Input.Len() * 2);
+	*/
 
 	// Run through matches
 	TArray<TagInfo> currentTags;
@@ -251,7 +256,7 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 		int end = myMatcher.GetMatchEnding();
 
 		// Add all text preceding the match to the output
-		strings.Append(Input.Mid(last, start - last));
+		strings += (Input.Mid(last, start - last));
 
 		// Check if we're dealing with a start tag or an end tag
 		FString tagName = myMatcher.GetCaptureGroup(1);
@@ -267,10 +272,10 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 			if (!info.dummy)
 			{
 				// If we have tags to close, close them
-				if (hasTagsToClose) { strings.Append(TEXT("</>")); }
+				if (hasTagsToClose) { strings += (TEXT("</>")); }
 
 				// Open the tag
-				strings.Append(CreateOpenTag(currentTags));
+				strings += (CreateOpenTag(currentTags));
 			}
 		}
 		else {
@@ -281,12 +286,12 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 			if (!popped.dummy)
 			{
 				// Write out the close
-				strings.Append(TEXT("</>"));
+				strings += (TEXT("</>"));
 
 				// If any tags are left, reopen
 				if (currentTags.Num() > 0)
 				{
-					strings.Append(CreateOpenTag(currentTags));
+					strings += (CreateOpenTag(currentTags));
 				}
 			}
 		}
@@ -299,15 +304,16 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 	// Add end of string
 	if (last != Input.Len())
 	{
-		strings.Append(Input.Mid(last, Input.Len() - last));
+		strings += (Input.Mid(last, Input.Len() - last));
 	}
 
 	// Create string
-	FString result = strings.ToString();
+	FString result = strings;//.ToString();
 
 	// Clean memory
-	delete buffer;
-	buffer = nullptr;
+	// TODO - see above about old unreal vers
+	//delete buffer;
+	//buffer = nullptr;
 
 	// Return result
 	return result;

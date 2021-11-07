@@ -9,6 +9,7 @@
 #include "ArticyRuntimeModule.h"
 #include "ArticyPluginSettings.h"
 #include "ArticyFlowPlayer.h"
+#include "ArticyAlternativeGlobalVariables.h"
 
 
 FArticyGvName::FArticyGvName(const FName FullVariableName)

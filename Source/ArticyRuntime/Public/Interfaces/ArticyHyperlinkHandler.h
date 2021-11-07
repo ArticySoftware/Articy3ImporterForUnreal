@@ -6,6 +6,7 @@
 class UArticyObject;
 class URichTextBlock;
 
+#include "UObject/Interface.h"
 #include "ArticyHyperlinkHandler.generated.h"
 
 UINTERFACE(MinimalAPI)

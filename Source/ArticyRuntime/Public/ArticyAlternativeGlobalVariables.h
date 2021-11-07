@@ -3,6 +3,7 @@
 //
 #pragma once
 
+#include "Engine/DataAsset.h"
 #include "ArticyAlternativeGlobalVariables.generated.h"
 
 UCLASS(BlueprintType)
