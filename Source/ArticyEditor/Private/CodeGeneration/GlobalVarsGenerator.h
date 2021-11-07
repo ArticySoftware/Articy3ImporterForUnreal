@@ -16,11 +16,6 @@ public:
 	static void GenerateCode(const UArticyImportData* Data);
 	static UArticyGlobalVariables* GenerateAsset(const UArticyImportData* Data);
 
-	/**
-	 * Searches for other GlobalVariable assets (not the default one) and calls Init on them.
-	 */
-	static TArray<UPackage*> ReinitializeOtherGlobalVariableStores(const UArticyImportData* Data);
-
 private:
 	GlobalVarsGenerator() {}
 	~GlobalVarsGenerator() {}

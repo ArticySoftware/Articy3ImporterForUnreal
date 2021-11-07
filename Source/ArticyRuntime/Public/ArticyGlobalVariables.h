@@ -464,11 +464,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Debug")
 	void DisableDebugLogging();
 
-	/**
-	 * Reinitializes the global variable store to its default values
-	 */
-	virtual void Reinitialize() { }
-
 protected:
 
 	UPROPERTY()
