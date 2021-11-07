@@ -1,7 +1,10 @@
 ## Unreal Import 1.3.2 Changelog
 
+- Breaking Changes:
+  - A change in the code generator will break existing projects. Search "Error C2451" in [the readme](README.md) for the quick fix to get you compiling again.
 - New Features:
   - Rich text support using Unreal's Rich Text Block component, including hyperlinks ([#64](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/64)).
+  - Support for multiple, independent global variable sets ([#66](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/66)).
 - Fixes:
   - Fix packaging compiler warning concerning `FADIHierarchy::RootObject` ([#60](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/60)).
   - Fix unsupported pragma compile error when building for PlayStation 4/5 ([#59](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/59) and [#67](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/67)).
