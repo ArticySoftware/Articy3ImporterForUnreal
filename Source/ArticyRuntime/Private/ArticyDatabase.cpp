@@ -224,11 +224,6 @@ bool UArticyDatabase::IsPackageDefaultPackage(FString PackageName)
 	return false;
 }
 
-UWorld* UArticyDatabase::GetWorld() const
-{
-	return GetOuter() ? GetOuter()->GetWorld() : nullptr;
-}
-
 void UArticyDatabase::LoadAllObjects()
 {
 	GetOriginal(true);

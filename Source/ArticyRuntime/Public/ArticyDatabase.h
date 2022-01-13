@@ -162,8 +162,6 @@ public:
 	UFUNCTION(BlueprintPure, meta = (DisplayName="Is package default package?"), Category = "Articy")
 	bool IsPackageDefaultPackage(FString PackageName);
 
-	UWorld* GetWorld() const override;
-
 	//---------------------------------------------------------------------------//
 
 	/**
