@@ -58,7 +58,7 @@ struct ARTICYRUNTIME_API ExpressoType
 	virtual ~ExpressoType() { }
 
 	//initialize from object and property
-	ExpressoType(UArticyBaseObject* Object, const FName& Property);
+	ExpressoType(UArticyBaseObject* Object, const FString& Property);
 	
 	// ReSharper disable CppNonExplicitConvertingConstructor
 
@@ -310,9 +310,9 @@ protected:
 	void setProp(const ExpressoType& Id_CloneId, const FString& Property, const ExpressoType& Value) const;
 
 	/** Don't change the name, it's called like this in script fragments! */
-	static ExpressoType getProp(UArticyBaseObject* Object, const FName& Property);
+	static ExpressoType getProp(UArticyBaseObject* Object, const FString& Property);
 	/** Don't change the name, it's called like this in script fragments! */
-	ExpressoType getProp(const ExpressoType& Id_CloneId, const FName& Property) const;
+	ExpressoType getProp(const ExpressoType& Id_CloneId, const FString& Property) const;
 
 	/** Don't change the name, it's called like this in script fragments! */
 	int random(int Min, int Max);

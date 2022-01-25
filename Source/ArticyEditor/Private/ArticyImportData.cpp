@@ -575,18 +575,31 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 		{
 			auto line = lines[l];
 
+			// since "line" gets modified after the literalStrings matcher was created
+			// we need to offset the values from the matcher based on the changes done to "line" in the loop
+			auto offset = 0;
+
+			// create FStrings from literal strings
+			FRegexMatcher literalStrings(literalStringPattern, line);
+			while (literalStrings.FindNext())
+			{
+				auto literalStart = literalStrings.GetMatchBeginning() + offset;
+				auto literalEnd = literalStrings.GetMatchEnding() + offset;
+
+				line = line.Left(literalStart) + TEXT("FString(TEXT(") + line.Mid(literalStart, literalEnd - literalStart) + TEXT("))") + line.Mid(literalEnd);
+				offset += strlen("FString(TEXT(") + strlen("))");
+			}
+
 			//find all GV accesses (Namespace.Variable)
 			FRegexMatcher gvAccess(unquotedWordDotWord, line);
 
 			//find the last assignment operator in the line
 			auto assignments = FRegexMatcher(assignmentOperator, line);
 			auto lastAssignment = line.Len();
-			while(assignments.FindNext())
+			while (assignments.FindNext())
 				lastAssignment = assignments.GetMatchBeginning();
 
-			// since "line" gets modified after the gvAccess matcher was created
-			// we need to offset the values from the matcher based on the changes done to "line" in the loop
-			auto offset = 0;
+			offset = 0;
 
 			//replace all remaining Namespace.Variable with *Namespace->Variable
 			//note: if the variable appears to the right of an assignment operator,
@@ -596,7 +609,7 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 				auto start = gvAccess.GetMatchBeginning() + offset;
 				auto end = gvAccess.GetMatchEnding() + offset;
 				
-				FRegexMatcher literalStrings(literalStringPattern, line);
+				literalStrings = FRegexMatcher(literalStringPattern, line);
 				auto inLiteral = false;
 				while (literalStrings.FindNext())
 				{
@@ -623,25 +636,9 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 						offset += strlen(">") + strlen("->Get()");
 					}
 					else
-					{			
-						// if the value the variable should get assigned is a string, we cast it to FString
-						auto valueStr = line.Mid(end);
-						for (int i = 0; i < valueStr.Len(); i++)
-						{
-							auto currentChar = valueStr[i];
-							if (currentChar == TEXT(' ') || currentChar == TEXT('<') || currentChar == TEXT('>') || currentChar == TEXT('=') || currentChar == TEXT('+') || currentChar == TEXT('-'))
-								continue;
-							else if (currentChar == '\"' && i > 0)
-							{
-								valueStr.InsertAt(i, TEXT("(FString)"));
-								offset += strlen("(FString)");
-							}
-	
-							break;
-						}
-						
+					{								
 						//get the dereferenced variable
-						line = line.Left(start) + TEXT("(*") + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + ")" + valueStr;
+						line = line.Left(start) + TEXT("(*") + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + ")" + line.Mid(end);
 						offset += strlen(".") + strlen(">") + strlen("()");
 					}
 				} // !inLiteral

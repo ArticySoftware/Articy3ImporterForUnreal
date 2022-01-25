@@ -10,9 +10,9 @@
 
 TMap<FName, ExpressoType::Definition> ExpressoType::Definitions;
 
-ExpressoType::ExpressoType(UArticyBaseObject* Object, const FName &Property)
+ExpressoType::ExpressoType(UArticyBaseObject* Object, const FString &Property)
 {
-	auto propName = Property.ToString();
+	auto propName = Property;
 	Object = TryFeatureReroute(Object, propName);
 
 	if(!Object)
@@ -671,12 +671,12 @@ void UArticyExpressoScripts::setProp(const ExpressoType& Id_CloneId, const FStri
 	setProp(getObjInternal(Id_CloneId), Property, Value);
 }
 
-ExpressoType UArticyExpressoScripts::getProp(UArticyBaseObject* Object, const FName& Property)
+ExpressoType UArticyExpressoScripts::getProp(UArticyBaseObject* Object, const FString& Property)
 {
 	return ExpressoType{Object, Property};
 }
 
-ExpressoType UArticyExpressoScripts::getProp(const ExpressoType& Id_CloneId, const FName& Property) const
+ExpressoType UArticyExpressoScripts::getProp(const ExpressoType& Id_CloneId, const FString& Property) const
 {
 	return getProp(getObjInternal(Id_CloneId), Property);
 }
