@@ -216,14 +216,26 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 	static FDelegateHandle AfterCompileLambda;
 	if(AfterCompileLambda.IsValid())
 	{
+#if ENGINE_MAJOR_VERSION >= 5
+		FCoreUObjectDelegates::ReloadCompleteDelegate.Remove(AfterCompileLambda);
+#else
 		IHotReloadModule::Get().OnHotReload().Remove(AfterCompileLambda);
+#endif
 		AfterCompileLambda.Reset();
 	}
-	
+
+#if ENGINE_MAJOR_VERSION >= 5
+	AfterCompileLambda = FCoreUObjectDelegates::ReloadCompleteDelegate.AddLambda([=](EReloadCompleteReason ReloadCompleteReason)
+	{
+		OnCompiled(Data);
+	});
+#else
 	AfterCompileLambda = IHotReloadModule::Get().OnHotReload().AddLambda([=](bool bWasTriggeredAutomatically)
 	{
 		OnCompiled(Data);
 	});
+#endif
+
 
 	// register a lambda to handle failure in code generation (compilation failed due to generated articy code)
 	// detection of faulty articy code is a heuristic and not optimal!

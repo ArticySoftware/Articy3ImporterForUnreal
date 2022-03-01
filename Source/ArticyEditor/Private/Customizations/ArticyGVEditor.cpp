@@ -38,12 +38,13 @@ void FArticyGVEditor::InitArticyGVEditor(const EToolkitMode::Type Mode, const TS
 		->AddArea
 		(
 			FTabManager::NewPrimaryArea()->SetOrientation(Orient_Vertical)
+			/* Is this really needed?
 			->Split
 			(
 				FTabManager::NewStack()
 				->SetSizeCoefficient(0.1f)
 				->AddTab(GetToolbarTabId(), ETabState::OpenedTab)->SetHideTabWell(true)
-			)
+			)*/
 			->Split
 			(
 				FTabManager::NewStack()

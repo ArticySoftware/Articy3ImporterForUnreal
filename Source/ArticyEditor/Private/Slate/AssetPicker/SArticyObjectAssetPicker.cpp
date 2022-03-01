@@ -200,7 +200,11 @@ TSharedRef<SWidget> SArticyObjectAssetPicker::CreateClassPicker()
 	FClassViewerInitializationOptions ClassViewerConfig;
 	ClassViewerConfig.DisplayMode = EClassViewerDisplayMode::ListView;
 	ClassViewerConfig.bAllowViewOptions = true;
+#if ENGINE_MAJOR_VERSION >= 5
+	ClassViewerConfig.ClassFilters.Add(MakeShareable(new FArticyRefClassFilter(TopLevelClassRestriction.Get(), false)));
+#else
 	ClassViewerConfig.ClassFilter = MakeShareable(new FArticyRefClassFilter(TopLevelClassRestriction.Get(), false));
+#endif
 
 	return FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer").CreateClassViewer(ClassViewerConfig, FOnClassPicked::CreateRaw(this, &SArticyObjectAssetPicker::OnClassPicked_Func));
 }
