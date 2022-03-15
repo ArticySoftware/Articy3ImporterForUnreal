@@ -192,8 +192,8 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 	if (LiveCodingModule.IsEnabledForSession())
 	{
 		// Cancel
-		FText ErrorTitle = FText(LOCTEXT("LiveReloadErrorTitle", "Disable Experimental Live Reload"));
-		FText ErrorText = FText(LOCTEXT("LiveReloadErrorMessage", "Unable to reimport Articy:Draft project changes because Experimental Live Reload is enabled. Please disable Live Reload and run a Full Reimport to continue."));
+		FText ErrorTitle = FText(LOCTEXT("LiveCodingErrorTitle", "Disable Experimental Live Coding"));
+		FText ErrorText = FText(LOCTEXT("LiveCodingErrorMessage", "Unable to reimport Articy:Draft project changes because Experimental Live Coding is enabled. Please disable Live Coding and run a Full Reimport to continue."));
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 		EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, ErrorText, ErrorTitle);
 #else
