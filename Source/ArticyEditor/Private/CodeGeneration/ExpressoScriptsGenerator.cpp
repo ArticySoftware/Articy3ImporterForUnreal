@@ -117,16 +117,6 @@ void GenerateExpressoScripts(CodeFileGenerator* header, const UArticyImportData*
 	}, "", false, "", "override");
 
 	header->Line();
-	header->Method("UObject*", "GetUserMethodsProviderObject", "", [&]
-	{
-		header->Line("if(UserMethodsProvider)");
-		header->Line("	return UserMethodsProvider;");
-		header->Line("if(DefaultUserMethodsProvider.IsValid())");
-		header->Line("	return DefaultUserMethodsProvider.Get();");
-		header->Line("return nullptr;");
-	}, "", false, "", "const");
-
-	header->Line();
 	header->Line("public:", false, true, -1);
 
 	header->Line();

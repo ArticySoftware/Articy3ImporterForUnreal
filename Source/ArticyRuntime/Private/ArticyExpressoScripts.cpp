@@ -656,6 +656,15 @@ UObject* UArticyExpressoScripts::GetDefaultUserMethodsProvider() const
 	return DefaultUserMethodsProvider.Get();
 }
 
+UObject* UArticyExpressoScripts::GetUserMethodsProviderObject() const
+{
+	if (UserMethodsProvider)
+		return UserMethodsProvider;
+	if (DefaultUserMethodsProvider != nullptr && DefaultUserMethodsProvider.IsValid())
+		return DefaultUserMethodsProvider.Get();
+	return nullptr;
+}
+
 void UArticyExpressoScripts::PrintInternal(const FString& msg)
 {
 	UE_LOG(LogArticyRuntime, Log, TEXT("%s"), *msg);

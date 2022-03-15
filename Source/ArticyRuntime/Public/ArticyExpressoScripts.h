@@ -276,6 +276,7 @@ public:
 	 */
 	void SetDefaultUserMethodsProvider(UObject* MethodProvider);
 	UObject* GetDefaultUserMethodsProvider() const;
+	UObject* GetUserMethodsProviderObject() const;
 
 	/** Gets the active GV instance in use if we're running an expresso script (otherwise nullptr) */
 	virtual UArticyGlobalVariables* GetGV() { return nullptr; }
