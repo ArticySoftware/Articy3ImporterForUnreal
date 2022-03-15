@@ -177,6 +177,7 @@ void ExpressoScriptsGenerator::GenerateCode(const UArticyImportData* Data)
 
 	CodeFileGenerator(GetFilename(Data), true, [&](CodeFileGenerator* header)
 	{
+		header->Line("#include \"CoreUObject.h\"");
 		header->Line("#include \"ArticyRuntime/Public/ArticyExpressoScripts.h\"");
 		header->Line("#include \"" + CodeGenerator::GetGlobalVarsClassname(Data, true) + ".h\"");
 		header->Line("#include \"" + CodeGenerator::GetExpressoScriptsClassname(Data, true) + ".generated.h\"");

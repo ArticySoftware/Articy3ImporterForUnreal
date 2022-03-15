@@ -19,7 +19,7 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 	const auto filename = CodeGenerator::GetGlobalVarsClassname(Data, true);
 	CodeFileGenerator(filename + ".h", true, [&](CodeFileGenerator* header)
 	{
-		
+		header->Line("#include \"CoreUObject.h\"");
 		header->Line("#include \"ArticyRuntime/Public/ArticyGlobalVariables.h\"");
 		header->Line("#include \"" + filename + ".generated.h\"");
 
