@@ -232,7 +232,9 @@ TSharedRef<class ITableRow> SArticyObjectAssetPicker::MakeTileViewWidget(TWeakOb
 {
 	TSharedPtr< STableRow<TWeakObjectPtr<UArticyObject>>> TableRowWidget;
 	SAssignNew(TableRowWidget, STableRow<TWeakObjectPtr<UArticyObject>>, OwnerTable)
+#if ENGINE_MAJOR_VERSION == 4
 		.Style(FEditorStyle::Get(), "ContentBrowser.AssetListView.TableRow")
+#endif
 		.Cursor(true ? EMouseCursor::GrabHand : EMouseCursor::Default)
 		.Padding(3.f);
 
