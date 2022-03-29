@@ -249,7 +249,7 @@ void UArticyDatabase::LoadDefaultPackages()
 
 void UArticyDatabase::LoadAllPackages(bool bDefaultOnly)
 {
-	for(const auto pack : ImportedPackages)
+	for (const auto &pack : ImportedPackages)
 	{
 		if(!bDefaultOnly || (pack.Value && pack.Value->bIsDefaultPackage)
 #if WITH_EDITOR
