@@ -159,7 +159,7 @@ void CodeFileGenerator::WriteToFile() const
 		bFileExisted = true;
 	}
 	
-	const bool bFileWritten = FFileHelper::SaveStringToFile(FileContent, *Path);
+	const bool bFileWritten = FFileHelper::SaveStringToFile(FileContent, *Path, FFileHelper::EEncodingOptions::ForceUTF8);
 
 	// mark the file for add if it's the first time we've written it
 	if(!bFileExisted && bFileWritten && SCModule.IsEnabled())
