@@ -1,14 +1,22 @@
-## Unreal Import 1.3.2 Changelog
+## Unreal Import 1.4 Changelog
 
+- Unreal Engine 5 support
 - Breaking Changes:
   - A change in the code generator will break existing projects. Search "Error C2451" in [the readme](README.md) for the quick fix to get you compiling again.
 - New Features:
   - Rich text support using Unreal's Rich Text Block component, including hyperlinks ([#64](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/64)).
   - Support for multiple, independent global variable sets ([#66](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/66)).
+- Changes:
+  - Import with with enabled live coding is now allowed in UE5
+  - Moved generated method `U<ProjectName>ExpressoScripts::GetUserMethodsProviderObject()` to `UArticyExpressoScripts::GetUserMethodsProviderObject()`
 - Fixes:
-  - Fix packaging compiler warning concerning `FADIHierarchy::RootObject` ([#60](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/60)).
-  - Fix unsupported pragma compile error when building for PlayStation 4/5 ([#59](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/59) and [#67](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/67)).
-  - Fix crash when changing levels while using a custom script methods ([#63](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/63)).
+  - Fixed compilation issues with UE4.22
+  - Fixed compilation issues with Linux cross-compilation toolchain v19
+  - Fixed packaging compiler warning concerning `FADIHierarchy::RootObject` ([#60](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/60)).
+  - Fixed unsupported pragma compile error when building for PlayStation 4/5 ([#59](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/59) and [#67](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/67)).
+  - Fixed issue with Unicode characters in generated scripts
+  - Fixed crash when changing levels while using a custom script methods ([#63](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/63)).
+  - Fixed issues with `GetWorld()` in `UArticyDatabase` and `UArticyBaseObject` ([#68])
 - Documentation
   - Added documentation for custom script methods and shadowing to the Readme ([#61](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/61)).
 

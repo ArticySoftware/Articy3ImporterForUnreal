@@ -8,10 +8,6 @@ The Unreal Engine importer allows integrating articy:draft content into Unreal p
 
 While full support is not guaranteed for this product, we're constantly working on improvements and would love to hear your suggestions. Feel free to forward us your ideas or even better directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the importer.
 
-## Unreal Engine 5 Early Access Support
-
-This version of the plugin compiles for Unreal Engine 5 Early Access 2. Be warned however that UE5 support is not fully tested and you should proceed with caution.
-
 # Table of contents
 
 * [Features](#features)
@@ -556,22 +552,8 @@ When importing drop-down list changes, it's best to restart Unreal to avoid issu
 
 ## Error C2451: a conditional expression of type 'const TWeakObjectPtr<UObject,FWeakObjectPtr>' is not valid
 
-If you're getting the above error after updating to version `1.3.2` of the Articy Unreal plugin, you need to make a manual fix to your generated C++ file to get Unreal started.
+If you're getting the above error after updating to version `1.4` of the Articy Unreal plugin, you need to make a manual fix to your generated C++ file to get Unreal started.
 
-Find `{ProjectName}ExpressoScripts.h` (where `{ProjectName}` is the name of your articy:draft project) in `Source\{UnrealProjectName}\ArticyGenerated` and look for the method `GetUserMethodsProviderObject` (should be around line `50`ish).
-
-Change 
-
-```cpp
-if(DefaultUserMethodsProvider)
-	return DefaultUserMethodsProvider;
-```
-
-to
-
-```cpp
-if(DefaultUserMethodsProvider.IsValid())
-	return DefaultUserMethodsProvider.Get();
-```
+Find `{ProjectName}ExpressoScripts.h` (where `{ProjectName}` is the name of your articy:draft project) in `Source\{UnrealProjectName}\ArticyGenerated` and delete the method `GetUserMethodsProviderObject` (should be around line `50`ish).
 
 Once the project succesfully compiles and opens, run a [Full Reimport](#importer-modes).
