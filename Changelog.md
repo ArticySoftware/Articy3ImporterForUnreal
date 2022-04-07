@@ -16,7 +16,7 @@
   - Fixed unsupported pragma compile error when building for PlayStation 4/5 ([#59](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/59) and [#67](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/67)).
   - Fixed issue with Unicode characters in generated scripts
   - Fixed crash when changing levels while using a custom script methods ([#63](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/63)).
-  - Fixed issues with `GetWorld()` in `UArticyDatabase` and `UArticyBaseObject` ([#68])
+  - Fixed issues with `GetWorld()` in `UArticyDatabase` and `UArticyBaseObject` ([#68](https://github.com/ArticySoftware/ArticyImporterForUnreal/issues/68))
 - Documentation
   - Added documentation for custom script methods and shadowing to the Readme ([#61](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/61)).
 
