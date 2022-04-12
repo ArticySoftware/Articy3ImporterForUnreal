@@ -14,6 +14,7 @@
 class UArticyExpressoScripts;
 struct FArticyId;
 class UArticyGlobalVariables;
+class UArticyAlternativeGlobalVariables;
 
 USTRUCT(BlueprintType)
 struct FArticyObjectShadow
@@ -133,6 +134,8 @@ public:
 	static UArticyDatabase* Get(const UObject* WorldContext);
 	/** Get the current GVs instance. */
 	virtual UArticyGlobalVariables* GetGVs() const;
+	/** Gets the current runtime instance of a set of GVs */
+	virtual UArticyGlobalVariables* GetRuntimeGVs(UArticyAlternativeGlobalVariables* Asset) const;
 
 	/** Unloads the database, which causes that all changes get removed.*/
 	UFUNCTION(BlueprintCallable, Category = "Articy")
@@ -158,8 +161,6 @@ public:
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName="Is package default package?"), Category = "Articy")
 	bool IsPackageDefaultPackage(FString PackageName);
-
-	UWorld* GetWorld() const override;
 
 	//---------------------------------------------------------------------------//
 

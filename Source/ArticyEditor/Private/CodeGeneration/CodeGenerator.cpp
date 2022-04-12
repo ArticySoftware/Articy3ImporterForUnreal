@@ -25,7 +25,7 @@
 #include "Misc/MessageDialog.h"
 #include "Dialogs/Dialogs.h"
 #include "ISourceControlModule.h"
-#if WITH_LIVE_CODING
+#if WITH_LIVE_CODING && ENGINE_MAJOR_VERSION == 4
 #include "Windows/LiveCoding/Public/ILiveCodingModule.h"
 #endif
 
@@ -187,13 +187,13 @@ bool CodeGenerator::DeleteGeneratedAssets()
 
 void CodeGenerator::Compile(UArticyImportData* Data)
 {
-#if WITH_LIVE_CODING
+#if WITH_LIVE_CODING && ENGINE_MAJOR_VERSION == 4
 	ILiveCodingModule& LiveCodingModule = FModuleManager::LoadModuleChecked<ILiveCodingModule>("LiveCoding");
 	if (LiveCodingModule.IsEnabledForSession())
 	{
 		// Cancel
-		FText ErrorTitle = FText(LOCTEXT("LiveReloadErrorTitle", "Disable Experimental Live Reload"));
-		FText ErrorText = FText(LOCTEXT("LiveReloadErrorMessage", "Unable to reimport Articy:Draft project changes because Experimental Live Reload is enabled. Please disable Live Reload and run a Full Reimport to continue."));
+		FText ErrorTitle = FText(LOCTEXT("LiveCodingErrorTitle", "Disable Experimental Live Coding"));
+		FText ErrorText = FText(LOCTEXT("LiveCodingErrorMessage", "Unable to reimport Articy:Draft project changes because Experimental Live Coding is enabled. Please disable Live Coding and run a Full Reimport to continue."));
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 		EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, ErrorText, ErrorTitle);
 #else
@@ -216,14 +216,26 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 	static FDelegateHandle AfterCompileLambda;
 	if(AfterCompileLambda.IsValid())
 	{
+#if ENGINE_MAJOR_VERSION >= 5
+		FCoreUObjectDelegates::ReloadCompleteDelegate.Remove(AfterCompileLambda);
+#else
 		IHotReloadModule::Get().OnHotReload().Remove(AfterCompileLambda);
+#endif
 		AfterCompileLambda.Reset();
 	}
-	
+
+#if ENGINE_MAJOR_VERSION >= 5
+	AfterCompileLambda = FCoreUObjectDelegates::ReloadCompleteDelegate.AddLambda([=](EReloadCompleteReason ReloadCompleteReason)
+	{
+		OnCompiled(Data);
+	});
+#else
 	AfterCompileLambda = IHotReloadModule::Get().OnHotReload().AddLambda([=](bool bWasTriggeredAutomatically)
 	{
 		OnCompiled(Data);
 	});
+#endif
+
 
 	// register a lambda to handle failure in code generation (compilation failed due to generated articy code)
 	// detection of faulty articy code is a heuristic and not optimal!
@@ -316,7 +328,7 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	AssetRegistryModule.Get().GetAssetsByPath(FName(*ArticyHelpers::GetArticyGeneratedFolder()), GeneratedAssets, true);
 
 	TArray<UPackage*> PackagesToSave;
-
+	
 	PackagesToSave.Add(Data->GetOutermost());
 	for (FAssetData AssetData : GeneratedAssets)
 	{

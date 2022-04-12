@@ -8,16 +8,17 @@ The Unreal Engine importer allows integrating articy:draft content into Unreal p
 
 While full support is not guaranteed for this product, we're constantly working on improvements and would love to hear your suggestions. Feel free to forward us your ideas or even better directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the importer.
 
-## Unreal Engine 5 Early Access Support
-
-This version of the plugin compiles for Unreal Engine 5 Early Access 2. Be warned however that UE5 support is not fully tested and you should proceed with caution.
-
 # Table of contents
 
 * [Features](#features)
 * [Setup](#setup)
-* [Export from articy:draft](#export-project-from-articydraft)
-* [Using the importer](#using-the-importer)
+  * [Export from articy:draft](#export-project-from-articydraft)
+  * [Import into Unreal](#import-into-unreal)
+* [Using the API](#using-the-api)
+  * [Getting an object](#getting-the-object)
+  * [Using the Flow Player](#articy-flow-player)
+  * [Custom Script Methods](#custom-script-methods)
+  * [Multiple Global Variable Sets](#multiple-global-variable-sets)
 * [Common Issues](#common-issues)
 
 # Features
@@ -293,12 +294,171 @@ store the branch in every button. When you instantiate the button you should pas
 
 If you want to learn more about the flow player and its events you can read the [unity documentation](https://www.articy.com/articy-importer/unity/html/howto_flowplayer.htm) as both implementations are based on the same principles.
 
+
+## Custom Script Methods
+
+It's possible to add new script methods into articy:draft's Expresso scripting language. These can trigger side effects in your game such as moving game objects or changing UI states, or they could return helpful values such as the location of the player.
+
+Getting started with custom script methods is easy. Simply start using new methods in articy:draft as if they already exist (as pictured below) and import your project into Unreal.
+
+![](docs/custom-method-node.png)
+
+The importer will detect these methods, infer their parameter types and return signatures (in the example above, one integer and one string), and generate an Interface you can implement in Blueprint or C++ with their implementations.
+
+There are three ways you can implement this interface.
+
+1. Implement the interface on an actor containing an `ArticyFlowPlayer` component. Any time that flow player component encounters a custom method, it'll call the function on this parent actor.
+2. Implement the interface on a component deriving from a `ActicyFlowPlayer` component. Any time this flow player encounters a custom method, it'll call the function on itself.
+3. Implementing the interface on a custom `UObject` and setting that class as the `User Methods Provider` on a `ArticyFlowPlayer` component. Any time that flow player encounters a custom method, it'll call the function on a new instance of that object.
+
+Each flow player can only use one of the above methods (you can't mix and match). 
+
+Choose one and create or open the corresponding Blueprint (whether it's the actor, the component, or the custom `UObject`). Go to `Class Settings` and add the interface generated from your Articy project to the Interfaces list.
+
+![](docs/interface-class-settings.png)
+
+Now, you can start implementing your custom methods. To do this, find the method in the `Interfaces` list under `My Blueprint` (bottom left), right-click it, and select `Implement event`.
+
+![](docs/implement-custom-function.png)
+
+This will create a new event node in your Blueprint graph with all the appropriate parameters.
+
+![](docs/custom-function-node.png)
+
+You'll notice the types of each parameter are automatically deduced based on how you used the function in Articy. Now, attach some nodes (if you just want to test it, try a Debug Print to start) and test it out.
+
+*Note: You may notice your method is called earlier and more often than expected. This is because Articy "scans ahead" in branches to find which ones are valid. To avoid executing your logic twice, see [Shadowing](#shadowing).*
+
+### Custom Methods that Return
+
+You can also define custom Expresso script methods that have return values.
+
+![](docs/articy-return-custom-method.png)
+
+To create implementations for these in Blueprint, use the Override function method in the Blueprint editor on the object that implements your interface.
+
+![](docs/implement-custom-return-function.png)
+
+Then, you'll get a custom function in Blueprint that can return a value.
+
+![](docs/custom-function-return-blueprint.png)
+
+
+### Shadowing
+
+You'll notice that if you put custom script methods into Instructions, Conditions or Pins, the methods will be executed *before* the node is actually reached by the Flow Player.
+
+This is because the flow player scans ahead while figuring out which branches are valid and not. This is how it knows which choices to show and which to hide. In order to make these decisions, it needs to run instructions and conditions ahead of time to see if any fail.
+
+Obviously, this would create problems if any of these scripts modify variables or properties, so the flow player goes into a **shadow state** when doing this. While shadowing, the flow player duplicates the global variables and other state so that changes made by instructions do not affect the real, current state.
+
+All this is handled automatically and requires no input from you.
+
+However, Articy doesn't know what your custom script methods do. If they have side effects (such as changing the state of your game or displaying something on the UI), it doesn't know that these shouldn't be executed during the shadow state.
+
+You need to handle this yourself.
+
+Thankfully, this is easy to handle with the `Is in shadow state?` Blueprint node available on the Articy Database. Gate any side effects your function has behind this method returning `False` to ensure they're only run when the node is actually being executed.
+
+![](docs/check-shadow-state.png)
+
+If your custom function has a return value, however, you still want to make sure it runs as normally. Remember: shadowing is how articy decides what branches are valid or not. If you return a different value while shadowing than you would otherwise, articy won't be able to figure out the proper list of branches to return. Only use `Is in shadow state?` to gate side-effects.
+
+## Multiple Global Variable Sets
+
+Some games may require having multiple independent sets of global variables, such as each player having their own variable set. 
+
+This is supported via the `Override GV` property of the `ArticyFlowPlayer` component.
+
+To create a new, independent set of global variables, right-click in your Content window and find `Alternative Articy Global Variables`. 
+
+![](docs/create-alternative-globals.png)
+
+Now, you can simply set the `Override GV` property on your flow player to this asset. Any two flow players with the same setting will share variables, and any flow players with this property unset will share the default global variables.
+
+![](docs/assign-alternative-globals.png)
+
+Similar to the default global variables set, these new sets respect the `Keep global variables between worlds` setting of your project. If it's turned on, changes to these global variables will persist across level boundaries. If it is turned off, each will reset to their default values anytime the level changes.
+
+### Getting Variable Sets in Blueprint and C++
+
+If you want to access the values in these sets in Blueprint or C++, you need to use the `Get Runtime GVs` method/node on the Articy Database. The `Alternative Articy Global Variables` asset is just a dummy placeholder, so it has no data itself. You need to use this method to access the runtime data.
+
+![](docs/get-vars-bp.png)
+
+Pass the asset reference into the `Get Runtime GVs` method and it will return the active runtime clone for that set.
+
+### Getting the Current Variables during Custom Script Calls
+
+If you're writing a handler for a [custom script method](#custom-script-methods), you may want to access the variable set currently being used in execution.
+
+When an expresso script is running, the `Get GVs` method/Blueprint node on the Articy Database will return the *active global variables instance* that the flow player is using.
+
+![](docs/get-script-gvs-bp.png)
+
 ## Articy Global Variables Debugger
 The Global Variables debugger can be accessed in the toolbar at the top of the level editor (UE4) or the Settings menu on the right hand side of the level editor (UE5). It shows all global variables while the game is running and lets you search by namespace or variable name which makes it easy to follow what is happening inside the game and to debug problems in relation to global variables.
 
 Furthermore, you can also change the global variables while the game is running, and your game code that listens to variable changes is going to get triggered. This is useful to replicate specific conditions without needing to go through all steps manually.
 
 For example, if your global variables control your quest states, checking a "quest accepted" global variable in the debugger will make your quest system initiate a quest.
+
+## UMG Rich Text Support
+
+If your articy:draft project has been exported using either the Unity Rich Text or Extended Markup formatting settings, you can use articy with the Unreal Rich Text Block widget to display richly formatted text.
+
+### Export and Import Configuration
+
+First, make sure you select one of these two settings in the `Export options` dialog in articy:draft
+
+![](docs/2021-10-31-10-31-19.png)
+
+Then, you'll need to enable a setting in Unreal to convert Unity rich text formatting to Unreal's format. **NOTE: Make sure you click `Import Changes` anytime you change this setting. You can find it in the [Articy Import Window](#import-into-unreal).**
+
+![](docs/2021-10-31-10-36-25.png)
+
+### Configuring Styles
+
+Next, you have to configure your styles by creating a style data table in Unreal. This asset tells the rich text widget what fonts, colors, and other styling effects to apply to each kind of text. Create this asset by creating a new `Data Table` in your Content window (under `Miscellaneous`) and for the row structure, pick `RichTextStyleRow`.
+
+![](docs/2021-10-31-10-48-28.png)
+
+Next, open the new data table and create your styles. You'll need to import a few fonts into your project to do this. On Windows, you can find the fonts installed under `C:\Windows\Fonts`. Drag one into your Unreal project to import it.
+
+You'll need to create a new row for every combination of styles you want to support. The first row is always the default style: what you'll get if there's no formatting set on text.
+
+Create a `b` row for a bold style. You can also create an `i` row for italic and `u` for underline. Make sure to set the appropriate font and style setting for each type.
+
+To support combinations (such as bold **and** italic), you need to create combination rows. Each combination is always alphabetically ordered. So, to support bold and italic, you'd create a `bi` row. For bold and underline, `bu`. For all three: `biu`. You need to create a row for each unique combination to tell Unreal which font to use. Usually, when importing a font, you'll get versions for each combination.
+
+**Example:**
+
+![](docs/2021-10-31-10-49-09.png)
+
+### Configuring your Rich Text Control
+
+Once these are all set, you can configure your rich text control. Create a Rich Text block in the UI editor and set it's Text Style Set to your new data table.
+
+![](docs/2021-10-31-10-50-17.png)
+
+Now, you'll be able to see your styling in articy appear in Unreal! Try setting the text to the text of a formatted node in articy to test.
+
+### Color Support
+
+*Note: Colors are only available with the extended markup option in the articy:draft export.*
+
+To support additional styling like custom colors, you need to add the `ArticyRichTextDecorator` to the list of `Decorator classes` on the rich text block.
+
+![](docs/2021-10-31-10-50-31.png)
+
+### Hyperlinks
+
+*Note: Hyperlinks are only available with the extended markup option in the articy:draft export.*
+
+To use hyperlinks from Articy, you'll need to do two things:
+
+1. Add the interface `ArticyHyperlinkHandler` to your user widget that owns the rich text control. You can do this in `Class Settings` under interfaces. Then, implement the `On Hyperlink Navigated` method to catch the event of users clicking the hyperlinks.
+2. Sub-class `ArticyRichTextDecorator` with a new Blueprint class and configure its `HyperlinkStyle` property. This will control the regular, hover, and underline style behavior of the hyperlinks. Then, use this new blueprint class as your Decorator class on the rich text control instead of `ArticyRichTextDecorator`.
 
 ## Advanced features (requiring C++)
 There are some specific workflow features that can be exposed to Blueprints using C++ only.
@@ -389,3 +549,11 @@ Both need to be copied into your Unreal project.
 Because of [a known issue with Unreal and hot-reloading changes to enums](https://issues.unrealengine.com/issue/UE-19528?lang=zh-CN), be very careful when hotreloading any changes to the values in a Drop-down list. If you save any Blueprint using the generated enum after hotreloading, you'll likely have all those nodes broken (converted into `bytes`) the next time you open the editor.
 
 When importing drop-down list changes, it's best to restart Unreal to avoid issues.
+
+## Error C2451: a conditional expression of type 'const TWeakObjectPtr<UObject,FWeakObjectPtr>' is not valid
+
+If you're getting the above error after updating to version `1.4` of the Articy Unreal plugin, you need to make a manual fix to your generated C++ file to get Unreal started.
+
+Find `{ProjectName}ExpressoScripts.h` (where `{ProjectName}` is the name of your articy:draft project) in `Source\{UnrealProjectName}\ArticyGenerated` and delete the method `GetUserMethodsProviderObject` (should be around line `50`ish).
+
+Once the project succesfully compiles and opens, run a [Full Reimport](#importer-modes).

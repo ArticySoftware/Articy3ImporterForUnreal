@@ -11,6 +11,13 @@
 
 #define STRINGIFY(x) #x
 
+// Converts Unity rich text markup to Unreal rich text markup.
+// Amounts to just replacing all closing tags with </> as Unreal
+// does not include the tag name in the closing tag.
+//
+// Ex. "My text has <b>bold</b> words." to "My text has <b>bold</> words."
+FString ConvertUnityMarkupToUnreal(const FString& Input);
+
 //---------------------------------------------------------------------------//
 
 //make sure the static Map is filled
@@ -39,11 +46,16 @@ FArticyPredefTypes::FArticyPredefTypes()
 	Types.Add(TEXT("id"), PREDEFINE_TYPE(FArticyId));
 	Types.Add(TEXT("string"), PREDEFINE_TYPE_EXT(FString, "TEXT(\"\")", [](PROP_SETTER_PARAMS) { return Json->Type == EJson::String ? Json->AsString() : FString{}; }));
 	Types.Add(TEXT("ftext"), PREDEFINE_TYPE_EXT(FText, TEXT("FText::GetEmpty()"), [](PROP_SETTER_PARAMS)
-	{
+		{
 		if(Json->Type == EJson::String)
 		{
+			// Convert Unity rich text markup to Unreal (if the setting is enabled)
+			FString Processed = GetDefault<UArticyPluginSettings>()->bConvertUnityToUnrealRichText ?
+				ConvertUnityMarkupToUnreal(Json->AsString()) : 
+				Json->AsString();
+
 			//return a new FText, where the Path is the key and the Property value is the defaut-language text
-			return FText::ChangeKey(TEXT("ARTICY"), Path, FText::FromString(Json->AsString()));
+			return FText::ChangeKey(TEXT("ARTICY"), Path, FText::FromString(Processed));
 		}
 		return FText::GetEmpty();
 	}));
@@ -142,4 +154,167 @@ FArticyPredefTypes::FArticyPredefTypes()
 bool FArticyPredefTypes::IsPredefinedType(const FName& OriginalType)
 {
 	return StaticInstance.Types.Contains(OriginalType);
+}
+
+// Stores open tags in ConvertUnityMarkupToUnreal
+struct TagInfo
+{
+	TagInfo(const FString& name, const FString& val) 
+		: tagName(name), hasValue(val.Len() > 0), value(val), dummy(false) { 
+		if (tagName == TEXT("align")) { dummy = true; }
+	}
+
+	// Tag name, like b, i, u, or color
+	FString tagName;
+
+	// Does this have a value? (like color="#FFFFFF")
+	bool hasValue;
+
+	// Value (if hasValue is true)
+	FString value;
+
+	// Dummy. Ignore this in the output
+	bool dummy;
+};
+
+bool HasAnyTags(const TArray<TagInfo>& currentTags)
+{
+	for (const auto& tag : currentTags)
+	{
+		if (!tag.dummy) { return true; }
+	}
+
+	return false;
+}
+
+FString CreateOpenTag(const TArray<TagInfo>& currentTags)
+{
+	TArray<FString> tags;
+	FString valueString = "";
+
+	int numberOfTags = 0;
+	for (const auto& tag : currentTags)
+	{
+		// Ignore dummy tags
+		if (tag.dummy) continue;
+
+		// If it's a value, append to the value string
+		if (tag.hasValue) {
+			valueString = valueString + FString::Printf(TEXT(" %s=\"%s\""), *tag.tagName, *tag.value);
+		}
+		else {
+			// Otherwise, add the tag to the list
+			tags.Add(tag.tagName);
+		}
+		numberOfTags++;
+	}
+
+	if (numberOfTags == 0) { return TEXT(""); }
+
+	// Sort tag names
+	tags.Sort([](const FString& a, const FString& b) { return (*a)[0] < (*b)[0]; });
+	FString totalTags = "";
+	for (const auto& tag : tags) { totalTags += tag; }
+
+	// Handle no tags case
+	if (totalTags.Len() == 0) { totalTags = "style"; }
+
+	// Create tag
+	return FString::Printf(TEXT("<%s%s>"), *totalTags, *valueString);
+}
+
+FString ConvertUnityMarkupToUnreal(const FString& Input)
+{
+	// Create a pattern to find closing tags
+	static FRegexPattern Pattern(TEXT("<\\/.+?>|<(\\w+)(=\"?(.+?)\"?)?>"));
+
+	// Create a matcher to search the input
+	FRegexMatcher myMatcher(Pattern, Input);
+
+	// Check to see if there's any matches at all
+	bool anyMatches = myMatcher.FindNext();
+
+	// If not, just return the input string
+	if (!anyMatches) { return Input; }
+
+	// Create a buffer to hold the output
+	FString strings = "";
+	/*
+	// Future TODO: I wanted to use string builder for efficiency, but it's not available in older versions of Unreal
+	//  or, at least, it gave me some build errors
+	TCHAR* buffer = new TCHAR[Input.Len() * 2];
+	FStringBuilderBase strings(buffer, Input.Len() * 2);
+	*/
+
+	// Run through matches
+	TArray<TagInfo> currentTags;
+	int last = 0;
+	do
+	{
+		// Get bounds of match
+		int start = myMatcher.GetMatchBeginning();
+		int end = myMatcher.GetMatchEnding();
+
+		// Add all text preceding the match to the output
+		strings += (Input.Mid(last, start - last));
+
+		// Check if we're dealing with a start tag or an end tag
+		FString tagName = myMatcher.GetCaptureGroup(1);
+		if (tagName.Len() > 0) {
+			bool hasTagsToClose = HasAnyTags(currentTags);
+
+			// Add to our list
+			FString value = myMatcher.GetCaptureGroup(3);
+			TagInfo info = TagInfo(tagName, value);
+			currentTags.Add(info);
+
+			// Don't bother if this is a dummy tag we're ignoring
+			if (!info.dummy)
+			{
+				// If we have tags to close, close them
+				if (hasTagsToClose) { strings += (TEXT("</>")); }
+
+				// Open the tag
+				strings += (CreateOpenTag(currentTags));
+			}
+		}
+		else {
+			// Remove our last tag
+			auto popped = currentTags.Pop();
+
+			// Only do the rest if the closed tag is not a dummy
+			if (!popped.dummy)
+			{
+				// Write out the close
+				strings += (TEXT("</>"));
+
+				// If any tags are left, reopen
+				if (currentTags.Num() > 0)
+				{
+					strings += (CreateOpenTag(currentTags));
+				}
+			}
+		}
+
+		last = end;
+
+		
+	} while (myMatcher.FindNext());
+
+	// Add end of string
+	if (last != Input.Len())
+	{
+		strings += (Input.Mid(last, Input.Len() - last));
+	}
+
+	// Create string
+	FString result = strings;//.ToString();
+
+	// Clean memory
+	// TODO - see above about old unreal vers
+	//delete buffer;
+	//buffer = nullptr;
+
+	// Return result
+	return result;
 }

@@ -19,14 +19,16 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 	const auto filename = CodeGenerator::GetGlobalVarsClassname(Data, true);
 	CodeFileGenerator(filename + ".h", true, [&](CodeFileGenerator* header)
 	{
-		
+		header->Line("#include \"CoreUObject.h\"");
 		header->Line("#include \"ArticyRuntime/Public/ArticyGlobalVariables.h\"");
 		header->Line("#include \"" + filename + ".generated.h\"");
 
 		// disable "optimization cannot be applied due to function size" compile error. This error is caused by the huge constructor when all expresso
 		// scripts are added to the collection and this pragma disables the optimizations.
+		header->Line("#if !((defined(PLATFORM_PS4) && PLATFORM_PS4) || (defined(PLATFORM_PS5) && PLATFORM_PS5))");
 		header->Line("#pragma warning(push)");
 		header->Line("#pragma warning(disable: 4883) //<disable \"optimization cannot be applied due to function size\" compile error.");
+		header->Line("#endif");
 		
 		//generate all the namespaces (with comment)
 		for(const auto ns : Data->GetGlobalVars().Namespaces)
@@ -118,7 +120,9 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 				TEXT("BlueprintPure, Category=\"ArticyGlobalVariables\", meta=(HidePin=\"WorldContext\", DefaultToSelf=\"WorldContext\", DisplayName=\"GetArticyGV\", keywords=\"global variables\")"));
 		});
 
+		header->Line("#if !((defined(PLATFORM_PS4) && PLATFORM_PS4) || (defined(PLATFORM_PS5) && PLATFORM_PS5))");
 		header->Line("#pragma warning(pop)");
+		header->Line("#endif");
 	});
 }
 

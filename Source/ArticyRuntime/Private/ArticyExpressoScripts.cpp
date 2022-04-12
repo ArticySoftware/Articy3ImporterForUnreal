@@ -10,9 +10,9 @@
 
 TMap<FName, ExpressoType::Definition> ExpressoType::Definitions;
 
-ExpressoType::ExpressoType(UArticyBaseObject* Object, const FName &Property)
+ExpressoType::ExpressoType(UArticyBaseObject* Object, const FString &Property)
 {
-	auto propName = Property.ToString();
+	auto propName = Property;
 	Object = TryFeatureReroute(Object, propName);
 
 	if(!Object)
@@ -593,7 +593,12 @@ bool UArticyExpressoScripts::Evaluate(const int& ConditionFragmentHash, UArticyG
 	UserMethodsProvider = MethodProvider;
 
 	auto condition = Conditions.Find(ConditionFragmentHash);
-	return ensure(condition) && (*condition)();
+	bool result = ensure(condition) && (*condition)();
+
+	// Clear methods provider
+	UserMethodsProvider = nullptr;
+	SetGV(nullptr);
+	return result;
 }
 
 bool UArticyExpressoScripts::Execute(const int& InstructionFragmentHash, UArticyGlobalVariables* GV, UObject* MethodProvider) const
@@ -601,14 +606,18 @@ bool UArticyExpressoScripts::Execute(const int& InstructionFragmentHash, UArticy
 	SetGV(GV);
 	UserMethodsProvider = MethodProvider;
 
+	bool result = false;
 	auto instruction = Instructions.Find(InstructionFragmentHash);
 	if(ensure(instruction))
 	{
 		(*instruction)();
-		return true;
+		result = true;
 	}
 
-	return false;
+	// Clear methods provider
+	UserMethodsProvider = nullptr;
+	SetGV(nullptr);
+	return result;
 }
 
 UArticyObject* UArticyExpressoScripts::getObj(const FString& NameOrId, const uint32& CloneId) const
@@ -636,6 +645,26 @@ UArticyObject* UArticyExpressoScripts::getObjInternal(const ExpressoType& Id_Clo
 	return getObj(Id, FCString::Atoi(*CloneId));
 }
 
+void UArticyExpressoScripts::SetDefaultUserMethodsProvider(UObject* MethodProvider)
+{
+	// Set a weak pointer to this object
+	DefaultUserMethodsProvider = MethodProvider;
+}
+
+UObject* UArticyExpressoScripts::GetDefaultUserMethodsProvider() const
+{
+	return DefaultUserMethodsProvider.Get();
+}
+
+UObject* UArticyExpressoScripts::GetUserMethodsProviderObject() const
+{
+	if (UserMethodsProvider)
+		return UserMethodsProvider;
+	if (DefaultUserMethodsProvider != nullptr && DefaultUserMethodsProvider.IsValid())
+		return DefaultUserMethodsProvider.Get();
+	return nullptr;
+}
+
 void UArticyExpressoScripts::PrintInternal(const FString& msg)
 {
 	UE_LOG(LogArticyRuntime, Log, TEXT("%s"), *msg);
@@ -651,12 +680,12 @@ void UArticyExpressoScripts::setProp(const ExpressoType& Id_CloneId, const FStri
 	setProp(getObjInternal(Id_CloneId), Property, Value);
 }
 
-ExpressoType UArticyExpressoScripts::getProp(UArticyBaseObject* Object, const FName& Property)
+ExpressoType UArticyExpressoScripts::getProp(UArticyBaseObject* Object, const FString& Property)
 {
 	return ExpressoType{Object, Property};
 }
 
-ExpressoType UArticyExpressoScripts::getProp(const ExpressoType& Id_CloneId, const FName& Property) const
+ExpressoType UArticyExpressoScripts::getProp(const ExpressoType& Id_CloneId, const FString& Property) const
 {
 	return getProp(getObjInternal(Id_CloneId), Property);
 }

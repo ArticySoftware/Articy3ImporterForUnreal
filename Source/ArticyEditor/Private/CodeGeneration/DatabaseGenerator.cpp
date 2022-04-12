@@ -20,6 +20,7 @@ void DatabaseGenerator::GenerateCode(const UArticyImportData* Data)
 	const auto filename = CodeGenerator::GetDatabaseClassname(Data, true);
 	CodeFileGenerator(filename + ".h", true, [&](CodeFileGenerator* header)
 	{
+		header->Line("#include \"CoreUObject.h\"");
 		header->Line("#include \"ArticyRuntime/Public/ArticyDatabase.h\"");
 		header->Line("#include \"" + ExpressoScriptsGenerator::GetFilename(Data) + "\"");
 		header->Line("#include \"" + filename + ".generated.h\"");
@@ -52,6 +53,11 @@ void DatabaseGenerator::GenerateCode(const UArticyImportData* Data)
 				{
 					header->Line(FString::Printf(TEXT("return static_cast<%s*>(Super::GetGVs());"), *globalVarsClass));
 				}, "Get the global variables.", true,
+					"BlueprintPure, Category = \"articy:draft\", meta=(keywords=\"global variables\")", "const override");
+				header->Method(globalVarsClass + "*", "GetRuntimeGVs", "UArticyAlternativeGlobalVariables* Asset", [&]
+					{
+						header->Line(FString::Printf(TEXT("return static_cast<%s*>(Super::GetRuntimeGVs(Asset));"), *globalVarsClass));
+					}, "Gets the current runtime instance of a set of GVs.", true,
 					"BlueprintPure, Category = \"articy:draft\", meta=(keywords=\"global variables\")", "const override");
 			}
 		});

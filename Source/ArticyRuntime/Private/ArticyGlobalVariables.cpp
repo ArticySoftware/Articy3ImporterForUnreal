@@ -9,6 +9,7 @@
 #include "ArticyRuntimeModule.h"
 #include "ArticyPluginSettings.h"
 #include "ArticyFlowPlayer.h"
+#include "ArticyAlternativeGlobalVariables.h"
 
 
 FArticyGvName::FArticyGvName(const FName FullVariableName)
@@ -158,6 +159,56 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetMutableOriginal()
 	return Asset.Get();
 }
 
+UArticyGlobalVariables* UArticyGlobalVariables::GetRuntimeClone(const UObject* WorldContext, UArticyAlternativeGlobalVariables* GVs)
+{
+	// Special case: We're passed a nullptr. Use the default shared set.
+	if (GVs == nullptr) { return GetDefault(WorldContext);  }
+
+	// Get unique name of GV set
+	const FString Name = GVs->GetFullName();
+	const FName Key = FName(*Name);
+
+	// Check if we already have a clone
+	const auto Existing = OtherClones.Find(Key);
+	if (Existing && Existing->IsValid())
+	{
+		// If so, return it
+		return Existing->Get();
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Cloning Override GVs %s"), *GVs->GetFullName());
+
+	// Get world context
+	auto world = GEngine->GetWorldFromContextObjectChecked(WorldContext);
+	ensureMsgf(world, TEXT("Getting world for GV cloning failed!"));
+
+	// Get global variable asset to clone
+	UArticyGlobalVariables* asset = UArticyGlobalVariables::GetMutableOriginal();
+
+	// Check if we're keeping global variable objects between worlds
+	bool keepBetweenWorlds = UArticyPluginSettings::Get()->bKeepGlobalVariablesBetweenWorlds;
+
+	// If so, duplicate and add to root
+	UArticyGlobalVariables* NewClone = nullptr;
+	if (keepBetweenWorlds)
+	{
+		FString NewName = TEXT("Persistent Runtime GV Clone of ") + Name;
+		NewClone = DuplicateObject(asset, world->GetGameInstance(), *NewName);
+#if !WITH_EDITOR
+		NewClone->AddToRoot();
+#endif
+	}
+	else
+	{
+		// Otherwise, add it to the active world
+		NewClone = DuplicateObject(asset, world, *FString::Printf(TEXT("%s %s GV"), *world->GetName(), *Name));
+	}
+
+	// Store and return
+	OtherClones.FindOrAdd(Key) = NewClone;
+	return NewClone;
+}
+
 void UArticyGlobalVariables::UnloadGlobalVariables()
 {
 	if (Clone.IsValid())
@@ -269,4 +320,5 @@ void UArticyGlobalVariables::DisableDebugLogging()
 }
 
 TWeakObjectPtr<UArticyGlobalVariables> UArticyGlobalVariables::Clone;
+TMap<FName, TWeakObjectPtr< UArticyGlobalVariables>> UArticyGlobalVariables::OtherClones;
 

@@ -15,6 +15,14 @@
 
 #define LOCTEXT_NAMESPACE "ArticyGlobalVariables"
 
+#if ENGINE_MAJOR_VERSION >= 5
+using SplitterSlotType = SSplitter::FScopedWidgetSlotArguments;
+using HorizontalBoxSlotType = SHorizontalBox::FScopedWidgetSlotArguments;
+#else
+using SplitterSlotType = SSplitter::FSlot&;
+using HorizontalBoxSlotType = SHorizontalBox::FSlot&;
+#endif
+
 void SArticyVariableSet::Construct(const FArguments& Args, TWeakObjectPtr<UArticyBaseVariableSet> InVariableSet)
 {
 	VariableSet = InVariableSet;
@@ -91,12 +99,13 @@ void SArticyVariableSet::BuildVariableWidgets()
 		];
 
 		// right variable slot
-		SSplitter::FSlot& RightVariableSlot = LocalSplitter->AddSlot()
-			.Value(SizeData->RightColumnWidth)
-			.OnSlotResized(SizeData->OnWidthChanged);
+		SplitterSlotType RightVariableSlot = LocalSplitter->AddSlot();
+		RightVariableSlot.Value(SizeData->RightColumnWidth);
+		RightVariableSlot.OnSlotResized(SizeData->OnWidthChanged);
 
 		TSharedRef<SHorizontalBox> ConstrainBox = SNew(SHorizontalBox);
-		SHorizontalBox::FSlot& InnerVarSlot = ConstrainBox->AddSlot().AutoWidth();
+		HorizontalBoxSlotType InnerVarSlot = ConstrainBox->AddSlot();
+		InnerVarSlot.AutoWidth();
 
 		RightVariableSlot
 		[

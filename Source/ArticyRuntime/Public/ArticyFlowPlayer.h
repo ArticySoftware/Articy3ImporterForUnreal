@@ -238,9 +238,11 @@ protected:
 	 * The instance of the global variables to be used with this flow player instance.
 	 * This property is private so it can only be directly changed through the editor,
 	 * so we can ensure that the needed setup is triggered every time this changes.
+	 * 
+	 * Keep as nullptr if you want to use the default shared global variables.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Setup")
-	UArticyGlobalVariables* OverrideGV = nullptr;
+	UArticyAlternativeGlobalVariables* OverrideGV = nullptr;
 
 	/**
 	 * This object will be used to resolve user-defined ScriptMethods. It must implement

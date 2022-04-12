@@ -180,12 +180,24 @@ void UArticyDatabase::UnloadDatabase()
 
 void UArticyDatabase::SetDefaultUserMethodsProvider(UObject * MethodProvider)
 {
-	GetExpressoInstance()->DefaultUserMethodsProvider = MethodProvider;
+	GetExpressoInstance()->SetDefaultUserMethodsProvider(MethodProvider);
 }
 
 UArticyGlobalVariables* UArticyDatabase::GetGVs() const
 {
+	// If we have an active variable set, grab that set
+	UArticyGlobalVariables* ActiveGlobals = GetExpressoInstance()->GetGV();
+	if (ActiveGlobals)
+		return ActiveGlobals;
+
+	// Otherwise, return the default GVs
 	return UArticyGlobalVariables::GetDefault(this);
+}
+
+UArticyGlobalVariables* UArticyDatabase::GetRuntimeGVs(UArticyAlternativeGlobalVariables* Asset) const
+{
+	// Find or create a clone of the global variables set associated with this "alternative" set
+	return UArticyGlobalVariables::GetRuntimeClone(this, Asset);
 }
 
 TArray<FString> UArticyDatabase::GetImportedPackageNames() const
@@ -210,11 +222,6 @@ bool UArticyDatabase::IsPackageDefaultPackage(FString PackageName)
 	}
 
 	return false;
-}
-
-UWorld* UArticyDatabase::GetWorld() const
-{
-	return GetOuter() ? GetOuter()->GetWorld() : nullptr;
 }
 
 void UArticyDatabase::LoadAllObjects()
@@ -242,7 +249,7 @@ void UArticyDatabase::LoadDefaultPackages()
 
 void UArticyDatabase::LoadAllPackages(bool bDefaultOnly)
 {
-	for(const auto pack : ImportedPackages)
+	for (const auto &pack : ImportedPackages)
 	{
 		if(!bDefaultOnly || (pack.Value && pack.Value->bIsDefaultPackage)
 #if WITH_EDITOR

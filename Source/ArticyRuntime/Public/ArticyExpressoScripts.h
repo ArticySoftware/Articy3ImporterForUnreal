@@ -58,7 +58,7 @@ struct ARTICYRUNTIME_API ExpressoType
 	virtual ~ExpressoType() { }
 
 	//initialize from object and property
-	ExpressoType(UArticyBaseObject* Object, const FName& Property);
+	ExpressoType(UArticyBaseObject* Object, const FString& Property);
 	
 	// ReSharper disable CppNonExplicitConvertingConstructor
 
@@ -270,8 +270,16 @@ public:
 	 */
 	bool Execute(const int &InstructionFragmentHash, UArticyGlobalVariables* GV, UObject* MethodProvider) const;
 
-	mutable UObject* UserMethodsProvider = nullptr;
-	mutable UObject* DefaultUserMethodsProvider = nullptr;
+	/**
+	 * Sets a default method provider, which will be always used whenever scripts get
+	 * evaluated / executed without a valid method provider.
+	 */
+	void SetDefaultUserMethodsProvider(UObject* MethodProvider);
+	UObject* GetDefaultUserMethodsProvider() const;
+	UObject* GetUserMethodsProviderObject() const;
+
+	/** Gets the active GV instance in use if we're running an expresso script (otherwise nullptr) */
+	virtual UArticyGlobalVariables* GetGV() { return nullptr; }
 
 protected:
 
@@ -303,9 +311,9 @@ protected:
 	void setProp(const ExpressoType& Id_CloneId, const FString& Property, const ExpressoType& Value) const;
 
 	/** Don't change the name, it's called like this in script fragments! */
-	static ExpressoType getProp(UArticyBaseObject* Object, const FName& Property);
+	static ExpressoType getProp(UArticyBaseObject* Object, const FString& Property);
 	/** Don't change the name, it's called like this in script fragments! */
-	ExpressoType getProp(const ExpressoType& Id_CloneId, const FName& Property) const;
+	ExpressoType getProp(const ExpressoType& Id_CloneId, const FString& Property) const;
 
 	/** Don't change the name, it's called like this in script fragments! */
 	int random(int Min, int Max);
@@ -336,6 +344,12 @@ protected:
 	static const bool& ConditionOrTrue(const bool &Condition) { return Condition; }
 	/** Script conditions that are empty or only contain a comment always return true. */
 	static bool ConditionOrTrue(void /*JustAComment*/) { return true; }
+
+	// This is a cache of the current methods provider set during Evaluate to use while running instructions/conditions
+	mutable UObject* UserMethodsProvider = nullptr;
+
+	// Default Methods Provider (fallback if none is set). This is a weak pointer in case it is deleted.
+	TWeakObjectPtr<UObject> DefaultUserMethodsProvider = nullptr;
 
 private:
 	
