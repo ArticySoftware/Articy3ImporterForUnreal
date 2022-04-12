@@ -1,4 +1,4 @@
-## Unreal Import 1.4 Changelog
+## Unreal Importer 1.4 Changelog
 
 - Unreal Engine 5 support
 - Breaking Changes:
@@ -20,7 +20,7 @@
 - Documentation
   - Added documentation for custom script methods and shadowing to the Readme ([#61](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/61)).
 
-## Unreal Import 1.3.1 Changelog
+## Unreal Importer 1.3.1 Changelog
 
 - General:
     - New warning dialogue if you try to run the importer and a hotload is required while Live Coding is enabled ([#53](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/53)).
@@ -35,14 +35,14 @@
     - Added proper dependencies so `ArticyEditorModule` can be included in another module without errors ([#57](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/57)).
 
 
-## Unreal Import 1.3.0 Changelog
+## Unreal Importer 1.3.0 Changelog
 - Unreal Engine 5 Early Access 2 Support ([#41](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/41)).
 
 - Fixes:
     - Fixed issue with plugin marking database and package assets for delete. Fixed in [#42](https://github.com/ArticySoftware/ArticyImporterForUnreal/pull/42). Resolves [#39](https://github.com/ArticySoftware/ArticyImporterForUnreal/issues/39).
     - Support for Unreal 4.27
 
-## Unreal Import 1.2.0 Changelog
+## Unreal Importer 1.2.0 Changelog
 - Unreal Engine 4.26 Support
 - Unreal Engine 4.20 and 4.21 no longer supported
 - New Features:
