@@ -2,7 +2,7 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.4",
-	"FriendlyName": "ArticyImporter",
+	"FriendlyName": "ArticyImporter CODE",
 	"Description": "Importer and interface for articy:draft.",
 	"Category": "Articy",
 	"CreatedBy": "articy Software GmbH & Co. KG",
@@ -12,7 +12,7 @@
 	"SupportURL": "https://www.articy.com/en/support/",
 	"EnabledByDefault": false,
 	"CanContainContent": true,
-	"IsBetaVersion": false,
+	"IsBetaVersion": true,
 	"Installed": true,
 	"Modules": [
 		{

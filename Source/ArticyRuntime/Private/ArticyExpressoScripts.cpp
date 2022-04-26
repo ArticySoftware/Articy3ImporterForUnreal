@@ -1,6 +1,6 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
+
 //
 
 
@@ -10,23 +10,23 @@
 
 TMap<FName, ExpressoType::Definition> ExpressoType::Definitions;
 
-ExpressoType::ExpressoType(UArticyBaseObject* Object, const FString &Property)
+ExpressoType::ExpressoType(UArticyBaseObject* Object, const FString& Property)
 {
 	auto propName = Property;
 	Object = TryFeatureReroute(Object, propName);
 
-	if(!Object)
+	if (!Object)
 		return;
 
 	auto prop = Object->GetProperty(*propName);
-	if(!ensure(prop))
+	if (!ensure(prop))
 		return;
 
 	FString itemType;
 	FName type = *prop->GetCPPType(&itemType);
 
 	auto factory = GetDefinition(type).Factory;
-	if(ensureMsgf(factory, TEXT("Property %s has unknown type %s!"), *propName, *type.ToString()))
+	if (ensureMsgf(factory, TEXT("Property %s has unknown type %s!"), *propName, *type.ToString()))
 		*this = factory(Object, prop);
 }
 
@@ -79,13 +79,13 @@ ExpressoType::ExpressoType(const UArticyString& Value)
 	StringValue = Value.Get();
 }
 
-ExpressoType::ExpressoType(const UArticyInt & Value)
+ExpressoType::ExpressoType(const UArticyInt& Value)
 {
 	Type = Int;
 	IntValue = Value.Get();
 }
 
-ExpressoType::ExpressoType(const UArticyBool & Value)
+ExpressoType::ExpressoType(const UArticyBool& Value)
 {
 	Type = Bool;
 	BoolValue = Value.Get();
@@ -131,7 +131,7 @@ ExpressoType::operator double() const
 {
 	ensure(Type == Float || Type == Int);
 
-	if(Type == Float)
+	if (Type == Float)
 		return GetFloat();
 
 	return GetInt();
@@ -182,7 +182,7 @@ ExpressoType ExpressoType::operator-() const
 	default:
 		ensureMsgf(false, TEXT("Unknown ArticyExpressoType!"));
 	}
-	
+
 	return ExpressoType{};
 }
 
@@ -252,7 +252,7 @@ bool ExpressoType::operator<(const ExpressoType& Other) const
 			ensureMsgf(false, TEXT("Uncomparable expresso types!"));
 		}
 	case Float:
-		switch(Other.Type)
+		switch (Other.Type)
 		{
 		case Float:
 			return GetFloat() < Other.GetFloat();
@@ -277,7 +277,7 @@ bool ExpressoType::operator>(const ExpressoType& Other) const
 	{
 	case Undefined:
 		break;
-		
+
 	case Bool:
 		return GetBool() > Other.GetBool();
 	case Int:
@@ -302,7 +302,7 @@ bool ExpressoType::operator>(const ExpressoType& Other) const
 		}
 	case String:
 		return GetString() > Other.GetString();
-		
+
 	default:
 		ensureMsgf(false, TEXT("Unknown ArticyExpressoType!"));
 	}
@@ -502,12 +502,12 @@ ExpressoType ExpressoType::operator--(int)
 
 const ExpressoType::Definition& ExpressoType::GetDefinition(const FName& CppType) const
 {
-	if(Definitions.Num() == 0)
+	if (Definitions.Num() == 0)
 	{
-		#define ADD_DEFINITION(Type) AddDefinition<Type>(#Type);
+#define ADD_DEFINITION(Type) AddDefinition<Type>(#Type);
 
 		ADD_DEFINITION(bool);
-		
+
 		ADD_DEFINITION(int8);
 		ADD_DEFINITION(int16);
 		ADD_DEFINITION(int);
@@ -520,7 +520,7 @@ const ExpressoType::Definition& ExpressoType::GetDefinition(const FName& CppType
 		ADD_DEFINITION(uint16);
 		ADD_DEFINITION(uint32);
 		ADD_DEFINITION(uint64);
-			
+
 		ADD_DEFINITION(float);
 		ADD_DEFINITION(double);
 
@@ -532,7 +532,7 @@ const ExpressoType::Definition& ExpressoType::GetDefinition(const FName& CppType
 	}
 
 	auto def = Definitions.Find(CppType);
-	if(def)
+	if (def)
 		return *def;
 
 	static const auto Empty = Definition{};
@@ -543,11 +543,11 @@ void ExpressoType::SetValue(UArticyBaseObject* Object, FString Property) const
 {
 	Object = TryFeatureReroute(Object, Property);
 
-	if(!Object)
+	if (!Object)
 		return;
 
 	auto prop = Object->GetProperty(*Property);
-	if(!ensure(prop))
+	if (!ensure(prop))
 	{
 		UE_LOG(LogArticyRuntime, Warning, TEXT("Property %s not found on Object %s!"), *Property, *Object->GetName());
 		return;
@@ -558,21 +558,21 @@ void ExpressoType::SetValue(UArticyBaseObject* Object, FString Property) const
 
 	auto setter = GetDefinition(type).Setter;
 
-	if(ensureMsgf(setter, TEXT("Property %s has unknown type %s!"), *Property, *type.ToString()))
+	if (ensureMsgf(setter, TEXT("Property %s has unknown type %s!"), *Property, *type.ToString()))
 		setter(Object, prop, *this);
 }
 
 UArticyBaseObject* ExpressoType::TryFeatureReroute(UArticyBaseObject* Object, FString& Property)
 {
-	if(Object)
+	if (Object)
 	{
 		FString feature;
-		if(Property.Split(TEXT("."), &feature, &Property))
+		if (Property.Split(TEXT("."), &feature, &Property))
 		{
 			//the property contains a dot
 			//take the part before the dot to extract the feature, and use it as Object to get the actual property from
 			UArticyBaseFeature* Feature = Object->GetProp<UArticyBaseFeature*>(*feature);
-			if(!ensure(Feature))
+			if (!ensure(Feature))
 			{
 				UE_LOG(LogArticyRuntime, Warning, TEXT("Feature %s on Object %s is null, cannot access property %s!"), *feature, *Object->GetName(), *Property);
 				return nullptr;
@@ -608,7 +608,7 @@ bool UArticyExpressoScripts::Execute(const int& InstructionFragmentHash, UArticy
 
 	bool result = false;
 	auto instruction = Instructions.Find(InstructionFragmentHash);
-	if(ensure(instruction))
+	if (ensure(instruction))
 	{
 		(*instruction)();
 		result = true;
@@ -622,9 +622,9 @@ bool UArticyExpressoScripts::Execute(const int& InstructionFragmentHash, UArticy
 
 UArticyObject* UArticyExpressoScripts::getObj(const FString& NameOrId, const uint32& CloneId) const
 {
-	if(NameOrId.StartsWith(TEXT("0x")))
+	if (NameOrId.StartsWith(TEXT("0x")))
 		return OwningDatabase->GetObject<UArticyObject>(FArticyId{ ArticyHelpers::HexToUint64(NameOrId) }, CloneId);
-	if(NameOrId.IsNumeric())
+	if (NameOrId.IsNumeric())
 		return OwningDatabase->GetObject<UArticyObject>(FArticyId{ FCString::Strtoui64(*NameOrId, NULL, 10) }, CloneId);
 
 	return OwningDatabase->GetObjectByName(*NameOrId, CloneId);
@@ -633,12 +633,12 @@ UArticyObject* UArticyExpressoScripts::getObj(const FString& NameOrId, const uin
 UArticyObject* UArticyExpressoScripts::getObjInternal(const ExpressoType& Id_CloneId) const
 {
 	//only works for strings!
-	if(!ensureMsgf(Id_CloneId.Type == ExpressoType::String, TEXT("getObj(Id_CloneId) only works for string-ExpressoType!")))
+	if (!ensureMsgf(Id_CloneId.Type == ExpressoType::String, TEXT("getObj(Id_CloneId) only works for string-ExpressoType!")))
 		return nullptr;
 
 	//parse id and cloneId from the compound id
 	FString Id, CloneId;
-	if(!Id_CloneId.GetString().Split("_", &Id, &CloneId))
+	if (!Id_CloneId.GetString().Split("_", &Id, &CloneId))
 		return nullptr;
 
 	//finally get the object by id and cloneId
@@ -682,7 +682,7 @@ void UArticyExpressoScripts::setProp(const ExpressoType& Id_CloneId, const FStri
 
 ExpressoType UArticyExpressoScripts::getProp(UArticyBaseObject* Object, const FString& Property)
 {
-	return ExpressoType{Object, Property};
+	return ExpressoType{ Object, Property };
 }
 
 ExpressoType UArticyExpressoScripts::getProp(const ExpressoType& Id_CloneId, const FString& Property) const
@@ -709,3 +709,41 @@ float UArticyExpressoScripts::random(float Max)
 {
 	return FMath::FRandRange(0, Max);
 }
+
+void UArticyExpressoScripts::incrementProp(UArticyBaseObject* Object, const FString& Property, const float Value /*= 1*/)
+{
+	float curvalue = (float)getProp(Object, Property);
+	setProp(Object, Property, static_cast<decltype(getProp(Object, Property))>(curvalue + Value));
+}
+
+void UArticyExpressoScripts::incrementProp(const ExpressoType& Id_CloneId, const FString& Property, const float Value /*= 1*/) const
+{
+	incrementProp(getObjInternal(Id_CloneId), Property, Value);
+}
+
+void UArticyExpressoScripts::decrementProp(UArticyBaseObject* Object, const FString& Property, const float Value /*= 1*/)
+{
+	float curvalue = (float)getProp(Object, Property);
+	setProp(Object, Property, static_cast<decltype(getProp(Object, Property))>(curvalue - Value));
+}
+
+void UArticyExpressoScripts::decrementProp(const ExpressoType& Id_CloneId, const FString& Property, const float Value /*= 1*/) const
+{
+	decrementProp(getObjInternal(Id_CloneId), Property, Value);
+}
+
+bool UArticyExpressoScripts::isInRange(float valueToTest, float lowerBound, float upperBound)
+{
+	return valueToTest >= lowerBound && valueToTest <= upperBound;
+}
+
+bool UArticyExpressoScripts::isPropInRange(UArticyBaseObject* Object, const FString& Property, float lowerBound, float upperBound)
+{
+	return isInRange((float)getProp(Object, Property), lowerBound, upperBound);
+}
+
+bool UArticyExpressoScripts::isPropInRange(const ExpressoType& Id_CloneId, const FString& Property, float lowerBound, float upperBound) const
+{
+	return isPropInRange(getObjInternal(Id_CloneId), Property, lowerBound, upperBound);
+}
+

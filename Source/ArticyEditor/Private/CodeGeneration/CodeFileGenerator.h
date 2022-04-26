@@ -34,7 +34,7 @@ public:
 	void Comment(const FString& Text);
 	/** 
 	 * Adds a (less-indented) access modifier.
-	 * The colon can be ommitted.
+	 * The colon can be committed.
 	 */
 	void AccessModifier(const FString& Text);
 

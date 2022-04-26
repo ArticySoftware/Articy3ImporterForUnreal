@@ -324,6 +324,21 @@ protected:
 	/** Don't change the name, it's called like this in script fragments! */
 	float random(float Max);
 
+	/** Don't change the name, it's called like this in script fragments! */
+	static void incrementProp(UArticyBaseObject* Object, const FString& Property, const float Value = 1);
+	/** Don't change the name, it's called like this in script fragments! */
+	void incrementProp(const ExpressoType& Id_CloneId, const FString& Property, const float Value = 1) const;
+
+	/** Don't change the name, it's called like this in script fragments! */
+	static void decrementProp(UArticyBaseObject* Object, const FString& Property, const float Value = 1);
+	/** Don't change the name, it's called like this in script fragments! */
+	void decrementProp(const ExpressoType& Id_CloneId, const FString& Property, const float Value = 1) const;
+
+	/** Don't change the names of the following methods as it's mapped as it from script fragments! */
+	static bool isInRange(float valueToTest, float lowerBound, float upperBound);
+	static bool isPropInRange(UArticyBaseObject* Object, const FString& Property, float lowerBound, float upperBound);
+	bool isPropInRange(const ExpressoType& Id_CloneId, const FString& Property, float lowerBound, float upperBound) const;
+
 
 	/**
 	 * Prints a string to the log. Can contain placeholders:
