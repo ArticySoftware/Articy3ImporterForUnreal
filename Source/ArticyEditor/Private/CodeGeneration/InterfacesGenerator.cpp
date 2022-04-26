@@ -30,7 +30,6 @@ void InterfacesGenerator::GenerateCode(const UArticyImportData* Data)
 				header->Line();
 				header->Method("virtual class " + feature.GetCppType(Data, true), "GetFeature" + feature.GetTechnicalName(), "", [&] 
 				{
-					header->Line("// TODO : implement method to select and return feature type");
 					header->Line("return nullptr", true);
 				}, "", true, "BlueprintCallable", "const");
 			});
