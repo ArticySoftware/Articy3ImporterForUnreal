@@ -747,22 +747,17 @@ bool UArticyExpressoScripts::isPropInRange(const ExpressoType& Id_CloneId, const
 	return isPropInRange(getObjInternal(Id_CloneId), Property, lowerBound, upperBound);
 }
 
-bool UArticyExpressoScripts::isInRange(const FString& valueToTest, const FString& lowerBound, const FString& upperBound /*= "T"*/)
+bool UArticyExpressoScripts::isInRange(const FString& valueToTest, const FString& lowerBound, const FString& upperBound)
 {
-	// [JCR] : Maybe we can use "upperBound" parameter to check case sensitive ?... 
-	//		   anyway, Case sensitive by default (upperBound is defaulted to some value)
-	if (upperBound.IsEmpty())
-		return valueToTest.Compare(lowerBound, ESearchCase::IgnoreCase) == 0 ? true : false;
-	else
-		return valueToTest.Compare(lowerBound,ESearchCase::CaseSensitive) == 0 ? true : false;
+	return valueToTest.Compare(lowerBound, ESearchCase::CaseSensitive) >= 0 && valueToTest.Compare(upperBound, ESearchCase::CaseSensitive) <= 0;
 }
 
-bool UArticyExpressoScripts::isPropInRange(UArticyBaseObject* Object, const FString& Property, const FString& lowerBound, const FString& upperBound /*= "T"*/)
+bool UArticyExpressoScripts::isPropInRange(UArticyBaseObject* Object, const FString& Property, const FString& lowerBound, const FString& upperBound)
 {
 	return isInRange((FString)getProp(Object, Property), lowerBound, upperBound);
 }
 
-bool UArticyExpressoScripts::isPropInRange(const ExpressoType& Id_CloneId, const FString& Property, const FString& lowerBound, const FString& upperBound /*= "T"*/) const
+bool UArticyExpressoScripts::isPropInRange(const ExpressoType& Id_CloneId, const FString& Property, const FString& lowerBound, const FString& upperBound) const
 {
 	return isPropInRange(getObjInternal(Id_CloneId), Property, lowerBound, upperBound);
 }
