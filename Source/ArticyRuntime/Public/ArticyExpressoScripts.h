@@ -339,6 +339,9 @@ protected:
 	static bool isPropInRange(UArticyBaseObject* Object, const FString& Property, float lowerBound, float upperBound);
 	bool isPropInRange(const ExpressoType& Id_CloneId, const FString& Property, float lowerBound, float upperBound) const;
 
+	static bool isInRange(const FString& valueToTest, const FString& lowerBound, const FString& upperBound = "T");
+	static bool isPropInRange(UArticyBaseObject* Object, const FString& Property, const FString& lowerBound, const FString& upperBound = "T");
+	bool isPropInRange(const ExpressoType& Id_CloneId, const FString& Property, const FString& lowerBound, const FString& upperBound = "T") const;
 
 	/**
 	 * Prints a string to the log. Can contain placeholders:
