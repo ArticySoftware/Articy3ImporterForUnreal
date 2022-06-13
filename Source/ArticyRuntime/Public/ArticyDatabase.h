@@ -213,8 +213,19 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Articy", meta=(DeterminesOutputType="CastTo", AdvancedDisplay="CloneId"))
 	UArticyObject* GetObjectByName(FName TechnicalName, int32 CloneId = 0, TSubclassOf<class UArticyObject> CastTo = NULL) const;
-	template<typename T>
+	template<typename T> 
 	T* GetObjectByName(FName TechnicalName, int32 CloneId = 0) const { return Cast<T>(GetObjectByName(TechnicalName, CloneId)); }
+
+
+	/****
+	* Get an object by its Articy String Representation.
+	* Use this method to get an Articy Id from a Global Variable String typed 
+	* that contains the result of an Expresso GetObj(---) method.
+	*****/
+	UFUNCTION(BlueprintCallable, Category = "Articy", meta = (DeterminesOutputType = "CastTo", AdvancedDisplay = "CloneId"))
+	UArticyObject* GetObjectFromStringRepresentation(FString StringID_CloneID, TSubclassOf<class UArticyObject> CastTo = NULL) const;
+	template<typename T> 
+	T* GetObjectFromStringRepresentation(FString StringID_CloneID) const { return Cast<T>(GetObjectFromStringRepresentation(StringID_CloneID)); }
 
 	/**
 	 * Get all objects with a given TechnicalName.

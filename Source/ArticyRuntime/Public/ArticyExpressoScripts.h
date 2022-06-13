@@ -325,6 +325,10 @@ protected:
 	float random(float Max);
 
 	/** Don't change the name, it's called like this in script fragments! */
+	ExpressoType random(const ExpressoType& Min, const ExpressoType& Max);
+	ExpressoType random(const ExpressoType& Max);
+
+	/** Don't change the name, it's called like this in script fragments! */
 	static void incrementProp(UArticyBaseObject* Object, const FString& Property, const float Value = 1);
 	/** Don't change the name, it's called like this in script fragments! */
 	void incrementProp(const ExpressoType& Id_CloneId, const FString& Property, const float Value = 1) const;

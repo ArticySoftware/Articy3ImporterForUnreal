@@ -9,7 +9,6 @@
 #include "ArticyExpressoScripts.h"
 #include "Misc/Paths.h"
 
-
 UArticyObject* FArticyObjectShadow::GetObject()
 {
 	return Object;
@@ -17,6 +16,7 @@ UArticyObject* FArticyObjectShadow::GetObject()
 
 FArticyShadowableObject::FArticyShadowableObject(UArticyObject* Object, int32 CloneId, UObject* Outer)
 {
+	Object->SetCloneID(CloneId);
 	ShadowCopies.Add(FArticyObjectShadow(0, Object, CloneId, Outer));
 }
 
@@ -494,6 +494,15 @@ UArticyObject* UArticyDatabase::GetObjectByName(FName TechnicalName, int32 Clone
 
 	auto info = arr->Objects[0];
 	return info? Cast<UArticyObject>(info->Get(this, CloneId)) : nullptr;
+}
+
+UArticyObject* UArticyDatabase::GetObjectFromStringRepresentation(FString StringID_CloneID, TSubclassOf<class UArticyObject> CastTo) const
+{
+	FString StringId,CloneId;
+	StringID_CloneID.Split(TEXT("_"), &StringId, &CloneId,ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+	uint64 id = FCString::Strtoui64(*StringId, NULL, 10);
+
+	return GetObjectInternal(id, FCString::Atoi(*CloneId));
 }
 
 TArray<UArticyObject*> UArticyDatabase::GetObjects(FName TechnicalName, int32 CloneId, TSubclassOf<class UArticyObject> CastTo) const

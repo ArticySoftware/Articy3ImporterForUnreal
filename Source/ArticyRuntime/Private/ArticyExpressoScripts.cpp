@@ -710,6 +710,41 @@ float UArticyExpressoScripts::random(float Max)
 	return FMath::FRandRange(0, Max);
 }
 
+
+ExpressoType UArticyExpressoScripts::random(const ExpressoType& Min, const ExpressoType& Max)
+{
+	if (Min.Type != Max.Type)
+	{
+		ensureMsgf(false, TEXT("Cannot evaluate random value : Min and Max must be same type. Min %s / Max %s"), *Min.ToString(), *Max.ToString());
+		return ExpressoType();
+	}
+
+	switch (Min.Type)
+	{
+	case Min.Int:
+		return FMath::FRandRange((int64)Min.GetInt(), (int64)Max.GetInt());
+	case Min.Float:
+		return FMath::FRandRange((float)Min.GetFloat(), (float)Max.GetFloat());
+
+	case Min.Bool:
+	case Min.String:
+	case Min.Undefined:
+		ensureMsgf(false, TEXT("Cannot evaluate random value from %s"), *Min.ToString());
+		break;
+
+	default:
+		ensureMsgf(false, TEXT("Unknown ArticyExpressoType!"));
+	}
+
+
+	return ExpressoType();
+}
+
+ExpressoType UArticyExpressoScripts::random(const ExpressoType& Max)
+{
+	return random(ExpressoType(0), Max);
+}
+
 void UArticyExpressoScripts::incrementProp(UArticyBaseObject* Object, const FString& Property, const float Value /*= 1*/)
 {
 	float curvalue = (float)getProp(Object, Property);
