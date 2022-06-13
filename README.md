@@ -560,9 +560,9 @@ Once the project succesfully compiles and opens, run a [Full Reimport](#importer
 
 ## Detailed step by step import process
 
-Here is a full detailed step by step process to configure Ureal to be able to import Articy content properly :
+Here is a full detailed step by step process to configure Unreal to be able to import Articy content properly :
 
-1. Create an Ureal C++ project
+1. Create an Unreal C++ project
 
 2. Uncheck "Hot Reload" inside Editor preferences (to prevent concurency with Live Coding session)
    * Go to Edit > Editor preferences > "General" section => "Miscellaneous" 
@@ -598,7 +598,7 @@ To make the PublicDependencyModuleNames like the following line :
 PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "ArticyRuntime" });
 ```
 NOTE:
-> This will tell to Unreal Engine build tool to take in account the Articy Dll when building project, otherwise Unreal build will fail.
+> This will tell to Unreal Engine build tool to take in account the Articy DLL when building project, otherwise Unreal build will fail.
     
 6. Do a fresh build of the project inside Visual studio. 
 
