@@ -14,6 +14,7 @@ UArticyPluginSettings::UArticyPluginSettings()
 	bKeepDatabaseBetweenWorlds = true;
 	bKeepGlobalVariablesBetweenWorlds = true;
 	bConvertUnityToUnrealRichText = false;
+	bVerifyArticyReferenceBeforeImport = true;
 
 	bSortChildrenAtGeneration = false;
 	ArticyDirectory.Path = TEXT("/Game");

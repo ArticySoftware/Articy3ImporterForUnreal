@@ -2,13 +2,13 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 //
 
-
 #include "ArticyImportData.h"
 #include "EditorFramework/AssetImportData.h"
 #include "CodeGeneration/CodeGenerator.h"
 #include "ArticyPluginSettings.h"
 #include "Internationalization/Regex.h"
 #include "ArticyEditorModule.h"
+#include "BuildToolParser/BuildToolParser.h"
 
 #define LOCTEXT_NAMESPACE "ArticyImportData"
 
@@ -444,9 +444,38 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	}
 	//===================================//
 
+	// ArticyRuntime reference check, ask user to add "ArticyRuntime" Reference to Unreal build tool if needed.
+	if (UArticyPluginSettings::Get()->bVerifyArticyReferenceBeforeImport)
+	{
+		FString path = FPaths::GameSourceDir() / FApp::GetProjectName() / FApp::GetProjectName() + TEXT(".Build.cs"); // TEXT("");
+		BuildToolParser RefVerifier = BuildToolParser::BuildToolParser(path);
+		if (!RefVerifier.VerifyArticyRuntimeRef())
+		{			
+			const FText RuntimeRefNotFoundTitle = FText::FromString(TEXT("ArticyRuntime reference not found."));
+			const FText RuntimeRefNotFound = LOCTEXT("ArticyRuntimeReferenceNotFound", 
+				"The \"ArticyRuntime\" reference needs to be added inside the Unreal build tool.\nDo you want to add the reference automatically ?\nIf you use a custom build system or a custom build file, you can disable automatic reference verification inside the Articy Plugin settings from the Project settings.\n");
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
+			EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, RuntimeRefNotFound, RuntimeRefNotFoundTitle);
+#else
+			EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::YesNoCancel, RuntimeRefNotFound, &RuntimeRefNotFoundTitle);
+#endif
+			if (ReturnType == EAppReturnType::Yes)
+			{
+				RefVerifier.AddArticyRuntimmeRef();
+			}
+			else if (ReturnType == EAppReturnType::Cancel)
+			{
+				// Abort code generation
+				bNeedsCodeGeneration = false;
+			}
+		}
+	}
+
 	// if we are generating code, generate and compile it; after it has finished, generate assets and perform post import logic
 	if(bNeedsCodeGeneration)
 	{
+
+
 		const bool bAnyCodeGenerated = CodeGenerator::GenerateCode(this);
 
 		if (bAnyCodeGenerated)
