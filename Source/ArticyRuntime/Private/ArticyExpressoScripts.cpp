@@ -726,7 +726,7 @@ ExpressoType UArticyExpressoScripts::random(const ExpressoType& Min, const Expre
 		break;
 
 	case Min.Float:
-		return FMath::RandRange(Min.GetFloat(), Max.GetFloat());
+		return FMath::RandRange((float)Min.GetFloat(),(float)Max.GetFloat());
 		break;
 
 	case Min.Bool:

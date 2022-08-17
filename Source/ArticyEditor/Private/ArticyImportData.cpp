@@ -8,6 +8,11 @@
 #include "ArticyPluginSettings.h"
 #include "Internationalization/Regex.h"
 #include "ArticyEditorModule.h"
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
+#include "Dialogs/Dialogs.h"
+#else
+#include "Misc/MessageDialog.h"
+#endif
 #include "BuildToolParser/BuildToolParser.h"
 
 #define LOCTEXT_NAMESPACE "ArticyImportData"
