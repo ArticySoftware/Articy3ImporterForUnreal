@@ -1,3 +1,21 @@
+## Unreal Importer 1.5 Changelog
+
+- New Features:
+	- Added a message box that verify for an "ArticyRuntime" reference in the dependency modules of the unreal build tool and ask the user to add it if it's not present.
+	- Added a checkbox inside the Articy Importer plugin preferences to avoid automatic ArticyRuntime verification (case of the developper have a custom build pipeline).	
+	- String representation : New node "Get Object from String Representation" that takes a string parameter (StringID CloneID) to get an object by its internal Articy String representation. 
+	- New expresso methods (IncrementProp, DecrementProp, IsPropInRange, IsInRange) to reflect Articy:Draft Expresso new methods.
+- Changes:
+	- Removed "BranchLimit" from FlowPlayer
+- Fixes:
+	- Fixed generated files for PS5 and Androïd
+	- Fixed Articy icon disappears when usign small editor icons for UE4
+	- Fixed CloneID that was always "1"
+- Documentation (web)
+	- Updated "Getting the object" section to add String representation example.
+	- Removed step by step import process section
+	- Changed "Adjust build configuration" section of the documentation to reflect automatic ArticyRuntime reference new functionality.
+
 ## Unreal Importer 1.4 Changelog
 
 - Unreal Engine 5 support
