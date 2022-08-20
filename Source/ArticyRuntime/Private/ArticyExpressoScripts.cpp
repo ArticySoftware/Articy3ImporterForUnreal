@@ -110,8 +110,8 @@ ExpressoType::operator int64() const
 		TArray<FString> articyIds;
 		int32 numberOfParts = GetString().ParseIntoArray(articyIds, TEXT("_"), true);
 		if (!ensureMsgf(numberOfParts == 2, TEXT(
-			"Trying to convert a string to 64-bit integer (such as an Articy ID). "
-			"Only the result of getObj or similar methods can be assigned to Slots.")))
+			                "Trying to convert a string to 64-bit integer (such as an Articy ID). "
+			                "Only the result of getObj or similar methods can be assigned to Slots.")))
 		{
 			// Fail with 0x00000000
 			return 0;
@@ -574,7 +574,8 @@ UArticyBaseObject* ExpressoType::TryFeatureReroute(UArticyBaseObject* Object, FS
 			UArticyBaseFeature* Feature = Object->GetProp<UArticyBaseFeature*>(*feature);
 			if (!ensure(Feature))
 			{
-				UE_LOG(LogArticyRuntime, Warning, TEXT("Feature %s on Object %s is null, cannot access property %s!"), *feature, *Object->GetName(), *Property);
+				UE_LOG(LogArticyRuntime, Warning, TEXT("Feature %s on Object %s is null, cannot access property %s!"),
+				       *feature, *Object->GetName(), *Property);
 				return nullptr;
 			}
 
@@ -587,7 +588,8 @@ UArticyBaseObject* ExpressoType::TryFeatureReroute(UArticyBaseObject* Object, FS
 
 //---------------------------------------------------------------------------//
 
-bool UArticyExpressoScripts::Evaluate(const int& ConditionFragmentHash, UArticyGlobalVariables* GV, UObject* MethodProvider) const
+bool UArticyExpressoScripts::Evaluate(const int& ConditionFragmentHash, UArticyGlobalVariables* GV,
+                                      UObject* MethodProvider) const
 {
 	SetGV(GV);
 	UserMethodsProvider = MethodProvider;
@@ -601,7 +603,8 @@ bool UArticyExpressoScripts::Evaluate(const int& ConditionFragmentHash, UArticyG
 	return result;
 }
 
-bool UArticyExpressoScripts::Execute(const int& InstructionFragmentHash, UArticyGlobalVariables* GV, UObject* MethodProvider) const
+bool UArticyExpressoScripts::Execute(const int& InstructionFragmentHash, UArticyGlobalVariables* GV,
+                                     UObject* MethodProvider) const
 {
 	SetGV(GV);
 	UserMethodsProvider = MethodProvider;
@@ -623,9 +626,9 @@ bool UArticyExpressoScripts::Execute(const int& InstructionFragmentHash, UArticy
 UArticyObject* UArticyExpressoScripts::getObj(const FString& NameOrId, const uint32& CloneId) const
 {
 	if (NameOrId.StartsWith(TEXT("0x")))
-		return OwningDatabase->GetObject<UArticyObject>(FArticyId{ ArticyHelpers::HexToUint64(NameOrId) }, CloneId);
+		return OwningDatabase->GetObject<UArticyObject>(FArticyId{ArticyHelpers::HexToUint64(NameOrId)}, CloneId);
 	if (NameOrId.IsNumeric())
-		return OwningDatabase->GetObject<UArticyObject>(FArticyId{ FCString::Strtoui64(*NameOrId, NULL, 10) }, CloneId);
+		return OwningDatabase->GetObject<UArticyObject>(FArticyId{FCString::Strtoui64(*NameOrId, NULL, 10)}, CloneId);
 
 	return OwningDatabase->GetObjectByName(*NameOrId, CloneId);
 }
@@ -633,7 +636,8 @@ UArticyObject* UArticyExpressoScripts::getObj(const FString& NameOrId, const uin
 UArticyObject* UArticyExpressoScripts::getObjInternal(const ExpressoType& Id_CloneId) const
 {
 	//only works for strings!
-	if (!ensureMsgf(Id_CloneId.Type == ExpressoType::String, TEXT("getObj(Id_CloneId) only works for string-ExpressoType!")))
+	if (!ensureMsgf(Id_CloneId.Type == ExpressoType::String,
+	                TEXT("getObj(Id_CloneId) only works for string-ExpressoType!")))
 		return nullptr;
 
 	//parse id and cloneId from the compound id
@@ -675,14 +679,15 @@ void UArticyExpressoScripts::setProp(UArticyBaseObject* Object, const FString& P
 	Value.SetValue(Object, Property);
 }
 
-void UArticyExpressoScripts::setProp(const ExpressoType& Id_CloneId, const FString& Property, const ExpressoType& Value) const
+void UArticyExpressoScripts::setProp(const ExpressoType& Id_CloneId, const FString& Property,
+                                     const ExpressoType& Value) const
 {
 	setProp(getObjInternal(Id_CloneId), Property, Value);
 }
 
 ExpressoType UArticyExpressoScripts::getProp(UArticyBaseObject* Object, const FString& Property)
 {
-	return ExpressoType{ Object, Property };
+	return ExpressoType{Object, Property};
 }
 
 ExpressoType UArticyExpressoScripts::getProp(const ExpressoType& Id_CloneId, const FString& Property) const
@@ -715,31 +720,30 @@ ExpressoType UArticyExpressoScripts::random(const ExpressoType& Min, const Expre
 {
 	if (Min.Type != Max.Type)
 	{
-		ensureMsgf(false, TEXT("Cannot evaluate random value : Min and Max must be same type. Min %s / Max %s"), *Min.ToString(), *Max.ToString());
+		ensureMsgf(false, TEXT("Cannot evaluate random value : Min and Max must be same type. Min %s / Max %s"),
+		           *Min.ToString(), *Max.ToString());
 		return ExpressoType();
 	}
 
-	switch (Min.Type)
+	if (Min.Type == Min.Int)
 	{
-	case Min.Int:
 		return FMath::RandRange(Min.GetInt(), Max.GetInt());
-		break;
-
-	case Min.Float:
-		return FMath::RandRange((float)Min.GetFloat(),(float)Max.GetFloat());
-		break;
-
-	case Min.Bool:
-	case Min.String:
-	case Min.Undefined:
-		ensureMsgf(false, TEXT("Cannot evaluate random value from %s"), *Min.ToString());
-		break;
-
-	default:
-		ensureMsgf(false, TEXT("Unknown ArticyExpressoType!"));
 	}
 
+	if(Min.Type == Min.Float)
+	{
+		return FMath::RandRange((float)Min.GetFloat(), (float)Max.GetFloat());
+	}
 
+	if(Min.Type == Min.Bool || Min.Type== Min.String || Min.Type == Min.Undefined)
+	{
+		ensureMsgf(false, TEXT("Cannot evaluate random value from %s"), *Min.ToString());
+	}
+	else
+	{
+		ensureMsgf(false, TEXT("Unknown ArticyExpressoType!"));
+	}
+	
 	return ExpressoType();
 }
 
@@ -748,24 +752,28 @@ ExpressoType UArticyExpressoScripts::random(const ExpressoType& Max)
 	return random(ExpressoType(0), Max);
 }
 
-void UArticyExpressoScripts::incrementProp(UArticyBaseObject* Object, const FString& Property, const float Value /*= 1*/)
+void UArticyExpressoScripts::incrementProp(UArticyBaseObject* Object, const FString& Property,
+                                           const float Value /*= 1*/)
 {
 	float curvalue = (float)getProp(Object, Property);
 	setProp(Object, Property, static_cast<decltype(getProp(Object, Property))>(curvalue + Value));
 }
 
-void UArticyExpressoScripts::incrementProp(const ExpressoType& Id_CloneId, const FString& Property, const float Value /*= 1*/) const
+void UArticyExpressoScripts::incrementProp(const ExpressoType& Id_CloneId, const FString& Property,
+                                           const float Value /*= 1*/) const
 {
 	incrementProp(getObjInternal(Id_CloneId), Property, Value);
 }
 
-void UArticyExpressoScripts::decrementProp(UArticyBaseObject* Object, const FString& Property, const float Value /*= 1*/)
+void UArticyExpressoScripts::decrementProp(UArticyBaseObject* Object, const FString& Property,
+                                           const float Value /*= 1*/)
 {
 	float curvalue = (float)getProp(Object, Property);
 	setProp(Object, Property, static_cast<decltype(getProp(Object, Property))>(curvalue - Value));
 }
 
-void UArticyExpressoScripts::decrementProp(const ExpressoType& Id_CloneId, const FString& Property, const float Value /*= 1*/) const
+void UArticyExpressoScripts::decrementProp(const ExpressoType& Id_CloneId, const FString& Property,
+                                           const float Value /*= 1*/) const
 {
 	decrementProp(getObjInternal(Id_CloneId), Property, Value);
 }
@@ -775,28 +783,32 @@ bool UArticyExpressoScripts::isInRange(float valueToTest, float lowerBound, floa
 	return valueToTest >= lowerBound && valueToTest <= upperBound;
 }
 
-bool UArticyExpressoScripts::isPropInRange(UArticyBaseObject* Object, const FString& Property, float lowerBound, float upperBound)
+bool UArticyExpressoScripts::isPropInRange(UArticyBaseObject* Object, const FString& Property, float lowerBound,
+                                           float upperBound)
 {
 	return isInRange((float)getProp(Object, Property), lowerBound, upperBound);
 }
 
-bool UArticyExpressoScripts::isPropInRange(const ExpressoType& Id_CloneId, const FString& Property, float lowerBound, float upperBound) const
+bool UArticyExpressoScripts::isPropInRange(const ExpressoType& Id_CloneId, const FString& Property, float lowerBound,
+                                           float upperBound) const
 {
 	return isPropInRange(getObjInternal(Id_CloneId), Property, lowerBound, upperBound);
 }
 
 bool UArticyExpressoScripts::isInRange(const FString& valueToTest, const FString& lowerBound, const FString& upperBound)
 {
-	return valueToTest.Compare(lowerBound, ESearchCase::CaseSensitive) >= 0 && valueToTest.Compare(upperBound, ESearchCase::CaseSensitive) <= 0;
+	return valueToTest.Compare(lowerBound, ESearchCase::CaseSensitive) >= 0 && valueToTest.Compare(
+		upperBound, ESearchCase::CaseSensitive) <= 0;
 }
 
-bool UArticyExpressoScripts::isPropInRange(UArticyBaseObject* Object, const FString& Property, const FString& lowerBound, const FString& upperBound)
+bool UArticyExpressoScripts::isPropInRange(UArticyBaseObject* Object, const FString& Property,
+                                           const FString& lowerBound, const FString& upperBound)
 {
 	return isInRange((FString)getProp(Object, Property), lowerBound, upperBound);
 }
 
-bool UArticyExpressoScripts::isPropInRange(const ExpressoType& Id_CloneId, const FString& Property, const FString& lowerBound, const FString& upperBound) const
+bool UArticyExpressoScripts::isPropInRange(const ExpressoType& Id_CloneId, const FString& Property,
+                                           const FString& lowerBound, const FString& upperBound) const
 {
 	return isPropInRange(getObjInternal(Id_CloneId), Property, lowerBound, upperBound);
 }
-
