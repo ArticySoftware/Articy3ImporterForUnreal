@@ -453,7 +453,7 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	if (UArticyPluginSettings::Get()->bVerifyArticyReferenceBeforeImport)
 	{
 		FString path = FPaths::GameSourceDir() / FApp::GetProjectName() / FApp::GetProjectName() + TEXT(".Build.cs"); // TEXT("");
-		BuildToolParser RefVerifier = BuildToolParser::BuildToolParser(path);
+		BuildToolParser RefVerifier = BuildToolParser(path);
 		if (!RefVerifier.VerifyArticyRuntimeRef())
 		{			
 			const FText RuntimeRefNotFoundTitle = FText::FromString(TEXT("ArticyRuntime reference not found."));

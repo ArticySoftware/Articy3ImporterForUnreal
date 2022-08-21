@@ -19,7 +19,7 @@ public:
 private:
 	// Enforce using parameterized constructor
 	BuildToolParser() {};
-	UINT32 PublicDependencyIndex;
+	int PublicDependencyIndex;
 	FString Path = TEXT("");
 	TArray <FString> PublicDependencyModulesNames;
 	TArray <FString> FileCodeLines;
