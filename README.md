@@ -81,49 +81,6 @@ Copy the folder **ArticyImporter** into this **Plugins** folder. Your project st
 ### Engine-based plugin
 If you decide to get the plugin on the marketplace, the Epic Games Launcher will handle the installation for you.
 
-## Adjust build configuration
-
-For Unreal to correctly build the importer we need to add it as a dependency, to do that locate the file **Source/\<ProjectName>/\<ProjectName\>Cpp.Build.cs**
-
-<p align="center">
-  <img src="https://www.articy.com/articy-importer/unreal/buildconfigfile.png">
-</p>
-
-And open it in your favorite text or code editor.
-
-Now we need to adjust the existing code and make sure that the Importer is a dependency for the project. Locate the `PublicDependencyModuleNames` array and add `"ArticyRuntime"` as an additional dependency. 
-If you are working on macOS, you should also add `"Json"` to `PrivateDependencyModuleNames`.
-
-Your file should now look something like this:
-
-```cpp
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
-
-using UnrealBuildTool;
-
-public class MyProject : ModuleRules
-{
-	public MyProject(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ArticyRuntime" });
-
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
-
-		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
-		
-		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
-
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
-	}
-}
-```
-
-Make sure to save the file and close the editor.
-
 ## Enable the importer in Unreal
 
 Now you can open your Unreal project and open the Plugins window by selecting Edit->Plugins in the main window menu bar.
@@ -148,7 +105,15 @@ When exporting, chose your Unreal projects **Content** folder as the target for 
 </p>
 
 ## Import into Unreal
-**Warning: Please make sure you have your project's build configuration adjusted**
+
+The first time the ArticyImporter find content to import, the plugin will automatically try to find an "ArticyRuntime" reference inside the project's Unreal build tool files. If the plugin can't find any reference, it will show the following messagebox to add it automatically : 
+![](docs/ArticyRuntimeRef_AutoAdd.png)
+
+"Yes" will automatically add the ArticyRuntime reference inside the Unreal build file.
+"No" will continue import (no modification to Unreal build files). 
+"Cancel" will abort import process.
+
+> NOTE : The automatic verification process can be disabled inside the project settings > Plugins > Articy importer (uncheck "Verify ArticyRuntime reference inside Unreal Build tools"). 
 
 After every export, going back to Unreal will trigger the ArticyImporter plugin to automatically parse the new file and show a prompt to import the changes. While this option is generally robust, there are certain cases in which more control over the import process is required.
 
