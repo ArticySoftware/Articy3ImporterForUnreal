@@ -203,8 +203,9 @@ protected:
 	/**
 	 * If this number of branches is reached, no more branches will be added.
 	 */
-	UPROPERTY(EditAnywhere, Category = "Setup", meta=(ClampMin=0))
-	int32 BranchLimit = 32;
+	// [Alewinn] : no valid reference in code, limit most probably set at Articy side.
+	//UPROPERTY(EditAnywhere, Category = "Setup", meta=(ClampMin=0))
+	//int32 BranchLimit = 32;
 
 	/**
 	 * If a branch reaches this length, exploration on it is aborted.

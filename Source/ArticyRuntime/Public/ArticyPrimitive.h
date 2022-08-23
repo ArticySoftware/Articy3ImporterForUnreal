@@ -20,13 +20,15 @@ class ARTICYRUNTIME_API UArticyPrimitive : public UArticyBaseObject
 public:
 	FArticyId GetId() const { return Id; }
 	uint32 GetCloneId() const { return CloneId; }
+	
+	void SetCloneID(uint32 cCloneId) { CloneId = cCloneId; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")
 	FArticyId Id;
 
 	// TODO k2 - changed to UArticyCloneableObject
-	//friend struct FArticyClonableObject;
+	// friend struct FArticyClonableObject;
 	friend struct FArticyObjectShadow;
 	/** The ID of this instance (0 is the original object). */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Articy")

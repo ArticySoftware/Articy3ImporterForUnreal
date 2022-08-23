@@ -29,6 +29,12 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = ImportSettings, meta = (DisplayName = "Sort children when importing"))
 	bool bSortChildrenAtGeneration;
 
+	/* If true, the importer will try to parse the Source/<ProjectName>/<ProjectName>.Build.cs file to find a reference to the ArticyRuntime inside it before importing,
+	*  And propose to the user to add it automatically if it didn't find any reference.
+	*/
+	UPROPERTY(EditAnywhere, config, Category = ImportSettings, meta = (DisplayName = "Verify ArticyRuntime reference inside Unreal Build tools before importing"))
+	bool bVerifyArticyReferenceBeforeImport;
+
 	/** The directory where ArticyContent will be generated and assets are looked for (when using ArticyAsset)
 	 *	Also used to search for the .articyue4 file to regenerate the import asset.
 	 *. Automatically set to the location of the import asset during import.

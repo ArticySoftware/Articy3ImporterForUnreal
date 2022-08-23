@@ -81,49 +81,6 @@ Copy the folder **ArticyImporter** into this **Plugins** folder. Your project st
 ### Engine-based plugin
 If you decide to get the plugin on the marketplace, the Epic Games Launcher will handle the installation for you.
 
-## Adjust build configuration
-
-For Unreal to correctly build the importer we need to add it as a dependency, to do that locate the file **Source/\<ProjectName>/\<ProjectName\>Cpp.Build.cs**
-
-<p align="center">
-  <img src="https://www.articy.com/articy-importer/unreal/buildconfigfile.png">
-</p>
-
-And open it in your favorite text or code editor.
-
-Now we need to adjust the existing code and make sure that the Importer is a dependency for the project. Locate the `PublicDependencyModuleNames` array and add `"ArticyRuntime"` as an additional dependency. 
-If you are working on macOS, you should also add `"Json"` to `PrivateDependencyModuleNames`.
-
-Your file should now look something like this:
-
-```cpp
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
-
-using UnrealBuildTool;
-
-public class MyProject : ModuleRules
-{
-	public MyProject(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ArticyRuntime" });
-
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
-
-		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
-		
-		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
-
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
-	}
-}
-```
-
-Make sure to save the file and close the editor.
-
 ## Enable the importer in Unreal
 
 Now you can open your Unreal project and open the Plugins window by selecting Edit->Plugins in the main window menu bar.
@@ -148,7 +105,15 @@ When exporting, chose your Unreal projects **Content** folder as the target for 
 </p>
 
 ## Import into Unreal
-**Warning: Please make sure you have your project's build configuration adjusted**
+
+The first time the ArticyImporter find content to import, the plugin will automatically try to find an "ArticyRuntime" reference inside the project's Unreal build tool files. If the plugin can't find any reference, it will show the following messagebox to add it automatically : 
+![](docs/ArticyRuntimeRef_AutoAdd.png)
+
+"Yes" will automatically add the ArticyRuntime reference inside the Unreal build file.
+"No" will continue import (no modification to Unreal build files). 
+"Cancel" will abort import process.
+
+> NOTE : The automatic verification process can be disabled inside the project settings > Plugins > Articy importer (uncheck "Verify ArticyRuntime reference inside Unreal Build tools"). 
 
 After every export, going back to Unreal will trigger the ArticyImporter plugin to automatically parse the new file and show a prompt to import the changes. While this option is generally robust, there are certain cases in which more control over the import process is required.
 
@@ -560,57 +525,58 @@ Once the project succesfully compiles and opens, run a [Full Reimport](#importer
 
 ## Detailed step by step import process
 
-Here is a full detailed step by step process to configure Unreal to be able to import Articy content properly :
+Here is a full detailed step by step process to configure Ureal to be able to import Articy content properly :
 
-1. Create an Unreal C++ project
+1- Create an Ureal C++ project
 
-2. Uncheck "Hot Reload" inside Editor preferences (to prevent concurency with Live Coding session)
-   * Go to Edit > Editor preferences > "General" section => "Miscellaneous" 
-   
-   * Uncheck "Automatically compile newly added C++ Classes" (in Unreal 5, Live coding tries to do this as well, that leads to race conditions over buildings & locked already build DLLs ...)
-        
-3. Save all and CLOSE the Editor / project
-
-IMPORTANTS NOTES:
-> If the Unreal Editor isn't closed, the first version of the project can't be build inside Visual studio. Even if this is not mandatory, it's far better to build a first version of the project outside the editor BEFORE doing the initial import, as the first import can fail if the Unreal project isn't already build because of the way Live Coding handles incremental compilation.
-
-> It's not necessary to build the first project outside of the Editor (Steps 4 / 5 / 6) BUT Editor needs to be closed / Reopened (step 3) to remove the Hot reload Editor references. So, as the Unreal editor must be closed at this moment, it's probably more natural to add the VERY IMPORTANT "ArticyRuntime" dependency at this time (step 5.).
-	
-4. Open the visual studio project
-
-5. Add the "ArticyRuntime" dependency (very important)
-
-Edit the following file :
-
-`<Project Path>\Source\<Project Name>\<project_name>.Build.cs`
-
-This file is automatically generated by Unreal when you create a c++ project.
-
-NOTE: 
-> There may be more than 3 files generated inside this folder depending on which kind of Template you choose when creating the project. An empty project will generate only necessary Unreal build tool files (3 files) when a third person project (by example) will generate 4 more files at less...
-	
-Inside the file, add 
-```cpp
-"ArticyRuntime"
-```
-To make the PublicDependencyModuleNames like the following line :
-```cpp
-PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "ArticyRuntime" });
-```
-NOTE:
-> This will tell to Unreal Engine build tool to take in account the Articy DLL when building project, otherwise Unreal build will fail.
+2- Uncheck "Hot Reload" inside Editor preferences (to prevent concurency with Live Coding session)
     
-6. Do a fresh build of the project inside Visual studio. 
-
-This will create the basic DLL for Live Coding to begin with the C++ project.
+	Edit > Editor preferences > "General" section => "Miscellaneous" > 
+        Uncheck "Automatically compile newly added C++ Classes" (in Unreal 5, Live coding tries to do this as well, that leads to race conditions over buildings & locked already build DLLs ...)
+        
+3- Save all and CLOSE the Editor / project 
+    
+	=> ! important NOTE ! :  
+	If the Unreal Editor isn't closed, the first version of the project can't be build inside Visual studio.
+    Even if this is not mandatory, it's far better to build a first version of the project outside the editor BEFORE doing the initial import, as the first import can fail if the Unreal project isn't already build because of the way Live Coding handles incremental compilation.
+    ALTERNATIVELY 
+    Also, the first import succeeds much more when the user firstly play the initial level before importing content from Articy... Then it's not necessary to build the first project outside of the Editor (Steps 4 / 5 / 6) BUT Editor neets to be closed / Reopend (step 3) to remove the Hot reload Editor references. So, as the Unreal editor must be closed at this moment, it's probably more natural to add the VERY IMPORTANT "ArticyRuntime" dependency at this time (step 5-).
 	
-7. Re-Open the project inside Unreal editor
+4- Open the visual studio project
 
-8. Export articy project inside Unreal (directely at the root of the "Content" folder)
+5- Add the "ArticyRuntime" dependency (very important) : 
 
-NOTE:
-> After a shot time, this action should trigger a "Import changes" message into the Unreal side, and the importer should have generated some code files inside the "<Project Path>\Source\<Project Name>\ArticyGenerated" folder.
+	edit the followng file :
 
-> Import the changes and wait Live coding compilation to finish (the first import can take some time, but the other ones are faster).
+    <Project Path>\Source\<Project Name>\<project_name>.Build.cs
+    
+    This file is automatically generated by Unreal when you create a c++ project. 
+    
+    [NOTE : It may be more than 3 files generated inside this folder depending on which kind of Template you choose when creating the project. 
+    An empty project will generate only necessary Unreal build tool files (3 files) when a third person project (by example) will generate 4 more files at less...]
+    
+    Inside the file, add 
 
-> To confirm that the importation finished sucessfully, some Unreal structures might have been generated inside the C++\<Project_Name>\ArticyGenerated folder.
+	```c#    
+    "ArticyRuntime"
+    ```
+	
+    To make the PublicDependencyModuleNames like the following line :
+    
+	```c#
+    PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "ArticyRuntime" });
+    ```
+	
+    This will tell to Unreal Engine build tool to take in account the Articy Dll when building project, otherwise Unreal build will fail.
+    
+6- Do a fresh build of the project inside Visual studio. 
+    => This will create the basic DLL for Live Coding to begin with the C++ project.
+	
+7- Re-Open the project inside Unreal editor
+
+5- Export articy project inside Unreal (directely at the root of the "Content" folder)
+    => After a shot time, this action should trigger a "Import changes" message into the Unreal side, and the importer should have generated some code files inside the 
+        "<Project Path>\Source\<Project Name>\ArticyGenerated" folder
+    => Import the changes and wait Live coding compilation to finish (the first import can take some time, but the other ones are faster)
+    
+    => To confirm that the importation finished sucessfully, some Unreal structures might have been generated inside the C++\<Project_Name>\ArticyGenerated folder.
