@@ -109,7 +109,7 @@ When exporting, chose your Unreal projects **Content** folder as the target for 
 The first time the ArticyImporter find content to import, the plugin will automatically try to find an "ArticyRuntime" reference inside the project's Unreal build tool files. If the plugin can't find any reference, it will show the following messagebox to add it automatically : 
 
 <p align="center">
-![](docs/ArticyRuntimeRef_AutoAdd.png)
+	<img src="/docs/ArticyRuntimeRef_AutoAdd.png">
 </p>
 
 - **"Yes"** will automatically add the ArticyRuntime reference inside the Unreal build file.
