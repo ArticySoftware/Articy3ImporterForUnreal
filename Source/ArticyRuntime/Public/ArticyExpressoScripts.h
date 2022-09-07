@@ -81,6 +81,7 @@ struct ARTICYRUNTIME_API ExpressoType
 	ExpressoType(const UArticyString& Value);
 	ExpressoType(const UArticyInt& Value);
 	ExpressoType(const UArticyBool& Value);
+	ExpressoType(const FArticyId& Value);
 	
 	//implicit conversion to value type
 	explicit operator bool() const;
@@ -360,7 +361,10 @@ protected:
 	 * Don't change the name, it's called like this in script fragments!
 	 */
 	template<typename ...ArgTypes>
-	static void print(const ExpressoType& Msg, ArgTypes... Args) { print(Msg.ToString(), Args...); }
+	static void print(const ExpressoType& Msg, ArgTypes... Args)
+	{
+		print(Msg.ToString(), Args...);
+	}
 
 	/** Script conditions that are not empty, but rather contain something that evaluates to bool, return that condition. */
 	static const bool& ConditionOrTrue(const bool &Condition) { return Condition; }
@@ -386,7 +390,7 @@ template <typename ... ArgTypes>
 void UArticyExpressoScripts::print(const FString& Msg, ArgTypes... Args)
 {
 	auto msg = Msg;
-
+	
 	auto arr = TArray<ExpressoType>{ Args... };
 	for(int i = 0; i < arr.Num(); ++i)
 		msg = msg.Replace(*FString::Printf(TEXT("{%d}"), i), *FString{ arr[i] });
