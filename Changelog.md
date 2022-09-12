@@ -1,3 +1,13 @@
+## Unreal Importer 1.5.1 Changelog : current Dev branch (ongoing list)
+
+- New Features:
+	- Slots evaluation for ExpressoScripts
+- Changes:
+- Fixes:
+- Known issues (Should be fixed in 1.6): 
+	- Expresso Print("A simple non-evaluated string..."); method won't work when used inside a branch where nodes also uses GetObj/SetObj/GetProperty/SetProperty
+- Documentation (web)
+
 ## Unreal Importer 1.5 Changelog
 
 - New Features:
