@@ -372,6 +372,13 @@ void UArticyFlowPlayer::UpdateAvailableBranchesInternal(bool Startup)
 
 void UArticyFlowPlayer::SetCursorToStartNode()
 {
+	// This ensure Flowplayer construction whithout Throwing
+	// error message when setup in Actor construction with C++
+	if(StartOn.NoneSet)
+	{
+		return;	
+	}
+	
 	const auto obj = StartOn.GetObject(this);
 
 	TScriptInterface<IArticyFlowObject> ptr;
