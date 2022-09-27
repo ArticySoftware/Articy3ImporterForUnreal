@@ -15,7 +15,8 @@ UArticyPluginSettings::UArticyPluginSettings()
 	bKeepGlobalVariablesBetweenWorlds = true;
 	bConvertUnityToUnrealRichText = false;
 	bVerifyArticyReferenceBeforeImport = true;
-
+	bUseLegacyImporter = false;
+	
 	bSortChildrenAtGeneration = false;
 	ArticyDirectory.Path = TEXT("/Game");
 	// update package load settings after all files have been loaded

@@ -46,7 +46,10 @@ UObject* UArticyJSONFactory::FactoryCreateFile(UClass* InClass, UObject* InParen
 	// properly update the config file and delete previous import assets
 	UArticyPluginSettings* CDO_Settings = GetMutableDefault<UArticyPluginSettings>();
     if(!CDO_Settings->ArticyDirectory.Path.Equals(Path))
-	{    	
+	{
+    	// @Alewinn - Relative to (Ticket#2022051610000026) / "Additional Asset Directories to Cook"
+    	//			  Also, this one is responsible on cooking fail problem due to an  unsolved directory path...
+    	//			  Looks like an attempt to automatize additional Directories to cook ... 
 		CDO_Settings->ArticyDirectory.Path = Path;
 		FString ConfigName = CDO_Settings->GetDefaultConfigFilename();
 		GConfig->SetString(TEXT("/Script/ArticyRuntime.ArticyPluginSettings"), TEXT("ArticyDirectory"), *Path, ConfigName);
@@ -68,16 +71,13 @@ UObject* UArticyJSONFactory::FactoryCreateFile(UClass* InClass, UObject* InParen
 
 	if(!bImportQueued)
 	{
-		if (ImportFromFile(Filename, ArticyImportData) && ArticyImportData)
-		{
-
-		}
-		else
+		if (!ImportFromFile(Filename, ArticyImportData) && ArticyImportData)
 		{
 			bOutOperationCanceled = true;
 			//the asset will be GCed because there are no references to it, no need to delete it
 			ArticyImportData = nullptr;
 		}
+		// Else import should be ok 
 	}
 	
 

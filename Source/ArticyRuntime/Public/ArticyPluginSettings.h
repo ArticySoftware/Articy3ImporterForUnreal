@@ -35,6 +35,12 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = ImportSettings, meta = (DisplayName = "Verify ArticyRuntime reference inside Unreal Build tools before importing"))
 	bool bVerifyArticyReferenceBeforeImport;
 
+	/*
+	 * If true, the old importer process will be used (Articy version <  3.2.3)
+	 */
+	UPROPERTY(EditAnywhere, Config, Category = ImportSettings, meta = (DisplayName = "Use legacy importer (prev. Articy 3.2.3)"))
+	bool bUseLegacyImporter;
+	
 	/** The directory where ArticyContent will be generated and assets are looked for (when using ArticyAsset)
 	 *	Also used to search for the .articyue4 file to regenerate the import asset.
 	 *. Automatically set to the location of the import asset during import.
