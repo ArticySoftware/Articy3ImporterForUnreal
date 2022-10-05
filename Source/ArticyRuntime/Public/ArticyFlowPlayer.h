@@ -211,7 +211,7 @@ protected:
 	 * If a branch reaches this length, exploration on it is aborted.
 	 */
 	UPROPERTY(EditAnywhere, Category = "Setup", meta=(ClampMin=0))
-	int32 ExploreDepthLimit = 128;
+	int32 ExploreLimit = 128;
 
 	/**
 	 * If more than this amount of ShadowLevels are needed at the same time,
