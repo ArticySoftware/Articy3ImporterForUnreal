@@ -330,7 +330,13 @@ const bool UserInterfaceHelperFunctions::ShowObjectInArticy(const FArticyId Arti
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 
 	TArray<FAssetData> OutAssetData;
+
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+	AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetClassPathName(), OutAssetData, false);
+#else
 	AssetRegistryModule.Get().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), OutAssetData, false);
+#endif
+	
 	FString TabURL = bNewTab ? FString("new") : FString("current");
 	if (OutAssetData.Num() == 1)
 	{
