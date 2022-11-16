@@ -19,7 +19,7 @@
 
 void FADISettings::ImportFromJson(TSharedPtr<FJsonObject> Json)
 {
-	if(!Json.IsValid())
+	if (!Json.IsValid())
 		return;
 
 	JSON_TRY_BOOL(Json, set_Localization);
@@ -33,12 +33,11 @@ void FADISettings::ImportFromJson(TSharedPtr<FJsonObject> Json)
 	JSON_TRY_STRING(Json, ScriptFragmentsHash);
 	bObjectDefsOrGVsChanged = oldObjectDefsHash != ObjectDefinitionsHash;
 	bScriptFragmentsChanged = oldScriptFragmentHash != ScriptFragmentsHash;
-	
 }
 
 void FArticyProjectDef::ImportFromJson(const TSharedPtr<FJsonObject> Json)
 {
-	if(!Json.IsValid())
+	if (!Json.IsValid())
 		return;
 
 	JSON_TRY_STRING(Json, Name);
@@ -49,7 +48,7 @@ void FArticyProjectDef::ImportFromJson(const TSharedPtr<FJsonObject> Json)
 
 FString FArticyGVar::GetCPPTypeString() const
 {
-	switch(Type)
+	switch (Type)
 	{
 	case EArticyType::ADT_Boolean:
 		return TEXT("UArticyBool");
@@ -68,7 +67,7 @@ FString FArticyGVar::GetCPPTypeString() const
 FString FArticyGVar::GetCPPValueString() const
 {
 	FString value;
-	switch(Type)
+	switch (Type)
 	{
 	case EArticyType::ADT_Boolean:
 		value = FString::Printf(TEXT("%s"), BoolValue ? TEXT("true") : TEXT("false"));
@@ -91,29 +90,30 @@ FString FArticyGVar::GetCPPValueString() const
 
 void FArticyGVar::ImportFromJson(const TSharedPtr<FJsonObject> JsonVar)
 {
-	if(!JsonVar.IsValid())
+	if (!JsonVar.IsValid())
 		return;
 
 	JSON_TRY_STRING(JsonVar, Variable);
 	JSON_TRY_STRING(JsonVar, Description);
 
 	FString typeString;
-	if(JsonVar->TryGetStringField(TEXT("Type"), typeString))
+	if (JsonVar->TryGetStringField(TEXT("Type"), typeString))
 	{
-		if(typeString == TEXT("Boolean"))
+		if (typeString == TEXT("Boolean"))
 			Type = EArticyType::ADT_Boolean;
-		else if(typeString == TEXT("Integer"))
+		else if (typeString == TEXT("Integer"))
 			Type = EArticyType::ADT_Integer;
 		else
 		{
-			if(typeString != TEXT("String"))
-			UE_LOG(LogArticyEditor, Error, TEXT("Unknown GlobalVariable type '%s', falling back to String."), *typeString);
+			if (typeString != TEXT("String"))
+				UE_LOG(LogArticyEditor, Error, TEXT("Unknown GlobalVariable type '%s', falling back to String."),
+			       *typeString);
 
 			Type = EArticyType::ADT_String;
 		}
 	}
 
-	switch(Type)
+	switch (Type)
 	{
 	case EArticyType::ADT_Boolean: JsonVar->TryGetBoolField(TEXT("Value"), BoolValue);
 		break;
@@ -127,7 +127,7 @@ void FArticyGVar::ImportFromJson(const TSharedPtr<FJsonObject> JsonVar)
 
 void FArticyGVNamespace::ImportFromJson(const TSharedPtr<FJsonObject> JsonNamespace, const UArticyImportData* Data)
 {
-	if(!JsonNamespace.IsValid())
+	if (!JsonNamespace.IsValid())
 		return;
 
 	JSON_TRY_STRING(JsonNamespace, Namespace);
@@ -135,12 +135,12 @@ void FArticyGVNamespace::ImportFromJson(const TSharedPtr<FJsonObject> JsonNamesp
 	JSON_TRY_STRING(JsonNamespace, Description);
 
 	const TArray<TSharedPtr<FJsonValue>>* varsJson;
-	if(!JsonNamespace->TryGetArrayField(TEXT("Variables"), varsJson))
+	if (!JsonNamespace->TryGetArrayField(TEXT("Variables"), varsJson))
 		return;
-	for(const auto varJson : *varsJson)
+	for (const auto varJson : *varsJson)
 	{
 		const auto obj = varJson->AsObject();
-		if(!obj.IsValid())
+		if (!obj.IsValid())
 			continue;
 
 		FArticyGVar var;
@@ -153,13 +153,13 @@ void FArticyGVInfo::ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json, c
 {
 	Namespaces.Reset(Json ? Json->Num() : 0);
 
-	if(!Json)
+	if (!Json)
 		return;
 
-	for(const auto nsJson : *Json)
+	for (const auto nsJson : *Json)
 	{
 		const auto obj = nsJson->AsObject();
-		if(!obj.IsValid())
+		if (!obj.IsValid())
 			continue;
 
 		FArticyGVNamespace ns;
@@ -173,46 +173,46 @@ void FArticyGVInfo::ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json, c
 const FString& FAIDScriptMethod::GetCPPReturnType() const
 {
 	//TODO change this once the ReturnType is changed from C#-style ('System.Void' ecc.) to something more generic!
-	if(ReturnType == "string")
+	if (ReturnType == "string")
 	{
-		const static auto String = FString{ "const FString" };
+		const static auto String = FString{"const FString"};
 		return String;
 	}
-	if(ReturnType == "object")
+	if (ReturnType == "object")
 	{
 		// object is pretty much all encompassing. We only support them as UArticyPrimitives right now, which means GetObj(...) and self works.
-		const static auto ArticyPrimitive = FString{ "UArticyPrimitive*" };
+		const static auto ArticyPrimitive = FString{"UArticyPrimitive*"};
 		return ArticyPrimitive;
 	}
-	
+
 	return ReturnType;
 }
 
 const FString& FAIDScriptMethod::GetCPPDefaultReturn() const
 {
 	//TODO change this once the ReturnType is changed from C#-style ('System.Void' ecc.) to something more generic!
-	if(ReturnType == "bool")
+	if (ReturnType == "bool")
 	{
-		const static auto True = FString{ "true" };
+		const static auto True = FString{"true"};
 		return True;
 	}
-	if(ReturnType == "int" || ReturnType == "float")
+	if (ReturnType == "int" || ReturnType == "float")
 	{
-		const static auto Zero = FString{ "0" };
+		const static auto Zero = FString{"0"};
 		return Zero;
 	}
-	if(ReturnType == "string")
+	if (ReturnType == "string")
 	{
-		const static auto EmptyString = FString{ "\"\"" };
+		const static auto EmptyString = FString{"\"\""};
 		return EmptyString;
 	}
 	if (ReturnType == "ArticyObject")
 	{
-		const static auto ArticyObject = FString{ "nullptr" };
+		const static auto ArticyObject = FString{"nullptr"};
 		return ArticyObject;
 	}
-	
-	const static auto Nothing = FString{ "" };
+
+	const static auto Nothing = FString{""};
 	return Nothing;
 }
 
@@ -220,15 +220,15 @@ const FString FAIDScriptMethod::GetCPPParameters() const
 {
 	FString Parameters = "";
 
-	for(const auto& Parameter : ParameterList)
+	for (const auto& Parameter : ParameterList)
 	{
 		FString Type = Parameter.Type;
 
-		if(Type.Equals("string"))
+		if (Type.Equals("string"))
 		{
 			Type = TEXT("const FString&");
 		}
-		else if(Type.Equals("object"))
+		else if (Type.Equals("object"))
 		{
 			Type = TEXT("UArticyPrimitive*");
 		}
@@ -243,7 +243,7 @@ const FString FAIDScriptMethod::GetArguments() const
 {
 	FString Parameters = "";
 
-	for (const auto& Argument: ArgumentList)
+	for (const auto& Argument : ArgumentList)
 	{
 		Parameters += Argument + TEXT(", ");
 	}
@@ -255,7 +255,7 @@ const FString FAIDScriptMethod::GetOriginalParametersForDisplayName() const
 {
 	FString DisplayNameSuffix = "";
 
-	for(const auto& OriginalParameterType : OriginalParameterTypes)
+	for (const auto& OriginalParameterType : OriginalParameterTypes)
 	{
 		DisplayNameSuffix += OriginalParameterType + TEXT(", ");
 	}
@@ -263,7 +263,7 @@ const FString FAIDScriptMethod::GetOriginalParametersForDisplayName() const
 	return DisplayNameSuffix.LeftChop(2);
 }
 
-void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString> &OverloadedMethods)
+void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString>& OverloadedMethods)
 {
 	JSON_TRY_STRING(Json, Name);
 	JSON_TRY_STRING(Json, ReturnType);
@@ -274,18 +274,18 @@ void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString
 
 	const TArray<TSharedPtr<FJsonValue>>* items;
 
-	if(Json->TryGetArrayField(TEXT("Parameters"), items))
+	if (Json->TryGetArrayField(TEXT("Parameters"), items))
 	{
-		for(const auto item : *items)
+		for (const auto item : *items)
 		{
 			const TSharedPtr<FJsonObject>* obj;
-			if(!ensure(item->TryGetObject(obj))) continue;
+			if (!ensure(item->TryGetObject(obj))) continue;
 
 			//import parameter name and type
 			FString Param, Type;
 			JSON_TRY_STRING((*obj), Param);
 			JSON_TRY_STRING((*obj), Type);
-			
+
 			// append param types to blueprint names
 			FString formattedType = Type;
 			formattedType[0] = FText::FromString(Type).ToUpper().ToString()[0];
@@ -299,7 +299,7 @@ void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString
 		}
 	}
 
-	if(BlueprintName.EndsWith("_"))
+	if (BlueprintName.EndsWith("_"))
 		BlueprintName.RemoveAt(BlueprintName.Len() - 1);
 
 	// determine if this is an overloaded blueprint function
@@ -313,22 +313,21 @@ void FAIDScriptMethod::ImportFromJson(TSharedPtr<FJsonObject> Json, TSet<FString
 	{
 		UsedBlueprintMethodsNames.Add(Name, BlueprintName);
 	}
-
 }
 
 void FAIDUserMethods::ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json)
 {
 	ScriptMethods.Reset(Json ? Json->Num() : 0);
 
-	if(!Json)
+	if (!Json)
 		return;
 
 	TSet<FString> OverloadedMethods;
 
-	for(const auto smJson : *Json)
+	for (const auto smJson : *Json)
 	{
 		const auto obj = smJson->AsObject();
-		if(!obj.IsValid())
+		if (!obj.IsValid())
 			continue;
 
 		FAIDScriptMethod sm;
@@ -345,7 +344,7 @@ void FAIDUserMethods::ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json)
 
 UADIHierarchyObject* UADIHierarchyObject::CreateFromJson(UObject* Outer, const TSharedPtr<FJsonObject> JsonObject)
 {
-	if(!JsonObject.IsValid())
+	if (!JsonObject.IsValid())
 		return nullptr;
 
 	//extract properties
@@ -364,10 +363,10 @@ UADIHierarchyObject* UADIHierarchyObject::CreateFromJson(UObject* Outer, const T
 
 	//fill in children
 	const TArray<TSharedPtr<FJsonValue>>* jsonChildren;
-	if(JsonObject->TryGetArrayField(TEXT("Children"), jsonChildren) && jsonChildren)
+	if (JsonObject->TryGetArrayField(TEXT("Children"), jsonChildren) && jsonChildren)
 	{
 		obj->Children.Reset(jsonChildren->Num());
-		for(auto jsonChild : *jsonChildren)
+		for (auto jsonChild : *jsonChildren)
 		{
 			auto child = CreateFromJson(obj, jsonChild->AsObject());
 			obj->Children.Add(child);
@@ -382,7 +381,7 @@ void FADIHierarchy::ImportFromJson(UArticyImportData* ImportData, const TSharedP
 	RootObject = nullptr;
 
 	//find the "Hierarchy" section
-	if(!Json.IsValid())
+	if (!Json.IsValid())
 		return;
 
 	RootObject = UADIHierarchyObject::CreateFromJson(ImportData, Json);
@@ -396,7 +395,7 @@ void UArticyImportData::PostInitProperties()
 	Super::PostInitProperties();
 
 #if WITH_EDITORONLY_DATA
-	if(!HasAnyFlags(RF_ClassDefaultObject))
+	if (!HasAnyFlags(RF_ClassDefaultObject))
 	{
 		ImportData = NewObject<UAssetImportData>(this, TEXT("ImportData"));
 	}
@@ -406,9 +405,10 @@ void UArticyImportData::PostInitProperties()
 #if WITH_EDITORONLY_DATA
 void UArticyImportData::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const
 {
-	if(ImportData)
+	if (ImportData)
 	{
-		OutTags.Add(FAssetRegistryTag(SourceFileTagName(), ImportData->GetSourceData().ToJson(), FAssetRegistryTag::TT_Hidden));
+		OutTags.Add(FAssetRegistryTag(SourceFileTagName(), ImportData->GetSourceData().ToJson(),
+		                              FAssetRegistryTag::TT_Hidden));
 	}
 
 	Super::GetAssetRegistryTags(OutTags);
@@ -417,12 +417,13 @@ void UArticyImportData::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags)
 
 void UArticyImportData::PostImport()
 {
-	FArticyEditorModule& ArticyEditorModule = FModuleManager::Get().GetModuleChecked<FArticyEditorModule>("ArticyEditor");
+	FArticyEditorModule& ArticyEditorModule = FModuleManager::Get().GetModuleChecked<FArticyEditorModule>(
+		"ArticyEditor");
 	ArticyEditorModule.OnImportFinished.Broadcast();
 }
 
 void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
-{	
+{
 	// import the main sections
 	Settings.ImportFromJson(RootObject->GetObjectField(JSON_SECTION_SETTINGS));
 	Project.ImportFromJson(RootObject->GetObjectField(JSON_SECTION_PROJECT));
@@ -433,16 +434,16 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	bool bNeedsCodeGeneration = false;
 
 	ParentChildrenCache.Empty();
-	
+
 	// import GVs and ObjectDefs only if needed
-	if(Settings.DidObjectDefsOrGVsChange())
+	if (Settings.DidObjectDefsOrGVsChange())
 	{
 		GlobalVariables.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_GLOBALVARS), this);
 		ObjectDefinitions.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_OBJECTDEFS), this);
 		bNeedsCodeGeneration = true;
 	}
 
-	if(Settings.DidScriptFragmentsChange() && this->GetSettings().set_UseScriptSupport)
+	if (Settings.DidScriptFragmentsChange() && this->GetSettings().set_UseScriptSupport)
 	{
 		this->GatherScripts();
 		bNeedsCodeGeneration = true;
@@ -452,17 +453,19 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	// ArticyRuntime reference check, ask user to add "ArticyRuntime" Reference to Unreal build tool if needed.
 	if (UArticyPluginSettings::Get()->bVerifyArticyReferenceBeforeImport)
 	{
-		FString path = FPaths::GameSourceDir() / FApp::GetProjectName() / FApp::GetProjectName() + TEXT(".Build.cs"); // TEXT("");
+		FString path = FPaths::GameSourceDir() / FApp::GetProjectName() / FApp::GetProjectName() + TEXT(".Build.cs");
+		// TEXT("");
 		BuildToolParser RefVerifier = BuildToolParser(path);
 		if (!RefVerifier.VerifyArticyRuntimeRef())
-		{			
+		{
 			const FText RuntimeRefNotFoundTitle = FText::FromString(TEXT("ArticyRuntime reference not found."));
-			const FText RuntimeRefNotFound = LOCTEXT("ArticyRuntimeReferenceNotFound", 
-				"The \"ArticyRuntime\" reference needs to be added inside the Unreal build tool.\nDo you want to add the reference automatically ?\nIf you use a custom build system or a custom build file, you can disable automatic reference verification inside the Articy Plugin settings from the Project settings.\n");
+			const FText RuntimeRefNotFound = LOCTEXT("ArticyRuntimeReferenceNotFound",
+			                                         "The \"ArticyRuntime\" reference needs to be added inside the Unreal build tool.\nDo you want to add the reference automatically ?\nIf you use a custom build system or a custom build file, you can disable automatic reference verification inside the Articy Plugin settings from the Project settings.\n");
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 			EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, RuntimeRefNotFound, RuntimeRefNotFoundTitle);
 #else
-			EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::YesNoCancel, RuntimeRefNotFound, &RuntimeRefNotFoundTitle);
+			EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::YesNoCancel, RuntimeRefNotFound,
+			                                                       &RuntimeRefNotFoundTitle);
 #endif
 			if (ReturnType == EAppReturnType::Yes)
 			{
@@ -477,29 +480,28 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 	}
 
 	// if we are generating code, generate and compile it; after it has finished, generate assets and perform post import logic
-	if(bNeedsCodeGeneration)
+	if (bNeedsCodeGeneration)
 	{
-
-
 		const bool bAnyCodeGenerated = CodeGenerator::GenerateCode(this);
 
 		if (bAnyCodeGenerated)
 		{
 			static FDelegateHandle PostImportHandle;
 
-			if(PostImportHandle.IsValid())
+			if (PostImportHandle.IsValid())
 			{
 				FArticyEditorModule::Get().OnCompilationFinished.Remove(PostImportHandle);
 				PostImportHandle.Reset();
 			}
-			
+
 			// this will have either the current import data or the cached version
-			PostImportHandle = FArticyEditorModule::Get().OnCompilationFinished.AddLambda([this](UArticyImportData* Data)
-			{
-				BuildCachedVersion();
-				CodeGenerator::GenerateAssets(Data);
-				PostImport();
-			});
+			PostImportHandle = FArticyEditorModule::Get().OnCompilationFinished.AddLambda(
+				[this](UArticyImportData* Data)
+				{
+					BuildCachedVersion();
+					CodeGenerator::GenerateAssets(Data);
+					PostImport();
+				});
 
 			CodeGenerator::Recompile(this);
 		}
@@ -517,9 +519,10 @@ const TWeakObjectPtr<UArticyImportData> UArticyImportData::GetImportData()
 {
 	static TWeakObjectPtr<UArticyImportData> ImportData = nullptr;
 
-	if(!ImportData.IsValid())
+	if (!ImportData.IsValid())
 	{
-		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(
+			"AssetRegistry");
 		TArray<FAssetData> AssetData;
 		AssetRegistryModule.Get().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), AssetData);
 
@@ -532,13 +535,21 @@ const TWeakObjectPtr<UArticyImportData> UArticyImportData::GetImportData()
 			ImportData = Cast<UArticyImportData>(AssetData[0].GetAsset());
 
 			if (AssetData.Num() > 1)
-			{
-				UE_LOG(LogArticyEditor, Error, TEXT("Found more than one import file. This is not supported by the plugin. Using the first found file for now: %s"), *AssetData[0].ObjectPath.ToString());
-			}
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+				UE_LOG(LogArticyEditor, Error,
+			       TEXT(
+				       "Found more than one import file. This is not supported by the plugin. Using the first found file for now: %s"
+			       ),
+			       *AssetData[0].GetObjectPathString());
+#else
+			UE_LOG(LogArticyEditor, Error,
+					TEXT("Found more than one import file. This is not supported by the plugin. Using the first found file for now: %s"),
+				*AssetData[0].ObjectPath.ToString());
+#endif
 		}
 	}
-	
-	return ImportData;	
+
+	return ImportData;
 }
 
 TArray<UArticyPackage*> UArticyImportData::GetPackagesDirect()
@@ -566,27 +577,28 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 	const FRegexPattern unquotedWordDotWord(TEXT("(?<![\"a-zA-Z_])([a-zA-Z_]{1}\\w+\\.\\w+)"));
 	//match an assignment operator (an = sign that does not have any of [ = < > ] before it, and no = after it)
 	const FRegexPattern assignmentOperator(TEXT("(?<![=<>])=(?!=)"));
-	
+
 	// regex pattern to find literal string, even if they contain escaped quotes (looks nasty if string escaped...): "([^"\\]|\\[\s\S])*" 
-	const FRegexPattern literalStringPattern(TEXT("\"([^\"\\\\]|\\\\[\\s\\S])*\""));  
+	const FRegexPattern literalStringPattern(TEXT("\"([^\"\\\\]|\\\\[\\s\\S])*\""));
 
 	bool bCreateBlueprintableUserMethods = UArticyPluginSettings::Get()->bCreateBlueprintTypeForScriptMethods;
 
 	auto string = Fragment; //Fragment.Replace(TEXT("\n"), TEXT(""));
-	if(string.Len() > 0)
+	if (string.Len() > 0)
 	{
-		static TArray<FString> lines; lines.Reset();
+		static TArray<FString> lines;
+		lines.Reset();
 		//split into lines
 		string.ParseIntoArray(lines, TEXT("\n"));
 
 		string = TEXT("");
 		FString comments = TEXT("");
-		for(auto line : lines)
+		for (auto line : lines)
 		{
 			//remove comment
 			//NOTE: this breaks once // is allowed in a string (i.e. in an object name)
 			auto doubleSlashPos = line.Find(TEXT("//"));
-			if(doubleSlashPos != INDEX_NONE)
+			if (doubleSlashPos != INDEX_NONE)
 			{
 				comments += line.Mid(doubleSlashPos) + TEXT("\n");
 				line = line.Left(doubleSlashPos);
@@ -605,7 +617,7 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 
 		//re-assemble the string, putting all comments at the top
 		string = comments;
-		for(auto l = 0; l < lines.Num(); ++l)
+		for (auto l = 0; l < lines.Num(); ++l)
 		{
 			auto line = lines[l];
 
@@ -620,7 +632,8 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 				auto literalStart = literalStrings.GetMatchBeginning() + offset;
 				auto literalEnd = literalStrings.GetMatchEnding() + offset;
 
-				line = line.Left(literalStart) + TEXT("FString(TEXT(") + line.Mid(literalStart, literalEnd - literalStart) + TEXT("))") + line.Mid(literalEnd);
+				line = line.Left(literalStart) + TEXT("FString(TEXT(") + line.Mid(
+					literalStart, literalEnd - literalStart) + TEXT("))") + line.Mid(literalEnd);
 				offset += strlen("FString(TEXT(") + strlen("))");
 			}
 
@@ -638,11 +651,11 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 			//replace all remaining Namespace.Variable with *Namespace->Variable
 			//note: if the variable appears to the right of an assignment operator,
 			//write Namespace->Variable->Get() instead
-			while(gvAccess.FindNext())
+			while (gvAccess.FindNext())
 			{
 				auto start = gvAccess.GetMatchBeginning() + offset;
 				auto end = gvAccess.GetMatchEnding() + offset;
-				
+
 				literalStrings = FRegexMatcher(literalStringPattern, line);
 				auto inLiteral = false;
 				while (literalStrings.FindNext())
@@ -650,29 +663,30 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 					// no offset, since this line copy is the current up-to-date one
 					auto literalStart = literalStrings.GetMatchBeginning();
 					auto literalEnd = literalStrings.GetMatchEnding();
-					
-					if ( start >= literalStart && end <= literalEnd )
+
+					if (start >= literalStart && end <= literalEnd)
 					{
 						inLiteral = true;
 						break;
 					}
 				}
-				
-				if ( !inLiteral )
+
+				if (!inLiteral)
 				{
 					// only to GV replacement if we are not within a literal string
-					if(lastAssignment < start)
+					if (lastAssignment < start)
 					{
 						//there is an assignment operator to the left of this, thus get the raw value
 						line = line.Left(start) + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) +
 							TEXT("->Get()") + line.Mid(end);
-	
+
 						offset += strlen(">") + strlen("->Get()");
 					}
 					else
-					{								
+					{
 						//get the dereferenced variable
-						line = line.Left(start) + TEXT("(*") + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) + ")" + line.Mid(end);
+						line = line.Left(start) + TEXT("(*") + line.Mid(start, end - start).Replace(
+							TEXT("."), TEXT("->")) + ")" + line.Mid(end);
 						offset += strlen(".") + strlen(">") + strlen("()");
 					}
 				} // !inLiteral
@@ -682,14 +696,13 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 			string += line;
 
 			//script conditions don't have semicolons!
-			if(bIsInstruction)
+			if (bIsInstruction)
 				string += TEXT(";");
 
 			//the last statement does not need a newline
-			if(l < lines.Num() - 1)
+			if (l < lines.Num() - 1)
 				string += TEXT("\n");
 		}
-
 	}
 
 	FArticyExpressoFragment frag;
@@ -724,7 +737,7 @@ void UArticyImportData::BuildCachedVersion()
 void UArticyImportData::ResolveCachedVersion()
 {
 	ensure(HasCachedVersion());
-	
+
 	this->Settings = CachedData.Settings;
 	this->Project = CachedData.Project;
 	this->GlobalVariables = CachedData.GlobalVariables;

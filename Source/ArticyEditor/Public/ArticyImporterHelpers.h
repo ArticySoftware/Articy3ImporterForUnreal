@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "UObject/Package.h"
 #include "ObjectTools.h"
 #include "UObject/ConstructorHelpers.h"

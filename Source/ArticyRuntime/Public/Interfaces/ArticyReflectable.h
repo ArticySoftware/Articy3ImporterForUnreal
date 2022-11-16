@@ -9,12 +9,12 @@
 #include "Launch/Resources/Version.h"
 #include "ArticyReflectable.generated.h"
 
-// #TODO Remove this and restore at the bottom in the future
-#if ENGINE_MAJOR_VERSION >= 5 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 25)
-#ifdef UProperty
-	#undef UProperty
-	#define UProperty FProperty
-#endif
+// Restore deprecation message for anyone trying to use UProperty after this file.
+// This only applies to 4.25 because that's the version that had both FProperty and UProperty supported (afterwards, only FProperty)
+//  Once we no longer need to support <4.25, we can just replace all UProperty's with FProperty's and delete all related #defines
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 25
+#undef FProperty
+#define FProperty DEPRECATED_MACRO(4.25, "UProperty has been renamed to FProperty") UProperty
 #endif
 
 UINTERFACE()
@@ -60,7 +60,7 @@ public:
 	}
 
 	/** Returns the pointer to a property of a given name. */
-	UProperty* GetProperty(FName Property) const
+	FProperty* GetProperty(FName Property) const
 	{
 		//look up the (hopefully already cached) property pointers
 		auto propPointers = GetPropertyPointers();
@@ -85,20 +85,19 @@ private:
 	 * They are cached because they can only be found by iterating over
 	 * them, using the TFieldIterator.
 	 */
-	TMap<FName, UProperty*>& GetPropertyPointers() const
+	TMap<FName, FProperty*>& GetPropertyPointers() const
 	{
 		return GetPropertyPointers(GetObjectClass());
 	}
 
-	static TMap<FName, UProperty*>& GetPropertyPointers(const UClass* Class)
+	static TMap<FName, FProperty*>& GetPropertyPointers(const UClass* Class)
 	{
-		static TMap<const UClass*, TMap<FName, UProperty*>> PropertyPointers;
-
+		static TMap<const UClass*, TMap<FName, FProperty*>> PropertyPointers;
 		auto& pp = PropertyPointers.FindOrAdd(Class);
 		if(pp.Num() == 0)
 		{
 			//cache property pointers
-			for(TFieldIterator<UProperty> It(Class); It; ++It)
+			for(TFieldIterator<FProperty> It(Class); It; ++It)
 				pp.Add(*It->GetNameCPP(), *It);
 		}
 
@@ -135,7 +134,7 @@ TValue& IArticyReflectable::GetProp(FName Property, int32 ArrayIndex)
 // Restore deprecation message for anyone trying to use UProperty after this file.
 // This only applies to 4.25 because that's the version that had both FProperty and UProperty supported (afterwards, only FProperty)
 //  Once we no longer need to support <4.25, we can just replace all UProperty's with FProperty's and delete all related #defines
-#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION == 25
-#undef UProperty
-#define UProperty DEPRECATED_MACRO(4.25, "UProperty has been renamed to FProperty") FProperty
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 25
+#undef FProperty
+#define FProperty DEPRECATED_MACRO(4.25, "UProperty has been renamed to FProperty") UProperty
 #endif

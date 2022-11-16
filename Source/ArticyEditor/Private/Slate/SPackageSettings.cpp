@@ -19,7 +19,11 @@ void SPackageSettings::Construct(const FArguments& InArgs)
 	this->ChildSlot
 	[
 		SNew(SSplitter)
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+		.Style(FAppStyle::Get(), "DetailsView.Splitter")
+#else
 		.Style(FEditorStyle::Get(), "DetailsView.Splitter")
+#endif
 		.PhysicalSplitterHandleSize(1.0f)
 		.HitDetectionSplitterHandleSize(5.0f)
 		+ SSplitter::Slot().Value(0.328f)

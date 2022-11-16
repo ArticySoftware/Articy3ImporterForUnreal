@@ -4,7 +4,7 @@
 
 #include "ArticyPluginSettings.h"
 #include "Modules/ModuleManager.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "ArticyDatabase.h"
 #include "Misc/ConfigCacheIni.h"
 
