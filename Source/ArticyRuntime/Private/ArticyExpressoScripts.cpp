@@ -91,6 +91,22 @@ ExpressoType::ExpressoType(const UArticyBool& Value)
 	BoolValue = Value.Get();
 }
 
+ExpressoType::ExpressoType(const FArticyId& Value)
+{
+	Type = String;
+
+	if (!Value)
+	{
+		// Return "Null" ID to avoid crashes expecting this to be in the %11u_%d format
+		StringValue = "0_0";
+		return;
+	}
+
+	// Make sure to use the full 64-bit ID
+	// > always 0 for clone ID... PB...
+	StringValue = FString::Printf(TEXT("%llu_0"), Value.Get());
+}
+
 ExpressoType::operator bool() const
 {
 	ensure(Type == Bool);
