@@ -126,7 +126,8 @@ TArray<UArticyPackage*> FArticyEditorModule::GetPackagesSlow()
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> PackageData;
 	AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), PackageData);
-
+	// AssetRegistryModule.Get().GetAssetsByPaths( TArray<FName> {UArticyPackage::StaticClass()->GetPathName() },PackageData);
+	
 	TArray<UArticyPackage*> Packages;
 	for(FAssetData& Data : PackageData)
 	{

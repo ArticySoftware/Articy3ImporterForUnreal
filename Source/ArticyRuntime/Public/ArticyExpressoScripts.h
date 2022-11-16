@@ -16,12 +16,13 @@ class UArticyBool;
 class UArticyExpressoScripts;
 
 // #TODO Remove this and restore at the bottom in the future
-#if ENGINE_MAJOR_VERSION >= 5 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 25)
-#ifdef UProperty
-	#undef UProperty
-	#define UProperty FProperty
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 25
+#ifdef FProperty
+	#undef FProperty
+	#define FProperty UProperty 
 #endif
 #endif
+
 struct ARTICYRUNTIME_API ExpressoType
 {
 	union
@@ -133,10 +134,10 @@ struct ARTICYRUNTIME_API ExpressoType
 
 	struct Definition
 	{
-		//function to create an ArticyExpressoType from a uproperty
-		TFunction<ExpressoType(UArticyBaseObject*, UProperty*)> Factory;
+		//function to create an ArticyExpressoType from a FProperty
+		TFunction<ExpressoType(UArticyBaseObject*, FProperty*)> Factory;
 		//function to set a uproperty from an ArticyExpressoType value
-		TFunction<void(UArticyBaseObject*, UProperty*, const ExpressoType&)> Setter;
+		TFunction<void(UArticyBaseObject*, FProperty*, const ExpressoType&)> Setter;
 	};
 	
 	/**
@@ -153,7 +154,7 @@ struct ARTICYRUNTIME_API ExpressoType
 	{
 		Definition def;
 
-		def.Factory = [](UArticyBaseObject* Object, UProperty* Property)
+		def.Factory = [](UArticyBaseObject* Object, FProperty* Property)
 		{
 			if(Object && Property)
 			{
@@ -165,7 +166,7 @@ struct ARTICYRUNTIME_API ExpressoType
 			return ExpressoType{};
 		};
 
-		def.Setter = [](UArticyBaseObject* Object, UProperty* Property, const ExpressoType& Value)
+		def.Setter = [](UArticyBaseObject* Object, FProperty* Property, const ExpressoType& Value)
 		{
 			if(!Object || !Property)
 				return;
@@ -397,7 +398,7 @@ void UArticyExpressoScripts::print(const FString& Msg, ArgTypes... Args)
 // Restore deprecation message for anyone trying to use UProperty after this file.
 // This only applies to 4.25 because that's the version that had both FProperty and UProperty supported (afterwards, only FProperty)
 //  Once we no longer need to support <4.25, we can just replace all UProperty's with FProperty's and delete all related #defines
-#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION == 25
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 25
 #undef UProperty
 #define UProperty DEPRECATED_MACRO(4.25, "UProperty has been renamed to FProperty") FProperty
 #endif

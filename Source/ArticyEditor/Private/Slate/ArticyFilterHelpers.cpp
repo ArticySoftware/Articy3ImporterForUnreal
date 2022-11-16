@@ -82,6 +82,7 @@ public:
 		if (bIncludeClassName)
 		{
 			const FTextFilterString AssetClassFilter(AssetPtr->AssetClass);
+			
 			if (AssetClassFilter.CompareText(InValue, InTextComparisonMode))
 			{
 				return true;
@@ -119,11 +120,20 @@ public:
 			bool bIsMatch = false;
 			if (InTextComparisonMode == ETextFilterTextComparisonMode::Partial)
 			{
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+				bIsMatch = TextFilterUtils::TestBasicStringExpression(AssetPtr->GetObjectPathString() , InValue, InTextComparisonMode);
+#else
 				bIsMatch = TextFilterUtils::TestBasicStringExpression(AssetPtr->ObjectPath, InValue, InTextComparisonMode);
+#endif
 			}
 			else
 			{
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+				bIsMatch = TextFilterUtils::TestBasicStringExpression(AssetPtr->GetObjectPathString(), InValue, InTextComparisonMode)
+#else
 				bIsMatch = TextFilterUtils::TestBasicStringExpression(AssetPtr->ObjectPath, InValue, InTextComparisonMode)
+#endif
+				
 					|| TextFilterUtils::TestBasicStringExpression(AssetPtr->PackageName, InValue, InTextComparisonMode)
 					|| TextFilterUtils::TestBasicStringExpression(AssetPtr->PackagePath, InValue, InTextComparisonMode);
 			}

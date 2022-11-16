@@ -27,7 +27,11 @@ void SArticyObjectToolTip::Construct(const FArguments& InArgs)
 	SToolTip::Construct(
 		SToolTip::FArguments()
 		.TextMargin(1.f)
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+		.BorderImage(FAppStyle::Get().GetBrush("ContentBrowser.TileViewTooltip.ToolTipBorder"))
+#else
 		.BorderImage(FEditorStyle::Get().GetBrush("ContentBrowser.TileViewTooltip.ToolTipBorder"))
+#endif
 		// Text makes tooltip show, probably because it doesn't initialize otherwise
 		.Text(FText::FromString("TEST"))
 		);
@@ -63,7 +67,11 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateTooltipWidget(FText NameText, TS
 	[
 		SNew(SBorder)
 		.Padding(6)
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+		.BorderImage(FAppStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
+#else
 		.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
+#endif
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot()
@@ -76,7 +84,11 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateTooltipWidget(FText NameText, TS
 				[
 					SNew(STextBlock)
 					.Text(NameText)
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0					
+					.Font(FAppStyle::GetFontStyle("ContentBrowser.TileViewTooltip.NameFont"))
+#else
 					.Font(FEditorStyle::GetFontStyle("ContentBrowser.TileViewTooltip.NameFont"))
+#endif
 					.AutoWrapText(true)
 				]
 			]
@@ -89,7 +101,11 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateTooltipWidget(FText NameText, TS
 	[		
 		SNew(SBorder)
 		.Padding(6)
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+		.BorderImage(FAppStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
+#else
 		.BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
+#endif
 		[
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot()
@@ -114,7 +130,11 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateTooltipWidget(FText NameText, TS
 
 	return SNew(SBorder)
     .Padding(6)
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0	
+	.BorderImage(FAppStyle::GetBrush("ContentBrowser.TileViewTooltip.ContentBorder"))
+#else
     .BorderImage(FEditorStyle::GetBrush("ContentBrowser.TileViewTooltip.NonContentBorder"))
+#endif
 	[
 		SNew(SBox)
 		.MaxDesiredWidth(500.f)
