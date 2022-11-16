@@ -7,7 +7,7 @@
 #include "ArticyHelpers.h"
 #include "ArticyDatabase.h"
 #include "ArticyBaseTypes.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "ArticyPackage.h"
 
 #if WITH_EDITOR

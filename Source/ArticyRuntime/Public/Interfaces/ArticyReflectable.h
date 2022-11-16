@@ -9,12 +9,12 @@
 #include "Launch/Resources/Version.h"
 #include "ArticyReflectable.generated.h"
 
-// #TODO Remove this and restore at the bottom in the future
+// Restore deprecation message for anyone trying to use UProperty after this file.
+// This only applies to 4.25 because that's the version that had both FProperty and UProperty supported (afterwards, only FProperty)
+//  Once we no longer need to support <4.25, we can just replace all UProperty's with FProperty's and delete all related #defines
 #if ENGINE_MAJOR_VERSION >= 5 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 25)
-#ifdef UProperty
-	#undef UProperty
-	#define UProperty FProperty
-#endif
+#undef UProperty
+#define UProperty DEPRECATED_MACRO(4.25, "UProperty has been renamed to FProperty") FProperty
 #endif
 
 UINTERFACE()
@@ -93,7 +93,6 @@ private:
 	static TMap<FName, UProperty*>& GetPropertyPointers(const UClass* Class)
 	{
 		static TMap<const UClass*, TMap<FName, UProperty*>> PropertyPointers;
-
 		auto& pp = PropertyPointers.FindOrAdd(Class);
 		if(pp.Num() == 0)
 		{
@@ -135,7 +134,7 @@ TValue& IArticyReflectable::GetProp(FName Property, int32 ArrayIndex)
 // Restore deprecation message for anyone trying to use UProperty after this file.
 // This only applies to 4.25 because that's the version that had both FProperty and UProperty supported (afterwards, only FProperty)
 //  Once we no longer need to support <4.25, we can just replace all UProperty's with FProperty's and delete all related #defines
-#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION == 25
+#if ENGINE_MAJOR_VERSION >= 5 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 25)
 #undef UProperty
 #define UProperty DEPRECATED_MACRO(4.25, "UProperty has been renamed to FProperty") FProperty
 #endif

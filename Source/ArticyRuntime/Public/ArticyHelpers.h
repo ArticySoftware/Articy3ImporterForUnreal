@@ -7,7 +7,7 @@
 #include <sstream>
 
 #include "ArticyPluginSettings.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Dom/JsonValue.h"
 #include "Dom/JsonObject.h"
 #include "ArticyRuntimeModule.h"

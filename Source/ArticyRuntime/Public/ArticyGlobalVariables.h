@@ -6,7 +6,7 @@
 
 #include "ArticyRuntimeModule.h"
 #include "Interfaces/ArticyReflectable.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "ShadowStateManager.h"
 #include "ArticyExpressoScripts.h"
 #include "ArticyGlobalVariables.generated.h"
