@@ -22,7 +22,7 @@ public:
 
 	/** The currently assigned clone ID. Use */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition="!bReferenceBaseObject"), Category="Setup")
-	mutable int32 CloneId;
+	mutable int32 CloneId = 0;
 
 	void SetId(FArticyId NewId);
 	void SetReference(UArticyObject* Object);
