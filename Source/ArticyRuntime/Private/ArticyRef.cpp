@@ -36,8 +36,15 @@ UArticyObject* FArticyRef::GetObjectInternal(const UObject* WorldContext) const
 
 	auto  database = UArticyDatabase::Get(WorldContext);
 
-	if (!ensureMsgf(database, TEXT("Could not get articy database")))
+	// Changed ensureMsgf to a logged  nullref return to be able  to integrate
+	// A flowplayer when building a C++ UActor before importing DB without
+	// Throwing an exception to log.
+	if(!database)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("No Articy database found."))
 		return nullptr;
+	}
+		
 
 
 	return database->GetOrClone<UArticyObject>(GetId(), CloneId);

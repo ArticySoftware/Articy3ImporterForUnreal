@@ -67,7 +67,8 @@ public:
 
 	//---------------------------------------------------------------------------//
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup", meta=(Bitmask, BitmaskEnum = "EArticyPausableType"))
+	//EArticyPausableType
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup", meta=(Bitmask, BitmaskEnum = "/Script/ArticyRuntime.EArticyPausableType"))
 	uint8 PauseOn = 1 << uint8(EArticyPausableType::DialogueFragment)
 					| 1 << uint8(EArticyPausableType::Dialogue)
 					| 1 << uint8(EArticyPausableType::FlowFragment);
@@ -211,7 +212,7 @@ protected:
 	 * If a branch reaches this length, exploration on it is aborted.
 	 */
 	UPROPERTY(EditAnywhere, Category = "Setup", meta=(ClampMin=0))
-	int32 ExploreDepthLimit = 128;
+	int32 ExploreLimit = 128;
 
 	/**
 	 * If more than this amount of ShadowLevels are needed at the same time,

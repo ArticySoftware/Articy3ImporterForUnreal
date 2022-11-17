@@ -216,10 +216,10 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 	TArray<FArticyBranch> OutBranches;
 
 	//check stop condition
-	if((Depth > ExploreDepthLimit || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))))
+	if((Depth > ExploreLimit || !Node || (Node != Cursor.GetInterface() && ShouldPauseOn(Node))))
 	{
-		if(Depth > ExploreDepthLimit)
-			UE_LOG(LogArticyRuntime, Warning, TEXT("ExploreDepthLimit (%d) reached, stopping exploration!"), ExploreDepthLimit);
+		if(Depth > ExploreLimit)
+			UE_LOG(LogArticyRuntime, Warning, TEXT("ExploreDepthLimit (%d) reached, stopping exploration!"), ExploreLimit);
 		if(!Node)
 			UE_LOG(LogArticyRuntime, Warning, TEXT("Found a nullptr Node when exploring a branch!"));
 
@@ -372,6 +372,13 @@ void UArticyFlowPlayer::UpdateAvailableBranchesInternal(bool Startup)
 
 void UArticyFlowPlayer::SetCursorToStartNode()
 {
+	// This ensure Flowplayer construction whithout Throwing
+	// error message when setup in Actor construction with C++
+	if(StartOn.NoneSet)
+	{
+		return;	
+	}
+	
 	const auto obj = StartOn.GetObject(this);
 
 	TScriptInterface<IArticyFlowObject> ptr;

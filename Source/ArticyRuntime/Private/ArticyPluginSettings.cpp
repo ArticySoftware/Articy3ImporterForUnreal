@@ -4,8 +4,12 @@
 
 #include "ArticyPluginSettings.h"
 #include "Modules/ModuleManager.h"
-#include "AssetRegistryModule.h"
 #include "ArticyDatabase.h"
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0 
+#include "AssetRegistry/AssetRegistryModule.h"
+#else
+#include "AssetRegistryModule.h"
+#endif
 #include "Misc/ConfigCacheIni.h"
 
 UArticyPluginSettings::UArticyPluginSettings()
@@ -15,7 +19,8 @@ UArticyPluginSettings::UArticyPluginSettings()
 	bKeepGlobalVariablesBetweenWorlds = true;
 	bConvertUnityToUnrealRichText = false;
 	bVerifyArticyReferenceBeforeImport = true;
-
+	bUseLegacyImporter = false;
+	
 	bSortChildrenAtGeneration = false;
 	ArticyDirectory.Path = TEXT("/Game");
 	// update package load settings after all files have been loaded

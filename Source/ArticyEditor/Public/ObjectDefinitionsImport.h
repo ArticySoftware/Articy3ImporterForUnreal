@@ -180,7 +180,7 @@ public:
 private:
 
 	UPROPERTY(VisibleAnywhere, Category="ObjectDef")
-	EObjectDefType DefType;
+	EObjectDefType DefType = EObjectDefType::Enum;
 
 	UPROPERTY(VisibleAnywhere, Category="ObjectDef")
 	FName Type = "";
