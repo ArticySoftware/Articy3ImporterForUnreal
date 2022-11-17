@@ -1,4 +1,8 @@
-## Unreal Importer 1.5.1 Changelog : current Dev branch (ongoing list)
+## Unreal Importer 1.6.0 Changelog : 
+
+- New Features: Unreal 5.1 compatibility
+
+## Unreal Importer 1.5.1 Changelog : 
 
 - New Features:
 	- Slots evaluation for ExpressoScripts
