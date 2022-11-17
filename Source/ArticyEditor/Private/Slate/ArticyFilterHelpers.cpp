@@ -81,7 +81,14 @@ public:
 
 		if (bIncludeClassName)
 		{
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+			const FTextFilterString AssetClassFilter(AssetPtr->AssetClassPath.ToString());
+#else
 			const FTextFilterString AssetClassFilter(AssetPtr->AssetClass);
+#endif					
+			
+			
+			
 			if (AssetClassFilter.CompareText(InValue, InTextComparisonMode))
 			{
 				return true;
@@ -119,11 +126,20 @@ public:
 			bool bIsMatch = false;
 			if (InTextComparisonMode == ETextFilterTextComparisonMode::Partial)
 			{
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+				bIsMatch = TextFilterUtils::TestBasicStringExpression(AssetPtr->GetObjectPathString() , InValue, InTextComparisonMode);
+#else
 				bIsMatch = TextFilterUtils::TestBasicStringExpression(AssetPtr->ObjectPath, InValue, InTextComparisonMode);
+#endif
 			}
 			else
 			{
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+				bIsMatch = TextFilterUtils::TestBasicStringExpression(AssetPtr->GetObjectPathString(), InValue, InTextComparisonMode)
+#else
 				bIsMatch = TextFilterUtils::TestBasicStringExpression(AssetPtr->ObjectPath, InValue, InTextComparisonMode)
+#endif
+				
 					|| TextFilterUtils::TestBasicStringExpression(AssetPtr->PackageName, InValue, InTextComparisonMode)
 					|| TextFilterUtils::TestBasicStringExpression(AssetPtr->PackagePath, InValue, InTextComparisonMode);
 			}
@@ -139,7 +155,12 @@ public:
 				return false;
 			}
 
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+			const bool bIsMatch = TextFilterUtils::TestBasicStringExpression(AssetPtr->AssetClassPath.ToString(), InValue, InTextComparisonMode);
+			// const FTextFilterString AssetClassFilter(AssetPtr->AssetClassPath.ToString());
+#else
 			const bool bIsMatch = TextFilterUtils::TestBasicStringExpression(AssetPtr->AssetClass, InValue, InTextComparisonMode);
+#endif	
 			return (InComparisonOperation == ETextFilterComparisonOperation::Equal) ? bIsMatch : !bIsMatch;
 		}
 

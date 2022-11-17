@@ -54,8 +54,12 @@ TSharedRef< FSlateStyleSet > FArticyEditorStyle::Create()
 	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("ArticyEditorStyle"));
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("ArticyImporter")->GetBaseDir() / TEXT("Resources"));
 
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+	const FTextBlockStyle NormalText = FAppStyle::GetWidgetStyle<FTextBlockStyle>("NormalText");
+#else
 	const FTextBlockStyle NormalText = FEditorStyle::GetWidgetStyle<FTextBlockStyle>("NormalText");
-
+#endif
+	
 	FTextBlockStyle NameText = FTextBlockStyle(NormalText)
 		.SetColorAndOpacity(FLinearColor(0.9f, 0.9f, 0.9f));
 	{
