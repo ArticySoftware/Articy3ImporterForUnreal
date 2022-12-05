@@ -11,7 +11,11 @@
 #include "ArticyDatabase.h"
 #include "Slate/SPackageSettings.h"
 #include "ArticyEditorModule.h"
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0 
 #include "AssetRegistry/AssetRegistryModule.h"
+#else
+#include "AssetRegistryModule.h"
+#endif
 
 #define LOCTEXT_NAMESPACE "ArticyPluginSettings"
 

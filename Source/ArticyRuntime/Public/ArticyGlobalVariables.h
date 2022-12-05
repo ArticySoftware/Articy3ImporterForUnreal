@@ -6,7 +6,11 @@
 
 #include "ArticyRuntimeModule.h"
 #include "Interfaces/ArticyReflectable.h"
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0 
 #include "AssetRegistry/AssetRegistryModule.h"
+#else
+#include "AssetRegistryModule.h"
+#endif
 #include "ShadowStateManager.h"
 #include "ArticyExpressoScripts.h"
 #include "ArticyGlobalVariables.generated.h"

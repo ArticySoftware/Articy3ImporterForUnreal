@@ -15,14 +15,6 @@ class UArticyInt;
 class UArticyBool;
 class UArticyExpressoScripts;
 
-// #TODO Remove this and restore at the bottom in the future
-#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 25
-#ifdef FProperty
-	#undef FProperty
-	#define FProperty UProperty 
-#endif
-#endif
-
 struct ARTICYRUNTIME_API ExpressoType
 {
 	union
@@ -398,11 +390,3 @@ void UArticyExpressoScripts::print(const FString& Msg, ArgTypes... Args)
 
 	PrintInternal(msg);
 }
-
-// Restore deprecation message for anyone trying to use UProperty after this file.
-// This only applies to 4.25 because that's the version that had both FProperty and UProperty supported (afterwards, only FProperty)
-//  Once we no longer need to support <4.25, we can just replace all UProperty's with FProperty's and delete all related #defines
-#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 25
-#undef UProperty
-#define UProperty DEPRECATED_MACRO(4.25, "UProperty has been renamed to FProperty") FProperty
-#endif

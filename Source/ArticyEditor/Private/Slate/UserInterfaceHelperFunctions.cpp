@@ -18,14 +18,6 @@
 #include "Interfaces/ArticyObjectWithColor.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-// #TODO Remove this and restore at the bottom in the future
-#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 25
-#ifdef FProperty
-	#undef FProperty
-	#define FProperty UProperty
-#endif
-#endif
-
 const FSlateBrush* UserInterfaceHelperFunctions::GetArticyTypeImage(const UArticyObject* ArticyObject, UserInterfaceHelperFunctions::EImageSize Size)
 {
 	if(!ArticyObject)
@@ -208,14 +200,6 @@ const FArticyId* UserInterfaceHelperFunctions::GetTargetID(const UArticyObject* 
 	return nullptr;
 }
 
-// Restore deprecation message for anyone trying to use UProperty after this file.
-// This only applies to 4.25 because that's the version that had both FProperty and UProperty supported (afterwards, only FProperty)
-//  Once we no longer need to support <4.25, we can just replace all UProperty's with FProperty's and delete all related #defines
-#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 25
-#undef UProperty
-#define UProperty DEPRECATED_MACRO(4.25, "UProperty has been renamed to FProperty") FProperty
-#endif
-
 const FString UserInterfaceHelperFunctions::GetDisplayName(const UArticyObject* ArticyObject)
 {
 	FString DisplayName = "None";
@@ -330,7 +314,13 @@ const bool UserInterfaceHelperFunctions::ShowObjectInArticy(const FArticyId Arti
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 
 	TArray<FAssetData> OutAssetData;
+
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
+	AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetClassPathName(), OutAssetData, false);
+#else
 	AssetRegistryModule.Get().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), OutAssetData, false);
+#endif
+	
 	FString TabURL = bNewTab ? FString("new") : FString("current");
 	if (OutAssetData.Num() == 1)
 	{

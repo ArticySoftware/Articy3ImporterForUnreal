@@ -120,13 +120,13 @@ public:
 	FArticyLocationAnchor(TSharedPtr<FJsonValue> Json);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy", meta=(DisplayName="AnchorPositionX"))
-	float AnchorPositionX;
+	float AnchorPositionX = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy", meta=(DisplayName="AnchorPositionY"))
-	float AnchorPositionY;
+	float AnchorPositionY= 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy", meta=(DisplayName="AnchorColor"))
-	FLinearColor AnchorColor;
+	FLinearColor AnchorColor= FLinearColor::White;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy", meta=(DisplayName="AnchorSize"))
-	EArticyLocationAnchorSize AnchorSize;
+	EArticyLocationAnchorSize AnchorSize = EArticyLocationAnchorSize::Medium;
 };
 
 UCLASS(BlueprintType)

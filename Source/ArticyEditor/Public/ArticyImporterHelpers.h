@@ -5,7 +5,11 @@
 #pragma once
 
 
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0 
 #include "AssetRegistry/AssetRegistryModule.h"
+#else
+#include "AssetRegistryModule.h"
+#endif
 #include "UObject/Package.h"
 #include "ObjectTools.h"
 #include "UObject/ConstructorHelpers.h"
