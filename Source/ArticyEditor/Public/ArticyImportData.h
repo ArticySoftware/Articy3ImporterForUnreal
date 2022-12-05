@@ -392,5 +392,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category="Imported")
 	TMap<FArticyId, FArticyIdArray> ParentChildrenCache;
+
+	bool IsVariableOfType(EArticyType varType, FString FullName);
 };
 

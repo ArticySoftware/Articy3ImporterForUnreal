@@ -1,3 +1,10 @@
+## Unreal Importer 1.6.1 Changelog : 
+- New Features:
+	- Fix for expresso script condition ; casting to int when necessary at gcode generation time to avoid c++ boolean ambiguïty error in complex expressions at compile time.
+	
+	- To be included [Helpers for UE communication (on screen messages, log, dialogs and notifications)]
+	- To be included [Code generatioon in a generated plugin instead than side by side with game code]
+	
 ## Unreal Importer 1.6.0 Changelog : 
 
 - New Features: Unreal 5.1 compatibility
