@@ -529,7 +529,7 @@ const TWeakObjectPtr<UArticyImportData> UArticyImportData::GetImportData()
 		AssetRegistryModule.Get().GetAssetsByClass(UArticyGlobalVariables::StaticClass()->GetClassPathName(), AssetData);
 #else
 		AssetRegistryModule.Get().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), AssetData);
-#endif	
+#endif
 
 		if (!AssetData.Num())
 		{
@@ -547,9 +547,11 @@ const TWeakObjectPtr<UArticyImportData> UArticyImportData::GetImportData()
 			       ),
 			       *AssetData[0].GetObjectPathString());
 #else
-			UE_LOG(LogArticyEditor, Error,
-					TEXT("Found more than one import file. This is not supported by the plugin. Using the first found file for now: %s"),
-				*AssetData[0].ObjectPath.ToString());
+				UE_LOG(LogArticyEditor, Error,
+			       TEXT(
+				       "Found more than one import file. This is not supported by the plugin. Using the first found file for now: %s"
+			       ),
+			       *AssetData[0].ObjectPath.ToString());
 #endif
 		}
 	}
@@ -678,14 +680,53 @@ void UArticyImportData::AddScriptFragment(const FString& Fragment, const bool bI
 
 				if (!inLiteral)
 				{
+					bool bDoCast = false;
 					// only to GV replacement if we are not within a literal string
 					if (lastAssignment < start)
 					{
+						if (!bIsInstruction)
+						{
+							if (IsVariableOfType(EArticyType::ADT_Integer, line.Mid(start, end - start)))
+							{
+								bDoCast = true;
+							}
+						}
+						// only to GV replacement if we are not within a literal string
 						//there is an assignment operator to the left of this, thus get the raw value
-						line = line.Left(start) + line.Mid(start, end - start).Replace(TEXT("."), TEXT("->")) +
-							TEXT("->Get()") + line.Mid(end);
+						if (!bIsInstruction && bDoCast)
+						{
+							line = line.Left(start) + TEXT("(int)(") + line.Mid(start, end - start).Replace(
+									TEXT("."), TEXT("->")) +
+								TEXT("->Get())") + line.Mid(end);
 
-						offset += strlen(">") + strlen("->Get()");
+							offset += strlen("(int)(>") + strlen("->Get())");
+						}
+						else
+						{
+							if (!bIsInstruction)
+							{
+								if (IsVariableOfType(EArticyType::ADT_Integer, line.Mid(start, end - start)))
+								{
+									bDoCast = true;
+								}
+							}
+
+							//get the dereferenced variable
+							if (!bIsInstruction && bDoCast)
+							{
+								line = line.Left(start) + TEXT("(int)(*") + line.Mid(start, end - start).Replace(
+									TEXT("."), TEXT("->")) + ")" + line.Mid(end);
+
+								offset += strlen("(int)(*") + strlen(">") + strlen(")");
+							}
+							else
+							{
+								line = line.Left(start) + TEXT("(*") + line.Mid(start, end - start).Replace(
+									TEXT("."), TEXT("->")) + ")" + line.Mid(end);
+
+								offset += strlen(".") + strlen(">") + strlen("()");
+							}
+						}
 					}
 					else
 					{
@@ -755,6 +796,31 @@ void UArticyImportData::ResolveCachedVersion()
 	this->ParentChildrenCache = CachedData.ParentChildrenCache;
 	this->CachedData = FArticyImportDataStruct();
 	this->bHasCachedVersion = false;
+}
+
+bool UArticyImportData::IsVariableOfType(EArticyType varType, FString FullName)
+{
+	FString GVNameSpace, GVVariable;
+	FullName.Split(TEXT("."), &GVNameSpace, &GVVariable);
+
+	for (auto Nmspc : GetGlobalVars().Namespaces)
+	{
+		if (Nmspc.Namespace.Compare(GVNameSpace) == 0)
+		{
+			for (auto var : Nmspc.Variables)
+			{
+				if (var.Variable.Compare(GVVariable) == 0)
+				{
+					if (var.Type == varType)
+					{
+						return true;
+					}
+				}
+			}
+		}
+	}
+
+	return false;
 }
 
 #undef LOCTEXT_NAMESPACE
