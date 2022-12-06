@@ -244,6 +244,20 @@ UArticyBaseVariableSet* UArticyGlobalVariables::GetNamespace(const FName Namespa
 }
 
 
+TMap<FString, UArticyVariable*> UArticyGlobalVariables::GetVariablesMap()
+{
+	TMap<FString, UArticyVariable*> resultmap;
+
+	for (auto ns : VariableSets)
+	{
+		for (auto v : ns->Variables)
+		{
+			resultmap.Add(ns->GetName() +"." + v->GetName(), v);
+		}
+	}
+	return resultmap;
+}
+
 void UArticyGlobalVariables::PrintGlobalVariable(FArticyGvName GvName)
 {
 	bool bTmpLogVariableAccess = bLogVariableAccess;
