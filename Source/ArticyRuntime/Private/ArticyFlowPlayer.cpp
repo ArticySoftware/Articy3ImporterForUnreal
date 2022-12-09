@@ -105,7 +105,7 @@ void UArticyFlowPlayer::FinishCurrentPausedObject(int PinIndex)
 
 bool UArticyFlowPlayer::ShouldPauseOn(IArticyFlowObject* Node) const
 {
-	return Node && (1 << static_cast<uint8>(Node->GetType()) & PauseOn);
+	return Node && (static_cast<uint8>(Node->GetType()) & PauseOn);
 }
 
 bool UArticyFlowPlayer::ShouldPauseOn(TScriptInterface<IArticyFlowObject> Node) const
@@ -314,18 +314,6 @@ TArray<FArticyBranch> UArticyFlowPlayer::Explore(IArticyFlowObject* Node, bool b
 	}
 
 	return OutBranches;
-}
-
-void UArticyFlowPlayer::SetPauseOn(EArticyPausableType Types)
-{
-	PauseOn = 1 << uint8(Types & EArticyPausableType::DialogueFragment)
-		| 1 << uint8(Types & EArticyPausableType::Dialogue)
-		| 1 << uint8(Types & EArticyPausableType::FlowFragment)
-		| 1 << uint8(Types & EArticyPausableType::Hub)
-		| 1 << uint8(Types & EArticyPausableType::Jump)
-		| 1 << uint8(Types & EArticyPausableType::Condition)
-		| 1 << uint8(Types & EArticyPausableType::Instruction)
-		| 1 << uint8(Types & EArticyPausableType::Pin);
 }
 
 //---------------------------------------------------------------------------//
