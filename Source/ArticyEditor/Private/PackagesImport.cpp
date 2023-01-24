@@ -6,7 +6,6 @@
 #include "ArticyEditorModule.h"
 #include "ArticyImporterHelpers.h"
 #include "ArticyImportData.h"
-#include "CodeGeneration/CodeGenerator.h"
 #include "ArticyObject.h"
 #include "Policies/CondensedJsonPrintPolicy.h"
 #include "Serialization/JsonSerializer.h"
@@ -14,9 +13,9 @@
 #include "Misc/Paths.h"
 #include "Misc/App.h"
 #include "UObject/ConstructorHelpers.h"
-#include <string>
 
 #include "ArticyPluginSettings.h"
+#include "FileHelpers.h"
 
 #define STRINGIFY(x) #x
 
@@ -202,8 +201,15 @@ UArticyPackage* FArticyPackageDef::GeneratePackageAsset(UArticyImportData* Data)
 	
 	FAssetRegistryModule::AssetCreated(ArticyPackage);
 
-	AssetPackage->MarkPackageDirty();
-
+	// AssetPackage->MarkPackageDirty();
+	FAssetRegistryModule::AssetCreated(ArticyPackage);
+	AssetPackage->SetDirtyFlag(true);
+	
+	if (!UEditorLoadingAndSavingUtils::SavePackages({AssetPackage}, true))
+	{
+		UE_LOG(LogArticyEditor, Error, TEXT("Failed to save packages. Make sure to save before submitting in Perforce."));
+	}
+	
 	return ArticyPackage;	
 }
 
