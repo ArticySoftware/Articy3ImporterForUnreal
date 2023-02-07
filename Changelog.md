@@ -1,11 +1,3 @@
-## Unreal Importer 1.6.1 Changelog : 
-- New Features:
-	- New method (and blueprint node) GlobalVariables::GetVariablesMap that return a dictionnary of FString,ArticyVariable which allows to get and set global variables from their full GVname (Namespace.VariableName). 
-	
-- Fixes:
-	- Fix for expresso script condition ; casting to int when necessary at gcode generation time to avoid c++ boolean ambiguïty error in complex expressions at compile time.
-	- Fix for full recompilation triggered when simple (non-expresso script and non global variable) flow, flow fragments, dialogs and dialog fragments content changed. Recompilation shouldn't trigger anymore in these cases, while even importing content.
-	
 ## Unreal Importer 1.6.0 Changelog : 
 
 - New Features: Unreal 5.1 compatibility
