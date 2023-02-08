@@ -267,7 +267,10 @@ If you want to learn more about the flow player and its events you can read the 
 
 It's possible to add new script methods into articy:draft's Expresso scripting language. These can trigger side effects in your game such as moving game objects or changing UI states, or they could return helpful values such as the location of the player.
 
-Getting started with custom script methods is easy. Simply start using new methods in articy:draft as if they already exist (as pictured below) and import your project into Unreal.
+Getting started with custom script methods is easy. 
+Simply start using new methods in articy:draft as if they already exist (as pictured below) and import your project into Unreal.
+
+Please be careful, however, to use only one custom script method per instruction node.
 
 ![](docs/custom-method-node.png)
 
