@@ -1,4 +1,8 @@
-﻿#include "ADBinaryFileBuilder.h"
+﻿//  
+// Copyright (c) Articy Software GmbH & Co. KG. All rights reserved.  
+//
+
+#include "ADBinaryFileBuilder.h"
 #include "ArticyEditor/ArticyEditor.h"
 #include "ArticyEditor/Factory/ADFileData/AD_FileData.h"
 #include "Misc/FileHelper.h"

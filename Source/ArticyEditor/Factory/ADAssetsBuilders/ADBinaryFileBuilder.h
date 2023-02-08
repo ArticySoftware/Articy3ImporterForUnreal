@@ -1,4 +1,8 @@
-﻿#pragma once
+﻿//  
+// Copyright (c) Articy Software GmbH & Co. KG. All rights reserved.  
+//
+
+#pragma once
 
 class UAD_FileData;
 
