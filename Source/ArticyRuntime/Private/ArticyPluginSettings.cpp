@@ -4,12 +4,8 @@
 
 #include "ArticyPluginSettings.h"
 #include "Modules/ModuleManager.h"
-#include "ArticyDatabase.h"
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0 
-#include "AssetRegistry/AssetRegistryModule.h"
-#else
 #include "AssetRegistryModule.h"
-#endif
+#include "ArticyDatabase.h"
 #include "Misc/ConfigCacheIni.h"
 
 UArticyPluginSettings::UArticyPluginSettings()
@@ -101,7 +97,12 @@ void UArticyPluginSettings::PostEditChangeProperty(FPropertyChangedEvent& Proper
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
+// @TODO 
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 25
+void UArticyPluginSettings::PostReloadConfig(UProperty* PropertyThatWasLoaded)
+#else
 void UArticyPluginSettings::PostReloadConfig(FProperty* PropertyThatWasLoaded)
+#endif
 {
 	Super::PostReloadConfig(PropertyThatWasLoaded);
 	GConfig->Flush(false, GEngineIni);

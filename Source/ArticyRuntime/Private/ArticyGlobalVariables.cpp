@@ -93,13 +93,8 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetDefault(const UObject* WorldC
 
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 		TArray<FAssetData> AssetData;
-
-
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
-		AssetRegistryModule.Get().GetAssetsByClass(UArticyGlobalVariables::StaticClass()->GetClassPathName() , AssetData, true);
-#else
 		AssetRegistryModule.Get().GetAssetsByClass(UArticyGlobalVariables::StaticClass()->GetFName(), AssetData, true);
-#endif		
+
 		UArticyGlobalVariables* asset = nullptr;
 		if(ensureMsgf(AssetData.Num() != 0, TEXT("ArticyGlobalVariables asset not found!")))
 		{
@@ -144,12 +139,8 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetMutableOriginal()
 		//create a clone of the database
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 		TArray<FAssetData> AssetData;
-
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
-		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetClassPathName() , AssetData, true);
-#else
 		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetFName(), AssetData, true);
-#endif		
+
 		if (AssetData.Num() != 0)
 		{
 			if (AssetData.Num() > 1)
@@ -243,20 +234,6 @@ UArticyBaseVariableSet* UArticyGlobalVariables::GetNamespace(const FName Namespa
 	return set;
 }
 
-
-TMap<FString, UArticyVariable*> UArticyGlobalVariables::GetVariablesMap()
-{
-	TMap<FString, UArticyVariable*> resultmap;
-
-	for (auto ns : VariableSets)
-	{
-		for (auto v : ns->Variables)
-		{
-			resultmap.Add(ns->GetName() +"." + v->GetName(), v);
-		}
-	}
-	return resultmap;
-}
 
 void UArticyGlobalVariables::PrintGlobalVariable(FArticyGvName GvName)
 {

@@ -6,6 +6,7 @@
 #include "ArticyEditorModule.h"
 #include "ArticyImporterHelpers.h"
 #include "ArticyImportData.h"
+#include "CodeGeneration/CodeGenerator.h"
 #include "ArticyObject.h"
 #include "Policies/CondensedJsonPrintPolicy.h"
 #include "Serialization/JsonSerializer.h"
@@ -13,9 +14,9 @@
 #include "Misc/Paths.h"
 #include "Misc/App.h"
 #include "UObject/ConstructorHelpers.h"
+#include <string>
 
 #include "ArticyPluginSettings.h"
-#include "FileHelpers.h"
 
 #define STRINGIFY(x) #x
 
@@ -70,12 +71,13 @@ UArticyObject* FArticyModelDef::GenerateSubAsset(const UArticyImportData* Data, 
 	className.RemoveAt(0);
 
 	//generate the asset
-
-	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *className);
+	// ArticyGenerated // FApp::GetProjectName()
+	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated") , *className);
 	auto uclass = ConstructorHelpersInternal::FindOrLoadClass(fullClassName, UArticyObject::StaticClass());
 	if (uclass)
 	{
-		auto obj = ArticyImporterHelpers::GenerateSubAsset<UArticyObject>(*className, FApp::GetProjectName(), GetNameAndId(), Outer);
+		// FApp::GetProjectName()
+		auto obj = ArticyImporterHelpers::GenerateSubAsset<UArticyObject>(*className, TEXT("ArticyGenerated"), GetNameAndId(), Outer);
 		FAssetRegistryModule::AssetCreated(Cast<UObject>(obj));
 		if (ensure(obj))
 		{
@@ -201,15 +203,8 @@ UArticyPackage* FArticyPackageDef::GeneratePackageAsset(UArticyImportData* Data)
 	
 	FAssetRegistryModule::AssetCreated(ArticyPackage);
 
-	// AssetPackage->MarkPackageDirty();
-	FAssetRegistryModule::AssetCreated(ArticyPackage);
-	AssetPackage->SetDirtyFlag(true);
-	
-	if (!UEditorLoadingAndSavingUtils::SavePackages({AssetPackage}, true))
-	{
-		UE_LOG(LogArticyEditor, Error, TEXT("Failed to save packages. Make sure to save before submitting in Perforce."));
-	}
-	
+	AssetPackage->MarkPackageDirty();
+
 	return ArticyPackage;	
 }
 

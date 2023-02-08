@@ -11,6 +11,14 @@
 #include "Internationalization/Regex.h"
 #include "ArticyDatabase.h"
 
+// #TODO Remove this and restore at the bottom in the future
+#if ENGINE_MAJOR_VERSION >= 5 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 25)
+#ifdef UProperty
+	#undef UProperty
+	#define UProperty FProperty
+#endif
+#endif
+
 class FArticyRichTextDecorator : public FRichTextDecorator
 {
 public:
@@ -18,7 +26,7 @@ public:
 		: FRichTextDecorator(InOwner), Decorator(InDecorator)
 	{
 		// Find the TextStyleSet property in the rich text block class
-		for (TFieldIterator<FProperty> It(URichTextBlock::StaticClass()); It; ++It)
+		for (TFieldIterator<UProperty> It(URichTextBlock::StaticClass()); It; ++It)
 		{
 			if (It->GetNameCPP() == TEXT("TextStyleSet"))
 			{
@@ -89,7 +97,7 @@ protected:
 
 private:
 	// Cached pointer to data table property in URichTextBlock. Needed because the property is protected :(
-	FProperty* DataTableProp = nullptr;
+	UProperty* DataTableProp = nullptr;
 
 	// Pointer to our parent decorator
 	UArticyRichTextDecorator* Decorator = nullptr;
@@ -169,3 +177,11 @@ void UArticyRichTextDecorator::OnArticyLinkNavigated(URichTextBlock* Parent, con
 	// Call handler
 	IArticyHyperlinkHandler::Execute_OnHyperlinkNavigated(Widget, Object, Parent);
 }
+
+// Restore deprecation message for anyone trying to use UProperty after this file.
+// This only applies to 4.25 because that's the version that had both FProperty and UProperty supported (afterwards, only FProperty)
+//  Once we no longer need to support <4.25, we can just replace all UProperty's with FProperty's and delete all related #defines
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION == 25
+#undef UProperty
+#define UProperty DEPRECATED_MACRO(4.25, "UProperty has been renamed to FProperty") FProperty
+#endif

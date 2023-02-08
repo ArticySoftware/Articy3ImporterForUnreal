@@ -25,6 +25,7 @@
 #include "Misc/MessageDialog.h"
 #include "Dialogs/Dialogs.h"
 #include "ISourceControlModule.h"
+#include "Misc/OutputDeviceNull.h"
 #if WITH_LIVE_CODING && ENGINE_MAJOR_VERSION == 4
 #include "Windows/LiveCoding/Public/ILiveCodingModule.h"
 #endif
@@ -38,7 +39,8 @@ TMap<FString, FString> CodeGenerator::CachedFiles;
 
 FString CodeGenerator::GetSourceFolder()
 {
-	return FPaths::GameSourceDir() / FApp::GetProjectName() / TEXT("ArticyGenerated");
+	// GameSourceDir() / TEXT("ArticyGenerated");
+	return FPaths::ProjectPluginsDir() / TEXT("ArticyGenerated") / TEXT("Source") / TEXT("ArticyGenerated") / TEXT("Public");
 }
 
 FString CodeGenerator::GetGeneratedInterfacesFilename(const UArticyImportData* Data)
@@ -235,8 +237,7 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 		OnCompiled(Data);
 	});
 #endif
-
-
+	
 	// register a lambda to handle failure in code generation (compilation failed due to generated articy code)
 	// detection of faulty articy code is a heuristic and not optimal!
 	static FDelegateHandle RestoreCachedVersionHandle;
@@ -278,7 +279,52 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 	
 	if (!bWaitingForOtherCompile)
 	{
-		HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None /*async*/);
+		// Recompile only ArticyGenerated module .Dll (not whole game)
+		CompileArticyGeneratedModule();
+		
+		// Old method ; recompile whole game...
+		// HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None /*async*/);
+	}
+}
+
+/**
+ * @brief Handle full recompilation, eventual package rebinding and log for ArticyGenerated module.
+ * @todo : test with early version of UE (< 4.24)
+ */
+void CodeGenerator::CompileArticyGeneratedModule()
+{
+	FModuleStatus ModuleStatus;
+	FName ModuleName = TEXT("ArticyGenerated");
+	if( ensure( FModuleManager::Get().QueryModule( ModuleName, ModuleStatus )))
+	{
+		TArray< UPackage* > PackagesToRebind;
+		if( ModuleStatus.bIsLoaded )
+		{
+			const bool bIsHotReloadable = FModuleManager::Get().DoesLoadedModuleHaveUObjects( ModuleName );
+			if( bIsHotReloadable )
+			{
+				// Is there a UPackage with the same name as this module?
+				FString PotentialPackageName = FString(TEXT("/Script/")) + ModuleName.ToString();
+				UPackage* Package = FindPackage( NULL, *PotentialPackageName);
+				if( Package != NULL )
+				{
+					PackagesToRebind.Add( Package );
+				}
+			}
+		}
+
+		// Avoid crash with rebinded packages (and also lost BP refs)
+		IHotReloadInterface& HotReloadSupport = FModuleManager::LoadModuleChecked<IHotReloadInterface>("HotReload");
+		if( PackagesToRebind.Num() > 0 )
+		{
+			// Perform a hot reload
+			ECompilationResult::Type Result = HotReloadSupport.RebindPackages(PackagesToRebind, EHotReloadFlags::WaitForCompletion, *GLog);
+		}
+		else
+		{
+			// Perform a regular unload, then reload
+			const bool bRecompileSucceeded = HotReloadSupport.RecompileModule(ModuleName, *GLog, ERecompileModuleFlags::ReloadAfterRecompile | ERecompileModuleFlags::FailIfGeneratedCodeChanges);
+		}
 	}
 }
 
@@ -291,7 +337,8 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	//compiling is done!
 	//check if UArticyBaseGlobalVariables can be found, otherwise something went wrong!
 	const auto ClassName = GetGlobalVarsClassname(Data, true);
-	auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *ClassName);
+	// FApp::GetProjectName()
+	auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated"), *ClassName);
 	if (!ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyGlobalVariables::StaticClass()))
 	{
 		if (!ensure(ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyGlobalVariables::StaticClass())))

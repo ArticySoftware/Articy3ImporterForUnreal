@@ -131,7 +131,9 @@ void CodeFileGenerator::EndStruct(const FString& InlineDeclaration)
 FString CodeFileGenerator::GetExportMacro()
 {
 	// added space
-	return FString(FApp::GetProjectName()).ToUpper() + FString(TEXT("_API "));
+	// FString(FApp::GetProjectName()).ToUpper() + FString(TEXT("_API "));
+	// Replaced by a constant string as always generated inside constant named module
+	return TEXT("ARTICYGENERATED_API "); 
 }
 
 void CodeFileGenerator::WriteToFile() const

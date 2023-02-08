@@ -62,12 +62,8 @@ void SArticyObjectTileView::Construct(const FArguments& InArgs)
 	PreviewImage = SNew(SImage)
 		.Image(this, &SArticyObjectTileView::OnGetEntityImage);
 
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
-	EntityNameTextStyle = MakeShareable(new FTextBlockStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("RichTextBlock.Bold")));
-#else
 	EntityNameTextStyle = MakeShareable(new FTextBlockStyle(FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("RichTextBlock.Bold")));
-#endif
-	
+
 	DisplayNameTextBlock = SNew(STextBlock)
 		.Text(this, &SArticyObjectTileView::OnGetEntityName)
 		.TextStyle(EntityNameTextStyle.Get())

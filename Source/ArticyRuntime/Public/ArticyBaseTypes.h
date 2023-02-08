@@ -121,9 +121,9 @@ public:
 	FArticySize(TSharedPtr<FJsonValue> Json);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
-	float w = 0.f;
+	float w;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
-	float h = 0.f;
+	float h;
 
 	FVector2D AsVector() const { return FVector2D{ w, h }; }
 };
@@ -142,13 +142,13 @@ public:
 	FArticyRect(TSharedPtr<FJsonValue> Json);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
-	float x = 0.f;
+	float x;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
-	float y= 0.f;
+	float y;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
-	float w= 0.f;
+	float w;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
-	float h= 0.f;
+	float h;
 };
 
 //---------------------------------------------------------------------------//

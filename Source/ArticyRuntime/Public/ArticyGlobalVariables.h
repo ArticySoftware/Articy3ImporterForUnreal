@@ -6,11 +6,7 @@
 
 #include "ArticyRuntimeModule.h"
 #include "Interfaces/ArticyReflectable.h"
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0 
-#include "AssetRegistry/AssetRegistryModule.h"
-#else
 #include "AssetRegistryModule.h"
-#endif
 #include "ShadowStateManager.h"
 #include "ArticyExpressoScripts.h"
 #include "ArticyGlobalVariables.generated.h"
@@ -442,9 +438,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Getter")
 	const TArray<UArticyBaseVariableSet*> GetVariableSets() const { return VariableSets; }
-
-	UFUNCTION(BlueprintCallable, Category = "Getter")
-	TMap<FString,UArticyVariable*> GetVariablesMap();
 	
 	/* Exec functions are only supported by a couple singleton classes
 	 * To make this exec compatible, one of those exec classes has to forward the call
@@ -477,9 +470,6 @@ protected:
 	TArray<UArticyBaseVariableSet*> VariableSets;
 
 	UPROPERTY()
-	TMap<FString,UArticyVariable*> VariablesMap;
-	
-	UPROPERTY()
 	bool bLogVariableAccess = false;
 
 private:
@@ -491,15 +481,13 @@ private:
 
 	template <typename ArticyVariableType, typename VariablePayloadType>
 	void SetVariableValue(const FName Namespace, const FName Variable, const VariablePayloadType Value);
-
-	// template <typename ArticyVariableType, typename VariablePayloadType>
-	// void SetVariableValue(const FName FullVariableName, const VariablePayloadType Value);
+	template <typename ArticyVariableType, typename VariablePayloadType>
+	void SetVariableValue(const FName FullVariableName, const VariablePayloadType Value);
 
 	template<typename ArticyVariableType, typename VariablePayloadType>
 	const VariablePayloadType& GetVariableValue(const FName Namespace, const FName Variable, bool& bSucceeded);
-
-	// template<typename ArticyVariableType, typename VariablePayloadType>
-	// const VariablePayloadType& GetVariableValue(const FName FullVariableName, bool& bSucceeded);
+	template<typename ArticyVariableType, typename VariablePayloadType>
+	const VariablePayloadType& GetVariableValue(const FName FullVariableName, bool& bSucceeded);
 };
 
 //---------------------------------------------------------------------------//

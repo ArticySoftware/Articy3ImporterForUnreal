@@ -392,13 +392,8 @@ const UArticyDatabase* UArticyDatabase::GetOriginal(bool bLoadAllPackages)
 		//create a clone of the database
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 		TArray<FAssetData> AssetData;
-
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
-		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetClassPathName() , AssetData, true);
-#else
 		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetFName(), AssetData, true);
-#endif
-		
+
 		if(AssetData.Num() != 0)
 		{
 			if(AssetData.Num() > 1)
@@ -429,12 +424,8 @@ TWeakObjectPtr<UArticyDatabase> UArticyDatabase::GetMutableOriginal()
 		//create a clone of the database
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 		TArray<FAssetData> AssetData;
-
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
-		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetClassPathName() , AssetData, true);
-#else
 		AssetRegistryModule.Get().GetAssetsByClass(StaticClass()->GetFName(), AssetData, true);
-#endif
+
 		if (AssetData.Num() != 0)
 		{
 			if (AssetData.Num() > 1)

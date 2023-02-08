@@ -95,14 +95,14 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="Variable")
 	FString Variable;
 	UPROPERTY(VisibleAnywhere, Category="Variable")
-	EArticyType Type = EArticyType::ADT_String;
+	EArticyType Type;
 	UPROPERTY(VisibleAnywhere, Category="Variable")
 	FString Description;
 
 	UPROPERTY(VisibleAnywhere, Category = "Variable")
-	bool BoolValue = false;
+	bool BoolValue;
 	UPROPERTY(VisibleAnywhere, Category = "Variable")
-	int IntValue = 0;
+	int IntValue;
 	UPROPERTY(VisibleAnywhere, Category = "Variable")
 	FString StringValue;
 
@@ -173,7 +173,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
 	FString BlueprintName;
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
-	bool bIsOverloadedFunction = false;
+	bool bIsOverloadedFunction;
 
 	/** A list of parameters (type + parameter name), to be used in a method declaration. */
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
@@ -392,7 +392,5 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category="Imported")
 	TMap<FArticyId, FArticyIdArray> ParentChildrenCache;
-
-	bool IsVariableOfType(EArticyType varType, FString FullName);
 };
 

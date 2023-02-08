@@ -7,11 +7,7 @@
 #include "ArticyHelpers.h"
 #include "ArticyDatabase.h"
 #include "ArticyBaseTypes.h"
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0 
-#include "AssetRegistry/AssetRegistryModule.h"
-#else
 #include "AssetRegistryModule.h"
-#endif
 #include "ArticyPackage.h"
 
 #if WITH_EDITOR
@@ -122,11 +118,7 @@ UArticyObject* UArticyObject::FindAsset(const FArticyId& Id)
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryConstants::ModuleName);
 		TArray<FAssetData> AssetData;
 
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
-		AssetRegistryModule.Get().GetAssetsByClass( UArticyPackage::StaticClass()->GetClassPathName() , AssetData, true);
-#else
 		AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), AssetData, true);
-#endif
 
 		for (const auto ArticyPackage : AssetData)
 		{
@@ -197,11 +189,8 @@ UArticyObject* UArticyObject::FindAsset(const FString& TechnicalName)// MM_CHANG
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryConstants::ModuleName);
 		TArray<FAssetData> AssetData;
 
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
-		AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetClassPathName() , AssetData, true);
-#else
 		AssetRegistryModule.Get().GetAssetsByClass(UArticyPackage::StaticClass()->GetFName(), AssetData, true);
-#endif
+
 		for (const auto ArticyPackage : AssetData)
 		{
 			const auto Package = Cast<UArticyPackage>(ArticyPackage.GetAsset());

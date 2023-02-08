@@ -40,6 +40,7 @@ public:
 private:
 
 	static void Compile(UArticyImportData* Data);
+	static void CompileArticyGeneratedModule();
 	static void OnCompiled(UArticyImportData* Data);
 	static bool ParseForError(const FString& Log);
 

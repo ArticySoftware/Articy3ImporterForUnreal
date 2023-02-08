@@ -67,8 +67,7 @@ public:
 
 	//---------------------------------------------------------------------------//
 
-	//EArticyPausableType
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup", meta=(Bitmask, BitmaskEnum = "/Script/ArticyRuntime.EArticyPausableType"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup", meta=(Bitmask, BitmaskEnum = "EArticyPausableType"))
 	uint8 PauseOn = 1 << uint8(EArticyPausableType::DialogueFragment)
 					| 1 << uint8(EArticyPausableType::Dialogue)
 					| 1 << uint8(EArticyPausableType::FlowFragment);
