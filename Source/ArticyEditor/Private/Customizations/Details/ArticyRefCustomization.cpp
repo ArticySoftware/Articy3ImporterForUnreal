@@ -85,7 +85,14 @@ UClass* FArticyRefCustomization::GetClassRestriction() const
 		if (Restriction == nullptr)
 		{
 			// FApp::GetProjectName() => Code generated inside a constant module now
-			FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated"), *ArticyClassRestriction);
+			if (UArticyPluginSettings::Get()->bGeneratePlugin)
+			{
+				FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated"), *ArticyClassRestriction);
+			}
+			else
+			{
+				FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *ArticyClassRestriction);
+			}
 			Restriction = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyObject::StaticClass());
 		}
 	}

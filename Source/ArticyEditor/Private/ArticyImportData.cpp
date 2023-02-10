@@ -14,6 +14,7 @@
 #include "Misc/MessageDialog.h"
 #endif
 #include "BuildToolParser/BuildToolParser.h"
+#include "ModuleGenerator/PluginGenerator.h"
 
 #define LOCTEXT_NAMESPACE "ArticyImportData"
 
@@ -448,10 +449,9 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 		bNeedsCodeGeneration = true;
 	}
 	//===================================//
-	// This part is not needed anymore as code is generated inside a constant named 
 	// ArticyRuntime reference check, ask user to add "ArticyRuntime" Reference to Unreal build tool if needed.
-	/*
-	if (UArticyPluginSettings::Get()->bVerifyArticyReferenceBeforeImport)
+	// Only used if code generation is done in game code (not necessary in plugin code generation mode)
+	if ( !UArticyPluginSettings::Get()->bGeneratePlugin && UArticyPluginSettings::Get()->bVerifyArticyReferenceBeforeImport)
 	{
 		FString path = FPaths::GameSourceDir() / FApp::GetProjectName() / FApp::GetProjectName() + TEXT(".Build.cs"); // TEXT("");
 		BuildToolParser RefVerifier = BuildToolParser(path);
@@ -476,14 +476,16 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 			}
 		}
 	}
-	*/
 	
-	// Temporarly disable code gen
-	// bNeedsCodeGeneration = false;
-
 	// if we are generating code, generate and compile it; after it has finished, generate assets and perform post import logic
 	if(bNeedsCodeGeneration)
 	{
+		// Verify if plugin exists, generate it if needed
+		if(UArticyPluginSettings::Get()->bGeneratePlugin && !PluginGenerator::IsPluginLoaded())
+		{
+			PluginGenerator::GeneratePlugin();
+		}
+		
 		const bool bAnyCodeGenerated = CodeGenerator::GenerateCode(this);
 
 		if (bAnyCodeGenerated)

@@ -15,6 +15,7 @@ UArticyPluginSettings::UArticyPluginSettings()
 	bKeepGlobalVariablesBetweenWorlds = true;
 	bConvertUnityToUnrealRichText = false;
 	bVerifyArticyReferenceBeforeImport = true;
+	bGeneratePlugin = false;
 	bUseLegacyImporter = false;
 	
 	bSortChildrenAtGeneration = false;

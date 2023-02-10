@@ -25,6 +25,7 @@
 #include "Misc/MessageDialog.h"
 #include "Dialogs/Dialogs.h"
 #include "ISourceControlModule.h"
+#include "GameFramework/WorldSettings.h"
 #include "Misc/OutputDeviceNull.h"
 #if WITH_LIVE_CODING && ENGINE_MAJOR_VERSION == 4
 #include "Windows/LiveCoding/Public/ILiveCodingModule.h"
@@ -39,8 +40,12 @@ TMap<FString, FString> CodeGenerator::CachedFiles;
 
 FString CodeGenerator::GetSourceFolder()
 {
-	// GameSourceDir() / TEXT("ArticyGenerated");
-	return FPaths::ProjectPluginsDir() / TEXT("ArticyGenerated") / TEXT("Source") / TEXT("ArticyGenerated") / TEXT("Public");
+	if (UArticyPluginSettings::Get()->bGeneratePlugin)
+	{
+		return FPaths::ProjectPluginsDir() / TEXT("ArticyGenerated") / TEXT("Source") / TEXT("ArticyGenerated") / TEXT("Public");
+	}
+	
+	return FPaths::GameSourceDir() / FApp::GetProjectName() / TEXT("ArticyGenerated");
 }
 
 FString CodeGenerator::GetGeneratedInterfacesFilename(const UArticyImportData* Data)
@@ -204,7 +209,8 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 		return;
 	}
 #endif
-
+	//FLiveCodingModule
+	
 	bool bWaitingForOtherCompile = false;
 
 	// We can only hot-reload via DoHotReloadFromEditor when we already had code in our project
@@ -279,11 +285,15 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 	
 	if (!bWaitingForOtherCompile)
 	{
-		// Recompile only ArticyGenerated module .Dll (not whole game)
-		CompileArticyGeneratedModule();
-		
-		// Old method ; recompile whole game...
-		// HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None /*async*/);
+		if (UArticyPluginSettings::Get()->bGeneratePlugin)
+		{
+			// Recompile only ArticyGenerated module .Dll (not whole game)
+			CompileArticyGeneratedModule();
+		}
+		else
+		{
+			HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None /*async*/);
+		}
 	}
 }
 
@@ -337,8 +347,16 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 	//compiling is done!
 	//check if UArticyBaseGlobalVariables can be found, otherwise something went wrong!
 	const auto ClassName = GetGlobalVarsClassname(Data, true);
-	// FApp::GetProjectName()
-	auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated"), *ClassName);
+	FString FullClassName;
+	if (UArticyPluginSettings::Get()->bGeneratePlugin)
+	{
+		FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated"), *ClassName);
+	}
+	else
+	{
+		FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *ClassName);
+	}
+	
 	if (!ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyGlobalVariables::StaticClass()))
 	{
 		if (!ensure(ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyGlobalVariables::StaticClass())))

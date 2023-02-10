@@ -50,8 +50,15 @@ namespace ArticyImporterHelpers
 		{
 			return Result;
 		}
-		// FApp::GetProjectName()
-		FullClassName = FString::Printf(TEXT("/Script/%s.%s"), TEXT("ArticyGenerated") , *ClassName);
+		
+		if (UArticyPluginSettings::Get()->bGeneratePlugin)
+		{
+			FullClassName = FString::Printf(TEXT("/Script/%s.%s"), TEXT("ArticyGenerated") , *ClassName);
+		}
+		else
+		{
+			FullClassName = FString::Printf(TEXT("/Script/%s.%s"), FApp::GetProjectName(), *ClassName);
+		}
 		Result = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, BaseClass);
 
 		return Result;

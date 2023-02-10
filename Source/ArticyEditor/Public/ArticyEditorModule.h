@@ -11,7 +11,6 @@
 #include "Framework/Commands/UICommandList.h"
 #include "Slate/SArticyIdProperty.h"
 
-
 DECLARE_LOG_CATEGORY_EXTERN(LogArticyEditor, Log, All)
 
 DECLARE_MULTICAST_DELEGATE(FOnImportFinished);

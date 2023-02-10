@@ -35,6 +35,9 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = ImportSettings, meta = (DisplayName = "Verify ArticyRuntime reference inside Unreal Build tools before importing"))
 	bool bVerifyArticyReferenceBeforeImport;
 
+	UPROPERTY(EditAnywhere, config, Category = ImportSettings, meta = (DisplayName = "Generate code inside plugin instead of inside game content. \nWill possibly require code migration ! \nTake care to backup your code before activating !"))
+	bool bGeneratePlugin;
+	
 	/*
 	 * If true, the old importer process will be used (Articy version <  3.2.3)
 	 */

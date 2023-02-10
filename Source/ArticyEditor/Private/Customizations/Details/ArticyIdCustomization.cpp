@@ -105,8 +105,14 @@ UClass* FArticyIdCustomization::GetClassRestriction() const
 		// the class name can be in the ArticyRuntime module or in the project module. If it wasn't found in ArticyRuntime, check the project module
 		if(Restriction == nullptr)
 		{
-			// FApp::GetProjectName()
-			FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated"), *ArticyClassRestriction);
+			if (UArticyPluginSettings::Get()->bGeneratePlugin)
+			{
+				FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated"), *ArticyClassRestriction);
+			}
+			else
+			{
+				FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *ArticyClassRestriction);
+			}
 			Restriction = ConstructorHelpersInternal::FindOrLoadClass(FullClassName, UArticyObject::StaticClass());
 		}
 	}

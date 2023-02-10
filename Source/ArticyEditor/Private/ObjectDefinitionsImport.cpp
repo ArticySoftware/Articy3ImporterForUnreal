@@ -530,8 +530,15 @@ UClass* FArticyTemplateFeatureDef::GetUClass(const UArticyImportData* Data) cons
 	//remove the 'U' at the beginning of the class name, since FindOrLoadClass doesn't like that one....
 	className.RemoveAt(0);
 
-	//  FApp::GetProjectName()
-	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated"), *className);
+	FString fullClassName;
+	if (UArticyPluginSettings::Get()->bGeneratePlugin)
+	{
+		fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated"), *className);
+	}
+	else
+	{
+		fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *className);
+	}
 	return ConstructorHelpersInternal::FindOrLoadClass(fullClassName, UObject::StaticClass());
 }
 

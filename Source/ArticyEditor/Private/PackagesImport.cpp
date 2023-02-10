@@ -72,12 +72,29 @@ UArticyObject* FArticyModelDef::GenerateSubAsset(const UArticyImportData* Data, 
 
 	//generate the asset
 	// ArticyGenerated // FApp::GetProjectName()
-	auto fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated") , *className);
+	FString fullClassName;
+	if (UArticyPluginSettings::Get()->bGeneratePlugin)
+	{
+		fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), TEXT("ArticyGenerated") , *className);
+	}
+	else
+	{
+		fullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *className);
+	}
 	auto uclass = ConstructorHelpersInternal::FindOrLoadClass(fullClassName, UArticyObject::StaticClass());
 	if (uclass)
 	{
 		// FApp::GetProjectName()
-		auto obj = ArticyImporterHelpers::GenerateSubAsset<UArticyObject>(*className, TEXT("ArticyGenerated"), GetNameAndId(), Outer);
+		FString ModuleName;
+		if (UArticyPluginSettings::Get()->bGeneratePlugin)
+		{
+			ModuleName = TEXT("ArticyGenerated");
+		}
+		else
+		{
+			ModuleName = FApp::GetProjectName();
+		}
+		auto obj = ArticyImporterHelpers::GenerateSubAsset<UArticyObject>(*className, *ModuleName, GetNameAndId(), Outer);
 		FAssetRegistryModule::AssetCreated(Cast<UObject>(obj));
 		if (ensure(obj))
 		{

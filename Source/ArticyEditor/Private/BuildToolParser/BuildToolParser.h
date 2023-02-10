@@ -12,10 +12,12 @@ class BuildToolParser
 public:
 	
 	BuildToolParser(const FString& filePath);
-	bool VerifyArticyRuntimeRef();
-	void AddArticyRuntimmeRef();
+	bool VerifyArticyRuntimeRef();  
+	void AddArticyRuntimmeRef(); 
 	~BuildToolParser() {};
 
+	static bool AddArticyRuntimeRef(FString& filepath);
+	
 private:
 	// Enforce using parameterized constructor
 	BuildToolParser() {};

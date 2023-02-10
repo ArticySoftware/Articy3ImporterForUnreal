@@ -67,5 +67,9 @@ void DatabaseGenerator::GenerateCode(const UArticyImportData* Data)
 UArticyDatabase* DatabaseGenerator::GenerateAsset(const UArticyImportData* Data)
 {
 	const auto className = CodeGenerator::GetDatabaseClassname(Data, true); // FApp::GetProjectName()
-	return ArticyImporterHelpers::GenerateAsset<UArticyDatabase>(*className, TEXT("ArticyGenerated") , "", "", RF_ArchetypeObject, true);
+	if (UArticyPluginSettings::Get()->bGeneratePlugin)
+	{
+		return ArticyImporterHelpers::GenerateAsset<UArticyDatabase>(*className, TEXT("ArticyGenerated") , "", "", RF_ArchetypeObject, true);
+	}
+	return ArticyImporterHelpers::GenerateAsset<UArticyDatabase>(*className, FApp::GetProjectName(), "", "", RF_ArchetypeObject, true);
 }
