@@ -282,13 +282,20 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 	}
 }
 
+// @Alewinn : Why is this located inside the CodeGenerator?
+//			  This is Unreal binary assets generation related, not code generation...
 void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 {
 	TGuardValue<bool> GuardIsInitialLoad(GIsInitialLoad, false);
 
 	ensure(Data);
 	
-	//compiling is done!
+	//compilation done
+
+	// @Alewinn : some kind of "Post import sanity checks" that should be located elsewhere,
+	//				possibly in CodeGenerator (but not the rest of the method!)
+	//				@todo : A probably even better method would be to import check before import (instead of sanitize)
+	//----------------------------------------------------------------------------------------------------------------
 	//check if UArticyBaseGlobalVariables can be found, otherwise something went wrong!
 	const auto ClassName = GetGlobalVarsClassname(Data, true);
 	auto FullClassName = FString::Printf(TEXT("Class'/Script/%s.%s'"), FApp::GetProjectName(), *ClassName);
@@ -305,10 +312,18 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 		// Failed to delete generated assets. We can't continue
 		return;
 	}
+	//----------------------------------------------------------------------------------------------------------------
 
-	//generate the global variables asset
+	// @Alewinn : The package generation sequence is done in 3 consecutives steps, after code generation :
+	//				1 - Database && GV generation
+	//				2 - List all packages to serialize on disk 
+	//				3 - On-disk serialization (Unreal .uasset files creation)
+	
+	//  1 -----> Intermediate generation
+	// GV             -> generate the global variables asset
 	GlobalVarsGenerator::GenerateAsset(Data);
-	//generate the database asset
+	
+	// DB			  -> generate the database asset
 	UArticyDatabase* ArticyDatabase = DatabaseGenerator::GenerateAsset(Data);
 	if (!ensureAlwaysMsgf(ArticyDatabase != nullptr, TEXT("Could not create ArticyDatabase asset!")))
 	{
@@ -318,10 +333,13 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 		return;
 	}
 
-	//generate assets for all the imported objects
+	// Objects          -> generate assets for all the imported objects
 	PackagesGenerator::GenerateAssets(Data);
 	ArticyDatabase->SetLoadedPackages(Data->GetPackagesDirect());
 
+
+	
+	// 2 --------> List all packages to serialize on disk && source control  
 	//gather all articy assets to save them
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> GeneratedAssets;
@@ -343,6 +361,9 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 		FEditorFileUtils::CheckoutPackages(PackagesToSave, &CheckedOutPackages, false);
 	}
 
+
+	
+	// 3  --------> On disk serialization
 	// Save the packages to disk
 	for (auto Package : PackagesToSave) { Package->SetDirtyFlag(true); }
 	if (!UEditorLoadingAndSavingUtils::SavePackages(PackagesToSave, true))
