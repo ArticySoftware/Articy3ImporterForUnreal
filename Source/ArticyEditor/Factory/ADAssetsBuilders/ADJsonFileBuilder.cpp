@@ -10,10 +10,48 @@
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
 
+/*
+ *	// Notes //
+	Initial (1.6) Import sequence :
+	-------------------------------
+	Settings.ImportFromJson(RootObject->GetObjectField(JSON_SECTION_SETTINGS));
+	Project.ImportFromJson(RootObject->GetObjectField(JSON_SECTION_PROJECT));
+	PackageDefs.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_PACKAGES));
+	Hierarchy.ImportFromJson(this, RootObject->GetObjectField(JSON_SECTION_HIERARCHY));
+	UserMethods.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_SCRIPTMEETHODS));
+
+	If Objects Definition OR GV changed
+	{
+		GlobalVariables.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_GLOBALVARS), this);
+		ObjectDefinitions.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_OBJECTDEFS), this);
+	}
+
+	if Script Fragments Change
+	{
+		GatherScripts()
+		Regenerate code
+		(recompile...)
+	}
+	
+ */
+
+void ADJsonFileBuilder::BuildAsset(UAD_FileData& FileDataAsset, const TSharedPtr<FJsonObject> RootObject)
+{
+	GetSettings(FileDataAsset.Settings, RootObject->GetObjectField(JSON_SECTION_SETTINGS));
+	GetProjectDefinitions(FileDataAsset.ProjectDefinitions, RootObject->GetObjectField(JSON_SECTION_PROJECT));
+	GetPackages(FileDataAsset.Packages, &RootObject->GetArrayField(JSON_SECTION_PACKAGES));
+
+	GetHierarchy(); // Looks like it imports the whole articy folder hierarchy... Necessary ???
+	GetUserMethods(FileDataAsset.UserMethods,&RootObject->GetArrayField(JSON_SECTION_SCRIPTMEETHODS));
+	
+	// Manifest related...
+	GetGlobalVariables(FileDataAsset.GlobalVariables, &RootObject->GetArrayField(JSON_SECTION_GLOBALVARS));
+}
+
 /**************************************************************
 				 Main
 **************************************************************/
-void ADJsonFileBuilder::BuildAsset(UAD_FileData& FileDataAsset, const TSharedPtr<FJsonObject> RootObject)
+void ADJsonFileBuilder::BuildAssetVerbose(UAD_FileData& FileDataAsset, const TSharedPtr<FJsonObject> RootObject)
 {
 	UE_LOG(ArticyEditor, Log, TEXT("-------- Begin big data asset builder --------"));
 

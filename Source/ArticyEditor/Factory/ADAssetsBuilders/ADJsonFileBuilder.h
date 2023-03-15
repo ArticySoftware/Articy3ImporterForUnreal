@@ -23,6 +23,7 @@ class ADJsonFileBuilder
 {
 public:
 	static void BuildAsset(UAD_FileData &FileDataAsset,const TSharedPtr<FJsonObject> RootObject);
+	static void BuildAssetVerbose(UAD_FileData &FileDataAsset,const TSharedPtr<FJsonObject> RootObject);
 	
 private:
 	// Flat data
