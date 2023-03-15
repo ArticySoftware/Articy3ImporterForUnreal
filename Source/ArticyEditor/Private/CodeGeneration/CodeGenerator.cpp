@@ -276,7 +276,7 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 		}
 	});
 	
-	if (!bWaitingForOtherCompile)
+	if (!bWaitingForOtherCompile && !UArticyPluginSettings::Get()->bPreventAutomaticCompilation)
 	{
 		HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None /*async*/);
 	}
