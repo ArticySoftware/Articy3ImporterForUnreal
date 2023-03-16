@@ -5,7 +5,8 @@
 
 #include "ADBinaryArchiveFactory.h"
 
-#include "ADAssetsBuilders/ADBinaryFileBuilder.h"
+#include "ADAssetsBuilders/ADBinaryFileReader.h"
+#include "ADAssetsBuilders/FileDispatcher/JsonFileDispatcher.h"
 #include "ADFileData/AD_FileData.h"
 #include "ArticyEditor/ArticyEditor.h"
 #include "Misc/FileHelper.h"
@@ -50,16 +51,18 @@ bool UADBinaryArchiveFactory::ImportFromFile(const FString& FileName, UAD_FileDa
 
 	if(fileContent.Num()<=0) return false;
 
-	// FMemoryReader FromBinary = FMemoryReader(fileContent, true);
-	// FromBinary.Seek(0);
-
-	ADBinaryFileBuilder::BuildAsset(Asset, fileContent);
+	//@todo feed :
+	//			in IJSonFileDispatcher,
+	//			in nullable (optional) logger/perf analyser ,
+	//			Out UAD_FileData&
+	// -----------------------------------------------------------------------
+	// IC / Testable objects section
+	// -----------------------------------------------------------------------
+	const TUniquePtr<FJsonFileDispatcher> Dispatcher = MakeUnique<FJsonFileDispatcher>();
+	const TUniquePtr<ADBinaryFileReader> BinFileReader = MakeUnique<ADBinaryFileReader>(Dispatcher.Get());
+	BinFileReader->ReadFile(fileContent);
 	
-	//Empty the buffer's contents
-	//FromBinary.FlushCache();
 	fileContent.Empty();
-	//Close the stream
-	//FromBinary.Close();
-	
+	// -----------------------------------------------------------------------
 	return true;
 }

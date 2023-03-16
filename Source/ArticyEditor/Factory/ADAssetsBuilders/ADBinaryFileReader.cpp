@@ -2,45 +2,41 @@
 // Copyright (c) Articy Software GmbH & Co. KG. All rights reserved.  
 //
 
-#include "ADBinaryFileBuilder.h"
+#include "ADBinaryFileReader.h"
 #include "ArticyEditor/ArticyEditor.h"
 #include "ArticyEditor/Factory/ADFileData/AD_FileData.h"
 #include "Misc/FileHelper.h"
 
-void ADBinaryFileBuilder::BuildAsset(UAD_FileData& FileDataAsset, TArray<uint8> Ar)
+void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)
 {
-	UE_LOG(ArticyEditor, Warning, TEXT("Reading binary archive..."));
-
 	// Header ------------------------------------------------------------------------------------------
-	int IdentifierSize = sizeof("ADFA") - 1;
+	int IdentifierSize = sizeof(_requiredMagic) - 1; // less null terminated
 	std::string cstr(reinterpret_cast<char*>(Ar.GetData()), IdentifierSize);
 	const FString MAGIC(cstr.c_str());
-
-	UE_LOG(ArticyEditor, Warning, TEXT("Found Magic = %s"), *MAGIC);
-
+	if(MAGIC !=_requiredMagic)
+	{
+		UE_LOG(ArticyEditor,Error, TEXT("Archive type mismatch. Abort import."));
+		return;
+	}
+	
 	long long offset = IdentifierSize; // ... size of the magic number for initial read
-	UE_LOG(ArticyEditor, Warning, TEXT("Found version = %i"), GetFromBuffer(Ar,offset,sizeof(char)));
+	_version = GetFromBuffer(Ar,offset,sizeof(char));
 
 	offset += sizeof(std::byte); // 1
-	UE_LOG(ArticyEditor, Warning, TEXT("Found pad = %i"), GetFromBuffer(Ar,offset,sizeof(char)));
+	_pad = GetFromBuffer(Ar,offset,sizeof(char));
 
 	offset += sizeof(std::byte); // 1
-	UE_LOG(ArticyEditor, Warning, TEXT("Found flags = %i"), GetFromBuffer(Ar,offset,sizeof(unsigned short)));
+	_flags = GetFromBuffer(Ar,offset,sizeof(unsigned short));
 
 	offset += sizeof(unsigned short);
-	int filesNumber = GetFromBuffer(Ar, offset, sizeof(int));
-	UE_LOG(ArticyEditor, Warning, TEXT("Found number of files = %i"), filesNumber);
+	_fileNumber = GetFromBuffer(Ar, offset, sizeof(int));
 
 	offset += sizeof(int);
 	long long FileDictOffset = GetLongFromBuffer(Ar, offset, sizeof(long long));
-	UE_LOG(ArticyEditor, Warning, TEXT("Found file dictionary pos = %lld"), FileDictOffset);
-
 	// File dictionary ------------------------------------------------------------------------------------------
 	ADBinaryFileEntry FileEntry;
-	for (int i = 0; i < filesNumber; i++)
+	for (int i = 0; i < _fileNumber; i++)
 	{
-		UE_LOG(ArticyEditor, Warning, TEXT("----------------- Reading File entry header #%i ---------------------"),
-		       i+1);
 		FileEntry = GetFileEntryFromArchive(FileDictOffset, Ar);
 		FString JsonFile = ExtractJsonFromFileEntry(Ar, FileEntry);
 		UE_LOG(ArticyEditor, Warning, TEXT("------------------- JSON file #%i --------------------------------"), i+1);
@@ -55,28 +51,9 @@ void ADBinaryFileBuilder::BuildAsset(UAD_FileData& FileDataAsset, TArray<uint8> 
 	}
 }
 
-// ? => Remove (need only LP64 return value version, then cast...)
-int ADBinaryFileBuilder::GetFromBuffer(TArray<uint8> Buffer, int Offset, int typeSize)
-{
-	int int_value = 0;
-
-	char* char_list = new char[typeSize];
-
-	for (int i = 0; i < typeSize; i++)
-	{
-		char_list[i] = Buffer.GetData()[i + Offset];
-	}
-
-	FMemory::Memcpy(&int_value, char_list, typeSize);
-	delete [] char_list;
-
-	return int_value;
-}
-
-long long ADBinaryFileBuilder::GetLongFromBuffer(TArray<uint8> Buffer, int Offset, int typeSize)
+long long ADBinaryFileReader::GetLongFromBuffer(TArray<uint8> Buffer, int Offset, int typeSize)
 {
 	long long long_value = 0;
-
 	char* char_list = new char[typeSize];
 
 	for (int i = 0; i < typeSize; i++)
@@ -90,8 +67,24 @@ long long ADBinaryFileBuilder::GetLongFromBuffer(TArray<uint8> Buffer, int Offse
 	return long_value;
 }
 
+// Convenience. Avoid a cast for short/int types.
+int ADBinaryFileReader::GetFromBuffer(TArray<uint8> Buffer, int Offset, int typeSize)
+{
+	int int_value = 0;
+	char* char_list = new char[typeSize];
 
-TArray<uint8> ADBinaryFileBuilder::GetByteArrayFromBuffer(TArray<uint8> Buffer, int StartIndex, int Size)
+	for (int i = 0; i < typeSize; i++)
+	{
+		char_list[i] = Buffer.GetData()[i + Offset];
+	}
+
+	FMemory::Memcpy(&int_value, char_list, typeSize);
+	delete [] char_list;
+
+	return int_value;
+}
+
+TArray<uint8> ADBinaryFileReader::GetByteArrayFromBuffer(TArray<uint8> Buffer, int StartIndex, int Size)
 {
 	TArray<uint8> retArray;
 	for (long long i = StartIndex; i < StartIndex + Size; i++)
@@ -100,7 +93,7 @@ TArray<uint8> ADBinaryFileBuilder::GetByteArrayFromBuffer(TArray<uint8> Buffer, 
 	return retArray;
 }
 
-FString ADBinaryFileBuilder::ExtractJsonFromFileEntry(TArray<uint8> Buffer, ADBinaryFileEntry fileEntry)
+FString ADBinaryFileReader::ExtractJsonFromFileEntry(TArray<uint8> Buffer, ADBinaryFileEntry fileEntry)
 {
 	TArray<uint8> bJSon = GetByteArrayFromBuffer(Buffer, fileEntry.FileStartPosition,
 	                                                                  fileEntry.PackedLength);
@@ -110,7 +103,7 @@ FString ADBinaryFileBuilder::ExtractJsonFromFileEntry(TArray<uint8> Buffer, ADBi
 	return JSonFString;
 }
 
-ADBinaryFileEntry ADBinaryFileBuilder::GetFileEntryFromArchive(long long offsetPosition, TArray<uint8> Ar)
+ADBinaryFileEntry ADBinaryFileReader::GetFileEntryFromArchive(long long offsetPosition, TArray<uint8> Ar)
 {
 	ADBinaryFileEntry retEntry;
 
@@ -118,13 +111,13 @@ ADBinaryFileEntry ADBinaryFileBuilder::GetFileEntryFromArchive(long long offsetP
 	offsetPosition += sizeof(retEntry.FileStartPosition);
 	retEntry.UnpackedLength = GetLongFromBuffer(Ar, offsetPosition, sizeof(retEntry.UnpackedLength));
 
-	offsetPosition += sizeof(retEntry.UnpackedLength); //long long);
+	offsetPosition += sizeof(retEntry.UnpackedLength);
 	retEntry.PackedLength = GetLongFromBuffer(Ar, offsetPosition, sizeof(retEntry.PackedLength));
 
-	offsetPosition += sizeof(retEntry.PackedLength); //long long);
+	offsetPosition += sizeof(retEntry.PackedLength);
 	retEntry.Flags = GetFromBuffer(Ar, offsetPosition, sizeof(retEntry.Flags));
 
-	offsetPosition += sizeof(retEntry.Flags); //short);
+	offsetPosition += sizeof(retEntry.Flags);
 	retEntry.UTF8NameLength = GetFromBuffer(Ar, offsetPosition, sizeof(retEntry.UTF8NameLength));
 
 	offsetPosition += sizeof(retEntry.UTF8NameLength);
@@ -132,12 +125,12 @@ ADBinaryFileEntry ADBinaryFileBuilder::GetFileEntryFromArchive(long long offsetP
 
 	std::string logStr(reinterpret_cast<char*>(retEntry.UTF8Filename.GetData()), retEntry.UTF8Filename.Num());
 	const FString UELogStr(logStr.c_str());
-	retEntry.FileName = UELogStr;
-	UE_LOG(ArticyEditor, Warning, TEXT("File name : %s"),*retEntry.FileName);
+	retEntry.FileName = UELogStr;	// Useful for dispatcher
 	
 	// There is probably far better than below ... but Anyway, this is optional ^^'
-	// (enumerate each property size from a given Poco type using reflection inside a static method...
-	// wouldn't this be an overkill ?...)
+	// By example, enumerate each property size from a given Poco type using reflection
+	// inside a static method... by the way, wouldn't this be an overkill ?...
+	// => Refactor if the binary file entry structure changes too much.
 	retEntry.FileEntrysize = sizeof(retEntry.FileStartPosition) +
 		sizeof(retEntry.UnpackedLength) +
 		sizeof(retEntry.PackedLength) +

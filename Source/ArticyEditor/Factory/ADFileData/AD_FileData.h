@@ -14,24 +14,20 @@
 #include "ADUserMethods.h"
 #include "AD_FileData.generated.h"
 
-//struct FADExpressoFragment;
-/**
- * UADFileData
- * -----------
- *	This is the root class of a plain old class object (POCO) data hierarchy
- *	representation of the Articy:Draft exported file, serialized inside a
- *	Unreal uasset.
- *	
- *	These hierarchical data are filled from the imported file at
- *	the UADJsonFactory.
+/*
+    UADFileData
+    -----------
+    POCO root of an object hierarchy reflecting the raw imported
+    AD data hierarchy destined to be serialized as a .uasset.   
+ 	
+ 	These hierarchical data are filled from the imported file at
+ 	the UADJsonFactory (prev. ArticyX) now UADBinaryArchiveFactory.
  */
 UCLASS()
 class ARTICYEDITOR_API UAD_FileData : public UDataAsset
 {
 	GENERATED_BODY()
-
-    
-
+   
 public:
 	UPROPERTY(VisibleAnywhere, Category="Data")
 	FADSettings Settings;
