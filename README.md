@@ -270,7 +270,7 @@ It's possible to add new script methods into articy:draft's Expresso scripting l
 Getting started with custom script methods is easy. 
 Simply start using new methods in articy:draft as if they already exist (as pictured below) and import your project into Unreal.
 
-Please be careful, however, to use only one custom script method per instruction node.
+Please be careful, however, to use only one custom script method per instruction node if you need to guarantee a sequential execution in Unreal for theses instructions.
 
 ![](docs/custom-method-node.png)
 
