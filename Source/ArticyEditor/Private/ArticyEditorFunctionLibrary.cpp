@@ -6,7 +6,7 @@
 #include "ArticyEditorFunctionLibrary.h"
 #include "ArticyPluginSettings.h"
 #include "ArticyEditorModule.h"
-#include "ArticyJSONFactory.h"
+#include "ImportFactories/ArticyJSONFactory.h"
 #include "CodeGeneration/CodeGenerator.h"
 #include "ObjectTools.h"
 #include "FileHelpers.h"

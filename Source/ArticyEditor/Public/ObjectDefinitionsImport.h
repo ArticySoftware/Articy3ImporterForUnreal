@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "ArticyJSONFactory.h"
+#include "ImportFactories/ArticyJSONFactory.h"
 #include "PredefinedTypes.h"
 #include "ArticyObject.h"
 
