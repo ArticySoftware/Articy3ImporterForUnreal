@@ -3,8 +3,8 @@
 //
 
 #include "ADJsonFileBuilder.h"
-#include "ArticyEditor/ArticyEditor.h"
-#include "ArticyEditor/Factory/ADFileData/AD_FileData.h"
+#include "ArticyEditor/Public/ArticyEditorModule.h"
+#include "ArticyEditor/Private/ImportFactories/ADFileData/AD_FileData.h"
 #include "Dom/JsonObject.h"
 #include "Policies/CondensedJsonPrintPolicy.h"
 #include "Serialization/JsonSerializer.h"
@@ -53,7 +53,7 @@ void ADJsonFileBuilder::BuildAsset(UAD_FileData& FileDataAsset, const TSharedPtr
 **************************************************************/
 void ADJsonFileBuilder::BuildAssetVerbose(UAD_FileData& FileDataAsset, const TSharedPtr<FJsonObject> RootObject)
 {
-	UE_LOG(ArticyEditor, Log, TEXT("-------- Begin big data asset builder --------"));
+	UE_LOG(LogArticyEditor, Log, TEXT("-------- Begin big data asset builder --------"));
 
 	FDateTime GlobalTime = FDateTime::UtcNow();
 
@@ -62,38 +62,38 @@ void ADJsonFileBuilder::BuildAssetVerbose(UAD_FileData& FileDataAsset, const TSh
 	FDateTime StartTime = FDateTime::UtcNow();
 	GetSettings(FileDataAsset.Settings, RootObject->GetObjectField(JSON_SECTION_SETTINGS));
 	float LocalTimeEllapsed = (FDateTime::UtcNow() - StartTime).GetTotalMilliseconds();
-	UE_LOG(ArticyEditor, Display, TEXT("Project settings import time : %f ms"), LocalTimeEllapsed)
+	UE_LOG(LogArticyEditor, Display, TEXT("Project settings import time : %f ms"), LocalTimeEllapsed)
 
 	StartTime = FDateTime::UtcNow();
 	GetProjectDefinitions(FileDataAsset.ProjectDefinitions, RootObject->GetObjectField(JSON_SECTION_PROJECT));
 	LocalTimeEllapsed = (FDateTime::UtcNow() - StartTime).GetTotalMilliseconds();
-	UE_LOG(ArticyEditor, Display, TEXT("Project definitions import time : %f ms"), LocalTimeEllapsed)
+	UE_LOG(LogArticyEditor, Display, TEXT("Project definitions import time : %f ms"), LocalTimeEllapsed)
 
 	StartTime = FDateTime::UtcNow();
 	GetPackages(FileDataAsset.Packages, &RootObject->GetArrayField(JSON_SECTION_PACKAGES));
 	LocalTimeEllapsed = (FDateTime::UtcNow() - StartTime).GetTotalMilliseconds();
-	UE_LOG(ArticyEditor, Display, TEXT("Packages import time : %f ms"), LocalTimeEllapsed)
+	UE_LOG(LogArticyEditor, Display, TEXT("Packages import time : %f ms"), LocalTimeEllapsed)
 
 	StartTime = FDateTime::UtcNow();
 	GetHierarchy(); // Looks like it imports the whole articy folder hierarchy... Necessary ???
 	LocalTimeEllapsed = (FDateTime::UtcNow() - StartTime).GetTotalMilliseconds();
-	UE_LOG(ArticyEditor, Display, TEXT("Hierarchy import time : %f ms"), LocalTimeEllapsed)
+	UE_LOG(LogArticyEditor, Display, TEXT("Hierarchy import time : %f ms"), LocalTimeEllapsed)
 
 	StartTime = FDateTime::UtcNow();
 	GetUserMethods(FileDataAsset.UserMethods,&RootObject->GetArrayField(JSON_SECTION_SCRIPTMEETHODS));
 	LocalTimeEllapsed = (FDateTime::UtcNow() - StartTime).GetTotalMilliseconds();
-	UE_LOG(ArticyEditor, Display, TEXT("User methods import time : %f ms"), LocalTimeEllapsed)
+	UE_LOG(LogArticyEditor, Display, TEXT("User methods import time : %f ms"), LocalTimeEllapsed)
 
 	// Manifest related...
 	StartTime = FDateTime::UtcNow();
 	GetGlobalVariables(FileDataAsset.GlobalVariables, &RootObject->GetArrayField(JSON_SECTION_GLOBALVARS));
 	LocalTimeEllapsed = (FDateTime::UtcNow() - StartTime).GetTotalMilliseconds();
-	UE_LOG(ArticyEditor, Display, TEXT("Global variables import time : %f ms"), LocalTimeEllapsed)
+	UE_LOG(LogArticyEditor, Display, TEXT("Global variables import time : %f ms"), LocalTimeEllapsed)
 	
-	UE_LOG(ArticyEditor, Display, TEXT("------------------------"))
+	UE_LOG(LogArticyEditor, Display, TEXT("------------------------"))
 	float TimeElapsedInMs = (FDateTime::UtcNow() - GlobalTime).GetTotalMilliseconds();
-	UE_LOG(ArticyEditor, Display, TEXT("Total time ellasped : %f ms"), TimeElapsedInMs)
-	UE_LOG(ArticyEditor, Log, TEXT("-------- End big data asset builder --------"));
+	UE_LOG(LogArticyEditor, Display, TEXT("Total time ellasped : %f ms"), TimeElapsedInMs)
+	UE_LOG(LogArticyEditor, Log, TEXT("-------- End big data asset builder --------"));
 }
 
 /**************************************************************
@@ -190,10 +190,10 @@ void ADJsonFileBuilder::GetModelDef(FArticyModelDef &modelDef, const TSharedPtr<
 	{
 		Properties->TryGetStringField(TEXT("TechnicalName"), modelDef.TechnicalName );
 		Properties->TryGetStringField(TEXT("Id"), modelDef.Id );
-		UE_LOG(ArticyEditor, Warning,TEXT("@Todo : ModelDef.Id => ArticyID"));
+		UE_LOG(LogArticyEditor, Warning,TEXT("@Todo : ModelDef.Id => ArticyID"));
 
 		Properties->TryGetStringField(TEXT("Parent"), modelDef.Parent );
-		UE_LOG(ArticyEditor, Warning,TEXT("@Todo : ModelDef.Parent => ArticyID"));
+		UE_LOG(LogArticyEditor, Warning,TEXT("@Todo : ModelDef.Parent => ArticyID"));
 
 		FString stringId;
 		Properties->TryGetStringField(TEXT("Id"), stringId);
@@ -380,7 +380,7 @@ void ADJsonFileBuilder::GetGVVariable(FArticyGVar& var, const TSharedPtr<FJsonOb
 		else
 		{
 			if (typeString != TEXT("String"))
-				UE_LOG(ArticyEditor, Error, TEXT("Unknown GlobalVariable type '%s', falling back to String."),
+				UE_LOG(LogArticyEditor, Error, TEXT("Unknown GlobalVariable type '%s', falling back to String."),
 			       *typeString);
 
 			var.Type = EArticyType::ADT_String;
@@ -404,7 +404,7 @@ void ADJsonFileBuilder::GetGVVariable(FArticyGVar& var, const TSharedPtr<FJsonOb
 **************************************************************/
 void ADJsonFileBuilder::GetHierarchy()
 {
-	UE_LOG(ArticyEditor, Warning, TEXT("@TodoOrRemove ?.? => Hierarchy import"));
+	UE_LOG(LogArticyEditor, Warning, TEXT("@TodoOrRemove ?.? => Hierarchy import"));
 }
 
 

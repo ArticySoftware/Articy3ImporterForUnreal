@@ -3,8 +3,8 @@
 //
 
 #include "ADBinaryFileReader.h"
-#include "ArticyEditor/ArticyEditor.h"
-#include "ArticyEditor/Factory/ADFileData/AD_FileData.h"
+#include "ArticyEditor/Public/ArticyEditorModule.h"
+#include "ArticyEditor/Private/ImportFactories/ADFileData/AD_FileData.h"
 #include "Misc/FileHelper.h"
 
 void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)
@@ -15,7 +15,7 @@ void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)
 	const FString MAGIC(cstr.c_str());
 	if(MAGIC !=_requiredMagic)
 	{
-		UE_LOG(ArticyEditor,Error, TEXT("Archive type mismatch. Abort import."));
+		UE_LOG(LogArticyEditor,Error, TEXT("Archive type mismatch. Abort import."));
 		return;
 	}
 	
@@ -39,9 +39,9 @@ void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)
 	{
 		FileEntry = GetFileEntryFromArchive(FileDictOffset, Ar);
 		FString JsonFile = ExtractJsonFromFileEntry(Ar, FileEntry);
-		UE_LOG(ArticyEditor, Warning, TEXT("------------------- JSON file #%i --------------------------------"), i+1);
-		UE_LOG(ArticyEditor, Warning, TEXT("%s"), *JsonFile);
-		UE_LOG(ArticyEditor, Warning, TEXT("------------------- ------------- --------------------------------"));
+		UE_LOG(LogArticyEditor, Warning, TEXT("------------------- JSON file #%i --------------------------------"), i+1);
+		UE_LOG(LogArticyEditor, Warning, TEXT("%s"), *JsonFile);
+		UE_LOG(LogArticyEditor, Warning, TEXT("------------------- ------------- --------------------------------"));
 
 		// Dispatcher forwards data to exsting Json structures depending on filename.
 		// Can be a chain of responsibility, strategy, Mediator + adapters, command stack... @Todo

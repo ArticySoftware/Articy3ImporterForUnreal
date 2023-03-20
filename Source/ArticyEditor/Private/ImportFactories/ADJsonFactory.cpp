@@ -9,7 +9,7 @@
 #include "Misc/FileHelper.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
-#include "ArticyEditor/ArticyEditor.h"
+#include "ArticyEditor/Public/ArticyEditorModule.h"
 
 UADJsonFactory::UADJsonFactory()
 {
@@ -20,7 +20,7 @@ UADJsonFactory::UADJsonFactory()
 
 bool UADJsonFactory::FactoryCanImport(const FString& Filename)
 {
-	UE_LOG(ArticyEditor, Log, TEXT("Importation start with file : %s"),*Filename);
+	UE_LOG(LogArticyEditor, Log, TEXT("Importation start with file : %s"),*Filename);
 	return Super::FactoryCanImport(Filename);
 }
 
@@ -45,7 +45,7 @@ bool UADJsonFactory::ImportFromFile(const FString& FileName, UAD_FileData &Asset
 	FString JSON;
 	if (!FFileHelper::LoadFileToString(JSON, *FileName))
 	{
-		UE_LOG(ArticyEditor, Error, TEXT("Failed to load file '%s' to string"), *FileName);
+		UE_LOG(LogArticyEditor, Error, TEXT("Failed to load file '%s' to string"), *FileName);
 		return false;
 	}
 

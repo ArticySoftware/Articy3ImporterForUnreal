@@ -30,8 +30,8 @@ public class ArticyEditor : ModuleRules
 			new string[]
 			{
 				"Core",
+				"ArticyRuntime",
 				"EditorWidgets",
-				"ArticyRuntime"
 				//"ClassViewer"
 				// ... add other public dependencies that you statically link with here ...
 			}

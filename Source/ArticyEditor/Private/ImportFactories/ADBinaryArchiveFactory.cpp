@@ -8,7 +8,7 @@
 #include "ADAssetsBuilders/ADBinaryFileReader.h"
 #include "ADAssetsBuilders/FileDispatcher/JsonFileDispatcher.h"
 #include "ADFileData/AD_FileData.h"
-#include "ArticyEditor/ArticyEditor.h"
+#include "ArticyEditor/Public/ArticyEditorModule.h"
 #include "Misc/FileHelper.h"
 
 UADBinaryArchiveFactory::UADBinaryArchiveFactory()
@@ -20,7 +20,7 @@ UADBinaryArchiveFactory::UADBinaryArchiveFactory()
 
 bool UADBinaryArchiveFactory::FactoryCanImport(const FString& Filename)
 {
-	UE_LOG(ArticyEditor, Log, TEXT("Importation start with file : %s"),*Filename);
+	UE_LOG(LogArticyEditor, Log, TEXT("Importation start with file : %s"),*Filename);
 	return Super::FactoryCanImport(Filename);
 }
 
@@ -45,7 +45,7 @@ bool UADBinaryArchiveFactory::ImportFromFile(const FString& FileName, UAD_FileDa
 	TArray<uint8> fileContent;
 	if (!FFileHelper::LoadFileToArray(fileContent, *FileName))
 	{
-		UE_LOG(ArticyEditor, Error, TEXT("Failed to load file '%s' to string"), *FileName);
+		UE_LOG(LogArticyEditor, Error, TEXT("Failed to load file '%s' to string"), *FileName);
 		return false;
 	}	
 
