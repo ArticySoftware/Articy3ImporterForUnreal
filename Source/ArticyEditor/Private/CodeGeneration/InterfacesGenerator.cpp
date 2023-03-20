@@ -6,7 +6,7 @@
 #include "InterfacesGenerator.h"
 #include "CodeFileGenerator.h"
 #include "ObjectDefinitionsImport.h"
-#include "ArticyImportData.h"
+#include "ImportFactories/ArticyImportData.h"
 
 void InterfacesGenerator::GenerateCode(const UArticyImportData* Data)
 {

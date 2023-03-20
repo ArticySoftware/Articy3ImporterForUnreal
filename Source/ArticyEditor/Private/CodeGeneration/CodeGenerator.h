@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ArticyImportData.h"
+#include "ImportFactories/ArticyImportData.h"
 #include "Misc/CompilationResult.h"
 
 

@@ -6,7 +6,7 @@
 #include "ObjectDefinitionsGenerator.h"
 #include "CodeFileGenerator.h"
 #include "ObjectDefinitionsImport.h"
-#include "ArticyImportData.h"
+#include "ImportFactories/ArticyImportData.h"
 
 void ObjectDefinitionsGenerator::GenerateCode(const UArticyImportData* Data)
 {

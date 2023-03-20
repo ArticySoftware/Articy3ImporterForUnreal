@@ -11,7 +11,7 @@
 #include "Interfaces/ArticyObjectWithDisplayName.h"
 #include "Interfaces/ArticyObjectWithText.h"
 #include "Kismet/KismetStringLibrary.h"
-#include "ArticyImportData.h"
+#include "ImportFactories/ArticyImportData.h"
 #include "ArticyEditorStyle.h"
 #include "ArticyFlowClasses.h"
 #include "ArticyEntity.h"

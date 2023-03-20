@@ -7,7 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "ArticyEditorFunctionLibrary.h"
-#include "ArticyImportData.h"
+#include "ImportFactories/ArticyImportData.h"
 
 #define LOCTEXT_NAMESPACE "ArticyImporter"
 

@@ -4,7 +4,7 @@
 //
 
 #include "PredefinedTypes.h"
-#include "ArticyImportData.h"
+#include "ImportFactories/ArticyImportData.h"
 #include "ArticyObject.h"
 #include "ArticyBuiltinTypes.h"
 #include "ArticyScriptFragment.h"

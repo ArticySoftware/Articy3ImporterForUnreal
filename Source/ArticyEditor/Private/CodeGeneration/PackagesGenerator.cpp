@@ -3,7 +3,7 @@
 //
 
 #include "PackagesGenerator.h"
-#include "ArticyImportData.h"
+#include "ImportFactories/ArticyImportData.h"
 
 #define LOCTEXT_NAMESPACE "PackagesGenerator"
 

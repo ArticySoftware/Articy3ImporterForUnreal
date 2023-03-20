@@ -4,7 +4,7 @@
 //
 #pragma once
 
-#include "ArticyImportData.h"
+#include "ImportFactories/ArticyImportData.h"
 
 /**
  * 
