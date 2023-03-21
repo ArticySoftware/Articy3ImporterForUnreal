@@ -146,7 +146,7 @@ bool UArticyJSONFactory::ImportFromFile(const FString& FileName, UArticyImportDa
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(JSON);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
 	{
-		Asset->ImportFromJson(JsonParsed);
+		Asset->MainImportFromJson(JsonParsed);
 	}
 
 	return true;

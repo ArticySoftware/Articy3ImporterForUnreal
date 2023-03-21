@@ -24,7 +24,8 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="Settings")
 	FString set_TextFormatter = "";
 	
-	/** If this is false, no ExpressoScripts class is generated, and script fragments are not evaluated/executed. */
+	/** If this is false, no ExpressoScripts class is generated,
+	    and script fragments are not evaluated/executed. */
 	UPROPERTY(VisibleAnywhere, Category="Settings")
 	bool set_UseScriptSupport = false;
 	
@@ -326,7 +327,7 @@ public:
 	
 	void PostImport();
 
-	void ImportFromJson(const TSharedPtr<FJsonObject> RootObject);
+	void MainImportFromJson(const TSharedPtr<FJsonObject> RootObject);
 
 	const static TWeakObjectPtr<UArticyImportData> GetImportData();
 	const FADISettings& GetSettings() const { return Settings; }
