@@ -34,6 +34,9 @@ public:
 	//~FReimportHandler
 
 private:
+	// @todo : analyse and trace use of this config file... Is it used somewhere ? What for ?
+	void UpdateConfigFile(FString Path);
+	
 	/** Performs the actual import task, converting the json data into UArticyImportData. */
 	bool ImportFromFile(const FString& FileName, UArticyImportData* Asset) const;
 
