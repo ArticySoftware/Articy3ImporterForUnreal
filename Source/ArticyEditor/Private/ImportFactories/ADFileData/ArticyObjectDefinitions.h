@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ADObjectDefs.generated.h"
+#include "ArticyObjectDefinitions.generated.h"
 
 USTRUCT()
 struct FArticyTemplateConstraint
@@ -116,7 +116,7 @@ struct FArticyObjectDef
 };
 
 USTRUCT()
-struct ARTICYEDITOR_API FADObjectDefs
+struct ARTICYEDITOR_API FArticyObjectDefinitions
 {
 	GENERATED_BODY()
 
@@ -128,6 +128,13 @@ struct ARTICYEDITOR_API FADObjectDefs
 	UPROPERTY(VisibleAnywhere, Category="ObjectDefinitions")
 	TMap<FName, FArticyObjectDef> Types;
 
+	/**
+	 * Contains the CPP type of all defined features.
+	 * This is needed to prevent feature types from being imported multiple times (as they are defined multiple times in the json).
+	 */
+	UPROPERTY(VisibleAnywhere, Category="ObjectDefinitions")
+	mutable TSet<FName> FeatureTypes;
+	
 	UPROPERTY(VisibleAnywhere, Category = "ObjectDefinitions")
 	TMap<FName, FArticyTemplateFeatureDef> FeatureDefs;	
 };

@@ -5,13 +5,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ADProjectDef.generated.h"
+#include "ArticyProjectDef.generated.h"
 
 /**
  * 
  */
 USTRUCT()
-struct ARTICYEDITOR_API FADProjectDef
+struct ARTICYEDITOR_API FArticyProjectDef
 {
 	GENERATED_BODY()
 

@@ -4,8 +4,10 @@
 
 #include "ADJsonFileBuilder.h"
 #include "ArticyEditor/Public/ArticyEditorModule.h"
-#include "ArticyEditor/Private/ImportFactories/ADFileData/AD_FileData.h"
 #include "Dom/JsonObject.h"
+#include "ImportFactories/ADFileData/ADISettings.h"
+#include "ImportFactories/ADFileData/ArticyImportData.h"
+#include "ImportFactories/ADFileData/ArticyProjectDef.h"
 #include "Policies/CondensedJsonPrintPolicy.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
@@ -35,7 +37,7 @@
 	
  */
 
-void ADJsonFileBuilder::BuildAsset(UAD_FileData& FileDataAsset, const TSharedPtr<FJsonObject> RootObject)
+void ADJsonFileBuilder::BuildAsset(UArticyImportData& FileDataAsset, const TSharedPtr<FJsonObject> RootObject)
 {
 	GetSettings(FileDataAsset.Settings, RootObject->GetObjectField(JSON_SECTION_SETTINGS));
 	GetProjectDefinitions(FileDataAsset.ProjectDefinitions, RootObject->GetObjectField(JSON_SECTION_PROJECT));
@@ -51,7 +53,7 @@ void ADJsonFileBuilder::BuildAsset(UAD_FileData& FileDataAsset, const TSharedPtr
 /**************************************************************
 				 Main
 **************************************************************/
-void ADJsonFileBuilder::BuildAssetVerbose(UAD_FileData& FileDataAsset, const TSharedPtr<FJsonObject> RootObject)
+void ADJsonFileBuilder::BuildAssetVerbose(UArticyImportData& FileDataAsset, const TSharedPtr<FJsonObject> RootObject)
 {
 	UE_LOG(LogArticyEditor, Log, TEXT("-------- Begin big data asset builder --------"));
 
@@ -99,7 +101,7 @@ void ADJsonFileBuilder::BuildAssetVerbose(UAD_FileData& FileDataAsset, const TSh
 /**************************************************************
 				 Flat data
 **************************************************************/
-void ADJsonFileBuilder::GetSettings(FADSettings& Settings, const TSharedPtr<FJsonObject> Json)
+void ADJsonFileBuilder::GetSettings(FADISettings& Settings, const TSharedPtr<FJsonObject> Json)
 {
 	if (!Json.IsValid())
 		return;
@@ -111,7 +113,7 @@ void ADJsonFileBuilder::GetSettings(FADSettings& Settings, const TSharedPtr<FJso
 	Json->TryGetStringField(TEXT("ScriptFragmentsHash"), Settings.ScriptFragmentsHash);
 }
 
-void ADJsonFileBuilder::GetProjectDefinitions(FADProjectDef& Project, const TSharedPtr<FJsonObject> Json)
+void ADJsonFileBuilder::GetProjectDefinitions(FArticyProjectDef& Project, const TSharedPtr<FJsonObject> Json)
 {
 	if (!Json.IsValid())
 		return;
@@ -125,7 +127,7 @@ void ADJsonFileBuilder::GetProjectDefinitions(FADProjectDef& Project, const TSha
 /**************************************************************
  				Packages
 **************************************************************/
-void ADJsonFileBuilder::GetPackages(FADPackages& PacksList, const TArray<TSharedPtr<FJsonValue>>* Json)
+void ADJsonFileBuilder::GetPackages(FArticyPackageDefs& PacksList, const TArray<TSharedPtr<FJsonValue>>* Json)
 {
 	PacksList.Packages.Reset();
 
@@ -228,7 +230,7 @@ EArticyAssetCategory ADJsonFileBuilder::GetAssetCategoryFromString(const FString
 /**************************************************************
 				User methods
 **************************************************************/
-void ADJsonFileBuilder::GetUserMethods(FADUserMethods& userMethods, const TArray<TSharedPtr<FJsonValue>>* Json)
+void ADJsonFileBuilder::GetUserMethods(FAIDUserMethods& userMethods, const TArray<TSharedPtr<FJsonValue>>* Json)
 {
 	userMethods.ScriptMethods.Reset(Json ? Json->Num() : 0);
 
@@ -313,7 +315,7 @@ void ADJsonFileBuilder::GetScriptMethod(FAIDScriptMethod& scriptMethod, TSharedP
 /**************************************************************
  				Global Namespaces/Variables
 **************************************************************/
-void ADJsonFileBuilder::GetGlobalVariables(FADGV& GV, const TArray<TSharedPtr<FJsonValue>>* Json)
+void ADJsonFileBuilder::GetGlobalVariables(FArticyGVInfo& GV, const TArray<TSharedPtr<FJsonValue>>* Json)
 {
 	GV.Namespaces.Reset(Json ? Json->Num() : 0);
 

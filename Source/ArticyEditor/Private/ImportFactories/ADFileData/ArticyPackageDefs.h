@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "ArticyAsset.h"
-#include "ADPackages.generated.h"
+#include "ArticyPackageDefs.generated.h"
 
 // UENUM()
 // enum class EArticyAssetCategory : uint8
@@ -89,7 +89,7 @@ struct FArticyPackageDef
 };
 
 USTRUCT()
-struct ARTICYEDITOR_API FADPackages
+struct ARTICYEDITOR_API FArticyPackageDefs
 {
 	GENERATED_BODY()
 

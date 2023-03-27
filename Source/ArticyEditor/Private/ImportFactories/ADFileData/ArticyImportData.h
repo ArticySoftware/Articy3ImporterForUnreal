@@ -5,14 +5,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ADGV.h"
-#include "ADHierarchy.h"
-#include "ADObjectDefs.h"
-#include "ADPackages.h"
-#include "ADProjectDef.h"
-#include "ADSettings.h"
-#include "ADUserMethods.h"
-#include "AD_FileData.generated.h"
+#include "ArticyGVInfo.h"
+#include "ADIHierarchy.h"
+#include "ArticyObjectDefinitions.h"
+#include "ArticyPackageDefs.h"
+#include "ArticyProjectDef.h"
+#include "ADISettings.h"
+#include "AIDUserMethods.h"
+#include "ArticyImportData.generated.h"
 
 /*
     UADFileData
@@ -24,34 +24,43 @@
  	the UADJsonFactory (prev. ArticyX) now UADBinaryArchiveFactory.
  */
 UCLASS()
-class ARTICYEDITOR_API UAD_FileData : public UDataAsset
+class ARTICYEDITOR_API UArticyImportData : public UDataAsset
 {
 	GENERATED_BODY()
    
 public:
+	// Todo : add comparison flags for import
+	//			Need proxy ?...
 	UPROPERTY(VisibleAnywhere, Category="Data")
-	FADSettings Settings;
+	FADISettings Settings;
 
 	UPROPERTY(VisibleAnywhere, Category="Data")
-	FADProjectDef ProjectDefinitions;
+	FArticyProjectDef ProjectDefinitions;
 
 	UPROPERTY(VisibleAnywhere, Category="Data")
-	FADGV GlobalVariables;
+	FArticyGVInfo GlobalVariables;
 
+	// unclomplete class.... not a poco
+	// Need a proxy class to implement
+	// GetTypes()/GetFeatures() ... etc...
 	UPROPERTY(VisibleAnywhere, Category="Data")
-	FADObjectDefs ObjectDefinitions;
+	FArticyObjectDefinitions ObjectDefinitions;
 
+	// Add proxy class
+	// (GatherScripts()/GenerateAssets()/GetPackageNames()...)
 	UPROPERTY(VisibleAnywhere, Category="Data")
-	FADPackages Packages;
-
-	UPROPERTY(VisibleAnywhere, Category="Data")
-	FADHierarchy Hierarchy;
-
+	FArticyPackageDefs Packages;
+	
 	UPROPERTY(VisibleAnywhere, Category="Scripts")
-	FADUserMethods UserMethods;
+	FAIDUserMethods UserMethods;
 
-	// UPROPERTY(VisibleAnywhere, Category="Scripts")
-	// TSet<FADExpressoFragment> ScriptFragments;
+	// Todo : build hierarchy 
+	UPROPERTY(VisibleAnywhere, Category="Data")
+	FADIHierarchy Hierarchy;
+
+	// Todo : build script fragments
+	UPROPERTY(VisibleAnywhere, Category="Scripts")
+	TSet<FArticyExpressoFragment> ScriptFragments;
 	
 	/*
 	// Blueprint type UDataAsset => move elsewhere ??

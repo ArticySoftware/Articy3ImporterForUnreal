@@ -30,6 +30,6 @@ public:
 private:
 	UADJsonFactory();
 	/** Performs the actual import task, converting the json data into UArticyImportData. */
-	bool ImportFromFile(const FString& FileName, class UAD_FileData &Asset) const;
+	bool ImportFromFile(const FString& FileName, class UArticyImportData &Asset) const;
 	
 };

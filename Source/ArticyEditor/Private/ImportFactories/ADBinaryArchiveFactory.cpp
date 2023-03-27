@@ -7,14 +7,14 @@
 
 #include "ADAssetsBuilders/ADBinaryFileReader.h"
 #include "ADAssetsBuilders/FileDispatcher/JsonFileDispatcher.h"
-#include "ADFileData/AD_FileData.h"
+#include "ADFileData/ArticyImportData.h"
 #include "ArticyEditor/Public/ArticyEditorModule.h"
 #include "Misc/FileHelper.h"
 
 UADBinaryArchiveFactory::UADBinaryArchiveFactory()
 {
 	bEditorImport = true;
-	SupportedClass = UAD_FileData::StaticClass();
+	SupportedClass = UArticyImportData::StaticClass();
 	Formats.Add(TEXT("archive;Articy:Draft exported file"));
 }
 
@@ -30,7 +30,7 @@ UObject* UADBinaryArchiveFactory::FactoryCreateFile(UClass* InClass, UObject* In
 {
 	FString Path = FPaths::GetPath(InParent->GetPathName());
 	
-	auto ImportData = NewObject<UAD_FileData>(InParent,InName,Flags);
+	auto ImportData = NewObject<UArticyImportData>(InParent,InName,Flags);
 	
 	if(!ImportFromFile(Filename, *ImportData) && ImportData)
 	{
@@ -40,7 +40,7 @@ UObject* UADBinaryArchiveFactory::FactoryCreateFile(UClass* InClass, UObject* In
 	return ImportData;
 }
 
-bool UADBinaryArchiveFactory::ImportFromFile(const FString& FileName, UAD_FileData& Asset) const
+bool UADBinaryArchiveFactory::ImportFromFile(const FString& FileName, UArticyImportData& Asset) const
 {
 	TArray<uint8> fileContent;
 	if (!FFileHelper::LoadFileToArray(fileContent, *FileName))

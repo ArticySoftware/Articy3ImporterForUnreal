@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ADGV.generated.h"
+#include "ArticyGVInfo.generated.h"
 
 // ------------------ GV Articy types
 UENUM()
@@ -56,7 +56,7 @@ struct FArticyGVNamespace
 
 // ------------------------ GV root Definition
 USTRUCT()
-struct ARTICYEDITOR_API FADGV
+struct ARTICYEDITOR_API FArticyGVInfo
 {
 	GENERATED_BODY()
 

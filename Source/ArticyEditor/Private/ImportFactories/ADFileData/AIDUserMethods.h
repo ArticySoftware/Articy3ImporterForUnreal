@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ADUserMethods.generated.h"
+#include "AIDUserMethods.generated.h"
 
 USTRUCT()
 struct FAIDScriptMethodParameter
@@ -46,7 +46,7 @@ struct FAIDScriptMethod
 };
 
 USTRUCT()
-struct ARTICYEDITOR_API FADUserMethods
+struct ARTICYEDITOR_API FAIDUserMethods
 {
 	GENERATED_BODY()
 

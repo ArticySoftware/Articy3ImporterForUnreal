@@ -5,13 +5,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ADSettings.generated.h"
+#include "ADISettings.generated.h"
 
 /**
  * 
  */
 USTRUCT()
-struct FADSettings
+struct FADISettings
 {
 	GENERATED_BODY()
 

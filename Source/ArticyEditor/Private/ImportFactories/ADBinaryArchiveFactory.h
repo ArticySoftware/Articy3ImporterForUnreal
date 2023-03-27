@@ -16,7 +16,7 @@ class ARTICYEDITOR_API UADBinaryArchiveFactory : public UFactory
 	GENERATED_BODY()
 	
 	UADBinaryArchiveFactory();
-	bool ImportFromFile(const FString& FileName, class UAD_FileData &Asset) const;
+	bool ImportFromFile(const FString& FileName, class UArticyImportData &Asset) const;
 	
 public:
 	bool FactoryCanImport(const FString& Filename) override;

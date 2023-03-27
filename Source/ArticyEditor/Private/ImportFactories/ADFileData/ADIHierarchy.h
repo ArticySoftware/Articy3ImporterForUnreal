@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "ADHierarchy.generated.h"
+#include "ADIHierarchy.generated.h"
 
 UCLASS(BlueprintType)
 class UADIHierarchyObject : public UObject
@@ -26,7 +26,7 @@ public:
 };
 
 USTRUCT()
-struct ARTICYEDITOR_API FADHierarchy
+struct ARTICYEDITOR_API FADIHierarchy
 {
 	GENERATED_BODY()
 

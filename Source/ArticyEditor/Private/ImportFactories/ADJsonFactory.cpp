@@ -5,7 +5,7 @@
 
 #include "ADJsonFactory.h"
 #include "ADAssetsBuilders/ADJsonFileBuilder.h"
-#include "ADFileData/AD_FileData.h"
+#include "ADFileData/ArticyImportData.h"
 #include "Misc/FileHelper.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
@@ -14,7 +14,7 @@
 UADJsonFactory::UADJsonFactory()
 {
 	bEditorImport = true;
-	SupportedClass = UAD_FileData::StaticClass();
+	SupportedClass = UArticyImportData::StaticClass();
 	Formats.Add(TEXT("articyue4;Articy:Draft exported file"));
 }
 
@@ -29,7 +29,7 @@ UObject* UADJsonFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, F
 {
 	FString Path = FPaths::GetPath(InParent->GetPathName());
 	
-	auto ImportData = NewObject<UAD_FileData>(InParent,InName,Flags);
+	auto ImportData = NewObject<UArticyImportData>(InParent,InName,Flags);
 	
 	if(!ImportFromFile(Filename, *ImportData) && ImportData)
 	{
@@ -39,7 +39,7 @@ UObject* UADJsonFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, F
 	return ImportData;
 }
 
-bool UADJsonFactory::ImportFromFile(const FString& FileName, UAD_FileData &Asset) const
+bool UADJsonFactory::ImportFromFile(const FString& FileName, UArticyImportData &Asset) const
 {
 	//load file as text file
 	FString JSON;

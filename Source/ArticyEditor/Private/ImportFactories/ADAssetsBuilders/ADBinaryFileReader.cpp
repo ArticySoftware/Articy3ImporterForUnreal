@@ -4,7 +4,7 @@
 
 #include "ADBinaryFileReader.h"
 #include "ArticyEditor/Public/ArticyEditorModule.h"
-#include "ArticyEditor/Private/ImportFactories/ADFileData/AD_FileData.h"
+#include "ArticyEditor/Private/ImportFactories/ADFileData/ArticyImportData.h"
 #include "Misc/FileHelper.h"
 
 void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)

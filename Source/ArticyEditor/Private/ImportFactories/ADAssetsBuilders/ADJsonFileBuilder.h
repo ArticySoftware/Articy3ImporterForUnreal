@@ -12,26 +12,28 @@
 #define JSON_SECTION_PACKAGES TEXT("Packages")
 #define JSON_SECTION_HIERARCHY TEXT("Hierarchy")
 
+class UArticyImportData;
 enum class EArticyAssetCategory : uint8;
-class UAD_FileData;
 struct FArticyGVNamespace;
 
 /**
  * @brief Build an AD_File object from a given Articy JSon Object
+ *          Must reproduce all the functionalities of the previous
+ *          Json importer to build the initial 
  */
 class ADJsonFileBuilder
 {
 public:
-	static void BuildAsset(UAD_FileData &FileDataAsset,const TSharedPtr<FJsonObject> RootObject);
-	static void BuildAssetVerbose(UAD_FileData &FileDataAsset,const TSharedPtr<FJsonObject> RootObject);
+	static void BuildAsset(UArticyImportData &FileDataAsset,const TSharedPtr<FJsonObject> RootObject);
+	static void BuildAssetVerbose(UArticyImportData &FileDataAsset,const TSharedPtr<FJsonObject> RootObject);
 	
 private:
 	// Flat data
-	static void GetSettings(struct FADSettings &Settings, const TSharedPtr<FJsonObject> Json);
-	static void GetProjectDefinitions(struct FADProjectDef &Project, const TSharedPtr<FJsonObject> Json);
+	static void GetSettings(struct FADISettings &Settings, const TSharedPtr<FJsonObject> Json);
+	static void GetProjectDefinitions(struct FArticyProjectDef &Project, const TSharedPtr<FJsonObject> Json);
 
 	// Packages
-	static void GetPackages(struct FADPackages &PacksList, const TArray<TSharedPtr<FJsonValue>>* Json);
+	static void GetPackages(struct FArticyPackageDefs &PacksList, const TArray<TSharedPtr<FJsonValue>>* Json);
 	static void GetPackageDef(struct FArticyPackageDef &pDef, const TSharedPtr<FJsonObject> Json);
 	static void GetModelDef(struct FArticyModelDef &modelDef,  const TSharedPtr<FJsonObject> Json);
 	static EArticyAssetCategory GetAssetCategoryFromString(const FString Category);
@@ -40,11 +42,11 @@ private:
 	static void GetHierarchy();
 
 	// User methods
-	static void GetUserMethods(struct FADUserMethods &userMethods, const TArray<TSharedPtr<FJsonValue>>* Json);
+	static void GetUserMethods(struct FAIDUserMethods &userMethods, const TArray<TSharedPtr<FJsonValue>>* Json);
 	static void GetScriptMethod(struct FAIDScriptMethod &scriptMethod, TSharedPtr<FJsonObject> Json, TSet<FString>& OverloadedMethods);
 	
 	// Global Namespaces/Variables
-	static void GetGlobalVariables(struct FADGV &GV, const TArray<TSharedPtr<FJsonValue>>* Json);
+	static void GetGlobalVariables(struct FArticyGVInfo &GV, const TArray<TSharedPtr<FJsonValue>>* Json);
 	static void GetGVNameSpace(FArticyGVNamespace &GVNamespace, const TSharedPtr<FJsonObject> JsonNamespace);
 	static void GetGVVariable(struct FArticyGVar& var, const TSharedPtr<FJsonObject> JsonVar);
 	

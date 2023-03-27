@@ -5,10 +5,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ADExpressoFragment.generated.h"
+#include "ArticyExpressoFragment.generated.h"
 
 USTRUCT()
-struct ARTICYEDITOR_API FADExpressoFragment
+struct ARTICYEDITOR_API FArticyExpressoFragment
 {
 	GENERATED_BODY()
 
@@ -20,14 +20,14 @@ struct ARTICYEDITOR_API FADExpressoFragment
 	bool bIsInstruction = false;
 
 	// TSet mandatory
-	bool operator==(const FADExpressoFragment& Other) const
+	bool operator==(const FArticyExpressoFragment& Other) const
 	{
 		return bIsInstruction == Other.bIsInstruction && OriginalFragment == Other.OriginalFragment;
 	}
 };
 
 // TSet mandatory
-inline uint32 GetTypeHash(const FADExpressoFragment& A)
+inline uint32 GetTypeHash(const FArticyExpressoFragment& A)
 {
 	return GetTypeHash(A.OriginalFragment) ^ GetTypeHash(A.bIsInstruction);
 }
