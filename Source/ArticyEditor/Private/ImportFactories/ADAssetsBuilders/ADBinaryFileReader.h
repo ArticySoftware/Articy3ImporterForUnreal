@@ -4,7 +4,7 @@
 #pragma once
 #include "FileDispatcher/IFileDispatcher.h"
 
-
+class UArticyImportData;
 // External forward
 class UAD_FileData;
 
@@ -19,7 +19,7 @@ class ADBinaryFileReader
 	const char _requiredMagic[5] = "ADFA"; // 4 + null terminated
 	
 	// Prioritary properties
-	TUniquePtr<IFileDispatcher> _dispatcher;
+	TSharedPtr<IFileDispatcher> _dispatcher;
 	int _fileNumber = 0;
 	
 	// Secondary properties (convenience - not used right now - @warning : Anchor?)
@@ -28,10 +28,9 @@ class ADBinaryFileReader
 	uint8 _flags = 0;
 	
 public:
-	ADBinaryFileReader(IFileDispatcher* Dispatcher)
+	ADBinaryFileReader(TSharedPtr<IFileDispatcher> Dispatcher)
 	{
-		// Transfert ownership... UniquePtr or SharedPtr ?..
-		_dispatcher = MakeUnique<IFileDispatcher>(*Dispatcher);
+		_dispatcher = Dispatcher;
 	}
 	
 	/**

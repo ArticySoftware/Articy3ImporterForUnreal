@@ -4,7 +4,7 @@
 
 #include "ADBinaryFileReader.h"
 #include "ArticyEditor/Public/ArticyEditorModule.h"
-#include "ArticyEditor/Private/ImportFactories/ADFileData/ArticyImportData.h"
+#include "ArticyEditor/Private/ImportFactories/Data/ArticyImportData.h"
 #include "Misc/FileHelper.h"
 
 void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)
@@ -39,7 +39,13 @@ void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)
 	{
 		FileEntry = GetFileEntryFromArchive(FileDictOffset, Ar);
 		FString JsonFile = ExtractJsonFromFileEntry(Ar, FileEntry);
-		UE_LOG(LogArticyEditor, Warning, TEXT("------------------- JSON file #%i --------------------------------"), i+1);
+
+		if(FileEntry.FileName.Contains(TEXT("manifest"),ESearchCase::IgnoreCase))
+		{
+			_dispatcher->HandleManifest(JsonFile);
+		}
+		
+		UE_LOG(LogArticyEditor, Warning, TEXT("------------------- JSON file #%i : %s --------------------------------"), i+1, *FileEntry.FileName);
 		UE_LOG(LogArticyEditor, Warning, TEXT("%s"), *JsonFile);
 		UE_LOG(LogArticyEditor, Warning, TEXT("------------------- ------------- --------------------------------"));
 

@@ -7,7 +7,7 @@
 
 #include "ADAssetsBuilders/ADBinaryFileReader.h"
 #include "ADAssetsBuilders/FileDispatcher/JsonFileDispatcher.h"
-#include "ADFileData/ArticyImportData.h"
+#include "Data/ArticyImportData.h"
 #include "ArticyEditor/Public/ArticyEditorModule.h"
 #include "Misc/FileHelper.h"
 
@@ -52,14 +52,16 @@ bool UADBinaryArchiveFactory::ImportFromFile(const FString& FileName, UArticyImp
 	if(fileContent.Num()<=0) return false;
 
 	//@todo feed :
-	//			in IJSonFileDispatcher,
-	//			in nullable (optional) logger/perf analyser ,
-	//			Out UAD_FileData&
+	//			- in VisitorStack that operates over the importData structure
+	//				to handle post-dispatcher operations
+	//			- in nullable (optional) logger/perf analyser
+	//			- Data proxyes that encapsulate imported data structures
+	//				and provides methods to manipulate imported/serialized data
 	// -----------------------------------------------------------------------
 	// IC / Testable objects section
 	// -----------------------------------------------------------------------
-	const TUniquePtr<FJsonFileDispatcher> Dispatcher = MakeUnique<FJsonFileDispatcher>();
-	const TUniquePtr<ADBinaryFileReader> BinFileReader = MakeUnique<ADBinaryFileReader>(Dispatcher.Get());
+	const TSharedPtr<FJsonFileDispatcher> Dispatcher = MakeShared<FJsonFileDispatcher>(&Asset);
+	const TSharedPtr<ADBinaryFileReader> BinFileReader = MakeShared<ADBinaryFileReader>(Dispatcher);
 	BinFileReader->ReadFile(fileContent);
 	
 	fileContent.Empty();

@@ -5,7 +5,7 @@
 
 #include "ADJsonFactory.h"
 #include "ADAssetsBuilders/ADJsonFileBuilder.h"
-#include "ADFileData/ArticyImportData.h"
+#include "Data/ArticyImportData.h"
 #include "Misc/FileHelper.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
