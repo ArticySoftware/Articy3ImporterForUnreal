@@ -34,7 +34,7 @@
 		Regenerate code
 		(recompile...)
 	}
-	
+	z
  */
 
 void ADJsonFileBuilder::BuildAsset(UArticyImportData& FileDataAsset, const TSharedPtr<FJsonObject> RootObject)

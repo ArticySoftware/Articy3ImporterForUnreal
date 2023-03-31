@@ -20,6 +20,7 @@ class ARTICYEDITOR_API UADBinaryArchiveFactory : public UFactory
 	
 public:
 	bool FactoryCanImport(const FString& Filename) override;
+	UClass* ResolveSupportedClass() override;
 	UObject* FactoryCreateFile(UClass* InClass,
 								UObject* InParent, 
 								FName InName, 

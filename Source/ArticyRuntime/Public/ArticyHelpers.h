@@ -21,6 +21,9 @@ namespace ArticyHelpers
 
 #define STRINGIFY(x) #x
 
+//---------------------------------------------------------------------------//
+//---------------------------------------------------------------------------//
+// @Alewinn ; JSon file import relatives macros shouldn't be inside the runtime part of the plugin....
 #define JSON_SECTION_SETTINGS TEXT("Settings")
 #define JSON_SECTION_PROJECT TEXT("Project")
 #define JSON_SECTION_GLOBALVARS TEXT("GlobalVariables")
@@ -29,6 +32,7 @@ namespace ArticyHelpers
 #define JSON_SECTION_PACKAGES TEXT("Packages")
 #define JSON_SECTION_HIERARCHY TEXT("Hierarchy")
 
+	
 /** Creates a new FJsonObject with name "x" from json->GetObjectField("x") */
 #define JSON_OBJECT(json, x) TSharedPtr<FJsonObject> x = json->GetObjectField(TEXT(#x))
 /** Tries to get the object with name "x" and if it's an object, executes body. */

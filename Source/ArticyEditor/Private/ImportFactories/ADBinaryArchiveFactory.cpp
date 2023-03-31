@@ -6,7 +6,7 @@
 #include "ADBinaryArchiveFactory.h"
 
 #include "ADAssetsBuilders/ADBinaryFileReader.h"
-#include "ADAssetsBuilders/FileDispatcher/JsonFileDispatcher.h"
+#include "ADAssetsBuilders/FileDispatcher/BinaryFileDispatcher.h"
 #include "Data/ArticyImportData.h"
 #include "ArticyEditor/Public/ArticyEditorModule.h"
 #include "Misc/FileHelper.h"
@@ -18,15 +18,20 @@ UADBinaryArchiveFactory::UADBinaryArchiveFactory()
 	Formats.Add(TEXT("archive;Articy:Draft exported file"));
 }
 
+UClass* UADBinaryArchiveFactory::ResolveSupportedClass()
+{
+	return UArticyImportData::StaticClass();
+}
+
 bool UADBinaryArchiveFactory::FactoryCanImport(const FString& Filename)
 {
 	UE_LOG(LogArticyEditor, Log, TEXT("Importation start with file : %s"),*Filename);
-	return Super::FactoryCanImport(Filename);
+	return true;
 }
 
 UObject* UADBinaryArchiveFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName,
-	EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn,
-	bool& bOutOperationCanceled)
+                                                    EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn,
+                                                    bool& bOutOperationCanceled)
 {
 	FString Path = FPaths::GetPath(InParent->GetPathName());
 	
@@ -60,7 +65,7 @@ bool UADBinaryArchiveFactory::ImportFromFile(const FString& FileName, UArticyImp
 	// -----------------------------------------------------------------------
 	// IC / Testable objects section
 	// -----------------------------------------------------------------------
-	const TSharedPtr<FJsonFileDispatcher> Dispatcher = MakeShared<FJsonFileDispatcher>(&Asset);
+	const TSharedPtr<FBinaryFileDispatcher> Dispatcher = MakeShared<FBinaryFileDispatcher>(&Asset);
 	const TSharedPtr<ADBinaryFileReader> BinFileReader = MakeShared<ADBinaryFileReader>(Dispatcher);
 	BinFileReader->ReadFile(fileContent);
 	

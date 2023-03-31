@@ -11,5 +11,5 @@ class UArticyImportData;
 class IFileDispatcher
 {
 public:
-	virtual void HandleManifest(FString JsonManifest) = 0;
+	virtual bool HandleFile(FString JsonManifest) = 0;
 };

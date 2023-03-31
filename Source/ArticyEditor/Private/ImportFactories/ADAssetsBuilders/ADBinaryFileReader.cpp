@@ -42,7 +42,7 @@ void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)
 
 		if(FileEntry.FileName.Contains(TEXT("manifest"),ESearchCase::IgnoreCase))
 		{
-			_dispatcher->HandleManifest(JsonFile);
+			_dispatcher->HandleFile(JsonFile);
 		}
 		
 		UE_LOG(LogArticyEditor, Warning, TEXT("------------------- JSON file #%i : %s --------------------------------"), i+1, *FileEntry.FileName);
