@@ -5,12 +5,15 @@
 #include "ADJsonFileBuilder.h"
 #include "ArticyEditor/Public/ArticyEditorModule.h"
 #include "Dom/JsonObject.h"
-#include "ImportFactories/Data/ADISettings.h"
+#include "ImportFactories/Data/Settings/ADISettings.h"
 #include "ImportFactories/Data/ArticyImportData.h"
-#include "ImportFactories/Data/ArticyProjectDef.h"
+#include "ImportFactories/Data/Project/ArticyProjectDef.h"
 #include "Policies/CondensedJsonPrintPolicy.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
+
+// Not used anymore / TODELETE 
+// => static class replaced with Poco/reader/dispatcher strategy.
 
 /*
  *	// Notes //
@@ -34,14 +37,13 @@
 		Regenerate code
 		(recompile...)
 	}
-	z
  */
 
 void ADJsonFileBuilder::BuildAsset(UArticyImportData& FileDataAsset, const TSharedPtr<FJsonObject> RootObject)
 {
 	GetSettings(FileDataAsset.Settings, RootObject->GetObjectField(JSON_SECTION_SETTINGS));
-	GetProjectDefinitions(FileDataAsset.ProjectDefinitions, RootObject->GetObjectField(JSON_SECTION_PROJECT));
-	GetPackages(FileDataAsset.Packages, &RootObject->GetArrayField(JSON_SECTION_PACKAGES));
+	GetProjectDefinitions(FileDataAsset.Project, RootObject->GetObjectField(JSON_SECTION_PROJECT));
+	GetPackages(FileDataAsset.PackageDefs, &RootObject->GetArrayField(JSON_SECTION_PACKAGES));
 
 	GetHierarchy(); // Looks like it imports the whole articy folder hierarchy... Necessary ???
 	GetUserMethods(FileDataAsset.UserMethods,&RootObject->GetArrayField(JSON_SECTION_SCRIPTMEETHODS));
@@ -67,12 +69,12 @@ void ADJsonFileBuilder::BuildAssetVerbose(UArticyImportData& FileDataAsset, cons
 	UE_LOG(LogArticyEditor, Display, TEXT("Project settings import time : %f ms"), LocalTimeEllapsed)
 
 	StartTime = FDateTime::UtcNow();
-	GetProjectDefinitions(FileDataAsset.ProjectDefinitions, RootObject->GetObjectField(JSON_SECTION_PROJECT));
+	GetProjectDefinitions(FileDataAsset.Project, RootObject->GetObjectField(JSON_SECTION_PROJECT));
 	LocalTimeEllapsed = (FDateTime::UtcNow() - StartTime).GetTotalMilliseconds();
 	UE_LOG(LogArticyEditor, Display, TEXT("Project definitions import time : %f ms"), LocalTimeEllapsed)
 
 	StartTime = FDateTime::UtcNow();
-	GetPackages(FileDataAsset.Packages, &RootObject->GetArrayField(JSON_SECTION_PACKAGES));
+	GetPackages(FileDataAsset.PackageDefs, &RootObject->GetArrayField(JSON_SECTION_PACKAGES));
 	LocalTimeEllapsed = (FDateTime::UtcNow() - StartTime).GetTotalMilliseconds();
 	UE_LOG(LogArticyEditor, Display, TEXT("Packages import time : %f ms"), LocalTimeEllapsed)
 

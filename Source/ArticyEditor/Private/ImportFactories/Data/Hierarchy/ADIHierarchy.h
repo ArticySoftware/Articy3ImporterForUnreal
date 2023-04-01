@@ -29,7 +29,7 @@ USTRUCT()
 struct ARTICYEDITOR_API FADIHierarchy
 {
 	GENERATED_BODY()
-
+	
 	UPROPERTY(VisibleAnywhere, Category="Hierarchy")
 	UADIHierarchyObject* RootObject = nullptr;
 };

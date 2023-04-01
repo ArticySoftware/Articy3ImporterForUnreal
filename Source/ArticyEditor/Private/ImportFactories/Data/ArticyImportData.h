@@ -6,12 +6,12 @@
 
 #include "CoreMinimal.h"
 #include "ArticyGVInfo.h"
-#include "ADIHierarchy.h"
+#include "Hierarchy/ADIHierarchy.h"
 #include "ArticyObjectDefinitions.h"
-#include "ArticyPackageDefs.h"
-#include "ArticyProjectDef.h"
-#include "ADISettings.h"
-#include "AIDUserMethods.h"
+#include "PackageDefs/ArticyPackageDefs.h"
+#include "Project/ArticyProjectDef.h"
+#include "Settings/ADISettings.h"
+#include "UserMethods/AIDUserMethods.h"
 #include "ArticyImportData.generated.h"
 
 /*
@@ -27,15 +27,21 @@ UCLASS()
 class ARTICYEDITOR_API UArticyImportData : public UDataAsset
 {
 	GENERATED_BODY()
-   
+
 public:
+	UPROPERTY(VisibleAnywhere, Category="Hash")
+	FString ObjectDefinitionsHash = "";
+
+	UPROPERTY(VisibleAnywhere, Category = "Hash")
+	FString ScriptFragmentsHash = "";
+
 	// Todo : add comparison flags for import
 	//			Need proxy ?...
 	UPROPERTY(VisibleAnywhere, Category="Data")
 	FADISettings Settings;
 
 	UPROPERTY(VisibleAnywhere, Category="Data")
-	FArticyProjectDef ProjectDefinitions;
+	FArticyProjectDef Project;
 
 	UPROPERTY(VisibleAnywhere, Category="Data")
 	FArticyGVInfo GlobalVariables;
@@ -49,8 +55,8 @@ public:
 	// Add proxy class
 	// (GatherScripts()/GenerateAssets()/GetPackageNames()...)
 	UPROPERTY(VisibleAnywhere, Category="Data")
-	FArticyPackageDefs Packages;
-	
+	FArticyPackageDefs PackageDefs;
+
 	UPROPERTY(VisibleAnywhere, Category="Scripts")
 	FAIDUserMethods UserMethods;
 
@@ -61,16 +67,17 @@ public:
 	// Todo : build script fragments
 	UPROPERTY(VisibleAnywhere, Category="Scripts")
 	TSet<FArticyExpressoFragment> ScriptFragments;
-	
+
 	/*
 	// Blueprint type UDataAsset => move elsewhere ??
 	// non-poco classes => ADFileAssets ... ? 
 	UPROPERTY(VisibleAnywhere, Category = "Assets")
     TArray<TSoftObjectPtr<UArticyPackage>> ImportedPackages;
+	*/
 
-    // Optim (ArticyID Hierarchy flattening) => move somewhere else
+	// Optim (ArticyID Hierarchy flattening) => move somewhere else
     // non-poco classes => ADFileCaches
     UPROPERTY(VisibleAnywhere, Category="Cache")
     TMap<FArticyId, FArticyIdArray> ParentChildrenCache;
-	*/
+
 };

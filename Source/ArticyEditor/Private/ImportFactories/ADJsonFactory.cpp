@@ -2,13 +2,10 @@
 // Copyright (c) Articy Software GmbH & Co. KG. All rights reserved.  
 //
 
-
 #include "ADJsonFactory.h"
-#include "ADAssetsBuilders/ADJsonFileBuilder.h"
 #include "ADAssetsBuilders/FileDispatcher/JsonFileDispatcher.h"
 #include "Data/ArticyImportData.h"
 #include "Misc/FileHelper.h"
-#include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "ArticyEditor/Public/ArticyEditorModule.h"
 
@@ -55,7 +52,7 @@ UObject* UADJsonFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, F
 	// Push outside from the factory if it's not directely
 	// related to it (architecture)
 	//------------------------------------------------------
-#pragma	NOTE( TODO - UADJsonFactory::FactoryCreateFile )	
+#pragma	NOTE( TODO - UADJsonFactory::FactoryCreateFile : analyse updateConfigFile )	
 	FString Path = FPaths::GetPath(InParent->GetPathName());
 	UpdateConfigFile(Path);
 	//------------------------------------------------------
@@ -82,6 +79,7 @@ UObject* UADJsonFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, F
 	return ImportData;
 }
 
+
 void UADJsonFactory::UpdateConfigFile(FString Path)
 {
 	UArticyPluginSettings* CDO_Settings = GetMutableDefault<UArticyPluginSettings>();
@@ -107,10 +105,37 @@ bool UADJsonFactory::ImportFromFile(const FString& FileName, UArticyImportData &
 	}
 
 	// No specific reader needed but the JSon reader itself,
-	// we can directely dispatch the file inside the target
+	// we can directly dispatch the file inside the target
 	// asset for serialization.
+	// Later this logic can be reused for archive multiple files
+	// import, hoping to reduce side effects.
 	TSharedPtr<FJsonFileDispatcher> Dispatcher = MakeShared<FJsonFileDispatcher>(&Asset);
-	return Dispatcher->HandleFile(JSON);
+	if(Dispatcher->HandleFile(JSON))
+	{
+		// Todo : architecture / strategy
+		// to externalyse following logic, as this stage will be the same
+		// than previous versions (single or multi JSon files)		
+		if(UArticyPluginSettings::Get()->bVerifyArticyReferenceBeforeImport)
+		{
+			// todo : ArticyRuntime reference check => merge BuildToolParser			
+		}
+
+		if(Dispatcher->isCodeGenerationNeeded())
+		{
+			// Todo : merge code generator
+			
+			// Todo : proxy (?)... for cache handling (?) 
+			// Todo : merge asset generator
+			// todo : PostImport method
+		}
+		else
+		{
+			// Todo : proxy (?)... for cache handling (?) 
+			// Todo : merge asset generator
+			// todo : PostImport method
+		}
+	}
+	else return false;		
 }
 
 // Reimport handler

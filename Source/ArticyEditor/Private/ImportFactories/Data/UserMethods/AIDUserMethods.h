@@ -29,8 +29,8 @@ struct FAIDScriptMethod
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
 	FString BlueprintName;
 	
-	// UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
-	// bool bIsOverloadedFunction = false;
+	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
+	bool bIsOverloadedFunction = false;
 
 	/** A list of parameters (type + parameter name), to be used in a method declaration. */
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
@@ -41,6 +41,7 @@ struct FAIDScriptMethod
 	/** A list of parameters (original types), used for generating the blueprint function display name. */
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
 	TArray<FString> OriginalParameterTypes;
+	
 	UPROPERTY(VisibleAnywhere, Category="ScriptMethods")
 	FString ReturnType;
 };

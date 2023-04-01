@@ -92,7 +92,7 @@ USTRUCT()
 struct ARTICYEDITOR_API FArticyPackageDefs
 {
 	GENERATED_BODY()
-
+	
 	UPROPERTY(VisibleAnywhere, Category = "Packages")
 	TArray<FArticyPackageDef> Packages;
 };
