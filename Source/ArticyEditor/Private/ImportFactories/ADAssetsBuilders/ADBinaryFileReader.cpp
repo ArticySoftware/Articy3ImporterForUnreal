@@ -4,7 +4,7 @@
 
 #include "ADBinaryFileReader.h"
 #include "ArticyEditor/Public/ArticyEditorModule.h"
-#include "ArticyEditor/Private/ImportFactories/Data/ArticyImportData.h"
+// #include "ArticyEditor/Private/ImportFactories/Data/ArticyImportData.h"
 #include "Misc/FileHelper.h"
 
 void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)
@@ -15,7 +15,7 @@ void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)
 	const FString MAGIC(cstr.c_str());
 	if(MAGIC !=_requiredMagic)
 	{
-		UE_LOG(LogArticyEditor,Error, TEXT("Archive type mismatch. Abort import."));
+		UE_LOG(LogArticyEditor,Error, TEXT("Archive type mismatch ; found %s - Abort import."), *MAGIC);
 		return;
 	}
 	
@@ -42,7 +42,7 @@ void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)
 
 		if(FileEntry.FileName.Contains(TEXT("manifest"),ESearchCase::IgnoreCase))
 		{
-			_dispatcher->HandleFile(JsonFile);
+			_dispatcher->HandleFile(JsonFile,IFileDispatcher::manifest);
 		}
 		
 		UE_LOG(LogArticyEditor, Warning, TEXT("------------------- JSON file #%i : %s --------------------------------"), i+1, *FileEntry.FileName);

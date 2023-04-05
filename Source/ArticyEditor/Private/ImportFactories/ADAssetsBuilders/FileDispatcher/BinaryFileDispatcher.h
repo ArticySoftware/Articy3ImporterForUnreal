@@ -1,15 +1,20 @@
 ﻿#pragma once
-#include "JsonFileDispatcher.h"
-#include "ImportFactories/Data/ArticyImportData.h"
+#include "IFileDispatcher.h"
+#include "ImportFactories/ArticyImportData.h"
+// #include "ImportFactories/Data/ArticyImportData.h"
 
 class UArticyImportData;
 
-class FBinaryFileDispatcher:public FJsonFileDispatcher
+class FBinaryFileDispatcher:public IFileDispatcher
 {
+	UArticyImportData* _asset;
+
 public:
+
 	explicit FBinaryFileDispatcher(UArticyImportData* Asset)
-	:FJsonFileDispatcher(Asset)
-	{}
+	{
+		_asset = Asset;
+	}
 	
-	virtual bool HandleFile(FString JsonManifest) override;
+	virtual bool HandleFile(FString JsonManifest, JsonFileType fleType) override;
 };

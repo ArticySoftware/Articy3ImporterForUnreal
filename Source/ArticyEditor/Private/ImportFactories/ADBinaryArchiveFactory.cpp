@@ -7,7 +7,7 @@
 
 #include "ADAssetsBuilders/ADBinaryFileReader.h"
 #include "ADAssetsBuilders/FileDispatcher/BinaryFileDispatcher.h"
-#include "Data/ArticyImportData.h"
+#include "ImportFactories/ArticyImportData.h"
 #include "ArticyEditor/Public/ArticyEditorModule.h"
 #include "Misc/FileHelper.h"
 

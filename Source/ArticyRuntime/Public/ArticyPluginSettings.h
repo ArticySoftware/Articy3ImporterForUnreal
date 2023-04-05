@@ -61,6 +61,8 @@ public:
 	UPROPERTY(EditAnywhere, config, Category=RuntimeSettings, meta=(DisplayName="Convert Unity formatting to Unreal Rich Text"))
 	bool bConvertUnityToUnrealRichText;
 
+	UPROPERTY(EditAnywhere, config, Category=RuntimeSettings, meta=(DisplayName="Prevent automatic compilation / Hot reloading while importing"))
+	bool bPreventAutomaticCompilation;
 
 	// internal cached data for data consistency between imports (setting restoration etc.)
 	UPROPERTY()
