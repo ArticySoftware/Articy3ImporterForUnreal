@@ -19,9 +19,11 @@ struct FADIFileHash
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere, Category="Hash")
-	FString fileName;
+	FString FileName;
 	UPROPERTY(VisibleAnywhere, Category="Hash")
-	FString hash;
+	FString Hash;
+
+	void ImportFromJson(const TSharedPtr<FJsonObject> Json);
 };
 
 USTRUCT()
@@ -30,11 +32,13 @@ struct FADILocalizedLanguage
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere, Category="Localization")
-	FString cultureName;
+	FString CultureName;
 	UPROPERTY(VisibleAnywhere, Category="Localization")
-	int articyLanguageID;
+	int ArticyLanguageId;
 	UPROPERTY(VisibleAnywhere, Category="Localization")
-	FString languageName;	
+	FString LanguageName;
+
+	void ImportFromJson(const TSharedPtr<FJsonObject> Json);
 };
 
 USTRUCT()
@@ -53,9 +57,12 @@ struct FADIManifest
 	UPROPERTY(VisibleAnywhere, Category="Manifest")
 	FADIFileHash ObjectDefinitionsTextsHash;
 
+	// @todo : mod. FArticyPackageDef (?)
+	/*
 	UPROPERTY(VisibleAnywhere, Category="Manifest")
 	TArray<FADIFileHash> PackagesHashes;
-
+	*/
+	
 	UPROPERTY(VisibleAnywhere, Category="Manifest")
 	FADIFileHash ScriptMethodsHash;
 
@@ -64,6 +71,8 @@ struct FADIManifest
 
 	UPROPERTY(VisibleAnywhere, Category="Manifest")
 	TArray<FADILocalizedLanguage> Languages;
+	
+	void ImportFromJson(const TSharedPtr<FJsonObject> JsonRoot);
 };
 
 
