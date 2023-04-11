@@ -11,13 +11,18 @@ class UArticyImportData;
 class IFileDispatcher
 {
 public:
-	// To complete when able to use full ArticyX export... 
+
 	enum JsonFileType
 	{
 		manifest,
 		globalVars,
-		ObjectDefinitions
+		objectDefinitions,
+		objectDefinitionsLocalization,
+		hierarchy,
+		package,
+		scriptMethods
 	};
 	
 	virtual bool HandleFile(FString JsonManifest, JsonFileType fleType) = 0;
+	virtual void HandleReimport() = 0;
 };

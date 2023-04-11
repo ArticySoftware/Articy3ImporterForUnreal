@@ -73,6 +73,8 @@ void UArticyImportData::MainImportFromDispatcher()
 	ParentChildrenCache.Empty();
 
 	// import GVs and ObjectDefs only if needed
+
+	
 	if (Settings.DidObjectDefsOrGVsChange())
 	{
 		if (_jsonGlobalVars.IsValid())

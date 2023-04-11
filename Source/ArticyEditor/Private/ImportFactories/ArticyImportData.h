@@ -117,8 +117,10 @@ struct FADISettings
 
 	void ImportFromJson(const TSharedPtr<FJsonObject> JsonRoot);
 
-	bool DidObjectDefsOrGVsChange() const { return bObjectDefsOrGVsChanged; }
-	bool DidScriptFragmentsChange() const { return bScriptFragmentsChanged; }
+	// !!!!!!!!! Alewinn ; for implementation only !!! --------------------------------------
+	//	=> This have to be moved into the manifest structure
+	bool DidObjectDefsOrGVsChange() const { return true;  } //bObjectDefsOrGVsChanged;
+	bool DidScriptFragmentsChange() const { return true; } //bScriptFragmentsChanged
 
 	void SetObjectDefinitionsRebuilt() { bObjectDefsOrGVsChanged = false; }
 	void SetScriptFragmentsRebuilt() { bScriptFragmentsChanged = false; }
@@ -126,6 +128,7 @@ struct FADISettings
 private:
 	bool bObjectDefsOrGVsChanged = true;
 	bool bScriptFragmentsChanged = true;
+	// !!!!!!!!! /Alewinn  -------------------------------------------------------------------
 };
 
 /**
@@ -399,6 +402,8 @@ public:
 	void MainImportFromJson(const TSharedPtr<FJsonObject> RootObject);
 
 	// ArticyX importer (importer >= 1.7.0)
+	// A better architecture would have been to externalize
+	// this section.. to refacto (?)
 	void MainImportFromDispatcher();
 	TSharedPtr<FJsonObject> _jsonManifest;
 	TSharedPtr<FJsonObject> _jsonPackageDefs;
@@ -406,7 +411,8 @@ public:
 	TSharedPtr<FJsonObject> _jsonUserMethods;
 	TSharedPtr<FJsonObject> _jsonGlobalVars;
 	TSharedPtr<FJsonObject> _jsonObjectDefinitions;
-
+	// -------------------------------------------------
+	
 	const static TWeakObjectPtr<UArticyImportData> GetImportData();
 	const FADISettings& GetSettings() const { return Settings; }
 	FADISettings& GetSettings() { return Settings; }

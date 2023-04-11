@@ -44,6 +44,37 @@ void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)
 		{
 			_dispatcher->HandleFile(JsonFile,IFileDispatcher::manifest);
 		}
+
+		// conditional reading depending manifest content / hashes 
+		if(FileEntry.FileName.Contains(TEXT("global_variables"),ESearchCase::IgnoreCase))
+		{
+			_dispatcher->HandleFile(JsonFile,IFileDispatcher::globalVars);
+		}
+
+		if(FileEntry.FileName.Contains(TEXT("object_definitions."),ESearchCase::IgnoreCase))
+		{
+			_dispatcher->HandleFile(JsonFile,IFileDispatcher::objectDefinitions);
+		}
+
+		if(FileEntry.FileName.Contains(TEXT("object_definitions_localization"),ESearchCase::IgnoreCase))
+		{
+			_dispatcher->HandleFile(JsonFile,IFileDispatcher::objectDefinitionsLocalization);
+		}
+
+		if(FileEntry.FileName.Contains(TEXT("hierarchy"),ESearchCase::IgnoreCase))
+		{
+			_dispatcher->HandleFile(JsonFile,IFileDispatcher::hierarchy);
+		}
+
+		if(FileEntry.FileName.Contains(TEXT("package"),ESearchCase::IgnoreCase))
+		{
+			_dispatcher->HandleFile(JsonFile,IFileDispatcher::package);
+		}
+
+		if(FileEntry.FileName.Contains(TEXT("script_methods"),ESearchCase::IgnoreCase))
+		{
+			_dispatcher->HandleFile(JsonFile,IFileDispatcher::scriptMethods);
+		}
 		
 		UE_LOG(LogArticyEditor, Warning, TEXT("------------------- JSON file #%i : %s --------------------------------"), i+1, *FileEntry.FileName);
 		UE_LOG(LogArticyEditor, Warning, TEXT("%s"), *JsonFile);
@@ -55,6 +86,11 @@ void ADBinaryFileReader::ReadFile(TArray<uint8> Ar)
 		
 		FileDictOffset += FileEntry.FileEntrysize;
 	}
+
+	// Now that we analyzed data structures from file,
+	// Determine if we have to reimport something and/or
+	// recompile code and do so
+	_dispatcher->HandleReimport();
 }
 
 long long ADBinaryFileReader::GetLongFromBuffer(TArray<uint8> Buffer, int Offset, int typeSize)
