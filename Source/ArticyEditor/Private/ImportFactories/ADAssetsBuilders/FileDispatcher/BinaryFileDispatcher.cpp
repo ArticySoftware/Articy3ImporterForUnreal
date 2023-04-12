@@ -56,7 +56,7 @@ bool FBinaryFileDispatcher::HandleFile(FString JsonManifest, JsonFileType fileTy
 		case package:
 			UE_LOG(LogArticyEditor,Warning,TEXT("=> Package found"));
 
-			// ?
+			// Done ?
 			_asset->_jsonPackageDefs = JsonParsed;
 			triggerReimport = true;
 			break;

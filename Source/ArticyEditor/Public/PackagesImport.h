@@ -96,11 +96,23 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Package")
 	FString Name;
+
+	// ArticyX ---------------
+	UPROPERTY(VisibleAnywhere, Category = "Package")
+	FString Id;
+	
 	UPROPERTY(VisibleAnywhere, Category = "Package")
 	FString Description;
 	UPROPERTY(VisibleAnywhere, Category = "Package")
 	bool IsDefaultPackage = false;
 
+	// ArticyX ---------------
+	UPROPERTY(VisibleAnywhere, Category = "Package")
+	bool IsIncluded = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "Package")
+	TArray<FADIFileHash> PackagesHashes;
+	
 	UPROPERTY(VisibleAnywhere, Category = "Package")
 	TArray<FArticyModelDef> Models;
 };

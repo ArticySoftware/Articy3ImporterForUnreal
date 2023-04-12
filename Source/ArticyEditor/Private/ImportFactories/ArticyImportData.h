@@ -84,9 +84,6 @@ struct FADISettings
 {
 	GENERATED_BODY()
 	
-	// public: => no need...
-	// in c++, like in c#, default acessibiliity
-	// in STRUCT is public...
 	// --- ArticyX multiJson file + localization
 	UPROPERTY(VisibleAnywhere, Category="Settings")
 	bool set_Localization = false;

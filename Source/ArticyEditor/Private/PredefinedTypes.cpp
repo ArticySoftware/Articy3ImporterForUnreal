@@ -1,6 +1,6 @@
 //  
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
- 
+
 //
 
 #include "PredefinedTypes.h"
@@ -27,11 +27,11 @@ FArticyPredefTypes::FArticyPredefTypes()
 {
 	//generic type for enums
 	Enum = MakeShareable(PREDEFINE_TYPE_EXT(uint8, "", [](PROP_SETTER_PARAMS)
-			{
-				uint32 num;
-				Json->TryGetNumber(num);
-				return static_cast<uint8>(num);
-			}));
+	                                        {
+	                                        uint32 num;
+	                                        Json->TryGetNumber(num);
+	                                        return static_cast<uint8>(num);
+	                                        }));
 
 	Types.Reset();
 
@@ -39,68 +39,98 @@ FArticyPredefTypes::FArticyPredefTypes()
 	//The key is the original type. It is NOT case-sensitive (FName)!
 	//Some are exposed as values, some as pointers
 	//Some can be initialized from json, others can't!
-	
-	Types.Add(TEXT("ArticyPrimitive"), new ArticyPredefinedTypeInfo<UArticyPrimitive, UArticyPrimitive*>("UArticyPrimitive", "UArticyPrimitive*", TEXT("nullptr"), nullptr /* NOTE: NO INITIALIZATION FROM JSON! */));
-	Types.Add(TEXT("ArticyObject"), new ArticyPredefinedTypeInfo<UArticyObject, UArticyObject*>("UArticyObject", "UArticyObject*", TEXT("nullptr"), nullptr /* NOTE: NO INITIALIZATION FROM JSON! */));
+
+	Types.Add(TEXT("ArticyPrimitive"), new ArticyPredefinedTypeInfo<UArticyPrimitive, UArticyPrimitive*>(
+		          "UArticyPrimitive", "UArticyPrimitive*", TEXT("nullptr"),
+		          nullptr /* NOTE: NO INITIALIZATION FROM JSON! */));
+	Types.Add(TEXT("ArticyObject"), new ArticyPredefinedTypeInfo<UArticyObject, UArticyObject*>(
+		          "UArticyObject", "UArticyObject*", TEXT("nullptr"),
+		          nullptr /* NOTE: NO INITIALIZATION FROM JSON! */));
 
 	Types.Add(TEXT("id"), PREDEFINE_TYPE(FArticyId));
-	Types.Add(TEXT("string"), PREDEFINE_TYPE_EXT(FString, "TEXT(\"\")", [](PROP_SETTER_PARAMS) { return Json->Type == EJson::String ? Json->AsString() : FString{}; }));
+	Types.Add(TEXT("string"), PREDEFINE_TYPE_EXT(FString, "TEXT(\"\")",
+	                                             [](PROP_SETTER_PARAMS) { return Json->Type == EJson::String ? Json->
+	                                             AsString() : FString{}; }));
 	Types.Add(TEXT("ftext"), PREDEFINE_TYPE_EXT(FText, TEXT("FText::GetEmpty()"), [](PROP_SETTER_PARAMS)
-		{
-		if(Json->Type == EJson::String)
-		{
-			// Convert Unity rich text markup to Unreal (if the setting is enabled)
-			FString Processed = GetDefault<UArticyPluginSettings>()->bConvertUnityToUnrealRichText ?
-				ConvertUnityMarkupToUnreal(Json->AsString()) : 
-				Json->AsString();
+	                                            {
+	                                            if(Json->Type == EJson::String)
+	                                            {
+	                                            // Convert Unity rich text markup to Unreal (if the setting is enabled)
+	                                            FString Processed = GetDefault<UArticyPluginSettings>()->
+	                                            bConvertUnityToUnrealRichText ?
+	                                            ConvertUnityMarkupToUnreal(Json->AsString()) :
+	                                            Json->AsString();
 
-			//return a new FText, where the Path is the key and the Property value is the defaut-language text
-			return FText::ChangeKey(TEXT("ARTICY"), Path, FText::FromString(Processed));
-		}
-		return FText::GetEmpty();
-	}));
+	                                            //return a new FText, where the Path is the key and the Property value is the defaut-language text
+	                                            return FText::ChangeKey(TEXT("ARTICY"), Path, FText::FromString(
+		                                            Processed));
+	                                            }
+	                                            return FText::GetEmpty();
+	                                            }));
+	// ------------------------------------------------------------------------------------------
+	// ArticyX localizable types
+
+	Types.Add(TEXT("ArticyString"), PREDEFINE_TYPE_EXT(FString, "TEXT(\"\")",
+	                                                   [](PROP_SETTER_PARAMS) { return Json->Type == EJson::String ?
+	                                                   Json->
+	                                                   AsString() : FString{}; }));
+
+	Types.Add(TEXT("ArticyMultiLanguageString"), PREDEFINE_TYPE_EXT(FString, "TEXT(\"\")",
+	                                                                [](PROP_SETTER_PARAMS) { return Json->Type == EJson
+	                                                                ::String ? Json->
+	                                                                AsString() : FString{}; }));
+	// ------------------------------------------------------------------------------------------
+
 	Types.Add(TEXT("rect"), PREDEFINE_TYPE(FArticyRect));
-	Types.Add(TEXT("color"), PREDEFINE_TYPE_EXT(FLinearColor, "FLinearColor::Black", [](PROP_SETTER_PARAMS) { return ArticyHelpers::ParseColorFromJson(Json); }));
-	Types.Add(TEXT("point"), PREDEFINE_TYPE_EXT(FVector2D, "FVector2D::ZeroVector", [](PROP_SETTER_PARAMS) { return ArticyHelpers::ParseFVector2DFromJson(Json); }));
+	Types.Add(TEXT("color"), PREDEFINE_TYPE_EXT(FLinearColor, "FLinearColor::Black",
+	                                            [](PROP_SETTER_PARAMS) { return ArticyHelpers::ParseColorFromJson(Json);
+	                                            }));
+	Types.Add(TEXT("point"), PREDEFINE_TYPE_EXT(FVector2D, "FVector2D::ZeroVector",
+	                                            [](PROP_SETTER_PARAMS) { return ArticyHelpers::ParseFVector2DFromJson(
+		                                            Json); }));
 	Types.Add(TEXT("size"), PREDEFINE_TYPE(FArticySize));
-	Types.Add(TEXT("float"), PREDEFINE_TYPE_EXT(float, "0.f", [](PROP_SETTER_PARAMS) { return Json->IsNull() ? 0.f : static_cast<float>(Json->AsNumber()); }));
+	Types.Add(TEXT("float"), PREDEFINE_TYPE_EXT(float, "0.f",
+	                                            [](PROP_SETTER_PARAMS) { return Json->IsNull() ? 0.f : static_cast<float
+	                                            >(Json->AsNumber()); }));
 
 	auto int32Info = PREDEFINE_TYPE_EXT(int32, "0", [](PROP_SETTER_PARAMS) {
-												int32 num;
-												Json->TryGetNumber(num);
-												return num;
-											});
+	                                    int32 num;
+	                                    Json->TryGetNumber(num);
+	                                    return num;
+	                                    });
 	//uint is imported as int32 too, so we can expose it to blueprints
 	Types.Add(TEXT("uint"), int32Info);
 	Types.Add(TEXT("int"), int32Info);
 
-	auto boolInfo = PREDEFINE_TYPE_EXT(bool, "false", [](PROP_SETTER_PARAMS) { return !Json->IsNull() && Json->AsBool(); });
+	auto boolInfo = PREDEFINE_TYPE_EXT(bool, "false",
+	                                   [](PROP_SETTER_PARAMS) { return !Json->IsNull() && Json->AsBool(); });
 	//bool and boolean are the same
 	Types.Add(TEXT("bool"), boolInfo);
 	Types.Add(TEXT("boolean"), boolInfo);
 
 	Types.Add(TEXT("DateTime"), PREDEFINE_TYPE_EXT(FDateTime, "", [](PROP_SETTER_PARAMS)
-	{
-		FDateTime dt;
-		if(Json->Type == EJson::String)
-		{
-			auto str = Json->AsString();
-			int32 lastDot;
-			if(str.FindLastChar('.', lastDot))
-			{
-				//unreal only allows for up to 3 digits for the fractional second -.-
-				auto pos = lastDot + 3;
-				str.RemoveAt(pos, str.Len()-pos);
-			}
+	                                               {
+	                                               FDateTime dt;
+	                                               if(Json->Type == EJson::String)
+	                                               {
+	                                               auto str = Json->AsString();
+	                                               int32 lastDot;
+	                                               if(str.FindLastChar('.', lastDot))
+	                                               {
+	                                               //unreal only allows for up to 3 digits for the fractional second -.-
+	                                               auto pos = lastDot + 3;
+	                                               str.RemoveAt(pos, str.Len()-pos);
+	                                               }
 
-			ensure(FDateTime::ParseIso8601(*str, dt));
-		}
-		return dt;
-	}));
+	                                               ensure(FDateTime::ParseIso8601(*str, dt));
+	                                               }
+	                                               return dt;
+	                                               }));
 
 	//generic arrays - the ItemType is filled in by FArticyPropertyDef
 	//NOTE we cannot resolve the ItemType here, so we add a placeholder
-	Types.Add(TEXT("array"), new ArticyPredefinedTypeInfo<nullptr_t>(TEXT("TArray<?>"), TEXT("TArray<?>"), "", nullptr));
+	Types.Add(TEXT("array"), new ArticyPredefinedTypeInfo<nullptr_t>(
+		          TEXT("TArray<?>"), TEXT("TArray<?>"), "", nullptr));
 
 	//========================================//
 
@@ -115,7 +145,7 @@ FArticyPredefTypes::FArticyPredefTypes()
 												}));*/
 
 	Types.Add(TEXT("PreviewImage"), PREDEFINE_ARTICYOBJECT_TYPE(UArticyPreviewImage));
-	
+
 	//========================================//
 
 	//connections
@@ -129,10 +159,12 @@ FArticyPredefTypes::FArticyPredefTypes()
 	Types.Add(TEXT("OutputPin"), PREDEFINE_ARTICYOBJECT_TYPE(UArticyOutputPin));
 
 	//========================================//
-	
+
 	//script fragments
-	Types.Add(TEXT("Script_Condition"), new ArticyObjectTypeInfo<UArticyScriptCondition, UArticyScriptCondition*>("UArticyScriptCondition", "UArticyScriptCondition""*"));
-	Types.Add(TEXT("Script_Instruction"), new ArticyObjectTypeInfo<UArticyScriptInstruction, UArticyScriptInstruction*>("UArticyScriptInstruction", "UArticyScriptInstruction""*"));
+	Types.Add(TEXT("Script_Condition"), new ArticyObjectTypeInfo<UArticyScriptCondition, UArticyScriptCondition*>(
+		          "UArticyScriptCondition", "UArticyScriptCondition""*"));
+	Types.Add(TEXT("Script_Instruction"), new ArticyObjectTypeInfo<UArticyScriptInstruction, UArticyScriptInstruction*>(
+		          "UArticyScriptInstruction", "UArticyScriptInstruction""*"));
 
 	//========================================//
 
@@ -159,8 +191,9 @@ bool FArticyPredefTypes::IsPredefinedType(const FName& OriginalType)
 // Stores open tags in ConvertUnityMarkupToUnreal
 struct TagInfo
 {
-	TagInfo(const FString& name, const FString& val) 
-		: tagName(name), hasValue(val.Len() > 0), value(val), dummy(false) { 
+	TagInfo(const FString& name, const FString& val)
+		: tagName(name), hasValue(val.Len() > 0), value(val), dummy(false)
+	{
 		if (tagName == TEXT("align")) { dummy = true; }
 	}
 
@@ -199,10 +232,12 @@ FString CreateOpenTag(const TArray<TagInfo>& currentTags)
 		if (tag.dummy) continue;
 
 		// If it's a value, append to the value string
-		if (tag.hasValue) {
+		if (tag.hasValue)
+		{
 			valueString = valueString + FString::Printf(TEXT(" %s=\"%s\""), *tag.tagName, *tag.value);
 		}
-		else {
+		else
+		{
 			// Otherwise, add the tag to the list
 			tags.Add(tag.tagName);
 		}
@@ -260,7 +295,8 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 
 		// Check if we're dealing with a start tag or an end tag
 		FString tagName = myMatcher.GetCaptureGroup(1);
-		if (tagName.Len() > 0) {
+		if (tagName.Len() > 0)
+		{
 			bool hasTagsToClose = HasAnyTags(currentTags);
 
 			// Add to our list
@@ -278,7 +314,8 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 				strings += (CreateOpenTag(currentTags));
 			}
 		}
-		else {
+		else
+		{
 			// Remove our last tag
 			auto popped = currentTags.Pop();
 
@@ -297,9 +334,8 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 		}
 
 		last = end;
-
-		
-	} while (myMatcher.FindNext());
+	}
+	while (myMatcher.FindNext());
 
 	// Add end of string
 	if (last != Input.Len())
@@ -308,7 +344,7 @@ FString ConvertUnityMarkupToUnreal(const FString& Input)
 	}
 
 	// Create string
-	FString result = strings;//.ToString();
+	FString result = strings; //.ToString();
 
 	// Clean memory
 	// TODO - see above about old unreal vers
