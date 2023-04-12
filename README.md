@@ -11,7 +11,7 @@ The separated and slightly refactored part of the ArticyImporter that concentrat
 As this branch concentrate on the file import functionality (can be seen as an effort to move toward a more "modular" architecture, even if it's not the primary goal of this branch), it won't contains other Editor functionalities (Slates adaptations, unreal import interface, etc...).
 
 # Delta to version :
-* New types handling : ArticyMultiLanguageString, ArticyString (handling definitions)
+* Package generation modification to generate correctly
 * Hash comparison structures (probably from FADIManifest) to triger changes import only
 * Automatic localization files building and compiling (optional auto compilation)
 * Global Variables content changes without rebuilding all
