@@ -7,7 +7,7 @@
 #include "ArticyAsset.h"
 #include "ArticyBaseTypes.h"
 #include "ArticyPackage.h"
-
+#include "ImportFactories/FADIFileHash.h"
 
 #include "PackagesImport.generated.h"
 
@@ -100,6 +100,7 @@ private:
 	// ArticyX ---------------
 	UPROPERTY(VisibleAnywhere, Category = "Package")
 	FString Id;
+	// ---------------
 	
 	UPROPERTY(VisibleAnywhere, Category = "Package")
 	FString Description;
@@ -111,8 +112,12 @@ private:
 	bool IsIncluded = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "Package")
-	TArray<FADIFileHash> PackagesHashes;
+	FADIFileHash ObjectsHash;
 	
+	UPROPERTY(VisibleAnywhere, Category = "Package")
+	FADIFileHash TextsHash;
+
+	// @Alewinn : todo ? change refs to split objects and texts ??  
 	UPROPERTY(VisibleAnywhere, Category = "Package")
 	TArray<FArticyModelDef> Models;
 };

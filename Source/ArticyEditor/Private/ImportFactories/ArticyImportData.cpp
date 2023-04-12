@@ -13,6 +13,7 @@
 #else
 #include "Misc/MessageDialog.h"
 #endif
+#include "FADIFileHash.h"
 #include "BuildToolParser/BuildToolParser.h"
 
 #define LOCTEXT_NAMESPACE "ArticyImportData"
@@ -562,14 +563,6 @@ bool UArticyImportData::IsVariableOfType(EArticyType varType, FString FullName)
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
 
-void FADIFileHash::ImportFromJson(const TSharedPtr<FJsonObject> Json)
-{
-	if (!Json.IsValid())
-		return;
-
-	JSON_TRY_STRING(Json, FileName);
-	JSON_TRY_STRING(Json,Hash);
-}
 
 void FADILocalizedLanguage::ImportFromJson(const TSharedPtr<FJsonObject> Json)
 {
@@ -601,6 +594,8 @@ void FADIManifest::ImportFromJson(const TSharedPtr<FJsonObject> JsonRoot)
 											->GetObjectField("ObjectDefinitions")
 											->GetObjectField("Texts"));
 	// @todo : packages...
+	// PackagesFilesHashes
+	
 
 	ScriptMethodsHash.ImportFromJson(JsonRoot->GetObjectField("ScriptMethods"));
 	HierarchyHash.ImportFromJson(JsonRoot->GetObjectField("Hierarchy"));

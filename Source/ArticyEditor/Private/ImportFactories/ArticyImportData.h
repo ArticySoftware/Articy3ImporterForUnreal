@@ -8,23 +8,12 @@
 #include "ObjectDefinitionsImport.h"
 #include "PackagesImport.h"
 #include "ArticyPackage.h"
+#include "FADIFileHash.h"
 #include "ArticyImportData.generated.h"
 
 class UArticyImportData;
 
 // --- ArticyX multifile manifest 
-USTRUCT()
-struct FADIFileHash
-{
-	GENERATED_BODY()
-
-	UPROPERTY(VisibleAnywhere, Category="Hash")
-	FString FileName;
-	UPROPERTY(VisibleAnywhere, Category="Hash")
-	FString Hash;
-
-	void ImportFromJson(const TSharedPtr<FJsonObject> Json);
-};
 
 USTRUCT()
 struct FADILocalizedLanguage
@@ -58,10 +47,8 @@ struct FADIManifest
 	FADIFileHash ObjectDefinitionsTextsHash;
 
 	// @todo : mod. FArticyPackageDef (?)
-	/*
-	UPROPERTY(VisibleAnywhere, Category="Manifest")
-	TArray<FADIFileHash> PackagesHashes;
-	*/
+	//UPROPERTY(VisibleAnywhere, Category="Manifest")
+	//TArray<FArticyPackageDef> PackagesFilesHashes;
 	
 	UPROPERTY(VisibleAnywhere, Category="Manifest")
 	FADIFileHash ScriptMethodsHash;
