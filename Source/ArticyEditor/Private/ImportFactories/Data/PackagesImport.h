@@ -7,7 +7,7 @@
 #include "ArticyAsset.h"
 #include "ArticyBaseTypes.h"
 #include "ArticyPackage.h"
-#include "ImportFactories/FADIFileHash.h"
+#include "Manifest\FileHash.h"
 
 #include "PackagesImport.generated.h"
 

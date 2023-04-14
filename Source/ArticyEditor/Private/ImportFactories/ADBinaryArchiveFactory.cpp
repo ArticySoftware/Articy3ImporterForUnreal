@@ -7,7 +7,7 @@
 
 #include "ADAssetsBuilders/ADBinaryFileReader.h"
 #include "ADAssetsBuilders/FileDispatcher/BinaryFileDispatcher.h"
-#include "ImportFactories/ArticyImportData.h"
+#include "ImportFactories/Data/ArticyImportData.h"
 #include "ArticyEditor/Public/ArticyEditorModule.h"
 #include "Misc/FileHelper.h"
 
@@ -15,7 +15,7 @@ UADBinaryArchiveFactory::UADBinaryArchiveFactory()
 {
 	bEditorImport = true;
 	SupportedClass = UArticyImportData::StaticClass();
-	Formats.Add(TEXT("archive;Articy:Draft exported file"));
+	Formats.Add(TEXT("articyue;Articy:Draft exported file"));
 }
 
 UClass* UADBinaryArchiveFactory::ResolveSupportedClass()

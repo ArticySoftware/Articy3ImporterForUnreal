@@ -5,7 +5,7 @@
 #include "ObjectDefinitionsImport.h"
 #include "Misc/App.h"
 #include "ArticyEditorModule.h"
-#include "ImportFactories/ArticyImportData.h"
+#include "ImportFactories/Data/ArticyImportData.h"
 #include "CodeGeneration/CodeFileGenerator.h"
 #include "ArticyBuiltinTypes.h"
 #include "PredefinedTypes.h"

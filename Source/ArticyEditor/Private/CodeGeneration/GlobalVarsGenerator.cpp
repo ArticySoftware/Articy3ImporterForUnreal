@@ -7,7 +7,7 @@
 #include "GlobalVarsGenerator.h"
 #include "CodeGenerator.h"
 #include "CodeFileGenerator.h"
-#include "ImportFactories/ArticyImportData.h"
+#include "ImportFactories/Data/ArticyImportData.h"
 #include "ArticyGlobalVariables.h"
 #include "ArticyImporterHelpers.h"
 

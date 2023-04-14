@@ -2,7 +2,7 @@
 // Copyright (c) articy Software GmbH & Co. KG. All rights reserved.  
 //
 
-#include "FADIFileHash.h"
+#include "FileHash.h"
 #include "ArticyHelpers.h"
 
 

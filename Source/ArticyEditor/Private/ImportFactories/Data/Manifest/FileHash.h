@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "FADIFileHash.generated.h"
+#include "FileHash.generated.h"
 
 // @Alewinn ; split out of ImportData file to
 // avoid diamond paradox/circular reference.

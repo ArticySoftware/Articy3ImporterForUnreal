@@ -4,7 +4,7 @@
 
 #include "ArticyJSONFactory.h"
 #include "CoreMinimal.h"
-#include "ArticyImportData.h"
+#include "ImportFactories/Data/ArticyImportData.h"
 #include "Editor.h"
 #include "ArticyEditorModule.h"
 #include "ArticyImporterHelpers.h"
@@ -19,7 +19,7 @@
 UArticyJSONFactory::UArticyJSONFactory()
 {
 	bEditorImport = true;
-	Formats.Add(TEXT("articyue4;A json file exported from articy:draft"));
+	Formats.Add(TEXT("articyue4_OLD;A json file exported from articy:draft"));
 }
 
 UArticyJSONFactory::~UArticyJSONFactory()

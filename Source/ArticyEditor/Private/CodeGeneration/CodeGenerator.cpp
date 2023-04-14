@@ -3,7 +3,7 @@
 //
 
 #include "CodeGenerator.h"
-#include "ImportFactories/ArticyImportData.h"
+#include "ImportFactories/Data/ArticyImportData.h"
 #include "DatabaseGenerator.h"
 #include "GlobalVarsGenerator.h"
 #include "InterfacesGenerator.h"

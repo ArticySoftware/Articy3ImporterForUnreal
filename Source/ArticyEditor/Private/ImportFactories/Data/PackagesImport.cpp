@@ -5,7 +5,7 @@
 #include "PackagesImport.h"
 #include "ArticyEditorModule.h"
 #include "ArticyImporterHelpers.h"
-#include "ImportFactories/ArticyImportData.h"
+#include "ImportFactories/Data/ArticyImportData.h"
 #include "ArticyObject.h"
 #include "Policies/CondensedJsonPrintPolicy.h"
 #include "Serialization/JsonSerializer.h"

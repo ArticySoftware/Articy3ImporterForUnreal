@@ -7,7 +7,7 @@
 #include "DatabaseGenerator.h"
 #include "CodeGenerator.h"
 #include "ArticyDatabase.h"
-#include "ImportFactories/ArticyImportData.h"
+#include "ImportFactories/Data/ArticyImportData.h"
 #include "CodeFileGenerator.h"
 #include "ExpressoScriptsGenerator.h"
 #include "ArticyImporterHelpers.h"
