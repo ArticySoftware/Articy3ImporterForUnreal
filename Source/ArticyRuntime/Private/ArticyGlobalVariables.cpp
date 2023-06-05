@@ -6,10 +6,12 @@
 
 #include "ArticyGlobalVariables.h"
 #include "Kismet/KismetStringLibrary.h"
+#include "Engine/GameInstance.h"
 #include "ArticyRuntimeModule.h"
 #include "ArticyPluginSettings.h"
 #include "ArticyFlowPlayer.h"
 #include "ArticyAlternativeGlobalVariables.h"
+#include "AssetRegistry/AssetData.h"
 
 
 FArticyGvName::FArticyGvName(const FName FullVariableName)
@@ -117,16 +119,17 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetDefault(const UObject* WorldC
 		auto world = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 		ensureMsgf(world, TEXT("Getting world for GV cloning failed!"));
 
+		TObjectPtr<UArticyGlobalVariables> assetPtr = asset;
 		if(keepBetweenWorlds)
 		{
-			Clone = DuplicateObject(asset, world->GetGameInstance(), TEXT("Persistent Runtime GV"));
+			Clone = DuplicateObject<UArticyGlobalVariables>(assetPtr, Cast<UObject>(world->GetGameInstance()), TEXT("Persistent Runtime GV"));
 #if !WITH_EDITOR
 			Clone->AddToRoot();
 #endif
 		}
 		else
 		{
-			Clone = DuplicateObject(asset, world, *FString::Printf(TEXT("%s GV"), *world->GetName()));
+			Clone = DuplicateObject<UArticyGlobalVariables>(assetPtr, Cast<UObject>(world), *FString::Printf(TEXT("%s GV"), *world->GetName()));
 		}
 
 		ensureMsgf(Clone.IsValid(), TEXT("Cloning GV asset failed!"));
@@ -199,10 +202,11 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetRuntimeClone(const UObject* W
 
 	// If so, duplicate and add to root
 	UArticyGlobalVariables* NewClone = nullptr;
+	TObjectPtr<UArticyGlobalVariables> assetPtr = asset;
 	if (keepBetweenWorlds)
 	{
 		FString NewName = TEXT("Persistent Runtime GV Clone of ") + Name;
-		NewClone = DuplicateObject(asset, world->GetGameInstance(), *NewName);
+		NewClone = DuplicateObject<UArticyGlobalVariables>(assetPtr, Cast<UObject>(world->GetGameInstance()), *NewName);
 #if !WITH_EDITOR
 		NewClone->AddToRoot();
 #endif
@@ -210,7 +214,7 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetRuntimeClone(const UObject* W
 	else
 	{
 		// Otherwise, add it to the active world
-		NewClone = DuplicateObject(asset, world, *FString::Printf(TEXT("%s %s GV"), *world->GetName(), *Name));
+		NewClone = DuplicateObject(assetPtr, Cast<UObject>(world), *FString::Printf(TEXT("%s %s GV"), *world->GetName(), *Name));
 	}
 
 	// Store and return

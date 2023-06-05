@@ -17,6 +17,8 @@
 #include "ArticyEntity.h"
 #include "Interfaces/ArticyObjectWithColor.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Styling/ISlateStyle.h"
+#include "Styling/SlateBrush.h"
 
 const FSlateBrush* UserInterfaceHelperFunctions::GetArticyTypeImage(const UArticyObject* ArticyObject, UserInterfaceHelperFunctions::EImageSize Size)
 {

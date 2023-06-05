@@ -9,6 +9,7 @@
 #include "ShadowStateManager.h"
 #include "ArticyObject.h"
 #include "ArticyPackage.h"
+#include "AssetRegistry/AssetData.h"
 #include "ArticyDatabase.generated.h"
 
 class UArticyExpressoScripts;

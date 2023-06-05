@@ -7,6 +7,8 @@
 #include "CoreMinimal.h"
 #include "Engine/Texture2D.h"
 #include "ArticyBaseTypes.h"
+#include "Styling/SlateBrush.h"
+
 /**
  * 
  */

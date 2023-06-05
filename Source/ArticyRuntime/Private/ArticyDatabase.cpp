@@ -3,6 +3,7 @@
 //
 
 #include "ArticyDatabase.h"
+#include "Engine/GameInstance.h"
 #include "ArticyBaseTypes.h"
 #include "ArticyGlobalVariables.h"
 #include "ArticyPluginSettings.h"
@@ -142,14 +143,14 @@ UArticyDatabase* UArticyDatabase::Get(const UObject* WorldContext)
 		//duplicate the original asset
 		if(bKeepBetweenWorlds)
 		{
-			clone = DuplicateObject(asset, world->GetGameInstance());
+			clone = DuplicateObject((UArticyDatabase*)asset, world->GetGameInstance());
 #if !WITH_EDITOR
 			clone->AddToRoot();
 #endif
 		}
 		else
 		{
-			clone = DuplicateObject(asset, world);
+			clone = DuplicateObject((UArticyDatabase*)asset, world);
 		}
 
 		//make the clone load its default packages
