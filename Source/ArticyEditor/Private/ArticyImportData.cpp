@@ -525,8 +525,8 @@ const TWeakObjectPtr<UArticyImportData> UArticyImportData::GetImportData()
 			"AssetRegistry");
 		TArray<FAssetData> AssetData;
 
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0
-		AssetRegistryModule.Get().GetAssetsByClass(UArticyGlobalVariables::StaticClass()->GetClassPathName(), AssetData);
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION > 0
+		AssetRegistryModule.Get().GetAssetsByClass(UArticyImportData::StaticClass()->GetClassPathName(), AssetData);
 #else
 		AssetRegistryModule.Get().GetAssetsByClass(UArticyImportData::StaticClass()->GetFName(), AssetData);
 #endif	
