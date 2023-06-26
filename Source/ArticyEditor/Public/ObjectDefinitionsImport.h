@@ -7,6 +7,7 @@
 #include "ArticyJSONFactory.h"
 #include "PredefinedTypes.h"
 #include "ArticyObject.h"
+#include "ArticyTexts.h"
 
 #include "ObjectDefinitionsImport.generated.h"
 
@@ -210,6 +211,7 @@ public:
 	
 	void ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json, const UArticyImportData* Data);
 	void GatherScripts(const FArticyModelDef& Values, UArticyImportData* Data) const;
+	void GatherText(const TSharedPtr<FJsonObject>& Json);
 	void InitializeModel(UArticyPrimitive* Model, const FArticyModelDef& Values, const UArticyImportData* Data) const;
 
 	FString GetCppType(const FName& OriginalType, const UArticyImportData* Data, const bool bForProperty) const;
@@ -248,6 +250,9 @@ private:
 	 */
 	UPROPERTY(VisibleAnywhere, Category="ObjectDefinitions")
 	TMap<FName, FArticyObjectDef> Types;
+
+	UPROPERTY(VisibleAnywhere, Category="ObjectDefinitions")
+	TMap<FString, FArticyTexts> Texts;
 
 	/**
 	 * Contains the CPP type of all defined features.

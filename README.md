@@ -2,17 +2,17 @@
   <img height="344" src="https://www.articy.com/articy-importer/unreal/adx/ad_importer_large.png">
 </p>
 
-# ArticyImporter for Unreal Engine
+# ArticyXImporter for Unreal Engine
 
-The Unreal Engine importer allows integrating articy:draft content into Unreal projects and provides a simple C++ and blueprint interface to work with the data. We release this importer as a GitHub open source project that will provide a substantial head start into incorporating articy:draft data into Unreal projects while still allowing enough flexibility to adjust the importer to personal needs. 
+The Unreal Engine importer allows integrating articy:draft X content into Unreal projects and provides a simple C++ and blueprint interface to work with the data. We release this importer as a GitHub open source project that will provide a substantial head start into incorporating articy:draft X data into Unreal projects while still allowing enough flexibility to adjust the importer to personal needs. 
 
-While full support is not guaranteed for this product, we're constantly working on improvements and would love to hear your suggestions. Feel free to forward us your ideas or even better directly [contribute](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the importer.
+While full support is not guaranteed for this product, we're constantly working on improvements and would love to hear your suggestions. Feel free to forward us your ideas or even better directly [contribute](https://github.com/ArticySoftware/ArticyXImporterForUnreal/blob/master/CONTRIBUTING.md) to the development of the importer.
 
 # Table of contents
 
 * [Features](#features)
 * [Setup](#setup)
-  * [Export from articy:draft](#export-project-from-articydraft)
+  * [Export from articy:draft X](#export-project-from-articydraft-x)
   * [Import into Unreal](#import-into-unreal)
 * [Using the API](#using-the-api)
   * [Getting an object](#getting-the-object)
@@ -23,7 +23,7 @@ While full support is not guaranteed for this product, we're constantly working 
 
 # Features
 
-This importer provides a working foundation for integrating articy:draft content into Unreal Engine projects. You can expect the following features including but not limited to:
+This importer provides a working foundation for integrating articy:draft X content into Unreal Engine projects. You can expect the following features including but not limited to:
 
  * Everything accessible via **C++** and **Blueprint**
  * **Flow player** for automatic configurable flow traversal as an actor component
@@ -69,10 +69,10 @@ Click Next, name the class "MyActor" and finish the setup. Unreal Engine should 
 You can decide to get the plugin at the [Unreal Engine marketplace](https://www.unrealengine.com/marketplace/en-US/product/articy-draft-importer) as an Engine plugin, or alternatively here via GitHub as a project-based plugin. Functionally, there are no differences.
 
 ### Project-based plugin
-*Unreal Engine 4.19 and below: use [the respectively tagged version](https://github.com/ArticySoftware/ArticyImporterForUnreal/releases) of the importer*
+*Unreal Engine 4.19 and below: use [the respectively tagged version](https://github.com/ArticySoftware/ArticyXImporterForUnreal/releases) of the importer*
 
 Get a copy of the importer and copy it into your projects **Plugins** folder. It is possible that you don't have one if it is a new project, so you can just create it.
-Copy the folder **ArticyImporter** into this **Plugins** folder. Your project structure should now look something like this.
+Copy the folder **ArticyXImporter** into this **Plugins** folder. Your project structure should now look something like this.
 
 <p align="center">
   <img src="https://www.articy.com/articy-importer/unreal/adx/copy_plugin.png">
@@ -84,7 +84,7 @@ If you decide to get the plugin on the marketplace, the Epic Games Launcher will
 ## Enable the importer in Unreal
 
 Now you can open your Unreal project and open the Plugins window by selecting Edit->Plugins in the main window menu bar.
-Inside this window scroll in the list of groups down until you find the Group **Project** (in case you are using the plugin on a project basis), or under **Installed** (in case you are using it as an engine plugin) and the sub group **Articy**, click on Articy and enable the ArticyImporter on the right.
+Inside this window scroll in the list of groups down until you find the Group **Project** (in case you are using the plugin on a project basis), or under **Installed** (in case you are using it as an engine plugin) and the sub group **Articy**, click on Articy and enable the ArticyXImporter on the right.
 
 <p align="center">
   <img src="https://www.articy.com/articy-importer/unreal/adx/enable_plugin.png">
@@ -92,13 +92,13 @@ Inside this window scroll in the list of groups down until you find the Group **
 
 After enabling the importer the window will prompt you to restart the editor, please do so to activate it for your project. When the editor restarts it will prompt you to rebuild missing DLL files for the importer which you should confirm. This can take a bit depending on the size of the project and the power of your computer but once finished the Unreal editor should be back up again.
 
-## Export project from articy:draft
+## Export project from articy:draft X
 
-Now that the importer is running, you are ready to export your data from articy:draft.
+Now that the importer is running, you are ready to export your data from articy:draft X.
 
-Open your articy:draft project and open the export window. Here you will find the Unreal Engine export. Please note that the Unreal export uses [Rulesets](https://www.articy.com/help/Exports_Rulesets.html) to choose what and how to export.
+Open your articy:draft X project and open the export window. Here you will find the Unreal Engine export. Please note that the Unreal export uses [Rulesets](https://www.articy.com/help/Exports_Rulesets.html) to choose what and how to export.
 
-When exporting, chose your Unreal projects **Content** folder as the target for the `.articyue4` export file.
+When exporting, chose your Unreal projects **Content** folder as the target for the `.articyue` export file.
 
 <p align="center">
   <img src="https://www.articy.com/articy-importer/unreal/adx/export_options.png">
@@ -106,7 +106,7 @@ When exporting, chose your Unreal projects **Content** folder as the target for 
 
 ## Import into Unreal
 
-The first time the ArticyImporter find content to import, the plugin will automatically try to find an "ArticyRuntime" reference inside the project's Unreal build tool files. If the plugin can't find any reference, it will show the following messagebox to add it automatically : 
+The first time the ArticyXImporter find content to import, the plugin will automatically try to find an "ArticyRuntime" reference inside the project's Unreal build tool files. If the plugin can't find any reference, it will show the following messagebox to add it automatically : 
 
 <p align="center">
 	<img src="/docs/ArticyRuntimeRef_AutoAdd.png">
@@ -116,11 +116,11 @@ The first time the ArticyImporter find content to import, the plugin will automa
 - **"No"** will continue import (no modification to Unreal build files). 
 - **"Cancel"** will abort import process.
 
-> NOTE : The automatic verification process can be disabled inside the project settings > Plugins > Articy importer (uncheck "Verify ArticyRuntime reference inside Unreal Build tools"). 
+> NOTE : The automatic verification process can be disabled inside the project settings > Plugins > Articy X Importer (uncheck "Verify ArticyRuntime reference inside Unreal Build tools"). 
 
-After every export, going back to Unreal will trigger the ArticyImporter plugin to automatically parse the new file and show a prompt to import the changes. While this option is generally robust, there are certain cases in which more control over the import process is required.
+After every export, going back to Unreal will trigger the ArticyXImporter plugin to automatically parse the new file and show a prompt to import the changes. While this option is generally robust, there are certain cases in which more control over the import process is required.
 
-For greater control over your imports, use the Articy Importer Menu. It can be accessed through the Articy Importer button on the Level Toolbar (UE4) or through the Settings menu (UE5).
+For greater control over your imports, use the Articy X Importer Menu. It can be accessed through the Articy X Importer button on the Level Toolbar (UE4) or through the Settings menu (UE5).
 
 **Unreal Engine 4**
 ![](https://www.articy.com/articy-importer/unreal/adx/articywindow.png)
@@ -170,7 +170,7 @@ Most of the time if you want to access the properties of an object you queried f
 cast the object to the correct type first. 
 
 If you have an object without a template the type to cast into is easy.
-Every built-in class is named as the object in articy:draft with your project name as a prefix. Let's say your project is named `ManiacManfred` so you will find `ManiacManfredFlowFragment`, `ManiacManfredDialogueFragment`, `ManiacManfredLocation`, `ManiacManfredEntity` and a lot more. 
+Every built-in class is named as the object in articy:draft X with your project name as a prefix. Let's say your project is named `ManiacManfred` so you will find `ManiacManfredFlowFragment`, `ManiacManfredDialogueFragment`, `ManiacManfredLocation`, `ManiacManfredEntity` and a lot more. 
 All those respective objects have their expected properties, so you will find the `Speaker` property inside the `ManiacManfredDialogueFragment` object, etc.
 
 <p align="center">
@@ -180,7 +180,7 @@ All those respective objects have their expected properties, so you will find th
 > You will also find classes with the `Articy` prefix. Those are the base classes for the generated classes and casting into them works almost the same. This would allow you to create code that is reusable
 > independent of any imported project.  
 
-Dealing with templates is a bit more complicated. The first thing to understand is that **all your articy:draft templates are new types** inside Unreal. 
+Dealing with templates is a bit more complicated. The first thing to understand is that **all your articy:draft X templates are new types** inside Unreal. 
 
 The name of your template types also follows a similar structure as the one mentioned before, but utilizing the Templates technical name: `<ProjectName><TemplateTechnicalName>`. So if your project is called *ManiacManfred* and your templates technical name is *Conditional_Zone* your correct type would be called `ManiacManfredConditional_Zone`.
 Its also worth mentioning that even if it is a new type, it is still derived from the base type with all its properties.
@@ -268,7 +268,7 @@ If you want to learn more about the flow player and its events you can read the 
 It's possible to add new script methods into articy:draft's Expresso scripting language. These can trigger side effects in your game such as moving game objects or changing UI states, or they could return helpful values such as the location of the player.
 
 Getting started with custom script methods is easy. 
-Simply start using new methods in articy:draft as if they already exist (as pictured below) and import your project into Unreal.
+Simply start using new methods in articy:draft X as if they already exist (as pictured below) and import your project into Unreal.
 
 Please be careful, however, to use only one custom script method per instruction node if you need to guarantee a sequential execution in Unreal for theses instructions.
 
@@ -376,11 +376,11 @@ For example, if your global variables control your quest states, checking a "que
 
 ## UMG Rich Text Support
 
-If your articy:draft project has been exported using either the Unity Rich Text or Extended Markup formatting settings, you can use articy with the Unreal Rich Text Block widget to display richly formatted text.
+If your articy:draft X project has been exported using either the Unity Rich Text or Extended Markup formatting settings, you can use articy with the Unreal Rich Text Block widget to display richly formatted text.
 
 ### Export and Import Configuration
 
-First, make sure you select one of these two settings in the `Export options` dialog in articy:draft
+First, make sure you select one of these two settings in the `Export options` dialog in articy:draft X
 
 ![](docs/2021-10-31-10-31-19.png)
 
@@ -416,7 +416,7 @@ Now, you'll be able to see your styling in articy appear in Unreal! Try setting 
 
 ### Color Support
 
-*Note: Colors are only available with the extended markup option in the articy:draft export.*
+*Note: Colors are only available with the extended markup option in the articy:draft X export.*
 
 To support additional styling like custom colors, you need to add the `ArticyRichTextDecorator` to the list of `Decorator classes` on the rich text block.
 
@@ -424,7 +424,7 @@ To support additional styling like custom colors, you need to add the `ArticyRic
 
 ### Hyperlinks
 
-*Note: Hyperlinks are only available with the extended markup option in the articy:draft export.*
+*Note: Hyperlinks are only available with the extended markup option in the articy:draft X export.*
 
 To use hyperlinks from Articy, you'll need to do two things:
 
@@ -456,9 +456,9 @@ public:
 ```
 
 ### ArticyId Widget Customization
-The ArticyId Widget customization is a system to let you add custom widgets to any ArticyId or ArticyRef property in the Unreal Engine editor without having to modify the plugin code. The Articy button that opens up the currently selected object inside articy:draft 3 itself is also implemented using the same system.
+The ArticyId Widget customization is a system to let you add custom widgets to any ArticyId or ArticyRef property in the Unreal Engine editor without having to modify the plugin code. The Articy button that opens up the currently selected object inside articy:draft X itself is also implemented using the same system.
 
-The system also allows you to test the associated object for its data, or to only use your custom widget for specific types of articy objects. For example, all objects that have a "Quest giver" feature in articy:draft 3 can show a button inside Unreal that will open up the asset in which the associated quest is contained.
+The system also allows you to test the associated object for its data, or to only use your custom widget for specific types of articy objects. For example, all objects that have a "Quest giver" feature in articy:draft X can show a button inside Unreal that will open up the asset in which the associated quest is contained.
 
 To create a customization, there are three steps:
 1. Create a Customization class inheriting from IArticyIdPropertyWidgetCustomization and override its functions. This class is responsible for actually creating the FExtender and the widget for the customization.
@@ -477,7 +477,7 @@ FArticyEditorModule::Get().GetCustomizationManager()->RegisterArticyIdPropertyWi
 ```
 # Contributing
 
-We are very grateful for any kind of contribution that you bring to the ArticyImporter, no matter if it is reporting any issues, or by actively adding new features, or fixing existing issues. If you want to know more about how to contribute please check our [Contribution](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) article.
+We are very grateful for any kind of contribution that you bring to the ArticyXImporter, no matter if it is reporting any issues, or by actively adding new features, or fixing existing issues. If you want to know more about how to contribute please check our [Contribution](https://github.com/ArticySoftware/ArticyXImporterForUnreal/blob/master/CONTRIBUTING.md) article.
 
 # Common Issues
 
@@ -507,7 +507,7 @@ The `UnrealPak` executable is located in the `\Engine\Binaries` folder in your U
 
 Older versions of the plugin had issues with various source control plugins for Unreal like Perforce and Plastic SCM. Frequently, generated Articy assets would get marked as `delete` instead of `edit`, making it easy to accidentally commit to your repository without these critical assets.
 
-These issues have been fixed in version `1.3.0` of the plugin. If you're still seeing issues with source control after updating, [create an issue on GitHub](https://github.com/ArticySoftware/ArticyImporterForUnreal/issues/new/choose) or contact support@articy.com for assistance.
+These issues have been fixed in version `1.3.0` of the plugin. If you're still seeing issues with source control after updating, [create an issue on GitHub](https://github.com/ArticySoftware/ArticyXImporterForUnreal/issues/new/choose) or contact support@articy.com for assistance.
 
 ## My Articy Assets (Textures/Sounds) are Not Appearing in Unreal
 
@@ -525,7 +525,7 @@ When importing drop-down list changes, it's best to restart Unreal to avoid issu
 
 If you're getting the above error after updating to version `1.4` of the Articy Unreal plugin, you need to make a manual fix to your generated C++ file to get Unreal started.
 
-Find `{ProjectName}ExpressoScripts.h` (where `{ProjectName}` is the name of your articy:draft project) in `Source\{UnrealProjectName}\ArticyGenerated` and delete the method `GetUserMethodsProviderObject` (should be around line `50`ish).
+Find `{ProjectName}ExpressoScripts.h` (where `{ProjectName}` is the name of your articy:draft X project) in `Source\{UnrealProjectName}\ArticyGenerated` and delete the method `GetUserMethodsProviderObject` (should be around line `50`ish).
 
 Once the project succesfully compiles and opens, run a [Full Reimport](#importer-modes).
 

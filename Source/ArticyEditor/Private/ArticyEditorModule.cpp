@@ -228,8 +228,8 @@ void FArticyEditorModule::RegisterPluginSettings() const
 	if (SettingsModule != nullptr)
 	{
 		ISettingsSectionPtr SettingsSectionPtr = SettingsModule->RegisterSettings("Project", "Plugins", "ArticyImporter",
-			LOCTEXT("Name", "Articy Importer"),
-			LOCTEXT("Description", "Articy Importer Configuration."),
+			LOCTEXT("Name", "Articy X Importer"),
+			LOCTEXT("Description", "Articy X Importer Configuration."),
 			GetMutableDefault<UArticyPluginSettings>()
 		);
 	}	

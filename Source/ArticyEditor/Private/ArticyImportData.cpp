@@ -13,7 +13,9 @@
 #else
 #include "Misc/MessageDialog.h"
 #endif
+#include "ArticyArchiveReader.h"
 #include "BuildToolParser/BuildToolParser.h"
+#include "Serialization/JsonSerializer.h"
 
 #define LOCTEXT_NAMESPACE "ArticyImportData"
 
@@ -26,13 +28,6 @@ void FADISettings::ImportFromJson(TSharedPtr<FJsonObject> Json)
 	JSON_TRY_STRING(Json, set_TextFormatter);
 	JSON_TRY_BOOL(Json, set_UseScriptSupport);
 	JSON_TRY_STRING(Json, ExportVersion);
-
-	const auto oldObjectDefsHash = ObjectDefinitionsHash;
-	const auto oldScriptFragmentHash = ScriptFragmentsHash;
-	JSON_TRY_STRING(Json, ObjectDefinitionsHash);
-	JSON_TRY_STRING(Json, ScriptFragmentsHash);
-	bObjectDefsOrGVsChanged = oldObjectDefsHash != ObjectDefinitionsHash;
-	bScriptFragmentsChanged = oldScriptFragmentHash != ScriptFragmentsHash;
 }
 
 void FArticyProjectDef::ImportFromJson(const TSharedPtr<FJsonObject> Json)
@@ -59,6 +54,9 @@ FString FArticyGVar::GetCPPTypeString() const
 	case EArticyType::ADT_String:
 		return TEXT("UArticyString");
 
+	case EArticyType::ADT_MultiLanguageString:
+		return TEXT("UArticyMultiLanguageString");
+
 	default:
 		return TEXT("Cannot get CPP type string, unknown type!");
 	}
@@ -78,6 +76,10 @@ FString FArticyGVar::GetCPPValueString() const
 		break;
 
 	case EArticyType::ADT_String:
+		value = FString::Printf(TEXT("\"%s\""), *StringValue);
+		break;
+
+	case EArticyType::ADT_MultiLanguageString:
 		value = FString::Printf(TEXT("\"%s\""), *StringValue);
 		break;
 
@@ -120,6 +122,8 @@ void FArticyGVar::ImportFromJson(const TSharedPtr<FJsonObject> JsonVar)
 	case EArticyType::ADT_Integer: JsonVar->TryGetNumberField(TEXT("Value"), IntValue);
 		break;
 	case EArticyType::ADT_String: JsonVar->TryGetStringField(TEXT("Value"), StringValue);
+		break;
+	case EArticyType::ADT_MultiLanguageString: JsonVar->TryGetStringField(TEXT("Value"), StringValue);
 		break;
 	default: break;
 	}
@@ -387,6 +391,29 @@ void FADIHierarchy::ImportFromJson(UArticyImportData* ImportData, const TSharedP
 	RootObject = UADIHierarchyObject::CreateFromJson(ImportData, Json);
 }
 
+void FArticyLanguageDef::ImportFromJson(const TSharedPtr<FJsonObject>& Json)
+{
+	if (!Json.IsValid())
+		return;
+
+	JSON_TRY_STRING(Json, CultureName);
+	JSON_TRY_STRING(Json, ArticyLanguageId);
+	JSON_TRY_STRING(Json, LanguageName);
+	JSON_TRY_BOOL(Json, IsVoiceOver);
+}
+
+void FArticyLanguages::ImportFromJson(const TSharedPtr<FJsonObject>& Json)
+{
+	if (!Json.IsValid())
+		return;
+
+	JSON_TRY_ARRAY(Json, Languages, {
+		FArticyLanguageDef def;
+		def.ImportFromJson(item->AsObject());
+		Languages.Add(def.ArticyLanguageId, def);
+	});
+}
+
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
 
@@ -422,27 +449,78 @@ void UArticyImportData::PostImport()
 	ArticyEditorModule.OnImportFinished.Broadcast();
 }
 
-void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
+void UArticyImportData::ImportFromJson(const UArticyArchiveReader& Archive, const TSharedPtr<FJsonObject> RootObject)
 {
 	// import the main sections
 	Settings.ImportFromJson(RootObject->GetObjectField(JSON_SECTION_SETTINGS));
 	Project.ImportFromJson(RootObject->GetObjectField(JSON_SECTION_PROJECT));
-	PackageDefs.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_PACKAGES));
-	Hierarchy.ImportFromJson(this, RootObject->GetObjectField(JSON_SECTION_HIERARCHY));
-	UserMethods.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_SCRIPTMEETHODS));
+	Languages.ImportFromJson(RootObject);
+	PackageDefs.ImportFromJson(Archive, &RootObject->GetArrayField(JSON_SECTION_PACKAGES), Settings);
+
+	TSharedPtr<FJsonObject> HierarchyObject;
+	if (
+		Archive.FetchJson(
+			RootObject,
+			JSON_SECTION_HIERARCHY,
+			Settings.HierarchyHash,
+			HierarchyObject))
+	{
+		Hierarchy.ImportFromJson(this, HierarchyObject);
+	}
+
+	TSharedPtr<FJsonObject> UserMethodsObject;
+	if (
+		Archive.FetchJson(
+			RootObject,
+			JSON_SECTION_SCRIPTMEETHODS,
+			Settings.ScriptMethodsHash,
+			UserMethodsObject))
+	{
+		UserMethods.ImportFromJson(&UserMethodsObject->GetArrayField(JSON_SECTION_SCRIPTMEETHODS));
+	}
 
 	bool bNeedsCodeGeneration = false;
 
 	ParentChildrenCache.Empty();
-
-	// import GVs and ObjectDefs only if needed
-	if (Settings.DidObjectDefsOrGVsChange())
+	
+	if (TSharedPtr<FJsonObject> GvObject;
+		Archive.FetchJson(
+			RootObject,
+			JSON_SECTION_GLOBALVARS,
+			Settings.GlobalVariablesHash,
+			GvObject))
 	{
-		GlobalVariables.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_GLOBALVARS), this);
-		ObjectDefinitions.ImportFromJson(&RootObject->GetArrayField(JSON_SECTION_OBJECTDEFS), this);
+		GlobalVariables.ImportFromJson(&GvObject->GetArrayField(JSON_SECTION_GLOBALVARS), this);
+		Settings.SetObjectDefinitionsNeedRebuild();
+		bNeedsCodeGeneration = true;
+	}
+	
+	const TSharedPtr<FJsonObject> ObjectDefs = RootObject->GetObjectField(JSON_SECTION_OBJECTDEFS);
+	if (TSharedPtr<FJsonObject> ObjTypes;
+		Archive.FetchJson(
+			RootObject->GetObjectField(JSON_SECTION_OBJECTDEFS),
+			JSON_SUBSECTION_TYPES,
+			Settings.ObjectDefinitionsHash,
+			ObjTypes))
+	{
+		ObjectDefinitions.ImportFromJson(&ObjTypes->GetArrayField(JSON_SECTION_OBJECTDEFS), this);
+		Settings.SetObjectDefinitionsNeedRebuild();
 		bNeedsCodeGeneration = true;
 	}
 
+	if (TSharedPtr<FJsonObject> ObjTexts;
+		Archive.FetchJson(
+			RootObject->GetObjectField(JSON_SECTION_OBJECTDEFS),
+			JSON_SUBSECTION_TEXTS,
+			Settings.ObjectDefinitionsTextHash,
+			ObjTexts))
+	{
+		ObjectDefinitions.GatherText(ObjTexts);
+		Settings.SetObjectDefinitionsNeedRebuild();
+		bNeedsCodeGeneration = true;
+	}
+
+	
 	if (Settings.DidScriptFragmentsChange() && this->GetSettings().set_UseScriptSupport)
 	{
 		this->GatherScripts();
@@ -734,6 +812,7 @@ void UArticyImportData::BuildCachedVersion()
 	CachedData.PackageDefs = this->PackageDefs;
 	CachedData.UserMethods = this->UserMethods;
 	CachedData.Hierarchy = this->Hierarchy;
+	CachedData.Languages = this->Languages;
 	CachedData.ScriptFragments = this->ScriptFragments;
 	CachedData.ImportedPackages = this->ImportedPackages;
 	CachedData.ParentChildrenCache = this->ParentChildrenCache;
@@ -750,6 +829,7 @@ void UArticyImportData::ResolveCachedVersion()
 	this->PackageDefs = CachedData.PackageDefs;
 	this->UserMethods = CachedData.UserMethods;
 	this->Hierarchy = CachedData.Hierarchy;
+	this->Languages = CachedData.Languages;
 	this->ScriptFragments = CachedData.ScriptFragments;
 	this->ImportedPackages = CachedData.ImportedPackages;
 	this->ParentChildrenCache = CachedData.ParentChildrenCache;

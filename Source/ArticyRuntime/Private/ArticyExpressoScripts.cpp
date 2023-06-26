@@ -79,6 +79,12 @@ ExpressoType::ExpressoType(const UArticyString& Value)
 	StringValue = Value.Get();
 }
 
+ExpressoType::ExpressoType(const UArticyMultiLanguageString& Value)
+{
+	Type = String;
+	StringValue = Value.Get();
+}
+
 ExpressoType::ExpressoType(const UArticyInt& Value)
 {
 	Type = Int;

@@ -23,11 +23,16 @@ namespace ArticyHelpers
 
 #define JSON_SECTION_SETTINGS TEXT("Settings")
 #define JSON_SECTION_PROJECT TEXT("Project")
+#define JSON_SECTION_LANGUAGES TEXT("Languages")
 #define JSON_SECTION_GLOBALVARS TEXT("GlobalVariables")
 #define JSON_SECTION_SCRIPTMEETHODS TEXT("ScriptMethods")
 #define JSON_SECTION_OBJECTDEFS TEXT("ObjectDefinitions")
 #define JSON_SECTION_PACKAGES TEXT("Packages")
 #define JSON_SECTION_HIERARCHY TEXT("Hierarchy")
+
+#define JSON_SUBSECTION_TYPES TEXT("Types")
+#define JSON_SUBSECTION_TEXTS TEXT("Texts")
+#define JSON_SUBSECTION_OBJECTS TEXT("Objects")
 
 /** Creates a new FJsonObject with name "x" from json->GetObjectField("x") */
 #define JSON_OBJECT(json, x) TSharedPtr<FJsonObject> x = json->GetObjectField(TEXT(#x))

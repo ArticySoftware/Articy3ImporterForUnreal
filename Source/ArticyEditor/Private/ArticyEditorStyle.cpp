@@ -54,7 +54,7 @@ const FVector2D Icon96x96(96.0f, 96.0f);
 TSharedRef< FSlateStyleSet > FArticyEditorStyle::Create()
 {
 	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("ArticyEditorStyle"));
-	Style->SetContentRoot(IPluginManager::Get().FindPlugin("ArticyImporter")->GetBaseDir() / TEXT("Resources"));
+	Style->SetContentRoot(IPluginManager::Get().FindPlugin("ArticyXImporter")->GetBaseDir() / TEXT("Resources"));
 
 #if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >0 
 	const FTextBlockStyle NormalText = FAppStyle::GetWidgetStyle<FTextBlockStyle>("NormalText");

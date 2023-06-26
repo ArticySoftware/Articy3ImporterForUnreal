@@ -4,6 +4,7 @@
 
 #include "ArticyJSONFactory.h"
 #include "CoreMinimal.h"
+#include "ArticyArchiveReader.h"
 #include "ArticyImportData.h"
 #include "Editor.h"
 #include "ArticyEditorModule.h"
@@ -20,7 +21,7 @@
 UArticyJSONFactory::UArticyJSONFactory()
 {
 	bEditorImport = true;
-	Formats.Add(TEXT("articyue4;A json file exported from articy:draft"));
+	Formats.Add(TEXT("articyue;A json file exported from articy:draft X"));
 }
 
 UArticyJSONFactory::~UArticyJSONFactory()
@@ -133,9 +134,12 @@ EReimportResult::Type UArticyJSONFactory::Reimport(UObject* Obj)
 
 bool UArticyJSONFactory::ImportFromFile(const FString& FileName, UArticyImportData* Asset) const
 {
+	UArticyArchiveReader* Archive = NewObject<UArticyArchiveReader>();
+	Archive->OpenArchive(*FileName);
+	
 	//load file as text file
 	FString JSON;
-	if (!FFileHelper::LoadFileToString(JSON, *FileName))
+	if (!Archive->ReadFile(TEXT("manifest.json"), JSON))
 	{
 		UE_LOG(LogArticyEditor, Error, TEXT("Failed to load file '%s' to string"), *FileName);
 		return false;
@@ -143,10 +147,10 @@ bool UArticyJSONFactory::ImportFromFile(const FString& FileName, UArticyImportDa
 
 	//parse outermost JSON object
 	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(JSON);
+	const TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(JSON);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
 	{
-		Asset->ImportFromJson(JsonParsed);
+		Asset->ImportFromJson(*Archive, JsonParsed);
 	}
 
 	return true;

@@ -345,6 +345,18 @@ private:
 
 //---------------------------------------------------------------------------//
 
+UCLASS(BlueprintType)
+class ARTICYRUNTIME_API UArticyMultiLanguageString : public UArticyString
+{
+	GENERATED_BODY()
+
+public:
+	//getter and setter
+	ARTICY_VARIABLE_ACCESS(FString)
+};
+
+//---------------------------------------------------------------------------//
+
 UCLASS()
 class ARTICYRUNTIME_API UArticyBaseVariableSet : public UObject, public IArticyReflectable
 {
@@ -455,6 +467,8 @@ public:
 	const int32& GetIntVariable(FArticyGvName GvName, bool& bSucceeded);
 	UFUNCTION(BlueprintCallable, Category="Getter")
 	const FString& GetStringVariable(FArticyGvName GvName, bool& bSucceeded);
+	UFUNCTION(BlueprintCallable, Category="Getter")
+	const FString& GetMultiLanguageStringVariable(FArticyGvName GvName, bool& bSucceeded);
 
 	UFUNCTION(BlueprintCallable, Category="Setter")
 	void SetBoolVariable(FArticyGvName GvName, const bool Value);
@@ -462,6 +476,8 @@ public:
 	void SetIntVariable(FArticyGvName GvName, const int32 Value);
 	UFUNCTION(BlueprintCallable, Category="Setter")
 	void SetStringVariable(FArticyGvName GvName, const FString Value);
+	UFUNCTION(BlueprintCallable, Category="Setter")
+	void SetMultiLanguageStringVariable(FArticyGvName GvName, const FString Value);
 
 	UFUNCTION(BlueprintCallable, Category="Debug")
 	void EnableDebugLogging();

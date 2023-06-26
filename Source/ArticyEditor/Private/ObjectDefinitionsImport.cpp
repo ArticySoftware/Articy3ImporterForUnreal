@@ -569,6 +569,19 @@ void FArticyObjectDefinitions::ImportFromJson(const TArray<TSharedPtr<FJsonValue
 	}
 }
 
+void FArticyObjectDefinitions::GatherText(const TSharedPtr<FJsonObject>& Json)
+{
+	for (auto JsonValue = Json->Values.CreateConstIterator(); JsonValue; ++JsonValue)
+	{
+		const FString Name = (*JsonValue).Key;
+		const TSharedPtr<FJsonValue> Value = (*JsonValue).Value;
+
+		FArticyTexts Text;
+		Text.ImportFromJson(Value->AsObject());
+		Texts.Add(Name, Text);
+	}
+}
+
 void FArticyObjectDefinitions::GatherScripts(const FArticyModelDef& Values, UArticyImportData* Data) const
 {
 	const auto def = Types.Find(Values.GetType());

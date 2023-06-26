@@ -42,7 +42,7 @@ public:
 	bool bUseLegacyImporter;
 	
 	/** The directory where ArticyContent will be generated and assets are looked for (when using ArticyAsset)
-	 *	Also used to search for the .articyue4 file to regenerate the import asset.
+	 *	Also used to search for the .articyue file to regenerate the import asset.
 	 *. Automatically set to the location of the import asset during import.
 	 *  Change only to manually apply a fix!
 	 */

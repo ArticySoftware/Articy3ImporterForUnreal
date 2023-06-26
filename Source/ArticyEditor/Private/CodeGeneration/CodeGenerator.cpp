@@ -298,7 +298,7 @@ void CodeGenerator::GenerateAssets(UArticyImportData* Data)
 		UE_LOG(LogArticyEditor, Error, TEXT("Could not find generated global variables class after compile!"));
 	}
 	if(!ensureAlwaysMsgf(DeleteGeneratedAssets(), 
-		TEXT("DeletedGeneratedAssets() has failed. The Articy Importer can not proceed without\n"
+		TEXT("DeletedGeneratedAssets() has failed. The Articy X Importer can not proceed without\n"
 		"being able to delete the previously generated assets to replace them with new ones.\n"
 		"Please make sure the Generated folder in ArticyContent is editable.")))
 	{

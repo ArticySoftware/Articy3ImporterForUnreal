@@ -22,6 +22,7 @@ void FArticyEditorFunctionLibrary::ForceCompleteReimport(UArticyImportData* Impo
 		return;
 	}
 
+	ImportData->Settings.GlobalVariablesHash.Reset();
 	ImportData->Settings.ObjectDefinitionsHash.Reset();
 	ImportData->Settings.ScriptFragmentsHash.Reset();
 	ReimportChanges(ImportData);
@@ -70,7 +71,7 @@ EImportDataEnsureResult FArticyEditorFunctionLibrary::EnsureImportDataAsset(UArt
 
 		if (!ImportDataAsset.IsValid())
 		{
-			UE_LOG(LogArticyEditor, Warning, TEXT("Attempting to create from .articyue4 export file"));
+			UE_LOG(LogArticyEditor, Warning, TEXT("Attempting to create from .articyue export file"));
 			ImportDataAsset = GenerateImportDataAsset();
 
 			if(ImportDataAsset.IsValid())
@@ -104,13 +105,14 @@ UArticyImportData* FArticyEditorFunctionLibrary::GenerateImportDataAsset()
 	const FString ArticyDirectory = GetDefault<UArticyPluginSettings>()->ArticyDirectory.Path;
 	// remove /Game/ so that the non-virtual part remains
 	FString ArticyDirectoryNonVirtual = ArticyDirectory;
-	ArticyDirectoryNonVirtual.RemoveFromStart(TEXT("/Game/"));
+	ArticyDirectoryNonVirtual.RemoveFromStart(TEXT("/Game"));
+	ArticyDirectoryNonVirtual.RemoveFromStart(TEXT("/"));
 	// attach the non-virtual path to the content directory, then convert it to absolute
 	const FString AbsoluteDirectoryPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*(FPaths::ProjectContentDir() + ArticyDirectoryNonVirtual));
-	IFileManager::Get().FindFiles(ArticyImportFiles, *AbsoluteDirectoryPath, TEXT("articyue4"));
+	IFileManager::Get().FindFiles(ArticyImportFiles, *AbsoluteDirectoryPath, TEXT("articyue"));
 	if (ArticyImportFiles.Num() == 0)
 	{
-		UE_LOG(LogArticyEditor, Error, TEXT("Failed creation of import data asset. No .articyue4 file found in directory %s. Please check the plugin settings for the correct articy directory and try again."), *ArticyDirectory);
+		UE_LOG(LogArticyEditor, Error, TEXT("Failed creation of import data asset. No .articyue file found in directory %s. Please check the plugin settings for the correct articy directory and try again."), *ArticyDirectory);
 		return nullptr;
 	}
 	
