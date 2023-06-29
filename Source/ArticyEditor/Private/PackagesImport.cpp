@@ -315,6 +315,24 @@ void FArticyPackageDef::GatherText(const TSharedPtr<FJsonObject>& Json)
 	}
 }
 
+TMap<FString, FArticyTexts> FArticyPackageDef::GetTexts() const
+{
+	return Texts;
+}
+
+TMap<FString, FArticyTexts> FArticyPackageDefs::GetTexts() const
+{
+	// TODO: Handle this individually for each package, ideally to output to different string tables
+	TMap<FString, FArticyTexts> MergedTexts;
+
+	for(const auto& pack : Packages)
+	{
+		MergedTexts.Append(pack.GetTexts());
+	}
+
+	return MergedTexts;
+}
+
 void FArticyPackageDefs::GenerateAssets(UArticyImportData* Data) const
 {
 	auto& ArticyPackages = Data->GetPackages();

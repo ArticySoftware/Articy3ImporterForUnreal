@@ -43,25 +43,6 @@ FArticyPredefTypes::FArticyPredefTypes()
 	Types.Add(TEXT("ArticyPrimitive"), new ArticyPredefinedTypeInfo<UArticyPrimitive, UArticyPrimitive*>("UArticyPrimitive", "UArticyPrimitive*", TEXT("nullptr"), nullptr /* NOTE: NO INITIALIZATION FROM JSON! */));
 	Types.Add(TEXT("ArticyObject"), new ArticyPredefinedTypeInfo<UArticyObject, UArticyObject*>("UArticyObject", "UArticyObject*", TEXT("nullptr"), nullptr /* NOTE: NO INITIALIZATION FROM JSON! */));
 
-	Types.Add(TEXT("ArticyString"), new ArticyPredefinedTypeInfo<UArticyString, UArticyString*>("UArticyString", "UArticyString*", TEXT("nullptr"), [](PROP_SETTER_PARAMS)
-	{
-		UArticyString* NewString = NewObject<UArticyString>();
-		if (Json->Type == EJson::String)
-		{
-			NewString->Set(Json->AsString());
-		}
-		return NewString;
-	}));
-	Types.Add(TEXT("ArticyMultiLanguageString"), new ArticyPredefinedTypeInfo<UArticyMultiLanguageString, UArticyMultiLanguageString*>("UArticyMultiLanguageString", "UArticyMultiLanguageString*", TEXT("nullptr"), [](PROP_SETTER_PARAMS)
-	{
-		UArticyMultiLanguageString* NewString = NewObject<UArticyMultiLanguageString>();
-		if (Json->Type == EJson::String)
-		{
-			NewString->Set(Json->AsString());
-		}
-		return NewString;
-	}));
-
 	Types.Add(TEXT("id"), PREDEFINE_TYPE(FArticyId));
 	Types.Add(TEXT("string"), PREDEFINE_TYPE_EXT(FString, "TEXT(\"\")", [](PROP_SETTER_PARAMS) { return Json->Type == EJson::String ? Json->AsString() : FString{}; }));
 	Types.Add(TEXT("ftext"), PREDEFINE_TYPE_EXT(FText, TEXT("FText::GetEmpty()"), [](PROP_SETTER_PARAMS)
@@ -83,6 +64,9 @@ FArticyPredefTypes::FArticyPredefTypes()
 	Types.Add(TEXT("point"), PREDEFINE_TYPE_EXT(FVector2D, "FVector2D::ZeroVector", [](PROP_SETTER_PARAMS) { return ArticyHelpers::ParseFVector2DFromJson(Json); }));
 	Types.Add(TEXT("size"), PREDEFINE_TYPE(FArticySize));
 	Types.Add(TEXT("float"), PREDEFINE_TYPE_EXT(float, "0.f", [](PROP_SETTER_PARAMS) { return Json->IsNull() ? 0.f : static_cast<float>(Json->AsNumber()); }));
+	Types.Add(TEXT("ArticyString"), PREDEFINE_TYPE_EXT(FString, "TEXT(\"\")", [](PROP_SETTER_PARAMS) { return Json->Type == EJson::String ? Json->AsString() : FString{}; }));
+	Types.Add(TEXT("ArticyMultiLanguageString"), PREDEFINE_TYPE(FArticyMultiLanguageString));
+
 
 	auto int32Info = PREDEFINE_TYPE_EXT(int32, "0", [](PROP_SETTER_PARAMS) {
 												int32 num;

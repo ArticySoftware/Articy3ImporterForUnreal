@@ -11,7 +11,6 @@
 #include "ArticyExpressoScripts.generated.h"
 
 class UArticyString;
-class UArticyMultiLanguageString;
 class UArticyInt;
 class UArticyBool;
 class UArticyExpressoScripts;
@@ -73,7 +72,6 @@ struct ARTICYRUNTIME_API ExpressoType
 	ExpressoType(const FName& Value) : ExpressoType(Value.ToString()) {}
 	ExpressoType(const UArticyPrimitive* Object);
 	ExpressoType(const UArticyString& Value);
-	ExpressoType(const UArticyMultiLanguageString& Value);
 	ExpressoType(const UArticyInt& Value);
 	ExpressoType(const UArticyBool& Value);
 	ExpressoType(const FArticyId& Value);

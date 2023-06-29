@@ -167,3 +167,32 @@ enum class EArticyLocationAnchorSize : uint8
 	Medium = 1,
 	Large = 2,
 };
+
+/**
+ * An string that is not localized
+ */
+USTRUCT(BlueprintType)
+struct ARTICYRUNTIME_API FArticyStdString
+{
+	GENERATED_BODY()
+	
+public:
+
+	FArticyStdString() = default;
+	FArticyStdString(TSharedPtr<FJsonValue> Json);
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
+	FString Text = TEXT("");
+
+	FString ToString() const { return Text; }
+};
+
+/**
+ * An string that is localized
+ */
+USTRUCT(BlueprintType)
+struct ARTICYRUNTIME_API FArticyMultiLanguageString : public FArticyStdString
+{
+	GENERATED_BODY()
+	
+};

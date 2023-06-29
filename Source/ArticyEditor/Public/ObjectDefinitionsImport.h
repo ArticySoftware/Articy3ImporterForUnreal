@@ -239,6 +239,8 @@ public:
 	bool IsNewFeatureType(const FName& CppType) const;
 	TMap<FName, FArticyObjectDef>& GetTypes() { return Types; }
 	const TMap<FName, FArticyObjectDef>& GetTypes() const { return Types; }
+	TMap<FString, FArticyTexts>& GetTexts() { return Texts; }
+	const TMap<FString, FArticyTexts>& GetTexts() const { return Texts; }
 	const TMap<FName, FArticyTemplateFeatureDef> GetFeatures() const { return FeatureDefs; }
 
 private:

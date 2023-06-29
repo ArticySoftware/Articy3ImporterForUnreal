@@ -141,30 +141,6 @@ void SArticyVariableSet::BuildVariableWidgets()
 				})
 			];
 		}
-		else if (Var->GetClass() == UArticyMultiLanguageString::StaticClass())
-		{
-			UArticyMultiLanguageString* StringVar = Cast<UArticyMultiLanguageString>(Var);
-			InnerVarSlot
-			[
-				SNew(SEditableTextBox)
-				.MinDesiredWidth(30.f)
-				.Text_Lambda([StringVar]()
-				{
-					return FText::FromString(StringVar->Get());
-				})
-				.OnTextCommitted_Lambda([StringVar](const FText& Text, ETextCommit::Type CommitType)
-				{
-					if(StringVar->Get().Equals(Text.ToString()))
-					{
-						return;
-					}
-
-					const FScopedTransaction Transaction(LOCTEXT("ModifyGV", "Modified GV"));
-					StringVar->Modify();
-					*StringVar = Text.ToString();
-				})
-			];
-		}
 		else if (Var->GetClass() == UArticyInt::StaticClass())
 		{
 			UArticyInt* IntVar = Cast<UArticyInt>(Var);

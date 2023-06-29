@@ -281,13 +281,6 @@ void UArticyGlobalVariables::PrintGlobalVariable(FArticyGvName GvName)
 			UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), *stringValue);
 			bPrintSuccessful = true;
 		}
-		else if (Cast<UArticyMultiLanguageString>(*basePtr))
-		{
-			bool stringSucceeded = false;
-			auto stringValue = GetStringVariable(GvName, stringSucceeded);
-			UE_LOG(LogArticyRuntime, Display, TEXT("%s::%s = %s"), *GvName.GetNamespace().ToString(), *GvName.GetVariable().ToString(), *stringValue);
-			bPrintSuccessful = true;
-		}
 	}
 
 	if(!bPrintSuccessful)
@@ -314,11 +307,6 @@ const FString& UArticyGlobalVariables::GetStringVariable(FArticyGvName GvName, b
 	return GetVariableValue<UArticyString, FString>(GvName.GetNamespace(), GvName.GetVariable(), bSucceeded);
 }
 
-const FString& UArticyGlobalVariables::GetMultiLanguageStringVariable(FArticyGvName GvName, bool& bSucceeded)
-{
-	return GetVariableValue<UArticyMultiLanguageString, FString>(GvName.GetNamespace(), GvName.GetVariable(), bSucceeded);
-}
-
 void UArticyGlobalVariables::SetBoolVariable(FArticyGvName GvName, const bool Value)
 {
 	SetVariableValue<UArticyBool>(GvName.GetNamespace(), GvName.GetVariable(), Value);
@@ -332,11 +320,6 @@ void UArticyGlobalVariables::SetIntVariable(FArticyGvName GvName, const int32 Va
 void UArticyGlobalVariables::SetStringVariable(FArticyGvName GvName, const FString Value)
 {
 	SetVariableValue<UArticyString>(GvName.GetNamespace(), GvName.GetVariable(), Value);
-}
-
-void UArticyGlobalVariables::SetMultiLanguageStringVariable(FArticyGvName GvName, const FString Value)
-{
-	SetVariableValue<UArticyMultiLanguageString>(GvName.GetNamespace(), GvName.GetVariable(), Value);
 }
 
 void UArticyGlobalVariables::EnableDebugLogging()

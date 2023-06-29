@@ -14,6 +14,7 @@
 #include "Misc/MessageDialog.h"
 #endif
 #include "ArticyArchiveReader.h"
+#include "StringTableGenerator.h"
 #include "BuildToolParser/BuildToolParser.h"
 #include "Serialization/JsonSerializer.h"
 
@@ -53,9 +54,6 @@ FString FArticyGVar::GetCPPTypeString() const
 
 	case EArticyType::ADT_String:
 		return TEXT("UArticyString");
-
-	case EArticyType::ADT_MultiLanguageString:
-		return TEXT("UArticyMultiLanguageString");
 
 	default:
 		return TEXT("Cannot get CPP type string, unknown type!");
@@ -211,6 +209,16 @@ const FString& FAIDScriptMethod::GetCPPDefaultReturn() const
 		return EmptyString;
 	}
 	if (ReturnType == "ArticyObject")
+	{
+		const static auto ArticyObject = FString{"nullptr"};
+		return ArticyObject;
+	}
+	if (ReturnType == "ArticyString")
+	{
+		const static auto ArticyObject = FString{"nullptr"};
+		return ArticyObject;
+	}
+	if (ReturnType == "ArticyMultiLanguageString")
 	{
 		const static auto ArticyObject = FString{"nullptr"};
 		return ArticyObject;
@@ -410,7 +418,7 @@ void FArticyLanguages::ImportFromJson(const TSharedPtr<FJsonObject>& Json)
 	JSON_TRY_ARRAY(Json, Languages, {
 		FArticyLanguageDef def;
 		def.ImportFromJson(item->AsObject());
-		Languages.Add(def.ArticyLanguageId, def);
+		Languages.Add(def.CultureName, def);
 	});
 }
 
@@ -555,6 +563,27 @@ void UArticyImportData::ImportFromJson(const UArticyArchiveReader& Archive, cons
 				bNeedsCodeGeneration = false;
 			}
 		}
+	}
+
+	// Create string tables
+	// TODO: Make sure it's necessary
+	for (const auto language : Languages.Languages)
+	{
+		StringTableGenerator(language.Key, [&](StringTableGenerator* CsvOutput)
+		{
+			// Handle object defs
+			for(const auto text : GetObjectDefs().GetTexts())
+			{
+				CsvOutput->Line(text.Key, text.Value.Content[TEXT("")].Text);
+			}
+
+			// Handle packages
+			// TODO: Improve this structure
+			for(const auto text : GetPackageDefs().GetTexts())
+			{
+				CsvOutput->Line(text.Key, text.Value.Content[TEXT("")].Text);
+			}
+		});
 	}
 
 	// if we are generating code, generate and compile it; after it has finished, generate assets and perform post import logic

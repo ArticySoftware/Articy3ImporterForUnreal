@@ -88,7 +88,7 @@ public:
 	void GatherScripts(UArticyImportData* Data) const;
 	void GatherText(const TSharedPtr<FJsonObject>& Json);
 	UArticyPackage* GeneratePackageAsset(UArticyImportData* Data) const;//MM_CHANGE
-
+	TMap<FString, FArticyTexts> GetTexts() const;
 
 	FString GetFolder() const;
 	FString GetFolderName() const;
@@ -121,6 +121,7 @@ public:
 	void ImportFromJson(const UArticyArchiveReader& Archive, const TArray<TSharedPtr<FJsonValue>>* Json, FADISettings& Settings);
 	void GatherScripts(UArticyImportData* Data) const;
 	void GenerateAssets(UArticyImportData* Data) const;//MM_CHANGE
+	TMap<FString, FArticyTexts> GetTexts() const;
 
 	TSet<FString> GetPackageNames() const;
 private:
