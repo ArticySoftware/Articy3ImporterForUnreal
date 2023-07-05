@@ -122,10 +122,19 @@ EReimportResult::Type UArticyJSONFactory::Reimport(UObject* Obj)
 	auto Asset = Cast<UArticyImportData>(Obj);
 	if(Asset)
 	{
-		if(!Asset->ImportData || Asset->ImportData->GetFirstFilename().Len() == 0)
+		if(!Asset->ImportData)
 			return EReimportResult::Failed;
 
-		if(ImportFromFile(Asset->ImportData->GetFirstFilename(), Asset))
+		// Don't look for old .articyue4 files
+		if (Asset->ImportData->SourceData.SourceFiles.Num() > 0)
+			Asset->ImportData->SourceData.SourceFiles[0].RelativeFilename.RemoveFromEnd(TEXT("4"));
+		
+		const FString ImportFilename = Asset->ImportData->GetFirstFilename();
+		
+		if(ImportFilename.Len() == 0)
+			return EReimportResult::Failed;
+
+		if(ImportFromFile(ImportFilename, Asset))
 			return EReimportResult::Succeeded;
 	}
 

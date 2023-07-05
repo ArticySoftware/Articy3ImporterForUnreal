@@ -12,7 +12,7 @@
 
 void StringTableGenerator::Line(const FString& Key, const FString& SourceString)
 {
-	FileContent += TEXT("\"") + Key + TEXT(",") + SourceString + TEXT("\n");
+	FileContent += TEXT("\"") + Key.Replace(TEXT("\""), TEXT("\"\"")) + TEXT("\",\"") + SourceString + TEXT("\"\n");
 }
 
 void StringTableGenerator::WriteToFile() const

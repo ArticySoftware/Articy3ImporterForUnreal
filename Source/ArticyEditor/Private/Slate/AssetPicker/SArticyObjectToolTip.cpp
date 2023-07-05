@@ -177,7 +177,7 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 	IArticyObjectWithDisplayName* ArticyObjectWithDisplayName = Cast<IArticyObjectWithDisplayName>(CachedArticyObject);
 	if (ArticyObjectWithDisplayName)
 	{
-		const FText DisplayName = FText::FromString(ArticyObjectWithDisplayName->GetDisplayName().Text);
+		const FText DisplayName = ArticyObjectWithDisplayName->GetDisplayName();
 		if(!DisplayName.IsEmpty())
 		{
 			NameText = DisplayName;
@@ -193,9 +193,9 @@ TSharedRef<SWidget> SArticyObjectToolTip::CreateToolTipContent()
 		if (Speaker)
 		{
 			const IArticyObjectWithDisplayName* DisplayNameOfSpeaker = Cast<IArticyObjectWithDisplayName>(Speaker);
-			const FArticyMultiLanguageString DisplayName = DisplayNameOfSpeaker->GetDisplayName();
+			const FText DisplayName = DisplayNameOfSpeaker->GetDisplayName();
 			AddToToolTipInfoBox(InfoBox, LOCTEXT("ArticyObjectToolTipSpeaker", "Speaker"),
-				FText::FromString(DisplayName.Text), true);
+				DisplayName, true);
 		}
 		else
 		{

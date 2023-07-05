@@ -54,13 +54,13 @@ void FArticyTemplateDef::GatherScripts(const TSharedPtr<FJsonObject> Values, UAr
 	}
 }
 
-void FArticyTemplateDef::InitializeModel(UArticyPrimitive* Model, const FString& Path, const TSharedPtr<FJsonObject> Values, const UArticyImportData* Data) const
+void FArticyTemplateDef::InitializeModel(UArticyPrimitive* Model, const FString& Path, const TSharedPtr<FJsonObject> Values, const UArticyImportData* Data, const FString& PackageName) const
 {
 	for(const auto feat : Features)
 	{
 		static const TSharedPtr<FJsonObject>* featureJson;
 		if(Values->TryGetObjectField(feat.GetTechnicalName(), featureJson))
-			feat.InitializeModel(Model, Path, *featureJson, Data);
+			feat.InitializeModel(Model, Path, *featureJson, Data, PackageName);
 	}
 }
 
@@ -185,7 +185,11 @@ void FArticyObjectDef::GatherScripts(const FArticyModelDef& Vals, UArticyImportD
 		Template.GatherScripts(featuresJson, Data);
 }
 
-void FArticyObjectDef::InitializeModel(UArticyPrimitive* Model, const FArticyModelDef& Vals, const UArticyImportData* Data) const
+void FArticyObjectDef::InitializeModel(
+	UArticyPrimitive* Model,
+	const FArticyModelDef& Vals,
+	const UArticyImportData* Data,
+	const FString& PackageName) const
 {
 	if(DefType == EObjectDefType::Enum)
 	{
@@ -199,7 +203,7 @@ void FArticyObjectDef::InitializeModel(UArticyPrimitive* Model, const FArticyMod
 		//initialize parent-class data first
 		auto parentDef = Data->GetObjectDefs().GetTypes().Find(Class);
 		if(parentDef)
-			parentDef->InitializeModel(Model, Vals, Data);
+			parentDef->InitializeModel(Model, Vals, Data, PackageName);
 	}
 
 	{
@@ -216,12 +220,12 @@ void FArticyObjectDef::InitializeModel(UArticyPrimitive* Model, const FArticyMod
 	auto propertiesJson = Vals.GetPropertiesJson();
 	//then set the rest of the properties
 	for(const auto prop : Properties)
-		prop.InitializeModel(Model, nameAndId, propertiesJson, Data);
+		prop.InitializeModel(Model, nameAndId, propertiesJson, Data, PackageName);
 
 	//set the features (if this is a template)
 	auto featuresJson = Vals.GetTemplatesJson();
 	if(featuresJson.IsValid())
-		Template.InitializeModel(Model, nameAndId, featuresJson, Data);
+		Template.InitializeModel(Model, nameAndId, featuresJson, Data, PackageName);
 	else
 		ensure(Template.GetDisplayName().IsEmpty());
 }
@@ -401,7 +405,12 @@ void FArticyPropertyDef::GatherScript(const TSharedPtr<FJsonObject>& JsonObject,
 		}
 	}
 
-void FArticyPropertyDef::InitializeModel(UArticyBaseObject* Model, const FString& Path, const TSharedPtr<FJsonObject>& JsonObject, const UArticyImportData* Data) const
+void FArticyPropertyDef::InitializeModel(
+	UArticyBaseObject* Model,
+	const FString& Path,
+	const TSharedPtr<FJsonObject>& JsonObject,
+	const UArticyImportData* Data,
+	const FString& PackageName) const
 {
 	auto jsonValue = JsonObject.IsValid() ? JsonObject->TryGetField(Property.ToString()) : nullptr;
 
@@ -409,7 +418,7 @@ void FArticyPropertyDef::InitializeModel(UArticyBaseObject* Model, const FString
 	if(!jsonValue.IsValid() || jsonValue->IsNull())
 		return;
 
-	FArticyObjectDefinitions::SetProp(ItemType.IsNone() ? Type : ItemType, GetPropetyName(), Model, Path + "." + Property.ToString(), jsonValue);
+	FArticyObjectDefinitions::SetProp(ItemType.IsNone() ? Type : ItemType, GetPropetyName(), Model, Path + "." + Property.ToString(), jsonValue, PackageName);
 }
 
 FString FArticyPropertyDef::GetCppType(const UArticyImportData* Data) const
@@ -513,7 +522,12 @@ void FArticyTemplateFeatureDef::GatherScripts(const TSharedPtr<FJsonObject>& Jso
 		prop.GatherScript(Json, Data);
 }
 
-void FArticyTemplateFeatureDef::InitializeModel(UArticyPrimitive* Model, const FString& Path, const TSharedPtr<FJsonObject>& Json, const UArticyImportData* Data) const
+void FArticyTemplateFeatureDef::InitializeModel(
+	UArticyPrimitive* Model,
+	const FString& Path,
+	const TSharedPtr<FJsonObject>& Json,
+	const UArticyImportData* Data,
+	const FString& PackageName) const
 {
 	//create new instance of the feature
 	auto feature = NewObject<UArticyBaseFeature>(Model, GetUClass(Data));
@@ -521,7 +535,7 @@ void FArticyTemplateFeatureDef::InitializeModel(UArticyPrimitive* Model, const F
 
 	const auto path = Path + "." + *TechnicalName;
 	for(const auto& prop : Properties)
-		prop.InitializeModel(feature, path, Json, Data);
+		prop.InitializeModel(feature, path, Json, Data, PackageName);
 }
 
 UClass* FArticyTemplateFeatureDef::GetUClass(const UArticyImportData* Data) const
@@ -593,11 +607,15 @@ void FArticyObjectDefinitions::GatherScripts(const FArticyModelDef& Values, UArt
 	}
 }
 
-void FArticyObjectDefinitions::InitializeModel(UArticyPrimitive* Model, const FArticyModelDef& Values, const UArticyImportData* Data) const
+void FArticyObjectDefinitions::InitializeModel(
+	UArticyPrimitive* Model,
+	const FArticyModelDef& Values,
+	const UArticyImportData* Data,
+	const FString& PackageName) const
 {
 	auto def = Types.Find(Values.GetType());
 	if(ensure(def))
-		def->InitializeModel(Model, Values, Data);
+		def->InitializeModel(Model, Values, Data, PackageName);
 	else
 	{
 		UE_LOG(LogArticyEditor, Error, TEXT("Model type %s for Model %s not found in definitions!"), *Values.GetType().ToString(), *Values.GetTechnicalName());
@@ -709,7 +727,7 @@ void FArticyObjectDefinitions::SetProp(const FName& OriginalType, const FName& P
 	{
 		static const TArray<TSharedPtr<FJsonValue>>* jArray;
 		if(Json->TryGetArray(jArray))
-			type->SetArray(Property, Model, Path, *jArray);
+			type->SetArray(Property, Model, Path, *jArray, PackageName);
 		else
 			type->SetProp(Property, PROP_SETTER_ARGS);
 	}

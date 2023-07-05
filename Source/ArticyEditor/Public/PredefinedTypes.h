@@ -20,9 +20,16 @@ class UArticyImportData;
 //same as PREDEFINED_TYPE_EX, but creates a ArticyObjectTypeInfo, which has a default deserializer
 #define PREDEFINE_ARTICYOBJECT_TYPE(Type) new ArticyObjectTypeInfo<Type, Type*>(#Type, #Type"*")
 
-#define PROP_SETTER_PARAMS UArticyBaseObject* Model, const FString& Path, const TSharedPtr<FJsonValue> Json
-#define ARRAY_SETTER_PARAMS UArticyBaseObject* Model, const FString& Path, const TArray<TSharedPtr<FJsonValue>> JsonArray
-#define PROP_SETTER_ARGS Model, Path, Json
+#define PROP_SETTER_PARAMS UArticyBaseObject* Model, const FString& Path, const TSharedPtr<FJsonValue> Json, const FString& PackageName
+#define ARRAY_SETTER_PARAMS UArticyBaseObject* Model, const FString& Path, const TArray<TSharedPtr<FJsonValue>> JsonArray, const FString& PackageName
+#define PROP_SETTER_ARGS Model, Path, Json, PackageName
+
+// Converts Unity rich text markup to Unreal rich text markup.
+// Amounts to just replacing all closing tags with </> as Unreal
+// does not include the tag name in the closing tag.
+//
+// Ex. "My text has <b>bold</b> words." to "My text has <b>bold</> words."
+FString ConvertUnityMarkupToUnreal(const FString& Input);
 
 struct ArticyPredefinedTypeBase
 {
@@ -84,7 +91,7 @@ public:
 
 		propArray.Reset(JsonArray.Num());
 		for(auto j : JsonArray)
-			propArray.Add(Deserializer(Model, Path, j));
+			propArray.Add(Deserializer(Model, Path, j, PackageName));
 
 		Model->SetProp(ArrayProperty, propArray);
 	}

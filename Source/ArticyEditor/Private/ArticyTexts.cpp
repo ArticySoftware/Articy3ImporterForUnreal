@@ -4,6 +4,7 @@
 
 #include "ArticyTexts.h"
 #include "ArticyHelpers.h"
+#include "PredefinedTypes.h"
 
 void FArticyTextDef::ImportFromJson(const TSharedPtr<FJsonValue>& Json)
 {
@@ -13,11 +14,12 @@ void FArticyTextDef::ImportFromJson(const TSharedPtr<FJsonValue>& Json)
 	const TSharedPtr<FJsonObject> JsonObject = Json->AsObject();
 	if (JsonObject->Values.IsEmpty())
 	{
-		Text = Json->AsString();
+		Text = ConvertUnityMarkupToUnreal(Json->AsString());
 		return;
 	}
 	
 	JSON_TRY_STRING(JsonObject, Text);
+	Text = ConvertUnityMarkupToUnreal(Text);
 	JSON_TRY_STRING(JsonObject, VOAsset);
 }
 

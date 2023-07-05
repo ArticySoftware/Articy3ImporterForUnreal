@@ -569,21 +569,36 @@ void UArticyImportData::ImportFromJson(const UArticyArchiveReader& Archive, cons
 	// TODO: Make sure it's necessary
 	for (const auto language : Languages.Languages)
 	{
-		StringTableGenerator(language.Key, [&](StringTableGenerator* CsvOutput)
+		StringTableGenerator(TEXT("ArticyStrings"), language.Key, [&](StringTableGenerator* CsvOutput)
 		{
 			// Handle object defs
-			for(const auto text : GetObjectDefs().GetTexts())
+			for(const auto Text : GetObjectDefs().GetTexts())
 			{
-				CsvOutput->Line(text.Key, text.Value.Content[TEXT("")].Text);
+				CsvOutput->Line(Text.Key, Text.Value.Content[TEXT("")].Text);
 			}
 
-			// Handle packages
-			// TODO: Improve this structure
-			for(const auto text : GetPackageDefs().GetTexts())
+			for(const auto Package : GetPackageDefs().GetPackageNames())
 			{
-				CsvOutput->Line(text.Key, text.Value.Content[TEXT("")].Text);
+				// Handle object defs
+				for(const auto Text : GetPackageDefs().GetTexts(Package))
+				{
+					CsvOutput->Line(Text.Key, Text.Value.Content[TEXT("")].Text);
+				}
 			}
 		});
+
+		// Handle packages
+		/* for(const auto Package : GetPackageDefs().GetPackageNames())
+		{
+			StringTableGenerator(Package.Replace(TEXT(" "), TEXT("_")), language.Key, [&](StringTableGenerator* CsvOutput)
+			{
+				// Handle object defs
+				for(const auto Text : GetPackageDefs().GetTexts(Package))
+				{
+					CsvOutput->Line(Text.Key, Text.Value.Content[TEXT("")].Text);
+				}
+			});
+		} */
 	}
 
 	// if we are generating code, generate and compile it; after it has finished, generate assets and perform post import logic

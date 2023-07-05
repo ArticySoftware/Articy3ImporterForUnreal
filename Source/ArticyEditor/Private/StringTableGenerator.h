@@ -23,7 +23,7 @@ public:
 	 * At last, WriteToFile is called.
 	 */
 	template<typename Lambda>
-	StringTableGenerator(const FString& Culture, Lambda ContentGenerator);
+	StringTableGenerator(const FString& TableName, const FString& Culture, Lambda ContentGenerator);
 
 	/** Add a line to the content. */
 	void Line(const FString& Key = "", const FString& SourceString = "");
@@ -51,16 +51,18 @@ inline void StringTableGenerator::SafeExecute(nullptr_t Lamb)
 }
 
 template <typename Lambda>
-StringTableGenerator::StringTableGenerator(const FString& Culture, Lambda ContentGenerator)
+StringTableGenerator::StringTableGenerator(const FString& TableName, const FString& Culture, Lambda ContentGenerator)
 {
-	Path = FPaths::ProjectContentDir() / TEXT("ArticyContent/Generated/ArticyStrings");
-	if (!Culture.IsEmpty())
+	const FString FilePath = TEXT("ArticyContent/Generated") / TableName;
+	if (Culture.IsEmpty())
 	{
-		Path += TEXT("-") + Culture;
+		Path = FPaths::ProjectContentDir() / FilePath;
+	} else {
+		Path = FPaths::ProjectContentDir() / TEXT("L10N") / Culture / FilePath;
 	}
 	Path += TEXT(".csv");
 	
-	Line("Key,SourceString");
+	Line("Key", "SourceString");
 	if(ensure(!std::is_null_pointer<Lambda>::value))
 		ContentGenerator(this);
 

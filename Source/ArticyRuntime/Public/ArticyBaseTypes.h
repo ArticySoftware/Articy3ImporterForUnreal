@@ -182,9 +182,7 @@ public:
 	FArticyStdString(TSharedPtr<FJsonValue> Json);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Articy")
-	FString Text = TEXT("");
-
-	FString ToString() const { return Text; }
+	FText Text;
 };
 
 /**

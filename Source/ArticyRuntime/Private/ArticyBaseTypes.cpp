@@ -49,5 +49,5 @@ FArticyStdString::FArticyStdString(TSharedPtr<FJsonValue> Json)
 	if(!ensure(Json.IsValid() && Json->Type == EJson::String))
 		return;
 
-	Text = Json->AsString();
+	Text = FText::AsCultureInvariant(Json->AsString());
 }

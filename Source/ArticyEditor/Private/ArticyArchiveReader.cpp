@@ -10,7 +10,7 @@
 bool UArticyArchiveReader::OpenArchive(const FString& InArchiveFileName)
 {
 	ArchiveFileName = InArchiveFileName;
-	
+
 	if (!ReadHeader())
 	{
 		UE_LOG(LogArticyEditor, Error, TEXT("Could not load archive %s."), *ArchiveFileName);

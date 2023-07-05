@@ -44,7 +44,12 @@ public:
 	void GenerateCode(CodeFileGenerator& header, const UArticyImportData* Data) const;
 
 	void GatherScript(const TSharedPtr<FJsonObject>& JsonValue, UArticyImportData* Data) const;
-	void InitializeModel(UArticyBaseObject* Model, const FString& Path, const TSharedPtr<FJsonObject>& JsonValue, const UArticyImportData* Data) const;
+	void InitializeModel(
+		UArticyBaseObject* Model,
+		const FString& Path,
+		const TSharedPtr<FJsonObject>& JsonValue,
+		const UArticyImportData* Data,
+		const FString& PackageName) const;
 
 	const FName& GetPropetyName() const { return Property; }
 	const FName& GetOriginalType() const { return Type; }
@@ -95,7 +100,12 @@ public:
 	void GeneratePropertyCode(CodeFileGenerator& header, const UArticyImportData* Data) const;
 
 	void GatherScripts(const TSharedPtr<FJsonObject>& Json, UArticyImportData* Data) const;
-	void InitializeModel(UArticyPrimitive* Model, const FString& Path, const TSharedPtr<FJsonObject>& Json, const UArticyImportData* Data) const;
+	void InitializeModel(
+		UArticyPrimitive* Model,
+		const FString& Path,
+		const TSharedPtr<FJsonObject>& Json,
+		const UArticyImportData* Data,
+		const FString& PackageName) const;
 
 	/** Returns the CPP type of this feature (for variable declarations if bAsVariable is true). */
 	FString GetCppType(const UArticyImportData* Data, bool bAsVariable) const;
@@ -130,7 +140,12 @@ public:
 	void GenerateProperties(CodeFileGenerator& header, const UArticyImportData* Data) const;
 
 	void GatherScripts(const TSharedPtr<FJsonObject> Values, UArticyImportData* Data) const;
-	void InitializeModel(UArticyPrimitive* Model, const FString& Path, const TSharedPtr<FJsonObject> Values, const UArticyImportData* Data) const;
+	void InitializeModel(
+		UArticyPrimitive* Model,
+		const FString& Path,
+		const TSharedPtr<FJsonObject> Values,
+		const UArticyImportData* Data,
+		const FString& PackageName) const;
 
 	FString GetDisplayName() const { return DisplayName; }
 	const TArray<FArticyTemplateFeatureDef>& GetFeatures() const { return Features; }
@@ -171,7 +186,11 @@ public:
 
 	/** Find all script fragments, add them to the UArticyImportData, and replace them with an id. */
 	void GatherScripts(const FArticyModelDef& Values, UArticyImportData* Data) const;
-	void InitializeModel(UArticyPrimitive* Model, const FArticyModelDef& Values, const UArticyImportData* Data) const;
+	void InitializeModel(
+		UArticyPrimitive* Model,
+		const FArticyModelDef& Values,
+		const UArticyImportData* Data,
+		const FString& PackageName) const;
 
 	FString GetCppType(const UArticyImportData* Data, const bool bForProperty) const;
 	FString GetCppBaseClasses(const UArticyImportData* Data) const;
@@ -212,7 +231,7 @@ public:
 	void ImportFromJson(const TArray<TSharedPtr<FJsonValue>>* Json, const UArticyImportData* Data);
 	void GatherScripts(const FArticyModelDef& Values, UArticyImportData* Data) const;
 	void GatherText(const TSharedPtr<FJsonObject>& Json);
-	void InitializeModel(UArticyPrimitive* Model, const FArticyModelDef& Values, const UArticyImportData* Data) const;
+	void InitializeModel(UArticyPrimitive* Model, const FArticyModelDef& Values, const UArticyImportData* Data, const FString& PackageName) const;
 
 	FString GetCppType(const FName& OriginalType, const UArticyImportData* Data, const bool bForProperty) const;
 	static const FString& GetCppDefaultValue(const FName& OriginalType);

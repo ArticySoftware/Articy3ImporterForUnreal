@@ -274,7 +274,7 @@ private:
 				return false;
 			}
 
-			FArticyMultiLanguageString& SpeakerName = SpeakerDisplayName->GetDisplayName();
+			const FText& SpeakerName = SpeakerDisplayName->GetDisplayName();
 			const FTextFilterString TextToCompare(SpeakerName.ToString());
 
 			if (TextToCompare.IsEmpty())

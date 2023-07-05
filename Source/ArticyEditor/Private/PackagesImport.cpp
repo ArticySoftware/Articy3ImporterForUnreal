@@ -82,7 +82,7 @@ UArticyObject* FArticyModelDef::GenerateSubAsset(const UArticyImportData* Data, 
 		if (ensure(obj))
 		{
 			obj->Initialize();
-			Data->GetObjectDefs().InitializeModel(obj, *this, Data);
+			Data->GetObjectDefs().InitializeModel(obj, *this, Data, Outer->GetName());
 
 			//SAVE!!
 
@@ -320,17 +320,18 @@ TMap<FString, FArticyTexts> FArticyPackageDef::GetTexts() const
 	return Texts;
 }
 
-TMap<FString, FArticyTexts> FArticyPackageDefs::GetTexts() const
+TMap<FString, FArticyTexts> FArticyPackageDefs::GetTexts(const FString& PackageName) const
 {
-	// TODO: Handle this individually for each package, ideally to output to different string tables
-	TMap<FString, FArticyTexts> MergedTexts;
-
+	// TODO: This is inefficient - fix it
 	for(const auto& pack : Packages)
 	{
-		MergedTexts.Append(pack.GetTexts());
+		if (pack.GetName().Equals(PackageName))
+		{
+			return pack.GetTexts();
+		}
 	}
 
-	return MergedTexts;
+	return TMap<FString, FArticyTexts>();
 }
 
 void FArticyPackageDefs::GenerateAssets(UArticyImportData* Data) const
