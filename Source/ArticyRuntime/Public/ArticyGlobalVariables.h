@@ -419,6 +419,8 @@ class ARTICYRUNTIME_API UArticyGlobalVariables : public UDataAsset, public IShad
 
 public:
 
+	virtual FPrimaryAssetId GetPrimaryAssetId() const override { return FPrimaryAssetId(FName(TEXT("ArticyGlobalVariables")), GetFName()); }
+
 	/**
 	 * Get a reference to the ArticyGlobalVariables asset.
 	 * Creates a temporary copy if the 
