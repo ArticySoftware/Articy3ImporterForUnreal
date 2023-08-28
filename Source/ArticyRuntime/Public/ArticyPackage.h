@@ -23,6 +23,8 @@ protected:
 	TMap<FArticyId, TSoftObjectPtr<UArticyObject>> AssetsById;
 public: 
 
+	virtual FPrimaryAssetId GetPrimaryAssetId() const override { return FPrimaryAssetId(FName(TEXT("ArticyPackage")), GetFName()); }
+
 	void AddAsset(UArticyObject* ArticyObject);
 
 	UFUNCTION()

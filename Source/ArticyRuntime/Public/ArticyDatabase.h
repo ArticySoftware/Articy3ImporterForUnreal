@@ -129,6 +129,8 @@ class ARTICYRUNTIME_API UArticyDatabase : public UDataAsset, public IShadowState
 
 public:
 
+	virtual FPrimaryAssetId GetPrimaryAssetId() const override { return FPrimaryAssetId(FName(TEXT("ArticyDatabase")), GetFName()); }
+
 	void Init();
 
 	/** Get the static instance of the database. */
