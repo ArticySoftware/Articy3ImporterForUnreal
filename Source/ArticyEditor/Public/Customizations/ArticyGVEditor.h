@@ -24,6 +24,7 @@ public:
 	virtual FText GetBaseToolkitName() const override;
 	virtual FString GetWorldCentricTabPrefix() const override;
 	virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& TabManager) override;
+	virtual FString GetReferencerName() const override;
 
 private:
 	TSharedRef<SDockTab> SpawnTab_ArticyGV(const FSpawnTabArgs& Args) const;

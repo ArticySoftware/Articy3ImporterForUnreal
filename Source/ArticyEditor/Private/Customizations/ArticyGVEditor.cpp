@@ -97,6 +97,11 @@ void FArticyGVEditor::RegisterTabSpawners(const TSharedRef<FTabManager>& InTabMa
 		.SetGroup(WorkspaceMenuCategoryRef);
 }
 
+FString FArticyGVEditor::GetReferencerName() const
+{
+	return TEXT("FArticyGVEditor");
+}
+
 TSharedRef<SDockTab> FArticyGVEditor::SpawnTab_ArticyGV(const FSpawnTabArgs& Args) const
 {
 	check(Args.GetTabId() == ArticyGVTab);
