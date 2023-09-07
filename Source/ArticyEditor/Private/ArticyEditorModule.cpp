@@ -334,6 +334,8 @@ void FArticyEditorModule::OnGeneratedCodeChanged(const TArray<FFileChangeData>& 
 		FText Title = FText::FromString(TEXT("Articy detected an error"));
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 		EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::YesNo, Message, Title);
+#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+		EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::YesNo, Message, Title);
 #else
 		EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::YesNo, Message, &Title);
 #endif

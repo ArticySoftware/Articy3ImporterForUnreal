@@ -463,6 +463,9 @@ void UArticyImportData::ImportFromJson(const TSharedPtr<FJsonObject> RootObject)
 			                                         "The \"ArticyRuntime\" reference needs to be added inside the Unreal build tool.\nDo you want to add the reference automatically ?\nIf you use a custom build system or a custom build file, you can disable automatic reference verification inside the Articy Plugin settings from the Project settings.\n");
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 			EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, RuntimeRefNotFound, RuntimeRefNotFoundTitle);
+#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+			EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::YesNoCancel, RuntimeRefNotFound,
+																   RuntimeRefNotFoundTitle);
 #else
 			EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::YesNoCancel, RuntimeRefNotFound,
 			                                                       &RuntimeRefNotFoundTitle);

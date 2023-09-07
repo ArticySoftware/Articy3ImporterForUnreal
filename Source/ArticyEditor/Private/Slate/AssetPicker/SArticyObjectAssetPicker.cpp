@@ -165,7 +165,11 @@ void SArticyObjectAssetPicker::CreateInternalWidgets()
 			[
 				SNew(SCheckBox)
 			.IsEnabled(bExactClassEditable)
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+			.IsChecked_Lambda([=, this]()
+#else
 			.IsChecked_Lambda([=]()
+#endif
 				               {
 					               return bExactClass.Get() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 				               })

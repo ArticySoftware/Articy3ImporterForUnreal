@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Runtime/CoreUObject/Public/UObject/Interface.h"
-#include "Launch/Resources/Version.h"
+#include "Runtime/Launch/Resources/Version.h"
 #include "ArticyReflectable.generated.h"
 
 UINTERFACE()

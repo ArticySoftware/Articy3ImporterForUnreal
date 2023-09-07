@@ -15,7 +15,11 @@
 void SArticyGlobalVariablesRuntimeDebugger::Construct(const FArguments& Args)
 {
 	// the runtime switcher will display a 'disabled' message if no game is running
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+	RuntimeSwitcher = SNew(SWidgetSwitcher).WidgetIndex_Lambda([=, this]()
+#else
 	RuntimeSwitcher = SNew(SWidgetSwitcher).WidgetIndex_Lambda([=]()
+#endif
 	{
 		return CurrentGlobalVariables.IsValid() ? 1 : 0;
 	});

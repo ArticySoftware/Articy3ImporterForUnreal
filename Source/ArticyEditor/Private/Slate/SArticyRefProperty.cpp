@@ -98,7 +98,11 @@ FArticyId SArticyRefProperty::GetArticyIdToDisplay() const
 void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
 {
 	TSharedRef<SHorizontalBox> AdditionalWidgetBox = SNew(SHorizontalBox)
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+	.IsEnabled_Lambda([=, this]()
+#else
 	.IsEnabled_Lambda([=]()
+#endif
 	{
 		return !bIsReadOnly.Get();
 	})
@@ -120,11 +124,19 @@ void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
 	.AutoWidth()
 	[
 		SNew(SCheckBox)
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+		.IsChecked_Lambda([=, this]()
+#else
 		.IsChecked_Lambda([=]()
+#endif
 		{
 			return CachedArticyRef.bReferenceBaseObject ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 		})
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+		.OnCheckStateChanged_Lambda([=, this](ECheckBoxState NewState)
+#else
 		.OnCheckStateChanged_Lambda([=](ECheckBoxState NewState)
+#endif
 		{
 			CachedArticyRef.bReferenceBaseObject = NewState == ECheckBoxState::Checked;
 			OnArticyRefChanged.ExecuteIfBound(CachedArticyRef);
@@ -147,7 +159,11 @@ void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
 		.Text(FText::FromString("Clone"))
 		.TextStyle(&FArticyEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("ArticyImporter.SmallTextBlock"))
 		.ToolTipText(FText::FromString("Which clone Id should be referenced?"))
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+		.Visibility_Lambda([=, this]()
+#else
 		.Visibility_Lambda([=]()
+#endif
 		{
 			return CachedArticyRef.bReferenceBaseObject ? EVisibility::Collapsed : EVisibility::Visible;
 		})
@@ -160,16 +176,28 @@ void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
 	[
 		SNew(SNumericEntryBox<int32>)
 		.MinDesiredValueWidth(15.f)
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+		.Value_Lambda([=, this]()
+#else
 		.Value_Lambda([=]()
+#endif
 		{
 			return CachedArticyRef.CloneId;
 		})
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+		.OnValueChanged_Lambda([=, this](int32 NewValue)
+#else
 		.OnValueChanged_Lambda([=](int32 NewValue)
+#endif
 		{
 			CachedArticyRef.CloneId = NewValue;
 			OnArticyRefChanged.ExecuteIfBound(CachedArticyRef);
 		})
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+		.Visibility_Lambda([=, this]()
+#else
 		.Visibility_Lambda([=]()
+#endif
 		{
 			return CachedArticyRef.bReferenceBaseObject ? EVisibility::Collapsed : EVisibility::Visible;
 		})

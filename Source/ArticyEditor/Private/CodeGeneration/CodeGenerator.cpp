@@ -196,6 +196,8 @@ void CodeGenerator::Compile(UArticyImportData* Data)
 		FText ErrorText = FText(LOCTEXT("LiveCodingErrorMessage", "Unable to reimport Articy:Draft project changes because Experimental Live Coding is enabled. Please disable Live Coding and run a Full Reimport to continue."));
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 		EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, ErrorText, ErrorTitle);
+#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+		EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, ErrorText, ErrorTitle);
 #else
 		EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, ErrorText, &ErrorTitle);
 #endif
@@ -397,6 +399,8 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 		const FText CacheNotAvailableText = FText::Format(LOCTEXT("NoCacheAvailable", "Aborting import process. No cache available to restore. Deleting import asset but leaving generated code intact. Please delete manually in Source/ArticyGenerated if necessary and rebuild. Reason: {0}."), ReasonForRestoreText);
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 		EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, CacheNotAvailableText, ArticyImportErrorText);
+#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+		EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheNotAvailableText, ArticyImportErrorText);
 #else
 		EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheNotAvailableText, &ArticyImportErrorText);
 #endif
@@ -430,6 +434,8 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 			const FText CacheRestoredText = FText::Format(LOCTEXT("ImportDataCacheRestoredText", "Restored previously generated articy code. Reason: {0}. Continuing import with last valid state."), ReasonForRestoreText);
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 			EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, CacheRestoredText, ArticyImportErrorText);
+#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+			EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheRestoredText, ArticyImportErrorText);
 #else
 			EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheRestoredText, &ArticyImportErrorText);
 #endif
@@ -446,6 +452,8 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 				const FText CacheDeletedText = FText::Format(LOCTEXT("ImportDataCacheDeletedText", "Deleted generated articy code. Reason: {0}. Aborting import process."), ReasonForRestoreText);
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 				EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletedText, ArticyImportErrorText);
+#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+				EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheDeletedText, ArticyImportErrorText);
 #else
 				EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheDeletedText, &ArticyImportErrorText);
 #endif
@@ -459,6 +467,8 @@ bool CodeGenerator::RestorePreviousImport(UArticyImportData* Data, const bool& b
 				const FText CacheDeletionFailedText = FText::Format(LOCTEXT("ImportDataCacheDeletionFailedText", "Tried to delete generated articy code. Reason: {0}. Failed to delete. Aborting import process."), ReasonForRestoreText);
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
 				EAppReturnType::Type ReturnType = OpenMsgDlgInt(EAppMsgType::Ok, CacheDeletionFailedText, ArticyImportErrorText);
+#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+				EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheDeletionFailedText, ArticyImportErrorText);
 #else
 				EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::Ok, CacheDeletionFailedText, &ArticyImportErrorText);
 #endif

@@ -10,7 +10,7 @@
 #include "ArticyEditorModule.h"
 #include "Widgets/Layout/SSplitter.h"
 #include "Slate/GV/SArticyGlobalVariablesDebugger.h"
-#include "Launch/Resources/Version.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 void FArticyGVCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {

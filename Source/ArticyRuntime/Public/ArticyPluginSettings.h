@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "Engine/EngineTypes.h"
-#include "Launch/Resources/Version.h"
+#include "Runtime/Launch/Resources/Version.h"
 #include "ArticyPluginSettings.generated.h"
 
 UCLASS(config = Engine, defaultconfig)
