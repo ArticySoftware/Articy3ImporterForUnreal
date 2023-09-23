@@ -44,7 +44,7 @@ UArticyObject* FArticyShadowableObject::Get(const IShadowStateManager* ShadowMan
 	auto obj = DuplicateObject(SourceObject, SourceObject);
 	ShadowCopies.Add(FArticyObjectShadow(ShadowLvl, obj, mostRecentShadow.GetCloneId()) );
 	
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 	const_cast<IShadowStateManager*>(ShadowManager)->RegisterOnPopState([=, this]
 #else
 	const_cast<IShadowStateManager*>(ShadowManager)->RegisterOnPopState([=]

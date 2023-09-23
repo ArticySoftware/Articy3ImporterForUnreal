@@ -525,7 +525,7 @@ uint32 UArticyVariable::GetShadowLevel(Type* Instance)
 template <typename Type>
 void UArticyVariable::RegisterOnStorePop(Type* Instance)
 {
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 	Store->RegisterOnPopState([=, this] { this->PopState(Instance); });
 #else
 	Store->RegisterOnPopState([=] { this->PopState(Instance); });

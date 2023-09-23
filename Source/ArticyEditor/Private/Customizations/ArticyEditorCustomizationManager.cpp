@@ -17,7 +17,7 @@ IArticyIdPropertyWidgetCustomizationFactory* FArticyEditorCustomizationManager::
 
 void FArticyEditorCustomizationManager::UnregisterArticyIdPropertyWidgetCustomizationFactory(const IArticyIdPropertyWidgetCustomizationFactory* Factory)
 {
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 	const int32 RemovedElements = ArticyIdPropertyWidgetCustomizationFactories.RemoveAll([=, this](const TSharedPtr<IArticyIdPropertyWidgetCustomizationFactory> FactoryPtr)
 #else
 	const int32 RemovedElements = ArticyIdPropertyWidgetCustomizationFactories.RemoveAll([=](const TSharedPtr<IArticyIdPropertyWidgetCustomizationFactory> FactoryPtr)

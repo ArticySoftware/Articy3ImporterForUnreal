@@ -98,7 +98,7 @@ FArticyId SArticyRefProperty::GetArticyIdToDisplay() const
 void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
 {
 	TSharedRef<SHorizontalBox> AdditionalWidgetBox = SNew(SHorizontalBox)
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 	.IsEnabled_Lambda([=, this]()
 #else
 	.IsEnabled_Lambda([=]()
@@ -124,7 +124,7 @@ void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
 	.AutoWidth()
 	[
 		SNew(SCheckBox)
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 		.IsChecked_Lambda([=, this]()
 #else
 		.IsChecked_Lambda([=]()
@@ -132,7 +132,7 @@ void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
 		{
 			return CachedArticyRef.bReferenceBaseObject ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 		})
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 		.OnCheckStateChanged_Lambda([=, this](ECheckBoxState NewState)
 #else
 		.OnCheckStateChanged_Lambda([=](ECheckBoxState NewState)
@@ -159,7 +159,7 @@ void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
 		.Text(FText::FromString("Clone"))
 		.TextStyle(&FArticyEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("ArticyImporter.SmallTextBlock"))
 		.ToolTipText(FText::FromString("Which clone Id should be referenced?"))
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 		.Visibility_Lambda([=, this]()
 #else
 		.Visibility_Lambda([=]()
@@ -176,7 +176,7 @@ void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
 	[
 		SNew(SNumericEntryBox<int32>)
 		.MinDesiredValueWidth(15.f)
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 		.Value_Lambda([=, this]()
 #else
 		.Value_Lambda([=]()
@@ -184,7 +184,7 @@ void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
 		{
 			return CachedArticyRef.CloneId;
 		})
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 		.OnValueChanged_Lambda([=, this](int32 NewValue)
 #else
 		.OnValueChanged_Lambda([=](int32 NewValue)
@@ -193,7 +193,7 @@ void SArticyRefProperty::CreateAdditionalRefWidgets(FToolBarBuilder& Builder)
 			CachedArticyRef.CloneId = NewValue;
 			OnArticyRefChanged.ExecuteIfBound(CachedArticyRef);
 		})
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 		.Visibility_Lambda([=, this]()
 #else
 		.Visibility_Lambda([=]()

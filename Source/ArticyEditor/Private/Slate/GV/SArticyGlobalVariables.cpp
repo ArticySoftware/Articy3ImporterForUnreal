@@ -151,7 +151,7 @@ void SArticyVariableSet::BuildVariableWidgets()
 				.MaxSliderValue(TOptional<int32>())
 				.MinSliderValue(TOptional<int32>())
 				.MinDesiredValueWidth(80.f)
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 				.OnBeginSliderMovement_Lambda([=, this]()
 #else
 				.OnBeginSliderMovement_Lambda([=]()
@@ -160,7 +160,7 @@ void SArticyVariableSet::BuildVariableWidgets()
 					bSliderMoving = true;
 					GEditor->BeginTransaction(TEXT("Articy GV"), FText::FromString(TEXT("Modify Articy GV by Slider")), IntVar);
 				})
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 				.OnEndSliderMovement_Lambda([=, this](int32 Value)
 #else
 				.OnEndSliderMovement_Lambda([=](int32 Value)
@@ -177,7 +177,7 @@ void SArticyVariableSet::BuildVariableWidgets()
 				})
 				// on value changed is only used for slider value updates
 				.OnValueChanged(this, &SArticyVariableSet::OnValueChanged, IntVar)
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 				.OnValueCommitted_Lambda([=, this](int32 Value, ETextCommit::Type Type)
 #else
 				.OnValueCommitted_Lambda([=](int32 Value, ETextCommit::Type Type)

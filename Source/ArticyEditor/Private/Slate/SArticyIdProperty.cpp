@@ -84,7 +84,7 @@ void SArticyIdProperty::Tick(const FGeometry& AllottedGeometry, const double InC
 void SArticyIdProperty::CreateInternalWidgets()
 {
 	ComboButton = SNew(SFixedSizeMenuComboButton)
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if __cplusplus >= 202002L
 	.IsEnabled_Lambda([=, this]()
 #else
 	.IsEnabled_Lambda([=]()
