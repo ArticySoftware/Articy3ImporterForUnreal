@@ -119,7 +119,7 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetDefault(const UObject* WorldC
 		auto world = GEngine->GetWorldFromContextObjectChecked(WorldContext);
 		ensureMsgf(world, TEXT("Getting world for GV cloning failed!"));
 
-		TObjectPtr<UArticyGlobalVariables> assetPtr = asset;
+		const auto assetPtr = asset;
 		if(keepBetweenWorlds)
 		{
 			Clone = DuplicateObject<UArticyGlobalVariables>(assetPtr, Cast<UObject>(world->GetGameInstance()), TEXT("Persistent Runtime GV"));
@@ -202,7 +202,7 @@ UArticyGlobalVariables* UArticyGlobalVariables::GetRuntimeClone(const UObject* W
 
 	// If so, duplicate and add to root
 	UArticyGlobalVariables* NewClone = nullptr;
-	TObjectPtr<UArticyGlobalVariables> assetPtr = asset;
+	const auto assetPtr = asset;
 	if (keepBetweenWorlds)
 	{
 		FString NewName = TEXT("Persistent Runtime GV Clone of ") + Name;
