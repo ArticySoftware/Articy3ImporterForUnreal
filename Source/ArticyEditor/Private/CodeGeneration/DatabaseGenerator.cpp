@@ -21,7 +21,7 @@ void DatabaseGenerator::GenerateCode(const UArticyImportData* Data)
 	CodeFileGenerator(filename + ".h", true, [&](CodeFileGenerator* header)
 	{
 		header->Line("#include \"CoreUObject.h\"");
-		header->Line("#include \"ArticyRuntime/Public/ArticyDatabase.h\"");
+		header->Line("#include \"ArticyDatabase.h\"");
 		header->Line("#include \"" + ExpressoScriptsGenerator::GetFilename(Data) + "\"");
 		header->Line("#include \"" + filename + ".generated.h\"");
 		header->Line();

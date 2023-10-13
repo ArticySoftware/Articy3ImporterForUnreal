@@ -8,7 +8,7 @@
 #include "GlobalVarsGenerator.h"
 #include "InterfacesGenerator.h"
 #include "Developer/HotReload/Public/IHotReload.h"
-#include "ArticyRuntime/Public/ArticyGlobalVariables.h"
+#include "ArticyGlobalVariables.h"
 #include "ObjectDefinitionsGenerator.h"
 #include "PackagesGenerator.h"
 #include "ArticyDatabase.h"
