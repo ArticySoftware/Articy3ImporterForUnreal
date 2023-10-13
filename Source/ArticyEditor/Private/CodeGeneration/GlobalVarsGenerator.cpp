@@ -20,7 +20,7 @@ void GlobalVarsGenerator::GenerateCode(const UArticyImportData* Data)
 	CodeFileGenerator(filename + ".h", true, [&](CodeFileGenerator* header)
 	{
 		header->Line("#include \"CoreUObject.h\"");
-		header->Line("#include \"ArticyRuntime/Public/ArticyGlobalVariables.h\"");
+		header->Line("#include \"ArticyGlobalVariables.h\"");
 		header->Line("#include \"" + filename + ".generated.h\"");
 
 		// disable "optimization cannot be applied due to function size" compile error. This error is caused by the huge constructor when all expresso
