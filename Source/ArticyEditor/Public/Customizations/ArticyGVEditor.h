@@ -2,21 +2,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/GCObject.h"
 #include "Toolkits/AssetEditorToolkit.h"
 #include "Misc/NotifyHook.h"
 #include "EditorUndoClient.h"
 #include "ArticyGlobalVariables.h"
 #include "Slate/GV/SArticyGlobalVariables.h"
 
-class FArticyGVEditor : public FAssetEditorToolkit, FEditorUndoClient, FNotifyHook, FGCObject
+class FArticyGVEditor : public FAssetEditorToolkit, FEditorUndoClient, FNotifyHook
 {
 public:
 	virtual ~FArticyGVEditor();
 	void InitArticyGVEditor(const EToolkitMode::Type Mode, const TSharedPtr<IToolkitHost>& InitToolkitHost, UArticyGlobalVariables* ObjectToEdit);
 
-	/** FGCObject Interface */
-	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 	/** IToolkit Interface */
 	virtual FLinearColor GetWorldCentricTabColorScale() const override;
 	/** FAssetEditorToolkit Interface */

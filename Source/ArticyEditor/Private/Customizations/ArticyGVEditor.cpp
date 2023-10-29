@@ -59,10 +59,6 @@ void FArticyGVEditor::InitArticyGVEditor(const EToolkitMode::Type Mode, const TS
 	FAssetEditorToolkit::InitAssetEditor(Mode, InitToolkitHost, TEXT("ArticyExtensionEditor"), StandaloneDefaultLayout, bCreateDefaultStandaloneMenu, bCreateDefaultToolbar, GlobalVariables.Get(), false);
 }
 
-void FArticyGVEditor::AddReferencedObjects(FReferenceCollector& Collector)
-{
-}
-
 FLinearColor FArticyGVEditor::GetWorldCentricTabColorScale() const
 {
 	return FLinearColor(0.3f, 0.2f, 0.5f, 0.5f);
