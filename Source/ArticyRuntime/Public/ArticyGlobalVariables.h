@@ -324,6 +324,11 @@ public:
 		else
 			return Value = NewValue.GetString();
 	}
+
+	bool operator ==(const FString& text) const { return Value.Equals(text); }
+	bool operator !=(const FString& text) const { return !this->operator==(text); }
+	bool operator ==(const FString&& text) const { return Value.Equals(text); }
+	bool operator !=(const FString&& text) const { return !this->operator==(text); }
 	bool operator ==(const char* const text) const { return Value.Equals(text); }
 	bool operator !=(const char* const text) const { return !this->operator==(text); }
 
