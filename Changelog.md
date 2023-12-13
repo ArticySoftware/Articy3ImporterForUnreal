@@ -1,3 +1,13 @@
+## Unreal Importer 1.7.1 Changelog :
+
+- Fixes:
+	- Fixed issue with literal strings
+        - Fixed header issues on Unreal 5.3
+
+## Unreal Importer 1.7.0 Changelog :
+
+- New Features: Unreal 5.2 & 5.3 compatibility
+
 ## Unreal Importer 1.6.0 Changelog : 
 
 - New Features: Unreal 5.1 compatibility
