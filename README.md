@@ -19,6 +19,7 @@ While full support is not guaranteed for this product, we're constantly working 
   * [Using the Flow Player](#articy-flow-player)
   * [Custom Script Methods](#custom-script-methods)
   * [Multiple Global Variable Sets](#multiple-global-variable-sets)
+* [Compatibility](#compatibility)
 * [Common Issues](#common-issues)
 
 # Features
@@ -478,6 +479,10 @@ FArticyEditorModule::Get().GetCustomizationManager()->RegisterArticyIdPropertyWi
 # Contributing
 
 We are very grateful for any kind of contribution that you bring to the ArticyImporter, no matter if it is reporting any issues, or by actively adding new features, or fixing existing issues. If you want to know more about how to contribute please check our [Contribution](https://github.com/ArticySoftware/ArticyImporterForUnreal/blob/master/CONTRIBUTING.md) article.
+
+# Compatibility
+
+It is not possible to have both [ArticyXImporter for Unreal Engine](https://github.com/ArticySoftware/ArticyXImporterForUnreal) and [ArticyImporter for Unreal Engine](https://github.com/ArticySoftware/Articy3ImporterForUnreal) installed in the same engine or project. If you need to use both on the same engine installation, then you need to install the relevant plugin at the project level.
 
 # Common Issues
 
