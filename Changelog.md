@@ -2,7 +2,7 @@
 
 - Fixes:
 	- Fixed issue with literal strings
-        - Fixed header issues on Unreal 5.3
+	- Fixed header issues on Unreal 5.3
 
 ## Unreal Importer 1.7.0 Changelog :
 
