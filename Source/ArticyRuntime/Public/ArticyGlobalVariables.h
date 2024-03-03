@@ -256,6 +256,20 @@ private:
 	TArray<ArticyShadowState<int>> Shadows;
 };
 
+// interim, hopefully
+static int operator+(const UArticyInt& v1, const UArticyInt& v2)
+{
+	return v1.Get() + v2.Get();
+}
+static int operator+(int k, const UArticyInt& v)
+{
+	return k + v.Get();
+}
+static int operator+(const UArticyInt& v, int k)
+{
+	return v.Get() + k;
+}
+
 //---------------------------------------------------------------------------//
 
 UCLASS(BlueprintType)
