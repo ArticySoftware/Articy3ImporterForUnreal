@@ -258,6 +258,62 @@ private:
 
 //---------------------------------------------------------------------------//
 
+// Allow arithmetic operations on integers
+
+static int operator+(const UArticyInt& v1, const UArticyInt& v2)
+{
+	return v1.Get() + v2.Get();
+}
+static int operator+(int k, const UArticyInt& v)
+{
+	return k + v.Get();
+}
+static int operator+(const UArticyInt& v, int k)
+{
+	return v.Get() + k;
+}
+
+static int operator-(const UArticyInt& v1, const UArticyInt& v2)
+{
+	return v1.Get() - v2.Get();
+}
+static int operator-(int k, const UArticyInt& v)
+{
+	return k - v.Get();
+}
+static int operator-(const UArticyInt& v, int k)
+{
+	return v.Get() + k;
+}
+
+static int operator*(const UArticyInt& v1, const UArticyInt& v2)
+{
+	return v1.Get() * v2.Get();
+}
+static int operator*(int k, const UArticyInt& v)
+{
+	return k * v.Get();
+}
+static int operator*(const UArticyInt& v, int k)
+{
+	return v.Get() * k;
+}
+
+static int operator/(const UArticyInt& v1, const UArticyInt& v2)
+{
+	return v1.Get() / v2.Get();
+}
+static int operator/(int k, const UArticyInt& v)
+{
+	return k / v.Get();
+}
+static int operator/(const UArticyInt& v, int k)
+{
+	return v.Get() / k;
+}
+
+//---------------------------------------------------------------------------//
+
 UCLASS(BlueprintType)
 class ARTICYRUNTIME_API UArticyBool : public UArticyVariable
 {
