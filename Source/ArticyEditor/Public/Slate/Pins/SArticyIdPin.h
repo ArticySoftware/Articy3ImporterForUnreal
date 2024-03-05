@@ -31,4 +31,9 @@ private:
 private:
 	FArticyId GetArticyId() const;
 	void OnArticyIdChanged(const FArticyId& NewArticyId);
+
+	UClass* GetClassRestriction() const;
+	bool IsExactClass() const;
+	bool HasClassRestrictionMetaData() const;
+	bool HasExactClassMetaData() const;
 };
