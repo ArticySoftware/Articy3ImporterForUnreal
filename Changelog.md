@@ -1,3 +1,7 @@
+## Unreal Importer 1.8.0 Changelog :
+
+- New Features: Unreal 5.4 compatibility
+
 ## Unreal Importer 1.7.1 Changelog :
 
 - Fixes:

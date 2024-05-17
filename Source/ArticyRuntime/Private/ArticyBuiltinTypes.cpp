@@ -18,7 +18,7 @@ void UArticyPreviewImage::InitFromJson(TSharedPtr<FJsonValue> Json)
 
 	auto obj = Json->AsObject();
 
-	ViewBox = FArticyRect{ obj->TryGetField(STRINGIFY(ViewBox)) };
+	ViewBox = FArticyRect{ obj->TryGetField(TEXT(STRINGIFY(ViewBox))) };
 	JSON_TRY_ENUM(obj, Mode);
 	JSON_TRY_HEX_ID(obj, Asset);
 }
@@ -34,7 +34,7 @@ void UArticyConnection::InitFromJson(TSharedPtr<FJsonValue> Json)
 	
 	auto obj = Json->AsObject();
 	JSON_TRY_STRING(obj, Label);
-	Color = ArticyHelpers::ParseColorFromJson(obj->TryGetField("Color"));
+	Color = ArticyHelpers::ParseColorFromJson(obj->TryGetField(TEXT("Color")));
 }
 
 UArticyPrimitive* UArticyOutgoingConnection::GetTarget() const
@@ -118,7 +118,7 @@ FArticyLocationAnchor::FArticyLocationAnchor(TSharedPtr<FJsonValue> Json)
 	JSON_TRY_FLOAT(obj, AnchorPositionX);
 	JSON_TRY_FLOAT(obj, AnchorPositionY);
 	
-	auto colorJson = obj->TryGetField(STRINGIFY(AnchorColor));
+	auto colorJson = obj->TryGetField(TEXT(STRINGIFY(AnchorColor)));
 	if(colorJson.IsValid())
 		AnchorColor = ArticyHelpers::ParseColorFromJson(colorJson);
 
@@ -135,19 +135,19 @@ void UArticyTransformation::InitFromJson(TSharedPtr<FJsonValue> Json)
 	auto obj = Json->AsObject();
 	
 	{
-		auto pivotJson = obj->TryGetField(STRINGIFY(Pivot));
+		auto pivotJson = obj->TryGetField(TEXT(STRINGIFY(Pivot)));
 		if(pivotJson.IsValid())
 			Pivot = ArticyHelpers::ParseFVector2DFromJson(pivotJson);
 	}
 
 	{
-		auto translationJson = obj->TryGetField(STRINGIFY(Translation));
+		auto translationJson = obj->TryGetField(TEXT(STRINGIFY(Translation)));
 		if(translationJson.IsValid())
 			Translation = ArticyHelpers::ParseFVector2DFromJson(translationJson);
 	}
 
 	{
-		auto matrixJson = obj->TryGetField(STRINGIFY(Matrix));
+		auto matrixJson = obj->TryGetField(TEXT(STRINGIFY(Matrix)));
 		if (matrixJson.IsValid())
 			Matrix = ArticyHelpers::ParseFMatrixFromJson(matrixJson);
 	}

@@ -375,7 +375,7 @@ void FArticyPropertyDef::GatherScript(const TSharedPtr<FJsonObject>& JsonObject,
 
 					FString value;
 					//property may not be contained in values
-					if(pin->AsObject()->TryGetStringField("Text", value))
+					if(pin->AsObject()->TryGetStringField(TEXT("Text"), value))
 						Data->AddScriptFragment(value, isOutputPin);
 				}
 			}

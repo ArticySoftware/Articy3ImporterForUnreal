@@ -27,8 +27,8 @@ FArticySize::FArticySize(TSharedPtr<FJsonValue> Json)
 		return;
 
 	auto obj = Json->AsObject();
-	w = obj->GetNumberField(STRINGIFY(w));
-	h = obj->GetNumberField(STRINGIFY(h));
+	w = obj->GetNumberField(TEXT(STRINGIFY(w)));
+	h = obj->GetNumberField(TEXT(STRINGIFY(h)));
 }
 
 FArticyRect::FArticyRect(TSharedPtr<FJsonValue> Json)
@@ -38,8 +38,8 @@ FArticyRect::FArticyRect(TSharedPtr<FJsonValue> Json)
 
 	auto obj = Json->AsObject();
 
-	x = obj->GetNumberField(STRINGIFY(x));
-	y = obj->GetNumberField(STRINGIFY(y));
-	w = obj->GetNumberField(STRINGIFY(w));
-	h = obj->GetNumberField(STRINGIFY(h));
+	x = obj->GetNumberField(TEXT(STRINGIFY(x)));
+	y = obj->GetNumberField(TEXT(STRINGIFY(y)));
+	w = obj->GetNumberField(TEXT(STRINGIFY(w)));
+	h = obj->GetNumberField(TEXT(STRINGIFY(h)));
 }

@@ -18,7 +18,7 @@ void UArticyFlowPin::InitFromJson(TSharedPtr<FJsonValue> Json)
 	auto obj = Json->AsObject();
 	JSON_TRY_FNAME(obj, Text);
 
-	auto id = obj->TryGetField("Owner");
+	auto id = obj->TryGetField(TEXT("Owner"));
 	Owner = FArticyId{id};
 
 	const TArray<TSharedPtr<FJsonValue>>* items;

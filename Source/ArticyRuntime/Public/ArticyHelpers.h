@@ -115,8 +115,8 @@ namespace ArticyHelpers
 		double X = 0, Y = 0;
 
 		auto obj = Json->AsObject();
-		obj->TryGetNumberField("x", X);
-		obj->TryGetNumberField("y", Y);
+		obj->TryGetNumberField(TEXT("x"), X);
+		obj->TryGetNumberField(TEXT("y"), Y);
 
 		return FVector2D{ static_cast<float>(X), static_cast<float>(Y) };
 	}
@@ -154,10 +154,10 @@ namespace ArticyHelpers
 		double R, G, B, A = 1.0;
 
 		auto obj = Json->AsObject();
-		obj->TryGetNumberField("r", R);
-		obj->TryGetNumberField("g", G);
-		obj->TryGetNumberField("b", B);
-		obj->TryGetNumberField("a", A);
+		obj->TryGetNumberField(TEXT("r"), R);
+		obj->TryGetNumberField(TEXT("g"), G);
+		obj->TryGetNumberField(TEXT("b"), B);
+		obj->TryGetNumberField(TEXT("a"), A);
 
 		return FLinearColor{ static_cast<float>(R), static_cast<float>(G), static_cast<float>(B), static_cast<float>(A) };
 	}
