@@ -103,7 +103,8 @@ public:
 		auto val = NewObject<Type>(Model);
 		val->InitFromJson(Json);
 		
-		auto prim = Cast<UArticyPrimitive>(val);
+        UObject* raw = val;
+		auto prim = Cast<UArticyPrimitive>(raw);
 		if(prim)
 			Model->AddSubobject(prim);
 

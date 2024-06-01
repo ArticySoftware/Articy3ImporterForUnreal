@@ -88,7 +88,15 @@ UArticyOutputPin* UArticyIncomingConnection::GetSourcePin() const
 	if(!SourcePinObj)
 	{
 		auto db = UArticyDatabase::Get(this);
-		SourcePinObj = db ? Cast<UArticyOutputPin>(db->GetObject(SourcePin)) : nullptr;
+        if (db)
+        {
+            SourcePinObj = nullptr;
+        }
+        else
+        {
+            UObject* RawObj = db->GetObject(SourcePin);
+            SourcePinObj = Cast<UArticyOutputPin>(RawObj);
+        }
 	}
 
 	return SourcePinObj;
