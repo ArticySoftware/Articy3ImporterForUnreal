@@ -10,6 +10,9 @@
 
 TMap<FName, ExpressoType::Definition> ExpressoType::Definitions;
 
+ExpressoType::ExpressoType() {}
+ExpressoType::~ExpressoType() {}
+
 ExpressoType::ExpressoType(UArticyBaseObject* Object, const FString& Property)
 {
 	auto propName = Property;
@@ -601,6 +604,44 @@ UArticyBaseObject* ExpressoType::TryFeatureReroute(UArticyBaseObject* Object, FS
 
 	return Object;
 }
+
+bool& ExpressoType::GetBool() { return BoolValue; }
+const bool& ExpressoType::GetBool() const { return BoolValue; }
+
+int64& ExpressoType::GetInt() { return IntValue; }
+const int64& ExpressoType::GetInt() const { return IntValue; }
+
+double& ExpressoType::GetFloat() { return FloatValue; }
+const double& ExpressoType::GetFloat() const { return FloatValue; }
+
+FString& ExpressoType::GetString() { return StringValue; }
+const FString& ExpressoType::GetString() const { return StringValue; }
+
+ExpressoType::ExpressoType(const int32& Value) : ExpressoType(int64(Value)) {}
+ExpressoType::ExpressoType(const int16& Value) : ExpressoType(int64(Value)) {}
+ExpressoType::ExpressoType(const int8& Value) : ExpressoType(int64(Value)) {}
+ExpressoType::ExpressoType(const uint64& Value) : ExpressoType(int64(Value)) {}
+ExpressoType::ExpressoType(const uint32& Value) : ExpressoType(int64(Value)) {}
+ExpressoType::ExpressoType(const uint16& Value) : ExpressoType(int64(Value)) {}
+ExpressoType::ExpressoType(const uint8& Value) : ExpressoType(int64(Value)) {}
+ExpressoType::ExpressoType(const float& Value) : ExpressoType(double(Value)) {}
+ExpressoType::ExpressoType(const FText& Value) : ExpressoType(Value.ToString()) {}
+ExpressoType::ExpressoType(const FName& Value) : ExpressoType(Value.ToString()) {}
+
+ExpressoType::operator int8() const { return int64(*this); }
+ExpressoType::operator uint8() const { return int64(*this); }
+ExpressoType::operator int16() const { return int64(*this); }
+ExpressoType::operator uint16() const { return int64(*this); }
+ExpressoType::operator int32() const { return int64(*this); }
+ExpressoType::operator uint32() const { return int64(*this); }
+ExpressoType::operator uint64() const { return int64(*this); }
+ExpressoType::operator float() const { return double(*this); }
+ExpressoType::operator FText() const { return FText::FromString(FString(*this)); }
+ExpressoType::operator FName() const { return *FString(*this); }
+ExpressoType::operator FArticyId() const { return int64(*this); }
+
+bool ExpressoType::operator<=(const ExpressoType& Other) const { return !(*this > Other); }
+bool ExpressoType::operator>=(const ExpressoType& Other) const { return !(*this < Other); }
 
 //---------------------------------------------------------------------------//
 

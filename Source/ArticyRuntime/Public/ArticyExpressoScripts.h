@@ -14,172 +14,178 @@ class UArticyString;
 class UArticyInt;
 class UArticyBool;
 class UArticyExpressoScripts;
+struct ExpressoType;
 
 struct ARTICYRUNTIME_API ExpressoType
 {
-	union
-	{
-		bool BoolValue;
-		int64 IntValue = 0;
-		double FloatValue;
-	};
-	FString StringValue;
+    union
+    {
+        bool BoolValue;
+        int64 IntValue = 0;
+        double FloatValue;
+    };
+    FString StringValue;
 
-	enum EType
-	{
-		Undefined, Bool, Int, Float, String
-	} Type = Undefined;
+    enum EType
+    {
+        Undefined, Bool, Int, Float, String
+    } Type = Undefined;
 
-	virtual bool& GetBool() { return BoolValue; }
-	virtual const bool& GetBool() const { return BoolValue; }
+    virtual bool& GetBool();
+    virtual const bool& GetBool() const;
 
-	virtual int64& GetInt() { return IntValue; }
-	virtual const int64& GetInt() const { return IntValue; }
+    virtual int64& GetInt();
+    virtual const int64& GetInt() const;
 
-	virtual double& GetFloat() { return FloatValue; }
-	virtual const double& GetFloat() const { return FloatValue; }
+    virtual double& GetFloat();
+    virtual const double& GetFloat() const;
 
-	virtual FString& GetString() { return StringValue; }
-	virtual const FString& GetString() const { return StringValue; }
+    virtual FString& GetString();
+    virtual const FString& GetString() const;
 
-	virtual FString ToString() const;
+    virtual FString ToString() const;
 
 
-	//---------------------------------------------------------------------------//
+    //---------------------------------------------------------------------------//
 
-	ExpressoType() {}
-	virtual ~ExpressoType() { }
+    ExpressoType();
+    virtual ~ExpressoType();
 
-	//initialize from object and property
-	ExpressoType(UArticyBaseObject* Object, const FString& Property);
-	
-	// ReSharper disable CppNonExplicitConvertingConstructor
+    //initialize from object and property
+    ExpressoType(UArticyBaseObject* Object, const FString& Property);
+    
+    // ReSharper disable CppNonExplicitConvertingConstructor
 
-	//implicit conversion from value type
-	ExpressoType(const bool& Value);
-	ExpressoType(const int64& Value);
-	ExpressoType(const int32& Value) : ExpressoType(int64(Value)) {}
-	ExpressoType(const int16& Value) : ExpressoType(int64(Value)) {}
-	ExpressoType(const int8& Value) : ExpressoType(int64(Value)) {}
-	ExpressoType(const uint64& Value) : ExpressoType(int64(Value)) {}
-	ExpressoType(const uint32& Value) : ExpressoType(int64(Value)) {}
-	ExpressoType(const uint16& Value) : ExpressoType(int64(Value)) {}
-	ExpressoType(const uint8& Value) : ExpressoType(int64(Value)) {}
-	ExpressoType(const double& Value);
-	ExpressoType(const float& Value) : ExpressoType(double(Value)) {}
-	ExpressoType(const FString& Value);
-	ExpressoType(const FText& Value) : ExpressoType(Value.ToString()) {}
-	ExpressoType(const FName& Value) : ExpressoType(Value.ToString()) {}
-	ExpressoType(const UArticyPrimitive* Object);
-	ExpressoType(const UArticyString& Value);
-	ExpressoType(const UArticyInt& Value);
-	ExpressoType(const UArticyBool& Value);
-	ExpressoType(const FArticyId& Value);
-	
-	//implicit conversion to value type
-	explicit operator bool() const;
-	explicit operator int64() const;
-	explicit operator int8() const { return int64(*this); }
-	explicit operator uint8() const { return int64(*this); }
-	explicit operator int16() const { return int64(*this); }
-	explicit operator uint16() const { return int64(*this); }
-	explicit operator int32() const { return int64(*this); }
-	explicit operator uint32() const { return int64(*this); }
-	explicit operator uint64() const { return int64(*this); }
-	explicit operator double() const;
-	explicit operator float() const { return double(*this); }
-	explicit operator FString() const;
-	explicit operator FText() const { return FText::FromString( FString(*this) ); }
-	explicit operator FName() const { return *FString(*this); }
-	explicit operator FArticyId() const { return int64(*this); }
+    //implicit conversion from value type
+    ExpressoType(const bool& Value);
+    ExpressoType(const int64& Value);
+    ExpressoType(const int32& Value);
+    ExpressoType(const int16& Value);
+    ExpressoType(const int8& Value);
+    ExpressoType(const uint64& Value);
+    ExpressoType(const uint32& Value);
+    ExpressoType(const uint16& Value);
+    ExpressoType(const uint8& Value);
+    ExpressoType(const double& Value);
+    ExpressoType(const float& Value);
+    ExpressoType(const FString& Value);
+    ExpressoType(const FText& Value);
+    ExpressoType(const FName& Value);
+    ExpressoType(const UArticyPrimitive* Object);
+    ExpressoType(const UArticyString& Value);
+    ExpressoType(const UArticyInt& Value);
+    ExpressoType(const UArticyBool& Value);
+    ExpressoType(const FArticyId& Value);
+    
+    //implicit conversion to value type
+    explicit operator bool() const;
+    explicit operator int64() const;
+    explicit operator int8() const;
+    explicit operator uint8() const;
+    explicit operator int16() const;
+    explicit operator uint16() const;
+    explicit operator int32() const;
+    explicit operator uint32() const;
+    explicit operator uint64() const;
+    explicit operator double() const;
+    explicit operator float() const;
+    explicit operator FString() const;
+    explicit operator FText() const;
+    explicit operator FName() const;
+    explicit operator FArticyId() const;
 
-	// ReSharper restore CppNonExplicitConvertingConstructor
+    // ReSharper restore CppNonExplicitConvertingConstructor
 
-	//---------------------------------------------------------------------------//
+    //---------------------------------------------------------------------------//
 
-	ExpressoType operator-() const;
+    ExpressoType operator-() const;
 
-	bool operator==(const ExpressoType& Other) const;
-	bool operator!=(const ExpressoType& Other) const;
-	bool operator<(const ExpressoType& Other) const;
-	bool operator>(const ExpressoType& Other) const;
-	bool operator<=(const ExpressoType& Other) const { return !(*this > Other); }
-	bool operator>=(const ExpressoType& Other) const { return !(*this < Other); }
+    bool operator==(const ExpressoType& Other) const;
+    bool operator!=(const ExpressoType& Other) const;
+    bool operator<(const ExpressoType& Other) const;
+    bool operator>(const ExpressoType& Other) const;
+    bool operator<=(const ExpressoType& Other) const;
+    bool operator>=(const ExpressoType& Other) const;
 
-	ExpressoType operator&&(const ExpressoType& Other) const;
-	ExpressoType operator||(const ExpressoType& Other) const;
-	ExpressoType operator^(const ExpressoType& Other) const;
+    ExpressoType operator&&(const ExpressoType& Other) const;
+    ExpressoType operator||(const ExpressoType& Other) const;
+    ExpressoType operator^(const ExpressoType& Other) const;
 
-	ExpressoType operator+(const ExpressoType& Other) const;
-	ExpressoType operator-(const ExpressoType& Other) const;
-	ExpressoType operator*(const ExpressoType& Other) const;
-	ExpressoType operator/(const ExpressoType& Other) const;
-	ExpressoType operator%(const ExpressoType& Other) const;
+    ExpressoType operator+(const ExpressoType& Other) const;
+    ExpressoType operator-(const ExpressoType& Other) const;
+    ExpressoType operator*(const ExpressoType& Other) const;
+    ExpressoType operator/(const ExpressoType& Other) const;
+    ExpressoType operator%(const ExpressoType& Other) const;
 
-	//NOTE: No assignment/mutation operators are defined, as those are not
-	//allowed anywhere where a ExpressoType is used!
-	/*ExpressoType& operator++();
-	ExpressoType operator++(int);
-	ExpressoType& operator--();
-	ExpressoType operator--(int);*/
+    //NOTE: No assignment/mutation operators are defined, as those are not
+    //allowed anywhere where a ExpressoType is used!
+    /*ExpressoType& operator++();
+    ExpressoType operator++(int);
+    ExpressoType& operator--();
+    ExpressoType operator--(int);*/
 
-	//---------------------------------------------------------------------------//
+    //---------------------------------------------------------------------------//
 
-	struct Definition
-	{
-		//function to create an ArticyExpressoType from a FProperty
-		TFunction<ExpressoType(UArticyBaseObject*, FProperty*)> Factory;
-		//function to set a uproperty from an ArticyExpressoType value
-		TFunction<void(UArticyBaseObject*, FProperty*, const ExpressoType&)> Setter;
-	};
-	
-	/**
-	 * This map contains a Factory and a Setter lambda for all the types
-	 * that may exist as properties. This is needed because we need the
-	 * cpp type (template argument) for reflection.
-	 */
-	static TMap<FName, Definition> Definitions;
+    struct Definition;
+    
+    /**
+     * This map contains a Factory and a Setter lambda for all the types
+     * that may exist as properties. This is needed because we need the
+     * cpp type (template argument) for reflection.
+     */
+    static TMap<FName, Definition> Definitions;
 
-	const Definition& GetDefinition(const FName& CppType) const;
+    const Definition& GetDefinition(const FName& CppType) const;
 
-	template<typename T>
-	static void AddDefinition(const FName& CppType)
-	{
-		Definition def;
+    template<typename T>
+    static void AddDefinition(const FName& CppType);
+    
+    //---------------------------------------------------------------------------//
 
-		def.Factory = [](UArticyBaseObject* Object, FProperty* Property)
-		{
-			if(Object && Property)
-			{
-				T* ptr = Property->ContainerPtrToValuePtr<T>(Object);
-				if(ptr)
-					return ExpressoType( *ptr );
-			}
+    /** Set the property with a given name, without knowing the type. */
+    void SetValue(UArticyBaseObject* Object, FString Property) const;
 
-			return ExpressoType{};
-		};
-
-		def.Setter = [](UArticyBaseObject* Object, FProperty* Property, const ExpressoType& Value)
-		{
-			if(!Object || !Property)
-				return;
-
-			T* ptr = Property->ContainerPtrToValuePtr<T>(Object);
-			if(ptr)
-				(*ptr) = (T)Value;
-		};
-
-		Definitions.Add(CppType, def);
-	}
-	
-	//---------------------------------------------------------------------------//
-
-	/** Set the property with a given name, without knowing the type. */
-	void SetValue(UArticyBaseObject* Object, FString Property) const;
-
-	/** If Property contains a dot, this method modifies Object and Property so a fueature is accessed instead. */
-	static UArticyBaseObject* TryFeatureReroute(UArticyBaseObject* Object, FString& Property);
+    /** If Property contains a dot, this method modifies Object and Property so a fueature is accessed instead. */
+    static UArticyBaseObject* TryFeatureReroute(UArticyBaseObject* Object, FString& Property);
 };
+
+struct ExpressoType::Definition
+{
+    //function to create an ArticyExpressoType from a FProperty
+    TFunction<ExpressoType(UArticyBaseObject*, FProperty*)> Factory;
+    //function to set a uproperty from an ArticyExpressoType value
+    TFunction<void(UArticyBaseObject*, FProperty*, const ExpressoType&)> Setter;
+};
+
+template<typename T>
+void ExpressoType::AddDefinition(const FName& CppType)
+{
+    Definition def;
+
+    def.Factory = [](UArticyBaseObject* Object, FProperty* Property)
+        {
+            if (Object && Property)
+            {
+                T* ptr = Property->ContainerPtrToValuePtr<T>(Object);
+                if (ptr)
+                    return ExpressoType(*ptr);
+            }
+
+            return ExpressoType{};
+        };
+
+    def.Setter = [](UArticyBaseObject* Object, FProperty* Property, const ExpressoType& Value)
+        {
+            if (!Object || !Property)
+                return;
+
+            T* ptr = Property->ContainerPtrToValuePtr<T>(Object);
+            if (ptr)
+                (*ptr) = (T)Value;
+        };
+
+    Definitions.Add(CppType, def);
+}
 
 FORCEINLINE int operator+(const int& Lhs, const ExpressoType& Rhs)
 {
