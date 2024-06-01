@@ -1,3 +1,9 @@
+## Unreal Importer 1.8.1 Changelog :
+- Changes:
+    - Split definitions and declarations for ExpressoType structs
+- Fixes:
+    - Handle cast issues in Unreal Engine 5.4
+
 ## Unreal Importer 1.8.0 Changelog :
 
 - New Features: Unreal 5.4 compatibility
