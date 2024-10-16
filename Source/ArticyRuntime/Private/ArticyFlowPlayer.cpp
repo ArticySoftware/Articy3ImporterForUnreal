@@ -25,6 +25,12 @@ void UArticyFlowPlayer::BeginPlay()
 
 	//update Cursor to object referenced by StartOn
 	SetCursorToStartNode();
+
+	if (bDeferBranchEvaluation)
+	{
+		TickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateUObject(this, &UArticyFlowPlayer::OnTick), 0.0f);
+	}
 }
 
 //---------------------------------------------------------------------------//
@@ -370,6 +376,31 @@ void UArticyFlowPlayer::UpdateAvailableBranchesInternal(bool Startup)
 	}
 }
 
+bool UArticyFlowPlayer::OnTick(float DeltaTime)
+{
+	if (!bDeferBranchEvaluation)
+	{
+		return false;
+	}
+
+	FArticyBranch Branch;
+	while (BranchQueue.Dequeue(Branch))
+	{
+		if (!ensure(ShadowLevel == 0))
+		{
+			UE_LOG(LogArticyRuntime, Error, TEXT("ArticyFlowPlayer::Traverse was called inside a ShadowedOperation! Aborting Play."))
+				return true;
+		}
+
+		for (auto node : Branch.Path)
+			node->Execute(GetGVs(), GetMethodsProvider());
+
+		Cursor = Branch.Path.Last();
+		UpdateAvailableBranches();
+	}
+	return true;
+}
+
 void UArticyFlowPlayer::SetCursorToStartNode()
 {
 	// This ensure Flowplayer construction whithout Throwing
@@ -453,6 +484,12 @@ bool UArticyFlowPlayer::FastForwardToPause()
 
 void UArticyFlowPlayer::PlayBranch(const FArticyBranch& Branch)
 {
+	if (bDeferBranchEvaluation)
+	{
+		BranchQueue.Enqueue(Branch);
+		return;
+	}
+
 	if(!ensure(ShadowLevel == 0))
 	{
 		UE_LOG(LogArticyRuntime, Error, TEXT("ArticyFlowPlayer::Traverse was called inside a ShadowedOperation! Aborting Play."))

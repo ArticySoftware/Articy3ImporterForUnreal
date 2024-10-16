@@ -1,4 +1,9 @@
+## Unreal Importer 1.9.0 Changelog :
+
+- New Features: Defer branch evaluation
+
 ## Unreal Importer 1.8.1 Changelog :
+
 - Changes:
     - Split definitions and declarations for ExpressoType structs
 - Fixes:

@@ -9,6 +9,7 @@
 #include "ArticyGlobalVariables.h"
 #include "ArticyRef.h"
 #include "Components/BillboardComponent.h"
+#include "Containers/Queue.h"
 #include "ArticyFlowPlayer.generated.h"
 
 class IArticyNode;
@@ -170,6 +171,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Setup")
 	bool IgnoresInvalidBranches() const { return bIgnoreInvalidBranches; }
 
+	bool OnTick(float DeltaTime);
+
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPushState);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPopState);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerPaused, TScriptInterface<IArticyFlowObject>, PausedOn);
@@ -196,6 +199,9 @@ public:
 	 */
 	UPROPERTY(BlueprintAssignable, Category = "Flow")
 	FOnBranchesUpdated OnBranchesUpdated;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Flow")
+	bool bDeferBranchEvaluation = false;
 
 protected:
 
@@ -260,6 +266,9 @@ private:
 	/** The current shadow level (0 == live state). */
 	UPROPERTY(Transient, VisibleAnywhere, Category="Debug")
 	mutable uint32 ShadowLevel = 0;
+
+	TQueue<FArticyBranch> BranchQueue;
+	FTSTicker::FDelegateHandle TickerHandle;
 
 private:
 	/**
