@@ -73,7 +73,7 @@ ExpressoType::ExpressoType(const UArticyPrimitive* Object)
 	}
 
 	// Make sure to use the full 64-bit ID
-	StringValue = FString::Printf(TEXT("%llu_%d"), Object->GetId(), Object->GetCloneId());
+	StringValue = FString::Printf(TEXT("%llu_%d"), Object->GetId().Get(), Object->GetCloneId());
 }
 
 ExpressoType::ExpressoType(const UArticyString& Value)

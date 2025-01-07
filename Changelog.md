@@ -1,3 +1,7 @@
+## Unreal Importer 1.10.0 Changelog :
+
+- New Features: Unreal Engine 5.5 compatibility
+
 ## Unreal Importer 1.9.0 Changelog :
 
 - New Features: Defer branch evaluation
