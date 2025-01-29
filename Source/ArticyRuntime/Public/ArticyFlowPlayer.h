@@ -14,17 +14,18 @@
 
 class IArticyNode;
 class IArticyFlowObject;
-UENUM(BlueprintType, meta = (Bitflags))
+UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class EArticyPausableType : uint8
 {
-	FlowFragment,
-	Dialogue,
-	DialogueFragment,
-	Hub,
-	Jump,
-	Condition,
-	Instruction,
-	Pin
+	None                = 0 UMETA(Hidden),
+	FlowFragment        = 1 << 0,
+	Dialogue            = 1 << 1,
+	DialogueFragment    = 1 << 2,
+	Hub                 = 1 << 3,
+	Jump                = 1 << 4,
+	Condition           = 1 << 5,
+	Instruction         = 1 << 6,
+	Pin                 = 1 << 7,
 };
 ENUM_CLASS_FLAGS(EArticyPausableType);
 
@@ -68,11 +69,11 @@ public:
 
 	//---------------------------------------------------------------------------//
 
-	//EArticyPausableType
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup", meta=(Bitmask, BitmaskEnum = "/Script/ArticyRuntime.EArticyPausableType"))
-	uint8 PauseOn = 1 << uint8(EArticyPausableType::DialogueFragment)
-					| 1 << uint8(EArticyPausableType::Dialogue)
-					| 1 << uint8(EArticyPausableType::FlowFragment);
+	// Indicates which pausable types should be paused on
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup", meta=(Bitmask, BitmaskEnum = EArticyPausableType))
+	uint8 PauseOn = uint8(EArticyPausableType::FlowFragment)
+					| uint8(EArticyPausableType::Dialogue)
+					| uint8(EArticyPausableType::DialogueFragment);
 
 	/**
 	 * Pushes a shadow state, executes the operation, then pops the shadow state back.
@@ -136,7 +137,6 @@ public:
 	 */
 	TArray<FArticyBranch> Explore(IArticyFlowObject* Node, bool bShadowed, int32 Depth, bool IncludeCurrent = true);
 
-	void SetPauseOn(EArticyPausableType Types);
 	/** Returns true if Node is one of the PauseOn types. */
 	bool ShouldPauseOn(IArticyFlowObject* Node) const;
 
