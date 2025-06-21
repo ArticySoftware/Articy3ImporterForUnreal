@@ -89,7 +89,10 @@ void UArticyPluginSettings::ApplyPreviousSettings() const
 
 	for(FString PackageName : OriginalDatabase->GetImportedPackageNames())
 	{
-		OriginalDatabase->ChangePackageDefault(FName(*PackageName), GetDefault<UArticyPluginSettings>()->PackageLoadSettings[PackageName]);
+		if (const bool* FoundDefaultSetting = GetDefault<UArticyPluginSettings>()->PackageLoadSettings.Find(PackageName))
+		{
+			OriginalDatabase->ChangePackageDefault(FName(*PackageName), *FoundDefaultSetting);
+		}
 	}
 }
 #if WITH_EDITOR
