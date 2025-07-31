@@ -206,10 +206,10 @@ const FString& FAIDScriptMethod::GetCPPDefaultReturn() const
 		const static auto EmptyString = FString{"\"\""};
 		return EmptyString;
 	}
-	if (ReturnType == "ArticyObject")
+	if (ReturnType == "object")
 	{
-		const static auto ArticyObject = FString{"nullptr"};
-		return ArticyObject;
+		const static auto NullPtr = FString{"nullptr"};
+		return NullPtr;
 	}
 
 	const static auto Nothing = FString{""};
