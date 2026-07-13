@@ -2,9 +2,7 @@
   <img height="344" src="https://www.articy.com/articy-importer/unreal/ad3/ad_importer_large.png">
 </p>
 
-<p align="center">
-  [![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
-</p>
+[![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
 
 # Articy 3 Importer plugin for Unreal Engine
 
