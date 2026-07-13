@@ -2,7 +2,14 @@
   <img height="344" src="https://www.articy.com/articy-importer/unreal/ad3/ad_importer_large.png">
 </p>
 
-# ArticyImporter for Unreal Engine
+<p align="center">
+  [![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
+</p>
+
+# Articy 3 Importer plugin for Unreal Engine
+
+> [!IMPORTANT]
+> This plugin integrates your Articy 3 projects with Unreal Engine. If you want to use the latest features or need support for the latest Unreal Engine versions, head over to the [Articy X plugin repository](https://github.com/ArticySoftware/ArticyXImporterForUnreal)!
 
 The Unreal Engine importer allows integrating articy:draft content into Unreal projects and provides a simple C++ and blueprint interface to work with the data. We release this importer as a GitHub open source project that will provide a substantial head start into incorporating articy:draft data into Unreal projects while still allowing enough flexibility to adjust the importer to personal needs. 
 
